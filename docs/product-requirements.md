@@ -1,35 +1,129 @@
 # Product requirements
 
-Status: Draft — project specifics unresolved.
+Status: Approved design — implementation has not started.
 
 ## Purpose and users
 
-- Problem to solve: [TODO]
-- Primary users: [TODO]
-- Desired user outcomes: [TODO]
-- Measures of success: [TODO]
+The Gavel is a public student-journalism website for Boston College. It replaces a compromised WordPress installation with a focused, security-first publishing platform that preserves the publication's existing identity while improving usability, accessibility, and maintainability.
 
-## Scope
+- Public readers browse published work without an account.
+- Approved `bc.edu` members create and manage content.
+- Authors manage only articles they own.
+- Administrators manage the publication, membership, and all content.
+- Credited writers, editors, and creative contributors do not need login accounts unless they require dashboard access.
 
-- First release: [TODO: essential features]
-- Later releases: [TODO]
-- Out of scope: [TODO]
+Success means readers can reliably discover and read articles, approved members can publish safely, unauthorized users cannot access editorial data, and future club leadership can operate and recover the service without relying on one student.
 
-## Feature template
+## MVP scope
 
-Copy this section for each feature.
+### Public experience
 
-### [TODO: feature name]
+- Responsive homepage matching the current site's structure, logo, colors, and editorial character.
+- One administrator-selected lead story and a configurable Featured News group, with newest-article fallbacks.
+- Homepage groups for News, Features, Opinions, Culture, Sports, and Allston–Brighton.
+- Published article pages with title, owner/writer credits, publication date, main graphic and credit, rich article body, contributor credits, author biography, categories, tags, same-section related stories, search, and recent stories.
+- Section, category, tag, author, search, and Letter to the Editor archive pages with pagination.
+- Public author pages with biography, optional profile image, and published articles.
+- About page containing publication history and mission.
+- Letter to the Editor archive plus a separate How to Submit page.
+- Search across published titles, descriptions, bodies, writers, sections, categories, and tags.
+- Configurable footer with mission, contact email, social links, navigation, and selected Read This stories.
+- Custom not-found page with search and a route home.
 
-- Status: Proposed / Approved / Implemented [TODO: select]
-- User need: [TODO]
-- Preconditions and permissions: [TODO]
-- Main user flow: [TODO: numbered steps]
-- Loading, empty, error, and alternate flows: [TODO]
-- Acceptance criteria: [TODO: observable, testable outcomes]
-- Related components and API contracts: [TODO: links]
+### Editorial dashboard
 
-## Constraints and open questions
+- Google sign-in restricted to `bc.edu` accounts.
+- Explicit administrator approval before dashboard access.
+- My Articles listing.
+- Create, edit, save draft, publish now, and archive owned articles.
+- Rich content supporting headings, paragraphs, emphasis, links, quotations, lists, images, captions, and approved video providers.
+- One designated owner, one primary section, zero or more categories, zero or more tags, and zero or more credited contributors per article.
+- SEO keyphrase, meta description, and search-result preview.
+- Personal public-profile editing.
+- Administrator management of all articles, memberships, contributor profiles, taxonomy, homepage selections, site information, and audit history.
+- Administrator-only permanent deletion of archived articles.
 
-- Business or technical constraints: [TODO]
-- Unresolved questions: [TODO]
+## Content organization
+
+Each article has exactly one primary section. It may also have multiple administrator-defined categories and multiple topic tags.
+
+| Section | Initial navigation categories |
+| --- | --- |
+| News | Initial categories to be confirmed during content setup |
+| Features | On Campus, Outside of BC, Authentic Eagles |
+| Opinions | Beyond Campus, Campus POV |
+| Culture | Politics and Activism, Arts and Entertainment |
+| Sports | Football, Hockey, Basketball, Press Pass |
+| Allston–Brighton | News, Culture and Community |
+| Letter to the Editor | Published letters; submission guidance is a separate page |
+
+Categories organize editorial navigation. Tags describe specific topics and may span sections.
+
+## Content lifecycle
+
+```text
+Draft -> Published -> Archived -> Permanently deleted
+```
+
+- Authors may create, edit, publish, and archive only articles they own.
+- Additional credited contributors do not gain edit permission.
+- Administrators may manage every article and restore archived articles.
+- Only administrators may permanently delete an archived article.
+- Permanent deletion requires explicit confirmation and an audit event.
+- Media is deleted only when no retained article references it.
+
+## Roles
+
+### Public reader
+
+- Read and search published content.
+- Browse sections, categories, tags, authors, and letters.
+- Cannot access drafts, archives, or the dashboard.
+
+### Author
+
+- Must use an approved `bc.edu` Google account.
+- Create articles and manage only articles they own.
+- Publish immediately; editorial approval is not required for the MVP.
+- Manage their public biography and profile image.
+- Cannot manage roles or permanently delete content.
+
+### Administrator
+
+- All author abilities across all content.
+- Approve, deactivate, and assign application memberships.
+- Manage contributors, taxonomy, homepage selections, editable site information, archives, and permanent deletion.
+- Application-administrator status does not automatically grant GitHub, Vercel, Supabase, Google Cloud, DNS, or source-code access.
+
+## Acceptance criteria
+
+- Anonymous readers receive only published, non-archived content.
+- An unapproved or non-`bc.edu` Google account cannot enter the dashboard.
+- Authors cannot read or mutate another author's non-public article through the UI, server interface, or Supabase API.
+- Authors cannot grant roles or permanently delete articles.
+- Administrators can manage all content and memberships.
+- Section/category/tag relationships remain valid and navigable.
+- Unsanitized scripts, arbitrary HTML, unsafe embeds, and disallowed uploads cannot execute or be served as trusted content.
+- Listings paginate and provide useful loading, empty, error, and not-found states.
+- Public pages work across supported mobile, tablet, and desktop layouts and meet the accessibility target in `design-system.md`.
+- Important authentication, membership, publication, archive, restore, and deletion actions are auditable.
+
+## Deferred from MVP
+
+- Comments; a later release will require `bc.edu` Google authentication and moderation controls.
+- Newsletter signup integration.
+- Scheduled publishing.
+- Importing legacy WordPress articles or accounts.
+- Public submissions through a Letter to the Editor form; the MVP provides instructions and uses the existing editorial intake process.
+
+## Client questions to confirm before launch
+
+- Should News appear in the main navigation or remain accessible from the homepage and archives?
+- Confirm `Outside of BC` versus `Off Campus` as the final Features category label.
+- Which initial News categories should be created?
+- Which newsletter provider should be integrated after the MVP?
+- What analytics service, if any, is permitted by Boston College?
+- Who will own the domain, DNS, GitHub, Vercel, Supabase, Google OAuth, and billing accounts?
+- Confirm production contact email, mission text, social URLs, and footer Read This selection rules.
+- What retention period, if any, is required before an archived article may be permanently deleted?
+- What Boston College privacy, branding, accessibility, records, or security policies apply?

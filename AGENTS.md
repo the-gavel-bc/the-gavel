@@ -31,7 +31,7 @@
 
 ## Project-specific preferences
 
-- Communication style: [TODO: preferred detail level and progress updates]
+- Communication style: concise progress updates, evidence-backed conclusions, and explicit unresolved decisions.
 - Coding conventions: see docs/coding-style.md.
-- Changes requiring discussion first: [TODO: project-specific boundaries]
-- Definition of done beyond the rules above: [TODO: additional requirements]
+- Changes requiring discussion first: authentication/authorization model, public URL changes, content lifecycle changes, destructive migrations, new external services, and additions to MVP scope.
+- Definition of done beyond the rules above: test role and ownership denials, update affected documentation, verify accessibility/security implications, and report commands actually run.

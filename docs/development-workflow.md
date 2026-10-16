@@ -1,23 +1,29 @@
 # Development workflow
 
-Status: Draft — team-specific conventions unresolved.
+Status: Approved working process.
 
 ## Task workflow
 
-1. Read relevant requirements and identify acceptance criteria.
-2. Clarify decisions that materially affect behavior or architecture.
-3. Plan significant changes; implement focused changes using project conventions.
-4. Update affected documentation and validate using [testing.md](testing.md).
-5. Summarize changes, validation results, and remaining limitations.
+1. Read relevant requirements and identify observable acceptance criteria.
+2. Inspect the current branch, worktree, documentation, and nearby implementation.
+3. Clarify decisions that materially change behavior, architecture, security, or contracts.
+4. For significant work, write a focused implementation plan with validation and rollback considerations.
+5. Implement the smallest complete vertical slice using tests appropriate to its risk.
+6. Update affected requirements, contracts, schema, security notes, and operational documentation.
+7. Run relevant checks and inspect the resulting user experience.
+8. Summarize changes, evidence, limitations, and remaining questions.
 
-## Related conventions
+## Security-sensitive work
 
-- Follow [coding-style.md](coding-style.md) for formatting, naming, organization, dependencies, and error handling.
-- Follow [git-github.md](git-github.md) for branches, commits, pull requests, review, and releases.
+Authentication, authorization, RLS, uploads, rich content, caching, redirects, secrets, and migrations require negative tests and review. UI permission checks never replace server and database enforcement.
 
 ## Definition of done
 
-- Requested acceptance criteria are met.
-- Relevant verification succeeds, or limitations are explicitly reported.
-- Affected documentation reflects actual behavior.
-- Additional project requirements: [TODO]
+- Approved acceptance criteria are met.
+- Relevant automated and manual verification succeeds.
+- Forbidden permission paths are tested.
+- Accessibility and responsive states are considered.
+- Database changes include migrations and compatibility reasoning.
+- Observability and failure behavior are adequate for the change.
+- Documentation matches actual behavior and labels future behavior honestly.
+- No secrets, private production data, or unrelated changes are included.

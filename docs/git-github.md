@@ -1,62 +1,38 @@
 # Git and GitHub workflow
 
-Status: Draft — repository-specific conventions and GitHub settings remain unresolved.
-
-## Working-tree rules
-
-- Inspect the current branch and working-tree changes before Git operations.
-- Preserve unrelated user changes; stage only files intended for the task.
-- Do not commit credentials, secrets, or sensitive data.
-- Avoid rewriting shared history. Discuss destructive operations and force pushes before performing them unless explicitly authorized.
-- Resolve conflicts by understanding the intended behavior on both sides and validate the result.
+Status: Approved baseline policy — GitHub rules are not yet configured.
 
 ## Repository and branches
 
-- GitHub repository URL: [TODO]
-- Default branch: [TODO]
-- Branch naming pattern: [TODO]
-- Branch-per-task policy: [TODO]
-- Branch synchronization strategy: [TODO: merge or rebase, and where each is appropriate]
-- Branch cleanup policy: [TODO]
+- Default branch: `main`.
+- Use a short-lived branch per focused task, named by type and intent, such as `feat/article-editor`, `fix/draft-visibility`, or `docs/mvp-requirements`.
+- Keep branches synchronized without rewriting shared history.
+- Delete merged task branches after release.
+- Preserve unrelated working-tree changes.
 
 ## Commits
 
-- Message format: [TODO: conventional commits or another format]
-- Commit scope and size: [TODO]
-- Issue references: [TODO]
-- Signing requirements: [TODO]
-- Generated files and lockfile policy: [TODO]
+- Use Conventional Commits.
+- Keep commits cohesive and reviewable.
+- Include schema, tests, and documentation with the behavior they describe.
+- Commit the dependency lockfile.
+- Never commit secrets, credentials, production data, or generated local environment files.
+- Commit signing is recommended for maintainers and can become required when GitHub ownership is finalized.
 
 ## Pull requests
 
-- Title format: [TODO]
-- Draft PR usage: [TODO]
-- Required reviewers / code owners: [TODO]
-- Review expectations: [TODO]
+- Use Conventional Commit style for titles.
+- Open drafts for work that needs early review.
+- Describe the problem, resulting behavior, design choices, validation, security/migration implications, and linked requirement.
+- Include screenshots for meaningful public or dashboard visual changes.
+- Require review from a maintainer other than the author for authentication, authorization, RLS, migrations, uploads, rich content, or deployment changes.
 
-Include the following in a pull request description:
+## Checks and merge policy
 
-- Problem and resulting behavior.
-- Relevant implementation choices and tradeoffs.
-- Validation performed and results.
-- Linked issue or requirements, when applicable.
-- Screenshots for meaningful visual changes, when applicable.
-- Migration, rollout, or compatibility implications, when applicable.
+Planned required checks: formatting, lint, strict types, unit/integration tests, RLS/database tests, end-to-end tests for affected critical flows, secret/dependency scanning, and production build.
 
-## GitHub checks and merge policy
-
-- CI workflows and required checks: [TODO: link to actual workflow files once created]
-- Branch protection or rulesets: [TODO]
-- Required approval count: [TODO]
-- Merge strategy: [TODO: squash, merge commit, or rebase]
-- Who may merge and release: [TODO]
-
-Documented settings are intended policy until actually configured in GitHub. Required validation commands live in [testing.md](testing.md).
+Use squash merge for task branches unless preserving a deliberate multi-commit history provides value. Protect `main`, prevent direct pushes, require current checks and at least one approval, and restrict production releases to designated maintainers.
 
 ## Issues and releases
 
-- Issue format, labels, and prioritization: [TODO]
-- Milestones or project board: [TODO: if used]
-- Version and tag format: [TODO]
-- Release notes and changelog process: [TODO]
-- Deployment relationship: see [deployment.md](deployment.md).
+Use issues with acceptance criteria for meaningful work. Track MVP work in a milestone/project board if helpful. Adopt semantic version tags when production releases begin. Release notes summarize user-visible behavior, migrations, security changes, rollback notes, and known limitations.

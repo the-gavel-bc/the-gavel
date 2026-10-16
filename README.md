@@ -1,42 +1,39 @@
-# the-gavel
+# The Gavel
 
-[TODO: one-paragraph description of the project, intended users, and the problem it solves]
+The Gavel is a security-first public publishing platform for Boston College student journalism. Public readers can discover articles without accounts, while explicitly approved `bc.edu` members use Google sign-in to create and manage content according to owner and administrator permissions.
 
-## Documentation status
+## Project status
 
-This repository starts with documentation templates. Fields marked `[TODO: ...]` need project-specific input. Proposed features and examples are not evidence of implemented functionality.
+Architecture and MVP requirements are approved. Application scaffolding and implementation have not started. Documents describe intended behavior unless explicitly marked implemented.
 
-## Start here
+## Planned stack
 
-1. Fill out product requirements and scope.
-2. Choose the stack and describe the architecture.
-3. Define components, data, and API contracts for the first feature.
-4. Add actual setup and validation commands as tooling is introduced.
+- Next.js and TypeScript
+- Vercel
+- Supabase Auth, PostgreSQL, Row Level Security, and Storage
+- Google OAuth restricted to approved `bc.edu` members
 
 ## Local setup
 
-- Prerequisites and versions: [TODO]
-- Dependency installation command: [TODO]
-- Local development command: [TODO]
-- Required configuration variable names: [TODO: names and purpose only; never actual secrets]
-- Test, lint, type-check, and build commands: see [testing](docs/testing.md).
+No executable application exists yet, so installation, development, test, lint, type-check, build, and environment-variable instructions will be added when the stack is scaffolded. Never place actual secrets in documentation or commit them to Git.
 
 ## Documentation index
 
 | Document | Purpose |
 | --- | --- |
 | [Project instructions](AGENTS.md) | Codex working rules and project preferences |
-| [Product requirements](docs/product-requirements.md) | Users, features, scope, and acceptance criteria |
-| [Architecture](docs/architecture.md) | Systems, stack, boundaries, and data flow |
-| [Component hierarchy](docs/component-hierarchy.md) | UI structure, responsibilities, props, and state ownership |
-| [API contracts](docs/api-contracts.md) | Interfaces, schemas, authentication, and errors |
+| [Product requirements](docs/product-requirements.md) | Users, MVP scope, deferred work, acceptance criteria, and client questions |
+| [MVP design](docs/superpowers/specs/2026-10-16-the-gavel-mvp-design.md) | Approved product, architecture, content, and security design |
+| [Architecture](docs/architecture.md) | Systems, boundaries, environments, and data flow |
+| [Component hierarchy](docs/component-hierarchy.md) | Planned routes and UI responsibilities |
+| [API contracts](docs/api-contracts.md) | Interface conventions and planned operations |
 | [Data model](docs/data-model.md) | Entities, relationships, constraints, and migrations |
-| [Design system](docs/design-system.md) | Visual conventions, accessibility, and interaction states |
-| [Testing](docs/testing.md) | Verification commands and required behavior checks |
+| [Design system](docs/design-system.md) | Brand direction, accessibility, and interaction rules |
+| [Security and permissions](docs/security-and-permissions.md) | Authentication, roles, RLS, uploads, and incident preparation |
+| [Testing](docs/testing.md) | Required verification and future commands |
 | [Development workflow](docs/development-workflow.md) | Task process and definition of done |
-| [Coding style](docs/coding-style.md) | Formatting, naming, organization, and code conventions |
-| [Git and GitHub](docs/git-github.md) | Branches, commits, pull requests, checks, and releases |
-| [Deployment](docs/deployment.md) | Environments, releases, monitoring, and rollback |
-| [Security and permissions](docs/security-and-permissions.md) | Roles, access rules, and sensitive data handling |
-| [Decisions](docs/decisions/README.md) | Significant technical decisions and rationale |
-| [Runbooks](docs/runbooks/README.md) | Operational diagnosis and recovery procedures |
+| [Coding style](docs/coding-style.md) | Planned TypeScript and project conventions |
+| [Git and GitHub](docs/git-github.md) | Branch, review, CI, and release policy |
+| [Deployment](docs/deployment.md) | Environments, configuration, release, and recovery |
+| [Decisions](docs/decisions/README.md) | Architecture decision records |
+| [Runbooks](docs/runbooks/README.md) | Operational procedures |

@@ -1,43 +1,85 @@
 # Component hierarchy
 
-Status: Draft — replace placeholders with the intended and then actual UI structure.
+Status: Approved route and responsibility design — source paths are not implemented.
 
-## Routes and pages
+## Public routes
 
-| Route | Page | Purpose | Access requirements |
-| --- | --- | --- | --- |
-| [TODO] | [TODO] | [TODO] | [TODO] |
+| Route | Purpose | Access |
+| --- | --- | --- |
+| `/` | Lead, featured, and section-based homepage | Public |
+| `/articles/[slug]` | Published article | Public when published |
+| `/sections/[slug]` | Section archive | Public |
+| `/categories/[slug]` | Category archive | Public |
+| `/tags/[slug]` | Tag archive | Public |
+| `/authors/[slug]` | Author biography and articles | Public |
+| `/search` | Published-content search | Public |
+| `/about` | Mission, history, and staff information | Public |
+| `/letters` | Published Letter to the Editor archive | Public |
+| `/letters/how-to-submit` | Submission instructions | Public |
+| `/sign-in` | Google sign-in | Public |
+| Not-found boundary | Search and return-home recovery | Public |
+
+Newsletter signup is deferred.
+
+## Dashboard routes
+
+| Route | Purpose | Access |
+| --- | --- | --- |
+| `/dashboard` | Summary and My Articles | Active members |
+| `/dashboard/articles/new` | Create article | Author/admin |
+| `/dashboard/articles/[id]` | Edit owned or administrator-accessible article | Owner/admin |
+| `/dashboard/profile` | Edit own public profile | Author/admin |
+| `/dashboard/admin/articles` | Manage all content and archives | Admin |
+| `/dashboard/admin/members` | Approve/deactivate members and roles | Admin |
+| `/dashboard/admin/contributors` | Manage credited profiles | Admin |
+| `/dashboard/admin/taxonomy` | Manage sections, categories, and tags | Admin |
+| `/dashboard/admin/homepage` | Curate lead, Featured News, and Read This | Admin |
+| `/dashboard/admin/site` | Edit allowlisted site information | Admin |
+| `/dashboard/admin/audit` | Review audit activity | Admin |
 
 ## Component tree
 
-The following is a structural placeholder, not a selected implementation.
-
 ```text
-[Application root]
-└── [Page or layout]
-    └── [Feature component]
-        └── [Reusable UI component]
+RootLayout
+├── PublicLayout
+│   ├── SiteHeader
+│   │   ├── Logo
+│   │   ├── PrimaryNavigation
+│   │   ├── ResponsiveMenu
+│   │   └── SearchControl
+│   ├── PublicPage
+│   │   ├── HomeSections / ArchiveListing / ArticleView / StaticPage
+│   │   ├── ArticleCard
+│   │   └── Pagination
+│   └── SiteFooter
+├── AuthLayout
+│   └── SignInCard
+└── DashboardLayout
+    ├── DashboardNavigation
+    ├── MembershipGuard
+    └── FeaturePage
+        ├── ArticleEditor
+        ├── ArticleTable
+        ├── ProfileEditor
+        └── AdminPanels
 ```
 
-## Component specification
+## Significant responsibilities
 
-Copy this section for each significant component.
+- `SiteHeader`: brand, navigation categories, accessible menus, and search entry.
+- `HomeSections`: render administrator selections with deterministic recent-content fallbacks.
+- `ArticleView`: render sanitized content, credits, taxonomy, biography, and related stories.
+- `ArchiveListing`: shared paginated presentation for section, category, tag, author, letter, and search results.
+- `ArticleEditor`: own form state and usability validation; authoritative validation remains server-side.
+- `MembershipGuard`: improve routing experience but never replace server/RLS authorization.
+- `AdminPanels`: focused interfaces for one administrative concern each.
+- `SiteFooter`: render managed mission/contact/social/navigation content.
 
-### [TODO: component name]
+## State and data conventions
 
-- Status and source path: [TODO: proposed / implemented; path]
-- Responsibility: [TODO]
-- Parent and children: [TODO]
-- Props / inputs and types: [TODO]
-- Events / outputs: [TODO]
-- State owner: [TODO: local, parent, shared, or server]
-- Data fetching and API dependencies: [TODO: link to contracts]
-- Loading, empty, error, and disabled states: [TODO]
-- Accessibility and responsive behavior: [TODO]
-- Reuse boundaries: [TODO: what belongs here and what belongs elsewhere]
-
-## Shared conventions
-
-- Component naming and organization: [TODO]
-- State management: [TODO]
-- Data-fetching conventions: [TODO]
+- Prefer server-rendered reads and server-owned authoritative state.
+- Use local client state only for interaction, editor state, optimistic feedback, and unsaved form changes.
+- URL query parameters own search terms, filters, and pagination where appropriate.
+- Do not create a global client store without a demonstrated cross-route requirement.
+- Every async surface provides loading, empty, error, success, and disabled states.
+- Shared public components use semantic HTML, keyboard operation, visible focus, and responsive layouts.

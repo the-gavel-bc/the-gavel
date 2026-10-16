@@ -6,4 +6,4 @@ Copy [template.md](template.md) to `0001-descriptive-title.md`, increasing the n
 
 ## Index
 
-No project decisions recorded yet. Add links here as records are created.
+- [0001: Use a server-first Next.js, Vercel, and Supabase architecture](0001-server-first-nextjs-vercel-supabase.md) — Accepted
