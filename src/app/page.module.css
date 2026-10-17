@@ -1,0 +1,31 @@
+.main {
+  display: grid;
+  gap: 1rem;
+  margin: 0 auto;
+  max-width: 48rem;
+  padding: 7rem 1.5rem;
+}
+
+.main h1,
+.main p {
+  margin: 0;
+}
+
+.main h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3rem, 12vw, 6rem);
+  line-height: 0.95;
+}
+
+.eyebrow {
+  color: #164f86;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.signIn {
+  color: #164f86;
+  font-weight: 700;
+  width: fit-content;
+}

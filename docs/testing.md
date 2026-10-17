@@ -1,10 +1,22 @@
 # Testing and validation
 
-Status: Approved strategy — commands will be added when tooling is installed.
+Status: Foundation tooling implemented; broader MVP coverage remains planned.
 
 ## Commands
 
-No application tooling exists yet. Do not invent or report placeholder commands as passing. When the project is scaffolded, record the exact package scripts for unit/integration tests, end-to-end tests, linting, type checking, production build, database tests, and migration verification here.
+Run commands with Node.js 22 and the pnpm version recorded in `package.json`.
+
+| Check            | Command             | Current scope                                                  |
+| ---------------- | ------------------- | -------------------------------------------------------------- |
+| Formatting       | `pnpm format:check` | Repository source and documentation                            |
+| Lint             | `pnpm lint`         | Next.js and TypeScript source                                  |
+| Types            | `pnpm typecheck`    | Strict TypeScript compilation                                  |
+| Unit/component   | `pnpm test`         | Vitest and Testing Library                                     |
+| Browser          | `pnpm test:e2e`     | Playwright desktop and mobile projects                         |
+| Production build | `pnpm build`        | Next.js production compilation                                 |
+| Database         | `pnpm test:db`      | Reserved for local Supabase pgTAP tests in the membership task |
+
+Install the Playwright Chromium runtime once with `pnpm exec playwright install chromium`. Local Supabase commands will be documented when the database foundation is implemented.
 
 ## Required coverage
 
