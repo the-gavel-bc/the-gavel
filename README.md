@@ -25,10 +25,17 @@ Install and run the application:
 ```bash
 corepack enable
 pnpm install --frozen-lockfile
+cp .env.example .env.local
 pnpm dev
 ```
 
-Open `http://localhost:3000`. Never place actual secrets in documentation or commit them to Git. Local Supabase setup and environment variables will be documented when those foundation tasks are implemented.
+Open `http://localhost:3000`. The application validates these variables at their server or browser boundary:
+
+- `NEXT_PUBLIC_SUPABASE_URL`: environment-specific Supabase URL.
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: browser-safe key protected by RLS.
+- `SITE_URL`: server-only canonical application origin.
+
+The committed values in `.env.example` are localhost examples, not credentials. Keep real values in `.env.local` or the deployment platform; never place secrets in documentation or Git. Local Supabase setup will be documented when the database foundation is implemented.
 
 Run the current quality gates:
 

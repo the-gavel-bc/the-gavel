@@ -1,28 +1,31 @@
 # Deployment and operations
 
-Status: Approved operational design — projects and commands are not configured.
+Status: Typed local configuration implemented; hosted projects and releases are not configured.
 
 ## Environments
 
-| Environment | Purpose | Services | Release |
-| --- | --- | --- | --- |
-| Local | Development and automated tests | Local/isolated Next.js and Supabase | Developer command after scaffolding |
-| Staging | Preview and pre-release verification | Protected Vercel previews plus staging Supabase/OAuth | Pull request/preview deployment |
-| Production | Public service | Production Vercel, Supabase, OAuth, domain, and monitoring | Protected default-branch release |
+| Environment | Purpose                              | Services                                                   | Release                             |
+| ----------- | ------------------------------------ | ---------------------------------------------------------- | ----------------------------------- |
+| Local       | Development and automated tests      | Local/isolated Next.js and Supabase                        | Developer command after scaffolding |
+| Staging     | Preview and pre-release verification | Protected Vercel previews plus staging Supabase/OAuth      | Pull request/preview deployment     |
+| Production  | Public service                       | Production Vercel, Supabase, OAuth, domain, and monitoring | Protected default-branch release    |
 
 Preview environments must never use production database or elevated production secrets.
 
-## Planned configuration
+## Configuration
 
-| Variable | Purpose | Public? |
-| --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Environment-specific Supabase URL | Yes |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Browser-safe publishable key; RLS remains mandatory | Yes |
-| Supabase secret key variable | Narrow server-only administrative access if required | No |
-| Site URL variable | Canonical URL and redirects | No |
-| Monitoring configuration | Error/log destination | No where credentials are involved |
+| Variable                               | Purpose                                              | Public?                           |
+| -------------------------------------- | ---------------------------------------------------- | --------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Environment-specific Supabase URL                    | Yes                               |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Browser-safe publishable key; RLS remains mandatory  | Yes                               |
+| `SITE_URL`                             | Canonical application origin and redirect validation | No                                |
+| Monitoring configuration               | Error/log destination                                | No where credentials are involved |
 
-Exact names for server-only values will be selected during implementation. Google provider secrets live in managed Supabase/Google configuration, never documentation or Git.
+`src/lib/env/public.ts` is the only browser configuration boundary and returns only the two `NEXT_PUBLIC_` variables. `src/lib/env/server.ts` validates the complete application configuration. Validation errors identify invalid variable names without echoing their values. Application modules must use these typed accessors instead of reading `process.env` directly.
+
+No Supabase secret/service-role key is required by the foundation application. If a later administrator workflow requires elevated service access, its name, server-only boundary, and threat model require a separate approved decision. Google provider secrets live in managed Supabase/Google configuration, never documentation or Git.
+
+Use `.env.example` only as a safe local template. Store real local values in the ignored `.env.local` file and hosted values in the relevant Vercel environment. Local, staging, and production values must remain separate.
 
 ## Release requirements
 
