@@ -24,6 +24,7 @@ No executable application exists yet, so installation, development, test, lint, 
 | [Project instructions](AGENTS.md) | Codex working rules and project preferences |
 | [Product requirements](docs/product-requirements.md) | Users, MVP scope, deferred work, acceptance criteria, and client questions |
 | [MVP design](docs/superpowers/specs/2026-10-16-the-gavel-mvp-design.md) | Approved product, architecture, content, and security design |
+| [Project foundation plan](docs/superpowers/plans/2026-10-17-project-foundation.md) | Test-first scaffolding, local Supabase, membership access, and CI plan |
 | [Architecture](docs/architecture.md) | Systems, boundaries, environments, and data flow |
 | [Component hierarchy](docs/component-hierarchy.md) | Planned routes and UI responsibilities |
 | [API contracts](docs/api-contracts.md) | Interface conventions and planned operations |
