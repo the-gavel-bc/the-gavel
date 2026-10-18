@@ -6,6 +6,8 @@ The Gavel is a security-first public publishing platform for Boston College stud
 
 Architecture and MVP requirements are approved. The application shell, local Supabase membership boundary, server-side sign-in/access flow, and protected empty dashboard are implemented. Article editing, publishing, administrator management pages, and hosted provider setup remain planned. Documents describe intended behavior unless explicitly marked implemented.
 
+The CI workflow is implemented; hosted CI execution remains pending. The dependency audit currently fails on an unpatched development-tool advisory; see [testing](docs/testing.md#ci-and-security-gates). The full foundation milestone remains open until that gate is resolved.
+
 ## Foundation stack
 
 - Next.js and TypeScript

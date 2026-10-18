@@ -1,6 +1,6 @@
 # Product requirements
 
-Status: Approved design — implementation has not started.
+Status: Approved design; application and membership-access foundation implemented. Publishing MVP remains planned.
 
 ## Purpose and users
 
@@ -47,14 +47,14 @@ Success means readers can reliably discover and read articles, approved members 
 
 Each article has exactly one primary section. It may also have multiple administrator-defined categories and multiple topic tags.
 
-| Section | Initial navigation categories |
-| --- | --- |
-| News | Initial categories to be confirmed during content setup |
-| Features | On Campus, Outside of BC, Authentic Eagles |
-| Opinions | Beyond Campus, Campus POV |
-| Culture | Politics and Activism, Arts and Entertainment |
-| Sports | Football, Hockey, Basketball, Press Pass |
-| Allston–Brighton | News, Culture and Community |
+| Section              | Initial navigation categories                             |
+| -------------------- | --------------------------------------------------------- |
+| News                 | Initial categories to be confirmed during content setup   |
+| Features             | On Campus, Outside of BC, Authentic Eagles                |
+| Opinions             | Beyond Campus, Campus POV                                 |
+| Culture              | Politics and Activism, Arts and Entertainment             |
+| Sports               | Football, Hockey, Basketball, Press Pass                  |
+| Allston–Brighton     | News, Culture and Community                               |
 | Letter to the Editor | Published letters; submission guidance is a separate page |
 
 Categories organize editorial navigation. Tags describe specific topics and may span sections.

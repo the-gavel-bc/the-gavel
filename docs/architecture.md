@@ -1,6 +1,6 @@
 # Architecture
 
-Status: Approved design — implementation has not started.
+Status: Application, local identity database, and protected dashboard foundation implemented; publishing and hosted deployment remain planned.
 
 ## System overview
 
@@ -15,15 +15,16 @@ Browser
 
 ## Technology choices
 
-| Area | Technology | Reason | Status |
-| --- | --- | --- | --- |
-| Language | TypeScript | Shared types and strict boundary validation | Approved |
-| Web framework | Next.js | Server rendering, routing, metadata, and Vercel integration | Approved |
-| Hosting | Vercel | Managed deployments, previews, TLS, edge protection, and rollback | Approved |
-| Authentication | Supabase Auth with Google | Managed OAuth and Supabase session integration | Approved |
-| Database | Supabase PostgreSQL | Relational integrity, search support, migrations, and RLS | Approved |
-| Media | Supabase Storage | Managed object storage integrated with RLS | Approved |
-| Styling and editor libraries | Not selected | Choose during implementation planning | Open |
+| Area           | Technology                 | Reason                                                            | Status      |
+| -------------- | -------------------------- | ----------------------------------------------------------------- | ----------- |
+| Language       | TypeScript                 | Shared types and strict boundary validation                       | Approved    |
+| Web framework  | Next.js                    | Server rendering, routing, metadata, and Vercel integration       | Approved    |
+| Hosting        | Vercel                     | Managed deployments, previews, TLS, edge protection, and rollback | Approved    |
+| Authentication | Supabase Auth with Google  | Managed OAuth and Supabase session integration                    | Approved    |
+| Database       | Supabase PostgreSQL        | Relational integrity, search support, migrations, and RLS         | Approved    |
+| Media          | Supabase Storage           | Managed object storage integrated with RLS                        | Approved    |
+| Styling        | Global CSS and CSS Modules | Small publication-owned design system                             | Implemented |
+| Editor library | Not selected               | Select during article-editor planning                             | Open        |
 
 ## Boundaries and responsibilities
 
@@ -90,7 +91,19 @@ Browser
 
 ## Repository structure
 
-The exact source tree will be selected during implementation planning. Keep public routes, dashboard features, domain services, validation schemas, Supabase access, and tests in explicit modules rather than a single shared utility layer.
+The implemented foundation uses:
+
+- `src/app/`: root public page, auth routes, and protected empty dashboard.
+- `src/components/`: semantic public/dashboard shells and button/link primitives.
+- `src/lib/env/`: typed configuration access, invoked at startup by `src/instrumentation.ts`.
+- `src/lib/auth/`: server access checks, OAuth/sign-out actions, and safe redirect validation.
+- `src/lib/supabase/`: typed clients, cookie refresh, and generated database types.
+- `src/proxy.ts`: verified session refresh only; membership authorization stays in server pages and RLS.
+- `supabase/`: local configuration, migrations, synthetic fixtures, and pgTAP assertions.
+- `e2e/`: local-only browser fixtures and desktop/mobile tests.
+- `.github/workflows/ci.yml`: automated foundation gates; hosted execution remains to be confirmed.
+
+The foundation uses ordinary dynamic rendering for authenticated routes with private/no-store responses. Public article caching, content services, uploads, and publishing remain unimplemented.
 
 ## Quality targets
 

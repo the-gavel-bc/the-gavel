@@ -75,37 +75,37 @@
 - Consumes: approved architecture and design documents.
 - Produces: scripts `dev`, `build`, `start`, `lint`, `format:check`, `typecheck`, `test`, `test:db`, and `test:e2e`; the `@/*` import alias; a renderable root page.
 
-- [ ] **Step 1: Scaffold Next.js in the repository root**
+- [x] **Step 1: Scaffold Next.js in the repository root**
 
 Use `pnpm create next-app@latest` options equivalent to TypeScript, ESLint, App Router, `src/`, no Tailwind, and `@/*`. Preserve existing documentation and screenshots instead of accepting destructive overwrite prompts. Pin Node 22 in `.nvmrc` and record pnpm through `packageManager`.
 
-- [ ] **Step 2: Install only the foundation dependencies**
+- [x] **Step 2: Install only the foundation dependencies**
 
 Add Vitest, jsdom, Testing Library, Playwright, Prettier, Zod, `@supabase/ssr`, `@supabase/supabase-js`, and Supabase CLI. Do not add UI, editor, analytics, or content dependencies.
 
-- [ ] **Step 3: Write the homepage smoke tests**
+- [x] **Step 3: Write the homepage smoke tests**
 
 `src/app/page.test.tsx` asserts the document heading identifies The Gavel and exposes a link or action toward sign-in. `e2e/home.spec.ts` asserts `/` returns a visible main landmark, heading, and skip link at desktop and mobile viewports.
 
-- [ ] **Step 4: Run the tests to establish the expected failure**
+- [x] **Step 4: Run the tests to establish the expected failure**
 
 Run: `pnpm test -- src/app/page.test.tsx`
 Expected: FAIL until the starter page and test environment use the agreed semantics.
 
-- [ ] **Step 5: Implement the minimal root layout and homepage**
+- [x] **Step 5: Implement the minimal root layout and homepage**
 
 Create a metadata-bearing root layout and a deliberately simple foundation homepage. Do not reproduce the final publication homepage yet.
 
-- [ ] **Step 6: Run the foundation checks**
+- [x] **Step 6: Run the foundation checks**
 
 Run: `pnpm format:check && pnpm lint && pnpm typecheck && pnpm test -- src/app/page.test.tsx && pnpm build`
 Expected: all commands exit 0.
 
-- [ ] **Step 7: Update project documentation**
+- [x] **Step 7: Update project documentation**
 
 Record actual setup and validation commands in `README.md` and `docs/testing.md`. Add ADR 0002 for pnpm, Node 22, App Router, CSS Modules, Vitest, Playwright, and local Supabase.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add package.json pnpm-lock.yaml .nvmrc .gitignore next.config.ts tsconfig.json eslint.config.mjs .prettierrc.json vitest.config.ts vitest.setup.ts playwright.config.ts src/app src/app/page.test.tsx e2e/home.spec.ts README.md docs/testing.md docs/decisions
@@ -127,29 +127,29 @@ git commit -m "chore: scaffold application foundation"
 - Consumes: Node runtime and Zod from Task 1.
 - Produces: `getServerEnv(source?: NodeJS.ProcessEnv): ServerEnv` and `getPublicEnv(source?: PublicEnvSource): PublicEnv`; no other module reads `process.env` directly.
 
-- [ ] **Step 1: Write failing environment tests**
+- [x] **Step 1: Write failing environment tests**
 
 Assert valid values parse, missing names are reported without values, malformed URLs fail, the public schema exposes only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and server-only values never appear in `PublicEnv`.
 
-- [ ] **Step 2: Run the tests to verify failure**
+- [x] **Step 2: Run the tests to verify failure**
 
 Run: `pnpm test -- src/lib/env/server.test.ts src/lib/env/public.test.ts`
 Expected: FAIL because the modules do not exist.
 
-- [ ] **Step 3: Implement the two environment modules**
+- [x] **Step 3: Implement the two environment modules**
 
 Keep server and public schemas separate. Return immutable typed objects. Safe errors identify invalid variable names but never interpolate their values.
 
-- [ ] **Step 4: Add a safe example configuration**
+- [x] **Step 4: Add a safe example configuration**
 
 Document variable names and localhost examples only. Do not add real project URLs, provider credentials, database passwords, or secret keys.
 
-- [ ] **Step 5: Run focused and full checks**
+- [x] **Step 5: Run focused and full checks**
 
 Run: `pnpm test -- src/lib/env/server.test.ts src/lib/env/public.test.ts && pnpm lint && pnpm typecheck`
 Expected: all commands exit 0.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add .env.example src/lib/env README.md docs/deployment.md
@@ -176,29 +176,29 @@ git commit -m "feat: validate runtime configuration"
 - Consumes: root layout and CSS support from Task 1.
 - Produces: `PublicShell({ children }: PropsWithChildren)`, `DashboardShell({ children, displayName, isAdmin }: DashboardShellProps)`, and shared link/button primitives.
 
-- [ ] **Step 1: Write failing shell tests**
+- [x] **Step 1: Write failing shell tests**
 
 Assert one banner/main/contentinfo landmark, a skip link targeting `#main-content`, a visible site identity, keyboard-reachable navigation, no admin navigation for `isAdmin=false`, and admin navigation for `isAdmin=true`.
 
-- [ ] **Step 2: Run the component tests to verify failure**
+- [x] **Step 2: Run the component tests to verify failure**
 
 Run: `pnpm test -- src/components/site/public-shell.test.tsx src/components/dashboard/dashboard-shell.test.tsx`
 Expected: FAIL because the shells do not exist.
 
-- [ ] **Step 3: Implement semantic shells and foundation tokens**
+- [x] **Step 3: Implement semantic shells and foundation tokens**
 
 Define brand-color roles, typography fallbacks, spacing, focus indicators, readable content width, and mobile-first shell layout in `globals.css`. Avoid final screenshot-level styling.
 
-- [ ] **Step 4: Extend the browser smoke test**
+- [x] **Step 4: Extend the browser smoke test**
 
 Add assertions for keyboard focus reaching the skip link, mobile navigation remaining operable, and no horizontal overflow at the configured mobile viewport.
 
-- [ ] **Step 5: Run component and browser checks**
+- [x] **Step 5: Run component and browser checks**
 
 Run: `pnpm test -- src/components && pnpm test:e2e -- e2e/home.spec.ts`
 Expected: all tests pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/app src/components e2e/home.spec.ts
@@ -221,38 +221,38 @@ git commit -m "feat: add accessible application shells"
 - Consumes: local Supabase CLI and approved profile/membership model.
 - Produces: `public.profiles`, `public.memberships`, enum `public.app_role`, RLS/grants, synthetic fixtures, and generated `Database` TypeScript type.
 
-- [ ] **Step 1: Initialize local Supabase**
+- [x] **Step 1: Initialize local Supabase**
 
 Run `pnpm supabase init`. Configure the local project without linking any remote project. Document that a Docker-compatible runtime is required.
 
-- [ ] **Step 2: Write failing pgTAP structure and permission tests**
+- [x] **Step 2: Write failing pgTAP structure and permission tests**
 
 Assert tables, keys, enum values, RLS enablement, and grants. Seed anonymous, inactive member, Author A, Author B, and Administrator identities. Assert public profile reads expose only intended public fields; users may update only their linked profile; no normal user may insert/update memberships; inactive membership grants no dashboard authorization data; Author A cannot mutate Author B.
 
-- [ ] **Step 3: Run the database tests to verify failure**
+- [x] **Step 3: Run the database tests to verify failure**
 
 Run: `pnpm supabase start && pnpm supabase db reset && pnpm supabase test db`
 Expected: pgTAP failures because the migration is absent.
 
-- [ ] **Step 4: Implement the foundation migration**
+- [x] **Step 4: Implement the foundation migration**
 
 Create profiles and memberships with constraints, indexes, explicit grants, and RLS policies. Do not create articles or generic role-editing functions. Membership writes remain unavailable to normal authenticated users.
 
-- [ ] **Step 5: Add deterministic synthetic seed data**
+- [x] **Step 5: Add deterministic synthetic seed data**
 
 Use reserved local-only identities and no real names or email addresses. The seed must be safe to recreate with `db reset`.
 
-- [ ] **Step 6: Regenerate and check database types**
+- [x] **Step 6: Regenerate and check database types**
 
 Run: `pnpm supabase gen types --lang typescript --local > src/lib/supabase/database.types.ts`
 Run a repository check that fails if regeneration changes the committed file.
 
-- [ ] **Step 7: Run database verification**
+- [x] **Step 7: Run database verification**
 
 Run: `pnpm supabase db reset && pnpm supabase test db && pnpm supabase db lint && pnpm typecheck`
 Expected: all commands exit 0 with all pgTAP assertions passing.
 
-- [ ] **Step 8: Update documentation and commit**
+- [x] **Step 8: Update documentation and commit**
 
 Mark only profiles, memberships, local migrations, and their policies as implemented; keep later entities conceptual.
 
@@ -284,44 +284,44 @@ git commit -m "feat: establish membership data boundary"
 - Produces: `createBrowserSupabaseClient()`, `createServerSupabaseClient()`, `refreshSession(request)`, `getCurrentAccess(): Promise<AccessState>`, and `requireActiveMembership(): Promise<ActiveMembership>`.
 - `AccessState` is a discriminated union: `signedOut | pending | active`, with active carrying `userId`, `profileId`, `displayName`, and `role`.
 
-- [ ] **Step 1: Write failing access-state tests**
+- [x] **Step 1: Write failing access-state tests**
 
 Mock the narrow Supabase calls and assert: missing user -> `signedOut`; user without membership -> `pending`; inactive membership -> `pending`; active author/admin -> typed `active`; database error -> safe server error without token or query leakage.
 
-- [ ] **Step 2: Run focused tests to verify failure**
+- [x] **Step 2: Run focused tests to verify failure**
 
 Run: `pnpm test -- src/lib/auth/access.test.ts`
 Expected: FAIL because the access module does not exist.
 
-- [ ] **Step 3: Implement typed Supabase clients and access functions**
+- [x] **Step 3: Implement typed Supabase clients and access functions**
 
 Use the official SSR cookie pattern. Do not use a service-role key. Query only the membership/profile fields needed for access decisions.
 
-- [ ] **Step 4: Implement session refresh Proxy**
+- [x] **Step 4: Implement session refresh Proxy**
 
 Place `src/proxy.ts` beside `src/app`. Match `/dashboard/:path*`, `/sign-in`, `/auth/callback`, and `/access-pending`; refresh cookies and treat redirects as convenience only. Do not query slow authorization data or consider Proxy authoritative.
 
-- [ ] **Step 5: Implement sign-in and callback routes**
+- [x] **Step 5: Implement sign-in and callback routes**
 
 Offer Google sign-in, restrict redirects to validated local paths, exchange the OAuth code server-side, and send signed-in users to dashboard or pending access. Provider configuration itself remains a documented manual step because credentials are not committed.
 
-- [ ] **Step 6: Write and run protected-page tests**
+- [x] **Step 6: Write and run protected-page tests**
 
 Assert the dashboard layout calls `requireActiveMembership`; signed-out users redirect to sign-in; pending/inactive users redirect to access-pending; active users render the empty dashboard; author markup has no admin navigation.
 
 Run: `pnpm test -- src/lib/auth/access.test.ts 'src/app/(dashboard)/dashboard/page.test.tsx'`
 Expected: PASS.
 
-- [ ] **Step 7: Add access-boundary browser coverage**
+- [x] **Step 7: Add access-boundary browser coverage**
 
 Use deterministic local test session helpers rather than real Google login. Assert direct dashboard navigation for signed-out and pending identities is denied even when client JavaScript is disabled; approved authors see the empty dashboard.
 
-- [ ] **Step 8: Run full task verification**
+- [x] **Step 8: Run full task verification**
 
 Run: `pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e -- e2e/access-boundary.spec.ts && pnpm build`
 Expected: all commands exit 0.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add src/lib src/proxy.ts 'src/app/(auth)' 'src/app/(dashboard)' src/components/site/site-header.tsx e2e/access-boundary.spec.ts
@@ -343,7 +343,7 @@ git commit -m "feat: protect dashboard membership access"
 - Consumes: all scripts and checks from Tasks 1–5.
 - Produces: one CI workflow that installs with the frozen lockfile and runs formatting, lint, types, unit/component tests, local Supabase reset/pgTAP/lint/type-generation drift, production build, and Playwright smoke/access tests.
 
-- [ ] **Step 1: Write the CI workflow**
+- [x] **Step 1: Write the CI workflow**
 
 Use least-privilege workflow permissions, pinned major action versions, pnpm cache, a service/runtime capable of local Supabase, and no production secrets. Fail on generated database-type drift.
 
@@ -363,7 +363,7 @@ Run in the same order as CI:
 
 Expected: every command exits 0.
 
-- [ ] **Step 3: Verify generated database types are current**
+- [x] **Step 3: Verify generated database types are current**
 
 Generate to a temporary file, compare it with `src/lib/supabase/database.types.ts`, and fail if they differ. Do not overwrite the committed file as part of the check.
 
@@ -371,7 +371,7 @@ Generate to a temporary file, compare it with `src/lib/supabase/database.types.t
 
 Verify desktop/mobile homepage landmarks and focus, signed-out dashboard denial, pending-member denial, approved-author empty dashboard, no admin controls for authors, no secrets in the client bundle or repository, and no production service dependency.
 
-- [ ] **Step 5: Update documentation to actual behavior**
+- [x] **Step 5: Update documentation to actual behavior**
 
 Replace planned commands and directory descriptions with verified values. Mark only implemented foundation routes/entities/security controls as implemented. Record unavailable hosted Google/Vercel/Supabase checks as remaining launch work.
 
@@ -381,6 +381,12 @@ Replace planned commands and directory descriptions with verified values. Mark o
 git add .github/workflows/ci.yml README.md docs
 git commit -m "ci: enforce foundation quality gates"
 ```
+
+## Current execution status (2026-10-18)
+
+Tasks 1–5 are committed and verified. Task 6's workflow is implemented and passes Actionlint. Local frozen install, formatting, lint, types, 37 unit/component assertions, 29 pgTAP assertions, database lint/type drift, production build, and 16 desktop/mobile browser tests pass. Startup checks reject missing/malformed configuration without values in errors. A read-only source snapshot scan finds no secrets, and elevated local credentials are absent from client build artifacts.
+
+The full dependency audit fails on unpatched development-tool advisory GHSA-vfj7-8cjw-p6xm; the production-only audit passes. No exception is configured. Task 6 and the full foundation milestone remain open for audit remediation/risk acceptance and hosted CI execution. Real Google OAuth, Vercel previews, and hosted Supabase checks remain manual launch work. Broader screen-reader/contrast review is still required before launch.
 
 ## Foundation milestone acceptance
 

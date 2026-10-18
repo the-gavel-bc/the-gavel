@@ -25,6 +25,12 @@ Install the Playwright Chromium runtime once with `pnpm exec playwright install 
 - Playwright covers desktop/mobile homepage landmarks, keyboard focus and overflow; signed-out, inactive, unapproved Google, non-`bc.edu`, author, administrator, and forged-cookie access paths. Access tests run with JavaScript disabled.
 - Browser fixtures are isolated to the fixed local Docker project. They set synthetic Auth metadata only; passwords and hosted Google credentials are not used. `db reset` restores the original passwordless fixtures.
 
+## CI and security gates
+
+`.github/workflows/ci.yml` installs the frozen lockfile and runs the local gates, generated-type drift check, dependency audit, and Gitleaks v8.30.1 history scan. It needs no production secrets. CI execution itself is pending a push/PR; local verification does not prove the hosted workflow ran.
+
+Known failing gate as of 2026-10-18: `pnpm audit --audit-level=high` reports [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm), an unpatched `braces <=3.0.3` stack-exhaustion advisory through `eslint-config-next`'s development dependency chain. No exception has been approved or configured. Keep this finding visible and the audit gate failing until remediation or an explicitly approved scoped exception. This prevents claiming the full foundation milestone is green.
+
 ## Required broader MVP coverage
 
 ### Critical journeys

@@ -1,6 +1,6 @@
 # Git and GitHub workflow
 
-Status: Approved baseline policy — GitHub rules are not yet configured.
+Status: Foundation CI workflow implemented; hosted execution and GitHub branch rules are not yet configured.
 
 ## Repository and branches
 

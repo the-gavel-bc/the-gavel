@@ -1,6 +1,6 @@
 # The Gavel MVP design
 
-Status: Approved in conversation; implementation has not started.
+Status: Approved in conversation. Foundation implementation status and remaining gates are tracked in README.md and the foundation plan; publishing features remain planned.
 
 ## Objective
 
