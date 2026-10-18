@@ -101,7 +101,13 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      current_profile: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          display_name: string;
+          id: string;
+        }[];
+      };
     };
     Enums: {
       app_role: "author" | "administrator";

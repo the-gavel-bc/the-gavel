@@ -21,11 +21,17 @@ Preview environments must never use production database or elevated production s
 | `SITE_URL`                             | Canonical application origin and redirect validation | No                                |
 | Monitoring configuration               | Error/log destination                                | No where credentials are involved |
 
-`src/lib/env/public.ts` is the only browser configuration boundary and returns only the two `NEXT_PUBLIC_` variables. `src/lib/env/server.ts` validates the complete application configuration. Validation errors identify invalid variable names without echoing their values. Application modules must use these typed accessors instead of reading `process.env` directly.
+`src/lib/env/public.ts` is the only browser configuration boundary and returns only the two `NEXT_PUBLIC_` variables. `src/lib/env/server.ts` validates the complete application configuration. The Next.js instrumentation hook validates configuration at server startup. Validation errors identify invalid variable names without echoing their values. Application modules must use these typed accessors instead of reading `process.env` directly.
 
 No Supabase secret/service-role key is required by the foundation application. If a later administrator workflow requires elevated service access, its name, server-only boundary, and threat model require a separate approved decision. Google provider secrets live in managed Supabase/Google configuration, never documentation or Git.
 
 Use `.env.example` only as a safe local template. Store real local values in the ignored `.env.local` file and hosted values in the relevant Vercel environment. Local, staging, and production values must remain separate.
+
+## Google provider setup (manual, not verified on hosted services)
+
+Configure Google OAuth in the environment-specific Supabase/Google projects, using the provider callback URL shown by Supabase. Configure the canonical application origin and exact `/auth/callback` URL in the Supabase redirect allowlist. Restrict hosted identity creation to the approved `bc.edu` Google domain; the application independently denies non-Google, unconfirmed, non-`bc.edu`, and inactive/unapproved sessions. Keep provider secrets in managed configuration. Local tests do not enable a real Google provider.
+
+Use HTTPS `SITE_URL` values in staging/production so session cookies are Secure. Browser sessions use HttpOnly cookies; foundation authentication and authenticated reads run on the server. Preview protection and hosted OAuth smoke checks remain launch gates.
 
 ## Release requirements
 

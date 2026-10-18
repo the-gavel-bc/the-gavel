@@ -4,7 +4,7 @@ The Gavel is a security-first public publishing platform for Boston College stud
 
 ## Project status
 
-Architecture and MVP requirements are approved. The Next.js application and quality toolchain are scaffolded; content, authentication, and publishing features remain planned. Documents describe intended behavior unless explicitly marked implemented.
+Architecture and MVP requirements are approved. The application shell, local Supabase membership boundary, server-side sign-in/access flow, and protected empty dashboard are implemented. Article editing, publishing, administrator management pages, and hosted provider setup remain planned. Documents describe intended behavior unless explicitly marked implemented.
 
 ## Foundation stack
 
@@ -57,7 +57,7 @@ pnpm test
 pnpm build
 ```
 
-Playwright is configured for desktop and mobile browser checks. Install its Chromium runtime once with `pnpm exec playwright install chromium`, then run `pnpm test:e2e`.
+Playwright is configured for desktop and mobile browser checks. Install its Chromium runtime once with `pnpm exec playwright install chromium`, start local Supabase, then run `pnpm test:e2e`. Browser tests prepare only fixed synthetic users in the local Docker project and verify access with JavaScript disabled.
 
 ## Documentation index
 

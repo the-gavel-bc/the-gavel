@@ -1,6 +1,6 @@
 # API contracts
 
-Status: Approved conventions and operation inventory — concrete schemas are not implemented.
+Status: Foundation access/session interfaces implemented; publishing operations remain planned.
 
 ## Style and ownership
 
@@ -20,6 +20,14 @@ Authoritative request schemas will live beside the implemented server operations
 - Errors use stable codes, safe messages, field details where useful, and a correlation identifier. Internal details remain private.
 - Retried mutations must not create duplicate publication, deletion, or audit effects.
 - Apply operation-specific rate limits.
+
+## Implemented foundation interfaces
+
+- `/sign-in` starts Google OAuth through a server action; the `bc.edu` provider hint is usability only. Server access checks require verified Google identity, a confirmed `bc.edu` email, active membership, and an active linked profile.
+- `GET /auth/callback` exchanges the OAuth code with PKCE, then redirects to `/dashboard`, `/access-pending`, or a safe sign-in error. Redirect origins come from validated `SITE_URL`; optional `next` destinations are restricted to local dashboard paths.
+- `getCurrentAccess()` returns `signedOut | pending | active`. Active access carries user ID, profile ID, display name, and role. `requireActiveMembership()` redirects denied identities; dashboard layout and page both call it.
+- `public.current_profile()` is a parameterless database function returning only the active caller's profile ID/display name. Its grants, fixed search path, and membership filter are authoritative in the migration. It never exposes identity links from other profiles.
+- Sign-out is a server action that clears the local Supabase session. Session cookies are HttpOnly, SameSite=Lax, and Secure on HTTPS origins; the foundation browser client performs anonymous reads only.
 
 ## Planned public operations
 

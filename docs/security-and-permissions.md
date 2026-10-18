@@ -1,6 +1,6 @@
 # Security and permissions
 
-Status: Foundation profile/membership database controls implemented; application and publishing controls remain planned.
+Status: Foundation membership, server access checks, and session controls implemented; publishing and hosted provider controls remain planned.
 
 ## Security objective
 
@@ -16,6 +16,12 @@ The project replaces a previously compromised WordPress site. The new system min
 - Authentication tokens must not appear in URLs, logs, analytics, or user-visible errors.
 - Infrastructure administrators must enable MFA.
 - Logout must invalidate the local session; an administrator can deactivate application access independently of Google.
+
+### Implemented foundation access
+
+The server verifies identity with Supabase `getUser()` before checking trusted Google provider metadata, confirmed `bc.edu` email, active membership, and linked profile. Proxy refreshes verified tokens but does not authorize dashboard access. Both the dashboard layout and page independently require active membership. Auth responses are private/no-store. OAuth callback destinations use the configured canonical origin and allow only dashboard-local paths. Session cookies are HttpOnly, SameSite=Lax, and Secure for HTTPS deployments.
+
+Google provider configuration and hosted domain restrictions remain manual launch work; automated browser tests use signed synthetic local sessions, without real Google credentials or production data. Profile reads retain private authentication links; `current_profile()` exposes only the active caller's ID and display name through a parameterless, fixed-search-path function.
 
 ## Authorization matrix
 

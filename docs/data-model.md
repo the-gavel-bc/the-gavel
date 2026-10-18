@@ -54,6 +54,8 @@ The migration `supabase/migrations/20261017000000_foundation_identity.sql` is au
 
 Generated application types live at `src/lib/supabase/database.types.ts`. Regenerate them with `pnpm db:types` while local Supabase is running and verify drift with `pnpm db:types:check`.
 
+`supabase/migrations/20261018000000_current_profile.sql` adds the parameterless `current_profile()` accessor used by server authorization. It returns only the caller's active profile ID/display name when membership is active, without exposing `auth_user_id` column grants to readers.
+
 ## Planned publishing entities
 
 ### articles

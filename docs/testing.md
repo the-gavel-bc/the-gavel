@@ -14,11 +14,18 @@ Run commands with Node.js 22 and the pnpm version recorded in `package.json`.
 | Unit/component   | `pnpm test`         | Vitest and Testing Library                                       |
 | Browser          | `pnpm test:e2e`     | Playwright desktop and mobile projects                           |
 | Production build | `pnpm build`        | Next.js production compilation                                   |
-| Database         | `pnpm test:db`      | Local Supabase membership/profile grants and RLS (25 assertions) |
+| Database         | `pnpm test:db`      | Local Supabase membership/profile grants and RLS (29 assertions) |
 
 Install the Playwright Chromium runtime once with `pnpm exec playwright install chromium`. Start local Supabase with `pnpm supabase start` using a Docker-compatible runtime. Run `pnpm supabase db reset`, `pnpm test:db`, `pnpm supabase db lint`, and `pnpm db:types:check`. Regenerate formatted types with `pnpm --silent db:types > src/lib/supabase/database.types.ts`. The drift check compares without overwriting the committed file.
 
-## Required coverage
+## Implemented foundation coverage
+
+- Unit/component tests cover configuration validation/startup, shell semantics, active membership checks, private profile resolution, safe OAuth redirects, and independent dashboard layout/page guards.
+- pgTAP covers grants, RLS, profile ownership, inactive-member edit denial, membership read/write/delete denials, administrator approval, and scoped profile lookup.
+- Playwright covers desktop/mobile homepage landmarks, keyboard focus and overflow; signed-out, inactive, unapproved Google, non-`bc.edu`, author, administrator, and forged-cookie access paths. Access tests run with JavaScript disabled.
+- Browser fixtures are isolated to the fixed local Docker project. They set synthetic Auth metadata only; passwords and hosted Google credentials are not used. `db reset` restores the original passwordless fixtures.
+
+## Required broader MVP coverage
 
 ### Critical journeys
 

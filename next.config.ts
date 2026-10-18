@@ -1,9 +1,6 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
-};
-
+// Foundation routes use ordinary server rendering. User-specific pages must
+// never enter shared caches; public content caching belongs to a later phase.
+const nextConfig: NextConfig = {};
 export default nextConfig;
