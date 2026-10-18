@@ -1,6 +1,6 @@
 # Security and permissions
 
-Status: Foundation membership, server access checks, and session controls implemented; publishing and hosted provider controls remain planned.
+Status: Foundation membership, trusted identity checks, server access checks, and session controls implemented; publishing and hosted provider controls remain planned.
 
 ## Security objective
 
@@ -48,6 +48,7 @@ Additional credits never imply ownership. Each article has one designated owner.
 Implemented foundation controls:
 
 - `profiles` and `memberships` have RLS enabled and explicit grants.
+- Direct profile writes, administrator membership privileges, and `current_profile()` additionally require authoritative Auth data: confirmed `bc.edu` email and trusted Google provider metadata. `private.has_eligible_identity()` reads these fields through a fixed-search-path predicate; caller-editable user metadata never grants access.
 - Anonymous readers can select only public profile columns and only active profile rows; authentication links are not granted.
 - Active members can update their own editable profile fields; active administrators may update these fields across profiles. Inactive members cannot edit profiles.
 - Authenticated users can read only their own membership unless they hold an active administrator membership.

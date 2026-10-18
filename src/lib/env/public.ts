@@ -1,8 +1,9 @@
 import { z } from "zod";
+import { httpOriginSchema, publishableKeySchema } from "./schema";
 
 const publicEnvSchema = z.object({
-  NEXT_PUBLIC_SUPABASE_URL: z.url(),
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
+  NEXT_PUBLIC_SUPABASE_URL: httpOriginSchema,
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: publishableKeySchema,
 });
 
 export type PublicEnvSource = Record<string, string | undefined>;

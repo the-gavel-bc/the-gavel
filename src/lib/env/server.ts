@@ -1,9 +1,10 @@
 import { z } from "zod";
+import { httpOriginSchema, publishableKeySchema } from "./schema";
 
 const serverEnvSchema = z.object({
-  NEXT_PUBLIC_SUPABASE_URL: z.url(),
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
-  SITE_URL: z.url(),
+  NEXT_PUBLIC_SUPABASE_URL: httpOriginSchema,
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: publishableKeySchema,
+  SITE_URL: httpOriginSchema,
 });
 
 export type ServerEnv = Readonly<z.infer<typeof serverEnvSchema>>;

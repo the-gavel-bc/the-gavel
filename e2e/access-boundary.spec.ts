@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { expectVisibleFocus } from "./focus";
 import { setLocalSession } from "./local-supabase";
 
 test.use({ javaScriptEnabled: false });
@@ -48,6 +49,8 @@ test("approved author sees empty dashboard without administrator controls", asyn
     0,
   );
   expect(response?.headers()["cache-control"]).toContain("no-store");
+  await page.keyboard.press("Tab");
+  await expectVisibleFocus(page.getByRole("link", { name: "Skip to content" }));
 });
 test("administrator sees administrator navigation", async ({
   context,

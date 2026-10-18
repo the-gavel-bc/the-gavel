@@ -1,5 +1,11 @@
 begin;
 
+-- Synthetic eligible Auth metadata for this transaction only.
+update auth.users set email = 'gavel-pgtap-' || right(id::text, 1) || '@bc.edu',
+  email_confirmed_at = now(), raw_app_meta_data = '{"provider":"google","providers":["google"]}'::jsonb
+where id in ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000004');
+
+
 create extension if not exists pgtap with schema extensions;
 
 select plan(25);

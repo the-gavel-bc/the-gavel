@@ -56,6 +56,8 @@ Generated application types live at `src/lib/supabase/database.types.ts`. Regene
 
 `supabase/migrations/20261018000000_current_profile.sql` adds the parameterless `current_profile()` accessor used by server authorization. It returns only the caller's active profile ID/display name when membership is active, without exposing `auth_user_id` column grants to readers.
 
+`supabase/migrations/20261018010000_identity_eligibility.sql` adds the trusted Auth identity predicate and tightens existing write/admin policies and the scoped accessor. This additive migration changes no stored rows or table columns. Existing application clients remain compatible; identities outside the approved boundary lose privileges intentionally. Apply it before deploying clients that depend on the consistent boundary. Reverting to earlier policies would weaken authorization and is not a safe security rollback.
+
 ## Planned publishing entities
 
 ### articles
@@ -137,5 +139,7 @@ Maps previous public paths to current destinations when published slugs or route
 - Test migrations from a clean database and from the previous committed schema.
 - Favor additive, backward-compatible production changes; pair destructive changes with backup, rollout, and rollback steps.
 - Legacy WordPress data migration is out of scope for the MVP.
+
+Known deferred constraint: deleting an approving Auth identity is currently rejected by approval-state invariants despite the foreign key's `SET NULL` clause. Choose preserved-history versus deletion semantics before introducing infrastructure identity deletion procedures; ordinary membership deactivation does not delete Auth users.
 
 Local reset, pgTAP, lint, and type generation require a running Docker-compatible container runtime. The local project is not linked to a hosted Supabase project.

@@ -34,3 +34,18 @@ describe("getPublicEnv", () => {
     }
   });
 });
+
+it.each([
+  {
+    NEXT_PUBLIC_SUPABASE_URL: "ftp://example.test",
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "synthetic-key",
+  },
+  {
+    NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321",
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "   ",
+  },
+])("rejects unusable browser configuration", (source) => {
+  expect(() => getPublicEnv(source)).toThrow(
+    /Invalid public environment variables/,
+  );
+});

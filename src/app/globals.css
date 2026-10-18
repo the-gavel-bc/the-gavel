@@ -5,7 +5,7 @@
   --color-muted: #5e6670;
   --color-paper: #ffffff;
   --color-surface: #f2f5f8;
-  --color-focus: #f4b942;
+  --color-focus: var(--color-brand-dark);
   --font-editorial: Georgia, "Times New Roman", serif;
   --font-interface: Arial, Helvetica, sans-serif;
   --space-1: 0.25rem;

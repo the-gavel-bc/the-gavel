@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { expectVisibleFocus } from "./focus";
 
 test("homepage exposes its accessible foundation", async ({ page }) => {
   await page.goto("/");
@@ -15,6 +16,8 @@ test("homepage exposes its accessible foundation", async ({ page }) => {
   await expect(
     page.getByRole("link", { name: "Skip to content" }),
   ).toBeFocused();
+
+  await expectVisibleFocus(page.getByRole("link", { name: "Skip to content" }));
 
   await page.getByText("Sections", { exact: true }).click();
   await expect(page.getByRole("link", { name: "Features" })).toBeVisible();

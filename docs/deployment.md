@@ -21,7 +21,7 @@ Preview environments must never use production database or elevated production s
 | `SITE_URL`                             | Canonical application origin and redirect validation | No                                |
 | Monitoring configuration               | Error/log destination                                | No where credentials are involved |
 
-`src/lib/env/public.ts` is the only browser configuration boundary and returns only the two `NEXT_PUBLIC_` variables. `src/lib/env/server.ts` validates the complete application configuration. The Next.js instrumentation hook validates configuration at server startup. Validation errors identify invalid variable names without echoing their values. Application modules must use these typed accessors instead of reading `process.env` directly.
+`src/lib/env/public.ts` is the only browser configuration boundary and returns only the two `NEXT_PUBLIC_` variables. `src/lib/env/server.ts` validates the complete application configuration. The Next.js instrumentation hook validates configuration at server startup. Both Supabase URL and `SITE_URL` must be credential-free HTTP(S) origins without paths, query strings, or fragments; publishable keys must contain non-whitespace characters. Validation errors identify invalid variable names without echoing their values. Application modules must use these typed accessors instead of reading `process.env` directly.
 
 No Supabase secret/service-role key is required by the foundation application. If a later administrator workflow requires elevated service access, its name, server-only boundary, and threat model require a separate approved decision. Google provider secrets live in managed Supabase/Google configuration, never documentation or Git.
 

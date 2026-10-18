@@ -367,7 +367,7 @@ Expected: every command exits 0.
 
 Generate to a temporary file, compare it with `src/lib/supabase/database.types.ts`, and fail if they differ. Do not overwrite the committed file as part of the check.
 
-- [ ] **Step 4: Run manual foundation acceptance checks**
+- [x] **Step 4: Run manual foundation acceptance checks**
 
 Verify desktop/mobile homepage landmarks and focus, signed-out dashboard denial, pending-member denial, approved-author empty dashboard, no admin controls for authors, no secrets in the client bundle or repository, and no production service dependency.
 
@@ -375,7 +375,7 @@ Verify desktop/mobile homepage landmarks and focus, signed-out dashboard denial,
 
 Replace planned commands and directory descriptions with verified values. Mark only implemented foundation routes/entities/security controls as implemented. Record unavailable hosted Google/Vercel/Supabase checks as remaining launch work.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add .github/workflows/ci.yml README.md docs
@@ -384,7 +384,9 @@ git commit -m "ci: enforce foundation quality gates"
 
 ## Current execution status (2026-10-18)
 
-Tasks 1–5 are committed and verified. Task 6's workflow is implemented and passes Actionlint. Local frozen install, formatting, lint, types, 37 unit/component assertions, 29 pgTAP assertions, database lint/type drift, production build, and 16 desktop/mobile browser tests pass. Startup checks reject missing/malformed configuration without values in errors. A read-only source snapshot scan finds no secrets, and elevated local credentials are absent from client build artifacts.
+Tasks 1–5 are committed and verified. Task 6's workflow is implemented and passes Actionlint. Local frozen install, formatting, lint, types, 44 unit/component assertions, 46 pgTAP assertions, database lint/type drift, production build, and 16 desktop/mobile browser tests pass. Startup checks reject missing/malformed configuration without values in errors. A read-only full Git-history scan finds no secrets, and elevated local credentials are absent from client build artifacts.
+
+Independent review findings on identity eligibility, safe URL validation, and focus contrast were reproduced and fixed with regression tests. Both clean reset and upgrade from the previous committed schema pass. Approving Auth-user deletion remains a deferred operational constraint decision; normal member deactivation is unaffected.
 
 The full dependency audit fails on unpatched development-tool advisory GHSA-vfj7-8cjw-p6xm; the production-only audit passes. No exception is configured. Task 6 and the full foundation milestone remain open for audit remediation/risk acceptance and hosted CI execution. Real Google OAuth, Vercel previews, and hosted Supabase checks remain manual launch work. Broader screen-reader/contrast review is still required before launch.
 
