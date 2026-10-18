@@ -1,6 +1,6 @@
 # Data model
 
-Status: Approved conceptual model — exact SQL and migrations are not implemented.
+Status: Foundation identity schema implemented; publishing entities remain conceptual.
 
 ## Storage
 
@@ -22,61 +22,68 @@ articles *--* media_assets
 auth.users 1--* audit_events
 ```
 
-## Core entities
+## Implemented foundation entities
 
 ### profiles
 
 Public contributor identity, independent from login access.
 
-| Field | Type | Rules |
-| --- | --- | --- |
-| id | UUID | Primary key |
-| auth_user_id | UUID nullable | Unique reference to `auth.users`; null for contributors without accounts |
-| display_name | text | Required |
-| slug | text | Required, unique |
-| biography | text nullable | Sanitized public biography |
-| profile_image_id | UUID nullable | Reference to media asset |
-| active | boolean | Default true |
-| created_at / updated_at | timestamptz | Required |
+| Field                   | Type          | Rules                                                                    |
+| ----------------------- | ------------- | ------------------------------------------------------------------------ |
+| id                      | UUID          | Primary key                                                              |
+| auth_user_id            | UUID nullable | Unique reference to `auth.users`; null for contributors without accounts |
+| display_name            | text          | Required                                                                 |
+| slug                    | text          | Required, unique                                                         |
+| biography               | text nullable | Sanitized public biography                                               |
+| active                  | boolean       | Default true                                                             |
+| created_at / updated_at | timestamptz   | Required                                                                 |
 
 ### memberships
 
-| Field | Type | Rules |
-| --- | --- | --- |
-| user_id | UUID | Primary key; reference to `auth.users` |
-| role | enum | `author` or `administrator` |
-| active | boolean | Default false until approved |
-| approved_by | UUID nullable | Administrator identity |
-| approved_at / revoked_at | timestamptz nullable | Lifecycle timestamps |
+| Field                    | Type                 | Rules                                  |
+| ------------------------ | -------------------- | -------------------------------------- |
+| user_id                  | UUID                 | Primary key; reference to `auth.users` |
+| role                     | enum                 | `author` or `administrator`            |
+| active                   | boolean              | Default false until approved           |
+| approved_by              | UUID nullable        | Administrator identity                 |
+| approved_at / revoked_at | timestamptz nullable | Lifecycle timestamps                   |
+
+The migration `supabase/migrations/20261017000000_foundation_identity.sql` is authoritative for these two tables, their constraints, grants, indexes, helper functions, and RLS policies. `supabase/seed.sql` contains four synthetic, passwordless local identities covering inactive member, two authors, and administrator roles. It contains no production identity or content.
+
+`profile_image_id` remains planned until the media schema exists. Biographies are stored as plain text; rich biography editing is not implemented.
+
+Generated application types live at `src/lib/supabase/database.types.ts`. Regenerate them with `pnpm db:types` while local Supabase is running and verify drift with `pnpm db:types:check`.
+
+## Planned publishing entities
 
 ### articles
 
-| Field | Type | Rules |
-| --- | --- | --- |
-| id | UUID | Primary key |
-| owner_profile_id | UUID | Required; exactly one owner |
-| section_id | UUID | Required |
-| title | text | Required; bounded length |
-| slug | text | Required, unique and stable after publication except managed redirects |
-| excerpt | text | Required for cards and metadata fallback |
-| content | structured JSON or constrained rich text | Required before publication |
-| status | enum | `draft`, `published`, or `archived` |
-| main_image_id | UUID nullable | Required before publication unless an editorial exception is approved later |
-| image_credit | text nullable | Public credit |
-| seo_keyphrase | text nullable | Editorial aid |
-| meta_description | text nullable | Bounded search/social description |
-| published_at | timestamptz nullable | Set on first publication |
-| archived_at | timestamptz nullable | Set while archived |
-| created_at / updated_at | timestamptz | Required |
+| Field                   | Type                                     | Rules                                                                       |
+| ----------------------- | ---------------------------------------- | --------------------------------------------------------------------------- |
+| id                      | UUID                                     | Primary key                                                                 |
+| owner_profile_id        | UUID                                     | Required; exactly one owner                                                 |
+| section_id              | UUID                                     | Required                                                                    |
+| title                   | text                                     | Required; bounded length                                                    |
+| slug                    | text                                     | Required, unique and stable after publication except managed redirects      |
+| excerpt                 | text                                     | Required for cards and metadata fallback                                    |
+| content                 | structured JSON or constrained rich text | Required before publication                                                 |
+| status                  | enum                                     | `draft`, `published`, or `archived`                                         |
+| main_image_id           | UUID nullable                            | Required before publication unless an editorial exception is approved later |
+| image_credit            | text nullable                            | Public credit                                                               |
+| seo_keyphrase           | text nullable                            | Editorial aid                                                               |
+| meta_description        | text nullable                            | Bounded search/social description                                           |
+| published_at            | timestamptz nullable                     | Set on first publication                                                    |
+| archived_at             | timestamptz nullable                     | Set while archived                                                          |
+| created_at / updated_at | timestamptz                              | Required                                                                    |
 
 ### article_contributors
 
-| Field | Type | Rules |
-| --- | --- | --- |
-| article_id | UUID | Required |
-| profile_id | UUID | Required |
-| contribution_role | enum | `writer`, `editor`, or `creative` |
-| display_order | integer | Non-negative |
+| Field             | Type    | Rules                             |
+| ----------------- | ------- | --------------------------------- |
+| article_id        | UUID    | Required                          |
+| profile_id        | UUID    | Required                          |
+| contribution_role | enum    | `writer`, `editor`, or `creative` |
+| display_order     | integer | Non-negative                      |
 
 Credits do not grant edit access. The owner may also have a writer credit.
 
@@ -128,3 +135,5 @@ Maps previous public paths to current destinations when published slugs or route
 - Test migrations from a clean database and from the previous committed schema.
 - Favor additive, backward-compatible production changes; pair destructive changes with backup, rollout, and rollback steps.
 - Legacy WordPress data migration is out of scope for the MVP.
+
+Local reset, pgTAP, lint, and type generation require a running Docker-compatible container runtime. The local project is not linked to a hosted Supabase project.

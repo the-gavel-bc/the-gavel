@@ -1,6 +1,6 @@
 # Security and permissions
 
-Status: Approved security design — controls are not implemented yet.
+Status: Foundation profile/membership database controls implemented; application and publishing controls remain planned.
 
 ## Security objective
 
@@ -19,25 +19,37 @@ The project replaces a previously compromised WordPress site. The new system min
 
 ## Authorization matrix
 
-| Action | Public | Author | Administrator |
-| --- | ---: | ---: | ---: |
-| Read published content | Yes | Yes | Yes |
-| Read own drafts/archives | No | Yes | Yes |
-| Read another author's drafts/archives | No | No | Yes |
-| Create an article | No | Yes | Yes |
-| Edit an article | No | Owner only | Any |
-| Publish an article | No | Owner only | Any |
-| Archive an article | No | Owner only | Any |
-| Restore an archived article | No | No | Yes |
-| Permanently delete an archived article | No | No | Yes |
-| Edit own public profile | No | Yes | Yes |
-| Manage memberships and roles | No | No | Yes |
-| Manage taxonomy, homepage, and site information | No | No | Yes |
-| Review audit history | No | No | Yes |
+| Action                                          | Public |     Author | Administrator |
+| ----------------------------------------------- | -----: | ---------: | ------------: |
+| Read published content                          |    Yes |        Yes |           Yes |
+| Read own drafts/archives                        |     No |        Yes |           Yes |
+| Read another author's drafts/archives           |     No |         No |           Yes |
+| Create an article                               |     No |        Yes |           Yes |
+| Edit an article                                 |     No | Owner only |           Any |
+| Publish an article                              |     No | Owner only |           Any |
+| Archive an article                              |     No | Owner only |           Any |
+| Restore an archived article                     |     No |         No |           Yes |
+| Permanently delete an archived article          |     No |         No |           Yes |
+| Edit own public profile                         |     No |        Yes |           Yes |
+| Manage memberships and roles                    |     No |         No |           Yes |
+| Manage taxonomy, homepage, and site information |     No |         No |           Yes |
+| Review audit history                            |     No |         No |           Yes |
 
 Additional credits never imply ownership. Each article has one designated owner.
 
 ## Database and API controls
+
+Implemented foundation controls:
+
+- `profiles` and `memberships` have RLS enabled and explicit grants.
+- Anonymous readers can select only public profile columns and only active profile rows; authentication links are not granted.
+- Active members can update their own editable profile fields; active administrators may update these fields across profiles. Inactive members cannot edit profiles.
+- Authenticated users can read only their own membership unless they hold an active administrator membership.
+- Active administrators can manage membership rows through narrow RLS policies backed by a fixed-search-path security-definer predicate.
+- Normal authors and inactive members cannot insert, update, delete, or read another user's membership.
+- Synthetic pgTAP fixtures cover anonymous, inactive, Author A, Author B, and administrator paths.
+
+The following requirements continue to govern later tables and operations:
 
 - Enable RLS and explicit grants on every exposed table, view, function, and Storage bucket.
 - Test permitted and forbidden operations for anonymous, author, inactive-member, and administrator identities.

@@ -13,7 +13,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:db": "supabase test db",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "db:types": "node scripts/database-types.mjs",
+    "db:types:check": "node scripts/database-types.mjs --check"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
