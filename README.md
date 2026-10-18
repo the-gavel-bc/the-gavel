@@ -22,6 +22,14 @@ Requirements:
 - Node.js 22 (see `.nvmrc`)
 - pnpm 11.25.0 through Corepack
 
+Activate Node.js 22 with your version manager before running project commands. For nvm users, run this inside the repository in each new terminal:
+
+```bash
+nvm use
+```
+
+The committed `.nvmrc` selects Node 22; it does not automatically switch your shell's Node version. The Next.js configuration disables generated agent rules so starting development preserves the repository's authored `AGENTS.md`.
+
 Install and run the application:
 
 ```bash
@@ -46,6 +54,8 @@ pnpm test:db
 pnpm supabase db lint
 pnpm db:types:check
 ```
+
+`pnpm supabase` uses the CLI version installed by the project lockfile; a separately installed global `supabase` command may use a different version. Local Supabase Studio is available at `http://127.0.0.1:54323` after startup.
 
 The reset command recreates only the local database with synthetic identities. No hosted project is linked. Copy the local URL and publishable key from `pnpm supabase status` into `.env.local`; elevated keys are not needed. Synthetic seed identities have no passwords and cannot sign in.
 
