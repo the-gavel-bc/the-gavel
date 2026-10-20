@@ -6,7 +6,7 @@ The Gavel is a security-first public publishing platform for Boston College stud
 
 Architecture and MVP requirements are approved. The application shell, local Supabase membership boundary, server-side sign-in/access flow, and protected empty dashboard are implemented. Article editing, publishing, administrator management pages, and hosted provider setup remain planned. Documents describe intended behavior unless explicitly marked implemented.
 
-The CI workflow is implemented; hosted CI execution remains pending. The dependency audit currently fails on an unpatched development-tool advisory; see [testing](docs/testing.md#ci-and-security-gates). The full foundation milestone remains open until that gate is resolved.
+The CI workflow is implemented; hosted CI verification and maintainer review remain pending. CI temporarily ignores one approved development-tool advisory while retaining an unfiltered production audit; see [testing](docs/testing.md#ci-and-security-gates). The full foundation milestone remains open pending CI results and review.
 
 ## Foundation stack
 

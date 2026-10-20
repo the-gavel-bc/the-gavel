@@ -388,7 +388,7 @@ Tasks 1–5 are committed and verified. Task 6's workflow is implemented and pas
 
 Independent review findings on identity eligibility, safe URL validation, and focus contrast were reproduced and fixed with regression tests. Both clean reset and upgrade from the previous committed schema pass. Approving Auth-user deletion remains a deferred operational constraint decision; normal member deactivation is unaffected.
 
-The full dependency audit fails on unpatched development-tool advisory GHSA-vfj7-8cjw-p6xm; the production-only audit passes. No exception is configured. Task 6 and the full foundation milestone remain open for audit remediation/risk acceptance and hosted CI execution. Real Google OAuth, Vercel previews, and hosted Supabase checks remain manual launch work. Broader screen-reader/contrast review is still required before launch.
+The maintainer approved a temporary CI-only exception for development-tool advisory GHSA-vfj7-8cjw-p6xm; see [ADR 0005](../../decisions/0005-temporary-ci-audit-exception.md). CI retains an unfiltered production audit; local full audits still expose the advisory. Remove the CI ignore when a compatible upstream fix is available. Task 6 and the full foundation milestone remain open pending hosted CI results and maintainer review. Real Google OAuth, Vercel previews, and hosted Supabase checks remain manual launch work. Broader screen-reader/contrast review is still required before launch.
 
 ## Foundation milestone acceptance
 
