@@ -1,12 +1,37 @@
 # Testing and validation
 
-Status: Approved strategy — commands will be added when tooling is installed.
+Status: Foundation tooling implemented; broader MVP coverage remains planned.
 
 ## Commands
 
-No application tooling exists yet. Do not invent or report placeholder commands as passing. When the project is scaffolded, record the exact package scripts for unit/integration tests, end-to-end tests, linting, type checking, production build, database tests, and migration verification here.
+Run commands with Node.js 22 and the pnpm version recorded in `package.json`.
 
-## Required coverage
+| Check            | Command             | Current scope                                                    |
+| ---------------- | ------------------- | ---------------------------------------------------------------- |
+| Formatting       | `pnpm format:check` | Repository source and documentation                              |
+| Lint             | `pnpm lint`         | Next.js and TypeScript source                                    |
+| Types            | `pnpm typecheck`    | Strict TypeScript compilation                                    |
+| Unit/component   | `pnpm test`         | Vitest and Testing Library                                       |
+| Browser          | `pnpm test:e2e`     | Playwright desktop and mobile projects                           |
+| Production build | `pnpm build`        | Next.js production compilation                                   |
+| Database         | `pnpm test:db`      | Local Supabase membership/profile grants and RLS (46 assertions) |
+
+Install the Playwright Chromium runtime once with `pnpm exec playwright install chromium`. Start local Supabase with `pnpm supabase start` using a Docker-compatible runtime. Run `pnpm supabase db reset`, `pnpm test:db`, `pnpm supabase db lint`, and `pnpm db:types:check`. Regenerate formatted types with `pnpm --silent db:types > src/lib/supabase/database.types.ts`. The drift check compares without overwriting the committed file.
+
+## Implemented foundation coverage
+
+- Unit/component tests cover configuration validation/startup, shell semantics, active membership checks, private profile resolution, safe OAuth redirects, and independent dashboard layout/page guards.
+- pgTAP covers grants, RLS, profile ownership, inactive-member edit denial, membership read/write/delete denials, administrator approval, scoped profile lookup, and direct-operation denials for non-Google, unconfirmed, and out-of-domain identities.
+- Playwright covers desktop/mobile homepage landmarks, keyboard focus/contrast and overflow; signed-out, inactive, unapproved Google, non-`bc.edu`, author, administrator, and forged-cookie access paths. Access tests run with JavaScript disabled.
+- Browser fixtures are isolated to the fixed local Docker project. They set synthetic Auth metadata only; passwords and hosted Google credentials are not used. `db reset` restores the original passwordless fixtures.
+
+## CI and security gates
+
+`.github/workflows/ci.yml` installs the frozen lockfile and runs the local gates, generated-type drift check, dependency audit, and Gitleaks v8.30.1 history scan. It needs no production secrets. CI execution itself is pending a push/PR; local verification does not prove the hosted workflow ran.
+
+Known failing gate as of 2026-10-18: `pnpm audit --audit-level=high` reports [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm), an unpatched `braces <=3.0.3` stack-exhaustion advisory through `eslint-config-next`'s development dependency chain. No exception has been approved or configured. Keep this finding visible and the audit gate failing until remediation or an explicitly approved scoped exception. This prevents claiming the full foundation milestone is green.
+
+## Required broader MVP coverage
 
 ### Critical journeys
 

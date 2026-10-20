@@ -13,6 +13,10 @@ Status: Approved working process.
 7. Run relevant checks and inspect the resulting user experience.
 8. Summarize changes, evidence, limitations, and remaining questions.
 
+## Foundation verification
+
+Use the commands in [testing.md](testing.md) with Node.js 22 and the pinned pnpm version. Run local Supabase before database and browser checks. The CI workflow mirrors formatting, lint, strict types, tests, database reset/pgTAP/lint/type drift, build, browser tests, and security scans. A known failing dependency gate is not an accepted exception; record unresolved findings explicitly before merge.
+
 ## Security-sensitive work
 
 Authentication, authorization, RLS, uploads, rich content, caching, redirects, secrets, and migrations require negative tests and review. UI permission checks never replace server and database enforcement.

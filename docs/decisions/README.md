@@ -7,3 +7,8 @@ Copy [template.md](template.md) to `0001-descriptive-title.md`, increasing the n
 ## Index
 
 - [0001: Use a server-first Next.js, Vercel, and Supabase architecture](0001-server-first-nextjs-vercel-supabase.md) — Accepted
+- [0002: Standardize the application foundation](0002-foundation-tooling.md) — Accepted
+
+- [0003: Enforce trusted identity alongside membership](0003-trusted-membership-identity.md) — Accepted
+
+- [0004: Wait for dependency audit remediation](0004-wait-for-dependency-audit-remediation.md) — Accepted

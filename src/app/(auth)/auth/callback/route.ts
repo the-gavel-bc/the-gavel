@@ -1,0 +1,27 @@
+import { NextResponse } from "next/server";
+import { getServerEnv } from "@/lib/env/server";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getCurrentAccess } from "@/lib/auth/access";
+import { safeDashboardPath } from "@/lib/auth/redirect";
+export async function GET(request: Request) {
+  const env = getServerEnv();
+  const url = new URL(request.url);
+  const code = url.searchParams.get("code");
+  const client = await createServerSupabaseClient();
+  let destination = "/sign-in?error=callback";
+  if (code) {
+    const { error } = await client.auth.exchangeCodeForSession(code);
+    if (!error) {
+      const access = await getCurrentAccess();
+      destination =
+        access.status === "active"
+          ? safeDashboardPath(url.searchParams.get("next"))
+          : access.status === "pending"
+            ? "/access-pending"
+            : destination;
+    }
+  }
+  const response = NextResponse.redirect(new URL(destination, env.SITE_URL));
+  response.headers.set("Cache-Control", "private, no-store");
+  return response;
+}

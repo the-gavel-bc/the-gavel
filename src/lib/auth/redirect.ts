@@ -1,0 +1,20 @@
+export function safeDashboardPath(value: string | null | undefined): string {
+  if (
+    !value ||
+    !value.startsWith("/") ||
+    value.startsWith("//") ||
+    /[\\\u0000- ]/.test(value)
+  )
+    return "/dashboard";
+  try {
+    const url = new URL(value, "https://local.invalid");
+    if (
+      url.origin !== "https://local.invalid" ||
+      !(url.pathname === "/dashboard" || url.pathname.startsWith("/dashboard/"))
+    )
+      return "/dashboard";
+    return `${url.pathname}${url.search}`;
+  } catch {
+    return "/dashboard";
+  }
+}

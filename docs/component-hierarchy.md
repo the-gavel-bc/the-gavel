@@ -1,41 +1,53 @@
 # Component hierarchy
 
-Status: Approved route and responsibility design — source paths are not implemented.
+Status: Foundation shell and access routes implemented; publication and dashboard feature routes below remain planned.
 
-## Public routes
+## Implemented foundation routes
 
-| Route | Purpose | Access |
-| --- | --- | --- |
-| `/` | Lead, featured, and section-based homepage | Public |
-| `/articles/[slug]` | Published article | Public when published |
-| `/sections/[slug]` | Section archive | Public |
-| `/categories/[slug]` | Category archive | Public |
-| `/tags/[slug]` | Tag archive | Public |
-| `/authors/[slug]` | Author biography and articles | Public |
-| `/search` | Published-content search | Public |
-| `/about` | Mission, history, and staff information | Public |
-| `/letters` | Published Letter to the Editor archive | Public |
-| `/letters/how-to-submit` | Submission instructions | Public |
-| `/sign-in` | Google sign-in | Public |
-| Not-found boundary | Search and return-home recovery | Public |
+| Route             | Behavior                                                                      |
+| ----------------- | ----------------------------------------------------------------------------- |
+| `/`               | Accessible foundation homepage; final publication composition remains planned |
+| `/sign-in`        | Server action initiating Google sign-in; hosted provider setup remains manual |
+| `/auth/callback`  | PKCE code exchange and safe access routing                                    |
+| `/access-pending` | Denied/pending membership experience and sign-out                             |
+| `/dashboard`      | Protected empty dashboard with role-aware shell and sign-out                  |
+
+The header's section links and dashboard profile/administration links identify future destinations; those feature routes are not implemented. Both dashboard layout and page independently call the server membership guard. Component source paths live under `src/components/site`, `src/components/dashboard`, and `src/components/ui`.
+
+## Full MVP public route design
+
+| Route                    | Purpose                                    | Access                |
+| ------------------------ | ------------------------------------------ | --------------------- |
+| `/`                      | Lead, featured, and section-based homepage | Public                |
+| `/articles/[slug]`       | Published article                          | Public when published |
+| `/sections/[slug]`       | Section archive                            | Public                |
+| `/categories/[slug]`     | Category archive                           | Public                |
+| `/tags/[slug]`           | Tag archive                                | Public                |
+| `/authors/[slug]`        | Author biography and articles              | Public                |
+| `/search`                | Published-content search                   | Public                |
+| `/about`                 | Mission, history, and staff information    | Public                |
+| `/letters`               | Published Letter to the Editor archive     | Public                |
+| `/letters/how-to-submit` | Submission instructions                    | Public                |
+| `/sign-in`               | Google sign-in                             | Public                |
+| Not-found boundary       | Search and return-home recovery            | Public                |
 
 Newsletter signup is deferred.
 
-## Dashboard routes
+## Full MVP dashboard route design
 
-| Route | Purpose | Access |
-| --- | --- | --- |
-| `/dashboard` | Summary and My Articles | Active members |
-| `/dashboard/articles/new` | Create article | Author/admin |
-| `/dashboard/articles/[id]` | Edit owned or administrator-accessible article | Owner/admin |
-| `/dashboard/profile` | Edit own public profile | Author/admin |
-| `/dashboard/admin/articles` | Manage all content and archives | Admin |
-| `/dashboard/admin/members` | Approve/deactivate members and roles | Admin |
-| `/dashboard/admin/contributors` | Manage credited profiles | Admin |
-| `/dashboard/admin/taxonomy` | Manage sections, categories, and tags | Admin |
-| `/dashboard/admin/homepage` | Curate lead, Featured News, and Read This | Admin |
-| `/dashboard/admin/site` | Edit allowlisted site information | Admin |
-| `/dashboard/admin/audit` | Review audit activity | Admin |
+| Route                           | Purpose                                        | Access         |
+| ------------------------------- | ---------------------------------------------- | -------------- |
+| `/dashboard`                    | Summary and My Articles                        | Active members |
+| `/dashboard/articles/new`       | Create article                                 | Author/admin   |
+| `/dashboard/articles/[id]`      | Edit owned or administrator-accessible article | Owner/admin    |
+| `/dashboard/profile`            | Edit own public profile                        | Author/admin   |
+| `/dashboard/admin/articles`     | Manage all content and archives                | Admin          |
+| `/dashboard/admin/members`      | Approve/deactivate members and roles           | Admin          |
+| `/dashboard/admin/contributors` | Manage credited profiles                       | Admin          |
+| `/dashboard/admin/taxonomy`     | Manage sections, categories, and tags          | Admin          |
+| `/dashboard/admin/homepage`     | Curate lead, Featured News, and Read This      | Admin          |
+| `/dashboard/admin/site`         | Edit allowlisted site information              | Admin          |
+| `/dashboard/admin/audit`        | Review audit activity                          | Admin          |
 
 ## Component tree
 

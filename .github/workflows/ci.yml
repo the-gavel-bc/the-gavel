@@ -1,0 +1,65 @@
+name: Foundation quality gates
+
+on:
+  pull_request:
+  push:
+    branches: [main, feat/project-foundation]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: foundation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: true
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_local_build_example
+      SITE_URL: http://127.0.0.1:3100
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+      - name: Activate pinned pnpm
+        run: corepack enable
+      - name: Locate pnpm store
+        id: pnpm-store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - name: Scan repository history for secrets
+        run: docker run --rm -v "$PWD:/repo:ro" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --redact --no-banner
+      - name: Start isolated local Supabase
+        run: pnpm supabase start > "$RUNNER_TEMP/supabase-start.log" 2>&1
+      - run: pnpm supabase db reset
+      - run: pnpm test:db
+      - run: pnpm supabase db lint
+      - run: pnpm db:types:check
+      - run: pnpm build
+      - name: Install browser runtime
+        run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+      - name: Scan dependencies
+        run: pnpm audit --audit-level=high
+      - name: Stop local services
+        if: always()
+        run: pnpm supabase stop --no-backup
