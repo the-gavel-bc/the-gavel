@@ -27,9 +27,11 @@ Install the Playwright Chromium runtime once with `pnpm exec playwright install 
 
 ## CI and security gates
 
-`.github/workflows/ci.yml` installs the frozen lockfile and runs the local gates, generated-type drift check, dependency audit, and Gitleaks v8.30.1 history scan. It needs no production secrets. CI execution itself is pending a push/PR; local verification does not prove the hosted workflow ran.
+`.github/workflows/ci.yml` installs the frozen lockfile and runs the local gates, generated-type drift check, dependency audit, and Gitleaks v8.30.1 history scan. It needs no production secrets. Hosted CI is triggered by the foundation pull request; review its results separately from local verification.
 
-Known failing gate as of 2026-10-18: `pnpm audit --audit-level=high` reports [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm), an unpatched `braces <=3.0.3` stack-exhaustion advisory through `eslint-config-next`'s development dependency chain. No exception has been approved or configured. Keep this finding visible and the audit gate failing until remediation or an explicitly approved scoped exception. This prevents claiming the full foundation milestone is green.
+Temporary CI exception approved on 2026-10-19: [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm), an unpatched `braces <=3.0.3` advisory in the Next.js ESLint development dependency chain. CI first runs an unfiltered `pnpm audit --prod --audit-level=high`, then configures this advisory ignore on the runner and runs the full high/critical audit. Other high/critical findings remain blocking. No ignore is committed to workspace configuration, so local `pnpm audit --audit-level=high` still reports this advisory.
+
+Remove the CI ignore when a compatible upstream fix is available: update the affected chain/lockfile, remove the ignore command and temporary comments, and verify the unfiltered full audit and lint. This is an accepted temporary risk, not a vulnerability fix. See [ADR 0005](decisions/0005-temporary-ci-audit-exception.md) for scope and removal tracking.
 
 ## Required broader MVP coverage
 

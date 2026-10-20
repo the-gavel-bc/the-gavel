@@ -11,4 +11,6 @@ Copy [template.md](template.md) to `0001-descriptive-title.md`, increasing the n
 
 - [0003: Enforce trusted identity alongside membership](0003-trusted-membership-identity.md) — Accepted
 
-- [0004: Wait for dependency audit remediation](0004-wait-for-dependency-audit-remediation.md) — Accepted
+- [0004: Wait for dependency audit remediation](0004-wait-for-dependency-audit-remediation.md) — Superseded by 0005
+
+- [0005: Temporarily ignore the development braces advisory in CI](0005-temporary-ci-audit-exception.md) — Accepted

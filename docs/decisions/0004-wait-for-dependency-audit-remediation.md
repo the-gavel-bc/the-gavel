@@ -1,9 +1,9 @@
 # 0004: Wait for dependency audit remediation
 
-- Status: Accepted — maintainer chose to wait; no exception is active
+- Status: Superseded by [0005](0005-temporary-ci-audit-exception.md)
 - Date: 2026-10-19
 - Related requirements: [Security gates](../testing.md#ci-and-security-gates), [foundation plan](../superpowers/plans/2026-10-17-project-foundation.md)
-- Supersedes / superseded by: None
+- Supersedes / superseded by: Superseded by [0005](0005-temporary-ci-audit-exception.md)
 
 ## Context
 
