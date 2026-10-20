@@ -382,13 +382,13 @@ git add .github/workflows/ci.yml README.md docs
 git commit -m "ci: enforce foundation quality gates"
 ```
 
-## Current execution status (2026-10-18)
+## Current execution status (2026-10-20)
 
 Tasks 1–5 are committed and verified. Task 6's workflow is implemented and passes Actionlint. Local frozen install, formatting, lint, types, 44 unit/component assertions, 46 pgTAP assertions, database lint/type drift, production build, and 16 desktop/mobile browser tests pass. Startup checks reject missing/malformed configuration without values in errors. A read-only full Git-history scan finds no secrets, and elevated local credentials are absent from client build artifacts.
 
 Independent review findings on identity eligibility, safe URL validation, and focus contrast were reproduced and fixed with regression tests. Both clean reset and upgrade from the previous committed schema pass. Approving Auth-user deletion remains a deferred operational constraint decision; normal member deactivation is unaffected.
 
-The maintainer approved a temporary CI-only exception for development-tool advisory GHSA-vfj7-8cjw-p6xm; see [ADR 0005](../../decisions/0005-temporary-ci-audit-exception.md). CI retains an unfiltered production audit; local full audits still expose the advisory. Remove the CI ignore when a compatible upstream fix is available. Task 6 and the full foundation milestone remain open pending hosted CI results and maintainer review. Real Google OAuth, Vercel previews, and hosted Supabase checks remain manual launch work. Broader screen-reader/contrast review is still required before launch.
+The maintainer approved a temporary CI-only exception for development-tool advisory GHSA-vfj7-8cjw-p6xm; see [ADR 0005](../../decisions/0005-temporary-ci-audit-exception.md). CI retains an unfiltered production audit; local full audits still expose the advisory. Remove the CI ignore when a compatible upstream fix is available. Hosted CI passed for merged commit `66f2f82`; see the [Phase 1 review evidence](../../reviews/phase-1-foundation.md#review-evidence). Task 6 and the full foundation milestone remain open pending recorded human maintainer review. Session issuance/refresh/logout coverage is explicitly tracked in [testing](../../testing.md#session-coverage-still-needed-before-hosted-launch) as pre-launch work. Real Google OAuth, Vercel previews, and hosted Supabase checks remain manual launch work. Broader screen-reader/contrast review is still required before launch.
 
 ## Foundation milestone acceptance
 

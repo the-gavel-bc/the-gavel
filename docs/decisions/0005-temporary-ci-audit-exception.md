@@ -38,4 +38,6 @@ Verified locally using Node.js 22.20.0 and pnpm 11.25.0:
 - Subsequent full high/critical audit: exit 0, reported one high finding with one ignored.
 - Restored the original workspace configuration; no persistent ignore or lockfile change.
 - Repository formatting and `git diff --check`: passed. Prettier parsed the workflow YAML successfully.
-- Dedicated workflow lint was unavailable because `actionlint` is not installed in the current environment; hosted CI validation remains pending.
+- Dedicated workflow lint was unavailable because `actionlint` is not installed in the current environment; hosted CI validation was pending at the time of this local check.
+
+Subsequent verification: [hosted main-branch run 39349263352](https://github.com/dylandrozario/the-gavel/actions/runs/39349263352) passed for merged commit `66f2f82` on 2026-10-20, including both audit steps. Human review remains a separate requirement.
