@@ -3,8 +3,10 @@ import { beforeEach, expect, it, vi } from "vitest";
 import DashboardLayout from "./layout";
 import DashboardPage from "./page";
 const access = vi.hoisted(() => vi.fn());
-vi.mock("@/lib/auth/access", () => ({ requireActiveMembership: access }));
-vi.mock("@/lib/auth/actions", () => ({ signOut: vi.fn() }));
+vi.mock("@/lib/auth/access/access", () => ({
+  requireActiveMembership: access,
+}));
+vi.mock("@/lib/auth/actions/actions", () => ({ signOut: vi.fn() }));
 beforeEach(() => {
   access.mockReset();
 });

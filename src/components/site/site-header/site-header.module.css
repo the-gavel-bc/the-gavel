@@ -1,0 +1,47 @@
+.header {
+  border-bottom: 1px solid #d7dde4;
+}
+.inner {
+  composes: container headerRow from "../../../styles/shell/shell.module.css";
+}
+.identity {
+  composes: identity from "../../../styles/shell/shell.module.css";
+}
+.signIn {
+  composes: button from "../../ui/button/button.module.css";
+}
+.menu {
+  position: relative;
+}
+.menu summary {
+  color: var(--color-brand-dark);
+  cursor: pointer;
+  font-weight: 700;
+  min-height: 2.75rem;
+  padding: var(--space-3);
+}
+.menu nav {
+  background: var(--color-paper);
+  border: 1px solid #d7dde4;
+  min-width: 15rem;
+  padding: var(--space-4);
+  position: absolute;
+  right: 0;
+  z-index: 10;
+}
+.menu ul {
+  display: grid;
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+@media (max-width: 42rem) {
+  .menu {
+    order: 3;
+    width: 100%;
+  }
+  .menu nav {
+    position: static;
+  }
+}

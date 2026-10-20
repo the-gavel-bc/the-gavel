@@ -16,7 +16,7 @@ Run commands with Node.js 22 and the pnpm version recorded in `package.json`.
 | Production build | `pnpm build`        | Next.js production compilation                                   |
 | Database         | `pnpm test:db`      | Local Supabase membership/profile grants and RLS (46 assertions) |
 
-Install the Playwright Chromium runtime once with `pnpm exec playwright install chromium`. Start local Supabase with `pnpm supabase start` using a Docker-compatible runtime. Run `pnpm supabase db reset`, `pnpm test:db`, `pnpm supabase db lint`, and `pnpm db:types:check`. Regenerate formatted types with `pnpm --silent db:types > src/lib/supabase/database.types.ts`. The drift check compares without overwriting the committed file.
+Install the Playwright Chromium runtime once with `pnpm exec playwright install chromium`. Start local Supabase with `pnpm supabase start` using a Docker-compatible runtime. Run `pnpm supabase db reset`, `pnpm test:db`, `pnpm supabase db lint`, and `pnpm db:types:check`. Regenerate formatted types with `pnpm --silent db:types > src/lib/supabase/database/database.types.ts`. The drift check compares without overwriting the committed file.
 
 ## Implemented foundation coverage
 

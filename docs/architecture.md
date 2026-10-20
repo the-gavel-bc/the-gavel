@@ -94,13 +94,15 @@ Browser
 The implemented foundation uses:
 
 - `src/app/`: root public page, auth routes, and protected empty dashboard.
-- `src/components/`: semantic public/dashboard shells and button/link primitives.
-- `src/lib/env/`: typed configuration access, invoked at startup by `src/instrumentation.ts`.
+- `src/components/`: semantic public/dashboard shells and button/link primitives; each component has a named folder with its owned styles and tests.
+- `src/lib/env/`: typed configuration access, invoked at startup by `src/lib/startup/startup.ts`.
 - `src/lib/auth/`: server access checks, OAuth/sign-out actions, and safe redirect validation.
 - `src/lib/supabase/`: typed clients, cookie refresh, and generated database types.
 - `src/proxy.ts`: verified session refresh only; membership authorization stays in server pages and RLS.
 - `supabase/`: local configuration, migrations, synthetic fixtures, and pgTAP assertions.
-- `e2e/`: local-only browser fixtures and desktop/mobile tests.
+- `src/styles/shell/`: shared CSS Module layout primitives; component-owned styles stay with their component.
+- `e2e/`: named browser-test suites with shared local-only helpers under `support/`.
+- `scripts/`: named script folders with owned support files.
 - `.github/workflows/ci.yml`: automated foundation gates; successful hosted execution is recorded in the [Phase 1 review](reviews/phase-1-foundation.md).
 
 The foundation uses ordinary dynamic rendering for authenticated routes with private/no-store responses. Public article caching, content services, uploads, and publishing remain unimplemented.

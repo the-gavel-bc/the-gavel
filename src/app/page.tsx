@@ -1,4 +1,4 @@
-import { PublicShell } from "@/components/site/public-shell";
+import { PublicShell } from "@/components/site/public-shell/public-shell";
 import styles from "./page.module.css";
 
 export default function Home() {

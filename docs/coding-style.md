@@ -20,6 +20,26 @@ Status: Foundation conventions implemented; formatter and linter configuration a
 - Tests describe observable behavior and security boundaries.
 - Organize by focused feature/domain boundaries; avoid generic dumping-ground utility modules.
 
+## File colocation
+
+Use a named folder for each component, module, script, or browser-test suite, keeping its implementation and existing companion files together. For example:
+
+```text
+src/components/site/public-shell/
+  public-shell.tsx
+  public-shell.module.css
+  public-shell.test.tsx
+src/lib/auth/access/
+  access.ts
+  access.test.ts
+```
+
+Use explicit implementation imports such as `@/components/site/public-shell/public-shell`; avoid adding barrel files solely to shorten paths. Add styles, tests, types, schemas, or fixtures beside their owner when needed; do not create empty companions. Related suites can use `support/<helper>/<helper>.ts` for genuinely shared helpers.
+
+Component-owned CSS lives beside the component as a CSS Module. Global tokens, resets, and focus rules remain in `src/app/globals.css`; reusable shell styles live in `src/styles/shell/shell.module.css`. Button and link-button share the button module's styles rather than duplicating them.
+
+Framework and tool conventions take precedence: Next.js route directories already colocate `page.tsx`/`route.ts` and their companions, and root `layout.tsx`, `instrumentation.ts`, `proxy.ts`, metadata, configuration, and test-runner setup stay in their required locations. Startup implementation/tests live together under `src/lib/startup/`, with a thin instrumentation entry point. Supabase migration filenames, SQL tests, seed/configuration, and generated outputs retain tool-compatible conventions; generated database types have their own `src/lib/supabase/database/` folder.
+
 ## Components and data
 
 - Prefer server components for public reads and non-interactive composition.

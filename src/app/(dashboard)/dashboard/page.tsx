@@ -1,4 +1,4 @@
-import { requireActiveMembership } from "@/lib/auth/access";
+import { requireActiveMembership } from "@/lib/auth/access/access";
 export default async function DashboardPage() {
   await requireActiveMembership();
   return (
