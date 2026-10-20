@@ -10,7 +10,7 @@
 
 **Spec:** [Approved MVP design](../specs/2026-10-16-the-gavel-mvp-design.md), [product requirements](../../product-requirements.md), [data model](../../data-model.md), [API contracts](../../api-contracts.md), and [security matrix](../../security-and-permissions.md#authorization-matrix).
 
-**Status:** Proposed task breakdown, not approval to implement a new schema. No repository document previously assigned a scope to Phase 2. This recommends the content-data foundation; including a working editor is an alternative requiring a separate design and expanded plan. Task 1 must settle schema-affecting decisions and produce an approved, executable design before dependent implementation begins. No product decision or unresolved client answer is selected here.
+**Status:** The owner instructed execution of these tasks on 2026-10-20. Task 0 is in progress; this authorizes the content-foundation work sequence, not unresolved schema decisions. Task 1 must settle schema-affecting decisions and produce an approved, executable design before dependent implementation begins. The editor remains a later phase. No unresolved product decision or client answer is selected here.
 
 ## Proposed scope and outcome
 
@@ -75,11 +75,13 @@ Tasks proceed in order: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7. If a task i
 
 **Deliverable:** A known main commit containing both documentation cleanup and file colocation. This is integration work, not a new refactor.
 
-- [ ] Verify current branch/PR state; open a focused follow-up PR for the already-reviewed colocation commit if it is still missing from main. Do not push directly to main or silently merge it.
+- [x] Verify current branch/PR state; open a focused follow-up PR for the already-reviewed colocation commit if it is still missing from main. [PR #6](https://github.com/dylandrozario/the-gavel/pull/6) targets main and contains only `f220aee`. Do not push directly to main or silently merge it.
 - [ ] After integration, confirm the new paths and capture that commit's hosted CI result.
 - [ ] Update this plan's baseline evidence without claiming the outstanding human review is complete.
 
 **Acceptance/review:** The main tree contains the requested organization; its CI passes. Owner reviews the integration before schema work. No new product behavior.
+
+Task 0 execution record (2026-10-20): GitHub reports PR #6 as mergeable. Its [current CI run](https://github.com/dylandrozario/the-gavel/actions/runs/39515089794) passed; an [earlier run on the same source commit](https://github.com/dylandrozario/the-gavel/actions/runs/39448247160) passed. These do not establish success for the eventual merged main commit. Task 0 remains incomplete pending owner review/merge, main-tree verification, and the main CI result. No schema work has started.
 
 ### Task 1: Resolve the content schema contract
 
