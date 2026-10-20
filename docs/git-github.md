@@ -1,6 +1,6 @@
 # Git and GitHub workflow
 
-Status: Foundation CI workflow implemented; hosted execution and GitHub branch rules are not yet configured.
+Status: Foundation CI workflow implemented and hosted execution verified; human review evidence and branch-rule configuration remain separate requirements. See the [Phase 1 review](reviews/phase-1-foundation.md).
 
 ## Repository and branches
 
@@ -25,11 +25,11 @@ Status: Foundation CI workflow implemented; hosted execution and GitHub branch r
 - Open drafts for work that needs early review.
 - Describe the problem, resulting behavior, design choices, validation, security/migration implications, and linked requirement.
 - Include screenshots for meaningful public or dashboard visual changes.
-- Require review from a maintainer other than the author for authentication, authorization, RLS, migrations, uploads, rich content, or deployment changes.
+- Require review from a maintainer other than the author for authentication, authorization, RLS, migrations, uploads, rich content, or deployment changes. Agent review and a green CI run supplement this human review. If no second maintainer is available, record the requirement as outstanding rather than claiming approval. See the [Phase 1 checklist](reviews/phase-1-foundation.md#maintainer-review-steps) for review scope and evidence.
 
 ## Checks and merge policy
 
-Planned required checks: formatting, lint, strict types, unit/integration tests, RLS/database tests, end-to-end tests for affected critical flows, secret/dependency scanning, and production build.
+Implemented CI checks: formatting, lint, strict types, unit/component tests, RLS/database tests, end-to-end tests for affected critical flows, secret/dependency scanning, and production build. Configuring these as required GitHub branch checks is separate from implementing the workflow.
 
 Use squash merge for task branches unless preserving a deliberate multi-commit history provides value. Protect `main`, prevent direct pushes, require current checks and at least one approval, and restrict production releases to designated maintainers.
 

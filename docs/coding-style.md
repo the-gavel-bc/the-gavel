@@ -1,6 +1,6 @@
 # Coding style
 
-Status: Approved baseline — formatter, linter, and exact dependency versions await scaffolding.
+Status: Foundation conventions implemented; formatter and linter configuration are committed, with dependency versions recorded in package.json and the lockfile.
 
 ## Language and type safety
 
@@ -45,7 +45,7 @@ Status: Approved baseline — formatter, linter, and exact dependency versions a
 
 ## Formatting and imports
 
-Use the repository's configured formatter and linter once selected. Prefer automatic formatting as the source of truth. Group imports consistently, use a single documented path alias, avoid circular dependencies, and keep public exports deliberate.
+Use the repository's configured Prettier formatter and ESLint checks. Prefer automatic formatting as the source of truth. Group imports consistently, use a single documented path alias, avoid circular dependencies, and keep public exports deliberate.
 
 ## Dependencies
 

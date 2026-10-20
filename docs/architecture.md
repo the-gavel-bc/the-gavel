@@ -101,7 +101,7 @@ The implemented foundation uses:
 - `src/proxy.ts`: verified session refresh only; membership authorization stays in server pages and RLS.
 - `supabase/`: local configuration, migrations, synthetic fixtures, and pgTAP assertions.
 - `e2e/`: local-only browser fixtures and desktop/mobile tests.
-- `.github/workflows/ci.yml`: automated foundation gates; hosted execution remains to be confirmed.
+- `.github/workflows/ci.yml`: automated foundation gates; successful hosted execution is recorded in the [Phase 1 review](reviews/phase-1-foundation.md).
 
 The foundation uses ordinary dynamic rendering for authenticated routes with private/no-store responses. Public article caching, content services, uploads, and publishing remain unimplemented.
 

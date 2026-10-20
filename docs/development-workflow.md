@@ -15,11 +15,11 @@ Status: Approved working process.
 
 ## Foundation verification
 
-Use the commands in [testing.md](testing.md) with Node.js 22 and the pinned pnpm version. Run local Supabase before database and browser checks. The CI workflow mirrors formatting, lint, strict types, tests, database reset/pgTAP/lint/type drift, build, browser tests, and security scans. A known failing dependency gate is not an accepted exception; record unresolved findings explicitly before merge.
+Use the commands in [testing.md](testing.md) with Node.js 22 and the pinned pnpm version. Run local Supabase before database and browser checks. The CI workflow mirrors formatting, lint, strict types, tests, database reset/pgTAP/lint/type drift, build, browser tests, and security scans. A known finding is not automatically an accepted exception. Any exception requires explicit maintainer approval and a documented scope and removal condition. The current CI-only development dependency exception is approved in [ADR 0005](decisions/0005-temporary-ci-audit-exception.md); all other high/critical findings remain blocking.
 
 ## Security-sensitive work
 
-Authentication, authorization, RLS, uploads, rich content, caching, redirects, secrets, and migrations require negative tests and review. UI permission checks never replace server and database enforcement.
+Authentication, authorization, RLS, uploads, rich content, caching, redirects, secrets, and migrations require negative tests and review. UI permission checks never replace server and database enforcement. Follow the [Phase 1 maintainer checklist](reviews/phase-1-foundation.md#maintainer-review-steps) to record the foundation review; automated or agent review does not substitute for the second-maintainer requirement in [Git and GitHub](git-github.md#pull-requests).
 
 ## Definition of done
 

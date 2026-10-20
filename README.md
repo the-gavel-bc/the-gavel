@@ -6,7 +6,7 @@ The Gavel is a security-first public publishing platform for Boston College stud
 
 Architecture and MVP requirements are approved. The application shell, local Supabase membership boundary, server-side sign-in/access flow, and protected empty dashboard are implemented. Article editing, publishing, administrator management pages, and hosted provider setup remain planned. Documents describe intended behavior unless explicitly marked implemented.
 
-The CI workflow is implemented; hosted CI verification and maintainer review remain pending. CI temporarily ignores one approved development-tool advisory while retaining an unfiltered production audit; see [testing](docs/testing.md#ci-and-security-gates). The full foundation milestone remains open pending CI results and review.
+The CI workflow is implemented and hosted execution is verified; human maintainer review remains outstanding. CI temporarily ignores one approved development-tool advisory while retaining an unfiltered production audit; see [testing](docs/testing.md#ci-and-security-gates). See the [Phase 1 review and checklist](docs/reviews/phase-1-foundation.md) for evidence and remaining review work.
 
 ## Foundation stack
 
@@ -86,6 +86,7 @@ Playwright is configured for desktop and mobile browser checks. Install its Chro
 | [Design system](docs/design-system.md)                                             | Brand direction, accessibility, and interaction rules                      |
 | [Security and permissions](docs/security-and-permissions.md)                       | Authentication, roles, RLS, uploads, and incident preparation              |
 | [Testing](docs/testing.md)                                                         | Required verification and future commands                                  |
+| [Phase 1 review](docs/reviews/phase-1-foundation.md)                               | Review evidence, remaining session coverage, and maintainer checklist      |
 | [Development workflow](docs/development-workflow.md)                               | Task process and definition of done                                        |
 | [Coding style](docs/coding-style.md)                                               | Planned TypeScript and project conventions                                 |
 | [Git and GitHub](docs/git-github.md)                                               | Branch, review, CI, and release policy                                     |
