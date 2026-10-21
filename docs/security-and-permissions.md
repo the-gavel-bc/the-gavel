@@ -1,6 +1,6 @@
 # Security and permissions
 
-Status: Foundation access/session controls and SELECT-only taxonomy implemented; article access, publishing, and hosted provider controls remain planned.
+Status: Foundation access/session controls, SELECT-only taxonomy, and private article reads implemented; publishing and hosted provider controls remain planned.
 
 ## Security objective
 
@@ -71,7 +71,15 @@ The following requirements continue to govern later tables and operations:
 
 Anonymous and ordinary authenticated readers see active sections and active categories only when their parent section is active, plus all tags. Separate anonymous policies avoid invoking private administrator helpers. Authenticated policies reuse the existing trusted-identity/active-administrator predicate to allow inactive taxonomy reads only for eligible active administrators. Inactive memberships and non-Google, unconfirmed, or out-of-domain identities receive no expanded visibility. These policies do not change foundation profile or membership permissions.
 
-The authorization matrix above describes the final MVP. Its taxonomy-management permissions and public article reads remain future workflows. Task 2 introduces no article storage, management UI, public route, or mutation RPC. Migration constraints and the [accepted contract](superpowers/specs/2026-10-21-content-foundation-design.md) define the stored taxonomy boundary; [testing coverage](testing.md#implemented-taxonomy-coverage) proves direct reads and write denials.
+The authorization matrix above describes the final MVP. Its taxonomy-management permissions and public article reads remain future workflows. Task 2 introduces no management UI, public route, or mutation RPC; article storage is described below. Migration constraints and the [accepted contract](superpowers/specs/2026-10-21-content-foundation-design.md) define the stored taxonomy boundary; [testing coverage](testing.md#implemented-taxonomy-coverage) proves direct reads and write denials.
+
+### Implemented private article controls
+
+`articles` has RLS and a SELECT grant only for authenticated users. Its single read policy calls `private.can_read_article(uuid)`: trusted Google identity, confirmed `bc.edu` email, and current active membership are required, followed by ownership through the profile Auth link or the existing active-administrator predicate. Supplying another article ID cannot change the caller's identity. The predicate is stable and security-definer with an empty search path, fully qualified references, and execution restricted to authenticated users; its private schema is not a public RPC surface.
+
+Anonymous readers have no article grant, including published fixtures. Inactive or ineligible identities receive no rows. Authors cannot read another owner's draft/archive/published fixture. Read authority does not depend on credits. Private `profiles.auth_user_id` stays inaccessible to clients. All article inserts, updates (including owner/lifecycle changes), and deletes are denied to every application role, including administrators.
+
+This is the accepted intermediate Phase 2 boundary. Final public article access, editor mutations, publishing/archiving/reassignment, validation, and atomic history capture require later interfaces. Stored JSON shape and byte bounds do not establish safe rich content. No application screen or public URL changes in this task; existing session and profile/membership policies are preserved.
 
 ## Content and input safety
 

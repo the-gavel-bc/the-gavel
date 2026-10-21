@@ -34,6 +34,73 @@ export type Database = {
   };
   public: {
     Tables: {
+      articles: {
+        Row: {
+          archived_at: string | null;
+          content: Json | null;
+          created_at: string;
+          excerpt: string | null;
+          id: string;
+          meta_description: string | null;
+          owner_profile_id: string;
+          published_at: string | null;
+          section_id: string;
+          seo_keyphrase: string | null;
+          slug: string;
+          status: Database["public"]["Enums"]["article_status"];
+          title: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          archived_at?: string | null;
+          content?: Json | null;
+          created_at?: string;
+          excerpt?: string | null;
+          id?: string;
+          meta_description?: string | null;
+          owner_profile_id: string;
+          published_at?: string | null;
+          section_id: string;
+          seo_keyphrase?: string | null;
+          slug: string;
+          status?: Database["public"]["Enums"]["article_status"];
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          archived_at?: string | null;
+          content?: Json | null;
+          created_at?: string;
+          excerpt?: string | null;
+          id?: string;
+          meta_description?: string | null;
+          owner_profile_id?: string;
+          published_at?: string | null;
+          section_id?: string;
+          seo_keyphrase?: string | null;
+          slug?: string;
+          status?: Database["public"]["Enums"]["article_status"];
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "articles_owner_profile_id_fkey";
+            columns: ["owner_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "articles_section_id_fkey";
+            columns: ["section_id"];
+            isOneToOne: false;
+            referencedRelation: "sections";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       categories: {
         Row: {
           active: boolean;
@@ -209,6 +276,7 @@ export type Database = {
     };
     Enums: {
       app_role: "author" | "administrator";
+      article_status: "draft" | "published" | "archived";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -340,6 +408,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["author", "administrator"],
+      article_status: ["draft", "published", "archived"],
     },
   },
 } as const;

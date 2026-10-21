@@ -10,7 +10,7 @@
 
 **Spec:** [Accepted content contract](../specs/2026-10-21-content-foundation-design.md), [Approved MVP design](../specs/2026-10-16-the-gavel-mvp-design.md), [product requirements](../../product-requirements.md), [data model](../../data-model.md), [API contracts](../../api-contracts.md), and [security matrix](../../security-and-permissions.md#authorization-matrix).
 
-**Status:** Tasks 0–2 complete as of 2026-10-21. The owner approved the content contract after reviewing the summary and excerpt/slug explanation. Task 2 taxonomy is implemented and verified; Tasks 3–7 remain implementation steps, not implemented behavior. The owner approved execution of this plan. Pause at the Task 2 review checkpoint before article storage; unresolved later-phase/client decisions remain unresolved.
+**Status:** Tasks 0–3 complete as of 2026-10-21. The owner approved the content contract after reviewing the summary and excerpt/slug explanation. Taxonomy and private article storage are implemented and verified; Tasks 4–7 remain implementation steps, not implemented behavior. The owner approved execution of this plan. Pause at the Task 3 review checkpoint before category associations; unresolved later-phase/client decisions remain unresolved.
 
 ## Scope and outcome
 
@@ -116,14 +116,16 @@ Task 2 evidence: 163 taxonomy assertions and all 209 database assertions passed;
 
 **Interfaces:** Consumes taxonomy and foundation profile/membership tables plus `private.has_eligible_identity() -> boolean` and administrator predicate. Produces `public.article_status` (`draft`, `published`, `archived`), `public.articles`, and `private.can_read_article(check_article_id uuid) -> boolean`.
 
-- [ ] Write tests for title 1/240 accepted and empty/241/whitespace rejected; excerpt NULL/600 accepted and empty/601 rejected; slug 180 accepted and 181/noncanonical/duplicate rejected; SEO keyphrase NULL/160 accepted and 161 rejected; meta description NULL/320 accepted and 321 rejected. Reject JSON arrays/scalars/JSON null while allowing SQL NULL and bounded objects. Build payloads using `octet_length(value::text)` to test 1,048,576 serialized bytes and rejection above that bound, including multibyte text.
-- [ ] Test owner/section references and exact timestamp/status combinations: draft has both timestamps NULL, published has publication only, archived has publication and archive. Missing required owner/section fails. Media fields remain absent.
-- [ ] Test eligible active Author A reads A's rows but not B's; B cannot read A's; administrator reads all. Anonymous, inactive, non-Google, unconfirmed, and out-of-domain identities cannot read articles, including synthetic published rows. All normal-role writes fail with `42501`. Owners with no credits retain read access. No client-supplied ID changes the authenticated identity.
-- [ ] Run focused SQL tests and observe intended missing-schema failure.
-- [ ] Implement the table and SELECT-only grants/RLS. Implement the stable fixed-search-path security-definer predicate: require trusted identity and active membership, then require either the article owner's profile `auth_user_id = auth.uid()` or the existing active administrator predicate. Return false for missing/unreadable IDs. Resolve identity privately without granting `profiles.auth_user_id` to clients; do not recurse through article RLS. Revoke PUBLIC/anon execution and grant authenticated execution. Give the article policy only this predicate; create no mutation policy/RPC.
-- [ ] Apply incrementally, run focused/shared checks, verify the upgrade snapshot is unchanged, update docs, and commit `feat: add private article storage`.
+- [x] Write tests for title 1/240 accepted and empty/241/whitespace rejected; excerpt NULL/600 accepted and empty/601 rejected; slug 180 accepted and 181/noncanonical/duplicate rejected; SEO keyphrase NULL/160 accepted and 161 rejected; meta description NULL/320 accepted and 321 rejected. Reject JSON arrays/scalars/JSON null while allowing SQL NULL and bounded objects. Build payloads using `octet_length(value::text)` to test 1,048,576 serialized bytes and rejection above that bound, including multibyte text.
+- [x] Test owner/section references and exact timestamp/status combinations: draft has both timestamps NULL, published has publication only, archived has publication and archive. Missing required owner/section fails. Media fields remain absent.
+- [x] Test eligible active Author A reads A's rows but not B's; B cannot read A's; administrator reads all. Anonymous, inactive, non-Google, unconfirmed, and out-of-domain identities cannot read articles, including synthetic published rows. All normal-role writes fail with `42501`. Owners with no credits retain read access. No client-supplied ID changes the authenticated identity.
+- [x] Run focused SQL tests and observe intended missing-schema failure.
+- [x] Implement the table and SELECT-only grants/RLS. Implement the stable fixed-search-path security-definer predicate: require trusted identity and active membership, then require either the article owner's profile `auth_user_id = auth.uid()` or the existing active administrator predicate. Return false for missing/unreadable IDs. Resolve identity privately without granting `profiles.auth_user_id` to clients; do not recurse through article RLS. Revoke PUBLIC/anon execution and grant authenticated execution. Give the article policy only this predicate; create no mutation policy/RPC.
+- [x] Apply incrementally, run focused/shared checks, verify the upgrade snapshot is unchanged, update docs, and commit `feat: add private article storage`.
 
 **Review outcome:** The accepted draft/read boundary is enforced by database constraints and RLS. No publication, reassignment, or editor is implemented.
+
+Task 3 evidence: 168 article assertions and all 377 database assertions passed; database lint, generated-type drift, strict types, lint, formatting, and 44 unit/component tests passed. The incremental migration preserved the original foundation snapshot. All article application writes remain closed, and no public article projection, editor, media, lifecycle operation, or association/history storage was added. Independent human review remains outstanding.
 
 ### Task 4: Enforce article/category consistency
 
