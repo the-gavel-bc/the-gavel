@@ -1,6 +1,6 @@
 # Data model
 
-Status: Foundation identity, taxonomy, and private article storage implemented; association and history storage remain planned.
+Status: Foundation identity, taxonomy, private articles, and article/category integrity implemented; tags/credits associations and history storage remain planned.
 
 ## Storage
 
@@ -66,7 +66,7 @@ Sections and categories have names, canonical slugs, non-negative navigation ord
 
 Anonymous and ordinary authenticated readers see active sections and only active categories with active parents; all tags are readable. Eligible active administrators can also read inactive taxonomy. All application writes remain denied, including administrator writes. See [security controls](security-and-permissions.md#implemented-taxonomy-controls) and the [accepted contract](superpowers/specs/2026-10-21-content-foundation-design.md).
 
-No real publication taxonomy is seeded. Fixtures are synthetic and transaction-local. Future tag-entry normalization, including Unicode and punctuation rules, remains unresolved until its create interface is designed. Article associations and taxonomy management screens are not implemented.
+No real publication taxonomy is seeded. Fixtures are synthetic and transaction-local. Future tag-entry normalization, including Unicode and punctuation rules, remains unresolved until its create interface is designed. Article/category links are implemented below; tag/credit associations and taxonomy management screens remain planned.
 
 ## Implemented article storage
 
@@ -80,9 +80,17 @@ Draft rows require both lifecycle timestamps NULL; published rows require public
 
 Authenticated eligible active members read owned articles; eligible active administrators read all. The stable fixed-search-path `private.can_read_article(uuid)` resolves ownership through private profile Auth links and current membership without exposing those links or recursing through article RLS. Anonymous readers have no article grant, even for synthetic published rows. Every application write remains denied, including administrator writes. See [article security controls](security-and-permissions.md#implemented-private-article-controls).
 
+## Implemented article/category links
+
+`supabase/migrations/20261021020000_article_categories.sql` is authoritative for `article_categories`. Each row contains required `article_id`, `category_id`, and `section_id`, with primary key `(article_id, category_id)`. Both parent tables have unique `(id, section_id)` constraints; restrictive composite foreign keys require the link's section to match both parents. Changing either parent's section or identity while links exist is rejected, as is deleting a referenced parent. A reverse category/section index complements the article-leading primary key.
+
+Privileged transactions may remove affected links, change a parent section, and attach only matching links atomically. Failed operations restore the original parent and links. This is an integrity capability exercised by transaction-local tests, not an application mutation interface. Normal application writes remain denied to every role, including administrators.
+
+Association reads reuse the private article predicate: eligible active owners read their article's links and eligible active administrators read all. Anonymous, inactive, ineligible, and other-owner reads remain denied. Catalog visibility or untrusted credit-looking metadata grants no private association access. Actual contributor relationships and their denial tests belong to Task 5.
+
 ## Planned publishing entities
 
-Taxonomy and private article storage are implemented above. Association and history tables, public article projections, and all mutation/workflow interfaces remain unimplemented. Follow the [accepted contract](superpowers/specs/2026-10-21-content-foundation-design.md) for later Phase 2 storage slices.
+Taxonomy, private articles, and article/category links are implemented above. Tag/credit associations, history tables, public article projections, and all mutation/workflow interfaces remain unimplemented. Follow the [accepted contract](superpowers/specs/2026-10-21-content-foundation-design.md) for later Phase 2 storage slices.
 
 ### article_contributors
 

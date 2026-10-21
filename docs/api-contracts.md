@@ -31,9 +31,9 @@ Authoritative request schemas will live beside the implemented server operations
 
 ## Implemented Phase 2 data reads
 
-Taxonomy SELECT access and private article SELECT access are enforced by database grants/RLS; see the [data model](data-model.md#implemented-article-storage) and [security controls](security-and-permissions.md#implemented-private-article-controls). `private.can_read_article(check_article_id uuid) -> boolean` is an internal policy predicate for the authenticated caller, not a public mutation or arbitrary-user lookup RPC. It returns false for missing or unreadable article IDs. It does not accept an identity argument or expose private profile links.
+Taxonomy SELECT access, private article SELECT access, and article/category association SELECT access are enforced by database grants/RLS; see the [data model](data-model.md#implemented-article-storage) and [security controls](security-and-permissions.md#implemented-private-article-controls). `private.can_read_article(check_article_id uuid) -> boolean` is an internal policy predicate for the authenticated caller, not a public mutation or arbitrary-user lookup RPC. It returns false for missing or unreadable article IDs. It does not accept an identity argument or expose private profile links.
 
-No application article-fetch wrapper, editor endpoint, public article projection, or new mutation RPC is implemented yet. Generated database Insert/Update types describe the row shape; they do not grant write permission. All new-table application writes remain denied, including administrator writes.
+Article/category links follow article read authority and enforce same-section membership through composite references; no application section-change or link-mutation interface is exposed. No application article-fetch wrapper, editor endpoint, public article projection, or new mutation RPC is implemented yet. Generated database Insert/Update types describe the row shape; they do not grant write permission. All new-table application writes remain denied, including administrator writes.
 
 ## Planned public operations
 

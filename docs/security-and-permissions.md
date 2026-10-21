@@ -1,6 +1,6 @@
 # Security and permissions
 
-Status: Foundation access/session controls, SELECT-only taxonomy, and private article reads implemented; publishing and hosted provider controls remain planned.
+Status: Foundation access/session controls, SELECT-only taxonomy, private articles, and article/category reads implemented; publishing and hosted provider controls remain planned.
 
 ## Security objective
 
@@ -80,6 +80,12 @@ The authorization matrix above describes the final MVP. Its taxonomy-management 
 Anonymous readers have no article grant, including published fixtures. Inactive or ineligible identities receive no rows. Authors cannot read another owner's draft/archive/published fixture. Read authority does not depend on credits. Private `profiles.auth_user_id` stays inaccessible to clients. All article inserts, updates (including owner/lifecycle changes), and deletes are denied to every application role, including administrators.
 
 This is the accepted intermediate Phase 2 boundary. Final public article access, editor mutations, publishing/archiving/reassignment, validation, and atomic history capture require later interfaces. Stored JSON shape and byte bounds do not establish safe rich content. No application screen or public URL changes in this task; existing session and profile/membership policies are preserved.
+
+### Implemented article/category controls
+
+`article_categories` enables RLS and grants SELECT only to authenticated users, with its single read policy reusing `private.can_read_article(article_id)`. It adds no helper or public RPC and changes no existing policies. Anonymous users have no grant; owners cannot read other owners' links; inactive/ineligible identities receive no rows. Untrusted credit-looking claims never confer access. All application inserts, updates, and deletes remain denied, including administrator operations.
+
+Composite restrictive foreign keys enforce section consistency for association writes and both parent updates/deletions. Tests exercise these constraints as privileged fixtures, including full rollback after failed link replacement. These tests do not expose an application section-change operation or establish future atomic history capture. No UI or public route changes in this task.
 
 ## Content and input safety
 

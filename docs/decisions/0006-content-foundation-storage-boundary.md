@@ -23,4 +23,4 @@ Later writes/rendering require a closed content schema, URL/embed validation, sa
 
 ## Validation
 
-Taxonomy and private article storage are implemented in Tasks 2 and 3 with direct SQL bounds, reference, role/ownership, and write-denial tests. Association/history storage and final clean/upgrade proof remain tracked in Tasks 4–7. No mutation, safe renderer, or automatic history capture is implemented. See the task plan and testing documentation for commands actually run; do not infer completion of later gates.
+Taxonomy, private article storage, and category links are implemented in Tasks 2–4 with direct SQL bounds, reference, role/ownership, and write-denial tests. Tag/credit associations, history storage, and final clean/upgrade proof remain tracked in Tasks 5–7. No mutation, safe renderer, or automatic history capture is implemented. See the task plan and testing documentation for commands actually run; do not infer completion of later gates.

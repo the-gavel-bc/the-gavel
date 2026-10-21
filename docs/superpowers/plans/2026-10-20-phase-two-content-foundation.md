@@ -10,7 +10,7 @@
 
 **Spec:** [Accepted content contract](../specs/2026-10-21-content-foundation-design.md), [Approved MVP design](../specs/2026-10-16-the-gavel-mvp-design.md), [product requirements](../../product-requirements.md), [data model](../../data-model.md), [API contracts](../../api-contracts.md), and [security matrix](../../security-and-permissions.md#authorization-matrix).
 
-**Status:** Tasks 0–3 complete as of 2026-10-21. The owner approved the content contract after reviewing the summary and excerpt/slug explanation. Taxonomy and private article storage are implemented and verified; Tasks 4–7 remain implementation steps, not implemented behavior. The owner approved execution of this plan. Pause at the Task 3 review checkpoint before category associations; unresolved later-phase/client decisions remain unresolved.
+**Status:** Tasks 0–4 complete as of 2026-10-21. The owner approved the content contract after reviewing the summary and excerpt/slug explanation. Taxonomy, private articles, and section-consistent category links are implemented and verified; Tasks 5–7 remain implementation steps, not implemented behavior. The owner approved execution of this plan. Pause at the Task 4 review checkpoint before tags/contributor associations; unresolved later-phase/client decisions remain unresolved.
 
 ## Scope and outcome
 
@@ -133,13 +133,15 @@ Task 3 evidence: 168 article assertions and all 377 database assertions passed; 
 
 **Interfaces:** Consumes `private.can_read_article(uuid)`, articles and categories. Produces `public.article_categories(article_id uuid, category_id uuid, section_id uuid)` with primary key `(article_id, category_id)`.
 
-- [ ] Write tests: valid same-section link succeeds for privileged fixture creation; mismatched section from either parent fails; duplicate link fails. Changing article section or category section while a link exists fails. Referenced article/category deletion fails. A separate privileged transaction can remove a link, change the section, and add only a matching link; demonstrate rollback leaves consistent data on failure.
-- [ ] Test association reads follow article access for owner/admin and deny others, including a credited-looking identity. All app-role writes fail with `42501`.
-- [ ] Run focused SQL tests; observe intended missing-table failure.
-- [ ] Add parent unique constraints `(id, section_id)` and the two restrictive composite foreign keys. Add reverse-reference indexes where the composite primary key does not cover the lookup. Enable RLS and SELECT-only authenticated grants using the existing article predicate; grant anon no access.
-- [ ] Apply incrementally, run focused/shared checks, update docs, and commit `feat: enforce article category integrity`.
+- [x] Write tests: valid same-section link succeeds for privileged fixture creation; mismatched section from either parent fails; duplicate link fails. Changing article section or category section while a link exists fails. Referenced article/category deletion fails. A separate privileged transaction can remove a link, change the section, and add only a matching link; demonstrate rollback leaves consistent data on failure.
+- [x] Test association reads follow article access for owner/admin and deny others, including a credited-looking identity. All app-role writes fail with `42501`.
+- [x] Run focused SQL tests; observe intended missing-table failure.
+- [x] Add parent unique constraints `(id, section_id)` and the two restrictive composite foreign keys. Add reverse-reference indexes where the composite primary key does not cover the lookup. Enable RLS and SELECT-only authenticated grants using the existing article predicate; grant anon no access.
+- [x] Apply incrementally, run focused/shared checks, update docs, and commit `feat: enforce article category integrity`.
 
 **Review outcome:** Every tested parent/child mutation path preserves the same-section invariant without relying on UI filtering.
+
+Task 4 evidence: 59 association assertions and all 436 database assertions passed; database lint, generated-type drift, strict types, lint, formatting, and 44 unit/component tests passed. Both parent mutation directions, valid replacements, and failed-operation rollback are proven in privileged test subtransactions. The original foundation snapshot remains unchanged. No application association mutation, UI, tags/credits, or history workflow was added. Independent human review remains outstanding.
 
 ### Task 5: Add tags and contributor credits
 
