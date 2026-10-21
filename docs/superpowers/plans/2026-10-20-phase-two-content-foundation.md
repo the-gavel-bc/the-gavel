@@ -10,7 +10,7 @@
 
 **Spec:** [Accepted content contract](../specs/2026-10-21-content-foundation-design.md), [Approved MVP design](../specs/2026-10-16-the-gavel-mvp-design.md), [product requirements](../../product-requirements.md), [data model](../../data-model.md), [API contracts](../../api-contracts.md), and [security matrix](../../security-and-permissions.md#authorization-matrix).
 
-**Status:** Tasks 0–4 complete as of 2026-10-21. The owner approved the content contract after reviewing the summary and excerpt/slug explanation. Taxonomy, private articles, and section-consistent category links are implemented and verified; Tasks 5–7 remain implementation steps, not implemented behavior. The owner approved execution of this plan. Pause at the Task 4 review checkpoint before tags/contributor associations; unresolved later-phase/client decisions remain unresolved.
+**Status:** Tasks 0–5 complete as of 2026-10-21. The owner approved the content contract after reviewing the summary and excerpt/slug explanation. Taxonomy, private articles, and category/tag/contributor associations are implemented and verified; Tasks 6–7 remain implementation steps, not implemented behavior. The owner approved execution of this plan. Pause at the Task 5 review checkpoint before history storage; unresolved later-phase/client decisions remain unresolved.
 
 ## Scope and outcome
 
@@ -149,13 +149,15 @@ Task 4 evidence: 59 association assertions and all 436 database assertions passe
 
 **Interfaces:** Consumes article predicate, profiles, and tags. Produces `public.article_tags(article_id uuid, tag_id uuid)` and `public.article_contributors(article_id uuid, profile_id uuid, contribution_role public.contribution_role, display_order integer default 0)`; role enum is `writer | editor | creative`.
 
-- [ ] Write tests: association duplicates/missing references fail; credit order 0 succeeds and -1 fails; unsupported role fails. A profile can hold writer and editor on one article but cannot repeat writer. Order ties succeed. A contributor without an Auth link can receive a credit.
-- [ ] Credit eligible Author B on Author A's private article and prove B still cannot read it or its private associations. Owner access does not depend on a credit. Administrator reads all associations. Anonymous/inactive/ineligible identities are denied. All app writes fail with `42501`.
-- [ ] Run focused tests; observe intended missing-schema failure.
-- [ ] Implement accepted primary keys, enum, bounds, restrictive references, reverse-reference indexes, SELECT-only authenticated grants, and RLS using the existing article predicate. Do not introduce tag-entry Unicode normalization or an author create-tag operation.
-- [ ] Apply incrementally, run focused/shared checks, update docs, and commit `feat: add secured article tags and credits`.
+- [x] Write tests: association duplicates/missing references fail; credit order 0 succeeds and -1 fails; unsupported role fails. A profile can hold writer and editor on one article but cannot repeat writer. Order ties succeed. A contributor without an Auth link can receive a credit.
+- [x] Credit eligible Author B on Author A's private article and prove B still cannot read it or its private associations. Owner access does not depend on a credit. Administrator reads all associations. Anonymous/inactive/ineligible identities are denied. All app writes fail with `42501`.
+- [x] Run focused tests; observe intended missing-schema failure.
+- [x] Implement accepted primary keys, enum, bounds, restrictive references, reverse-reference indexes, SELECT-only authenticated grants, and RLS using the existing article predicate. Do not introduce tag-entry Unicode normalization or an author create-tag operation.
+- [x] Apply incrementally, run focused/shared checks, update docs, and commit `feat: add secured article tags and credits`.
 
 **Review outcome:** Credits remain metadata and cannot become a second ownership channel.
+
+Task 5 evidence: 90 tag/credit assertions and all 526 database assertions passed; database lint, generated-type drift, strict types, lint, formatting, and 44 unit/component tests passed. Actual writer/editor credits give Author B no access to A's article or private associations; owner A reads without a credit. The original foundation snapshot remains unchanged. No application mutation, renderer, tag normalization, or history workflow was added. Independent human review remains outstanding.
 
 ### Task 6: Protect revision and audit storage
 
