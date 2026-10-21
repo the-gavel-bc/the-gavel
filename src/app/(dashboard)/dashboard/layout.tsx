@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
-import { DashboardShell } from "@/components/dashboard/dashboard-shell";
-import { requireActiveMembership } from "@/lib/auth/access";
-import { signOut } from "@/lib/auth/actions";
-import { Button } from "@/components/ui/button";
+import { DashboardShell } from "@/components/dashboard/dashboard-shell/dashboard-shell";
+import { requireActiveMembership } from "@/lib/auth/access/access";
+import { signOut } from "@/lib/auth/actions/actions";
+import { Button } from "@/components/ui/button/button";
 export default async function DashboardLayout({
   children,
 }: {

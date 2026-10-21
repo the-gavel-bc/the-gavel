@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
-import { PublicShell } from "@/components/site/public-shell";
-import { Button } from "@/components/ui/button";
-import { getCurrentAccess } from "@/lib/auth/access";
-import { signOut } from "@/lib/auth/actions";
+import { PublicShell } from "@/components/site/public-shell/public-shell";
+import { Button } from "@/components/ui/button/button";
+import { getCurrentAccess } from "@/lib/auth/access/access";
+import { signOut } from "@/lib/auth/actions/actions";
 export default async function AccessPendingPage() {
   const access = await getCurrentAccess();
   if (access.status === "signedOut") redirect("/sign-in");

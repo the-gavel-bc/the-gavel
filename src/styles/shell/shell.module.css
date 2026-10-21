@@ -1,0 +1,28 @@
+.container {
+  margin-inline: auto;
+  max-width: var(--content-width);
+  padding: var(--space-4) var(--space-6);
+}
+.headerRow {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  justify-content: space-between;
+}
+.identity {
+  color: var(--color-ink);
+  font-family: var(--font-editorial);
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.footer {
+  border-top: 1px solid #d7dde4;
+  color: var(--color-muted);
+}
+@media (max-width: 42rem) {
+  .headerRow {
+    align-items: stretch;
+  }
+}

@@ -12,7 +12,7 @@ Status: Foundation shell and access routes implemented; publication and dashboar
 | `/access-pending` | Denied/pending membership experience and sign-out                             |
 | `/dashboard`      | Protected empty dashboard with role-aware shell and sign-out                  |
 
-The header's section links and dashboard profile/administration links identify future destinations; those feature routes are not implemented. Both dashboard layout and page independently call the server membership guard. Component source paths live under `src/components/site`, `src/components/dashboard`, and `src/components/ui`.
+The header's section links and dashboard profile/administration links identify future destinations; those feature routes are not implemented. Both dashboard layout and page independently call the server membership guard. Components live in named folders under `src/components/site`, `src/components/dashboard`, and `src/components/ui`, alongside their owned CSS Modules and existing tests. See [file colocation](coding-style.md#file-colocation).
 
 ## Full MVP public route design
 

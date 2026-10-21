@@ -1,11 +1,11 @@
 import { defineConfig, devices } from "@playwright/test";
 
-import { localSupabase } from "./e2e/local-supabase";
+import { localSupabase } from "./e2e/support/local-supabase/local-supabase";
 
 const local = localSupabase();
 
 export default defineConfig({
-  globalSetup: "./e2e/global-setup.ts",
+  globalSetup: "./e2e/global-setup/global-setup.ts",
   workers: 2,
   testDir: "./e2e",
   fullyParallel: true,

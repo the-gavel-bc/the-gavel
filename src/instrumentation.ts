@@ -1,4 +1,1 @@
-import { getServerEnv } from "@/lib/env/server";
-export function register() {
-  getServerEnv();
-}
+export { register } from "@/lib/startup/startup";
