@@ -31,7 +31,7 @@ Install the Playwright Chromium runtime once with `pnpm exec playwright install 
 
 The additive Task 2 migration was applied to the populated foundation database without resetting it. A private local snapshot confirmed existing profiles, memberships, and synthetic Auth identity fields were unchanged after the tests. The focused taxonomy suite, all 209 database assertions, database lint, and generated-type drift check passed. These statements cover Task 2; they do not claim Phase 2's later article/association/history or clean-reset proof is complete.
 
-During the Phase 2 upgrade sequence, apply each migration with `pnpm supabase migration up --local` and retain the ignored baseline snapshot. Do not run `db reset` until Task 7 verifies upgrade preservation; Task 7 then performs the separate clean-reset proof. The normal reset workflow above applies outside this in-progress upgrade proof.
+Phase 2 migrations were applied incrementally with `pnpm supabase migration up --local`, preserving the ignored baseline snapshot. Task 7 verified upgrade preservation before performing the separate clean-reset proof. The normal reset workflow above is now appropriate for local synthetic data; never use it against hosted or production data.
 
 ## Implemented private article coverage
 
@@ -64,6 +64,28 @@ Task 5 applied incrementally without a reset. The original foundation snapshot r
 Crossed revision actors plus real contributor credits prove that history reads depend on article ownership, not actor/credit identity. Exact owner/admin reads, ordinary-owner audit denial, anonymous/inactive/ineligible/deactivated administrator denials, and all-role insert/payload/actor/delete denials exercise both tables. Privileged fixtures do not establish an application actor-forging or capture interface.
 
 Task 6 applied incrementally without resetting. The original foundation snapshot remained unchanged. The focused suite and full 648-assertion database suite passed; database lint found no schema errors. Final integrated upgrade/clean-reset proof remains Task 7. Automatic capture, restore, rich snapshot validation, and retention/deletion workflows are not implemented or claimed tested.
+
+## Phase 2 integrated verification
+
+Local verification completed on 2026-10-21 against the complete content schema integrated at `aaa4226`. Before any reset, the original pre-Task-2 snapshot matched exactly: four profiles, four memberships, and five synthetic Auth identities. Migration history contained the three foundation migrations followed by all five Phase 2 migrations applied in order; the full 648-assertion denial/constraint suite passed. Private row snapshots and execution evidence remain in the ignored plan workspace and are not committed.
+
+A separate `pnpm supabase db reset` then applied all eight migrations and the original synthetic seed. All nine content tables were empty as intended; tests supply transaction-local content instead of deciding real publication labels. The reset intentionally restores the original four seeded identities; browser fixtures may add/adjust their fixed local synthetic identities afterward. This does not invalidate the already-recorded pre-reset upgrade proof.
+
+| Gate                                   | Observed local result                    |
+| -------------------------------------- | ---------------------------------------- |
+| Upgrade SQL suite before reset         | 648 assertions passed                    |
+| Clean-install SQL suite after reset    | 648 assertions passed                    |
+| Database lint and generated-type drift | Passed; no schema errors or type changes |
+| Formatting, lint, strict TypeScript    | Passed                                   |
+| Unit/component tests                   | 44 passed                                |
+| Production build                       | Passed                                   |
+| Desktop/mobile Playwright              | 16 passed                                |
+
+Fresh whole-phase code/security review of `74ae26a..aaa4226` found no Critical, Important, or Minor findings. It inspected implementation and upgrade evidence; it did not independently rerun these local gates. Final task-branch hosted CI is pending and must pass before final handoff. The approved dependency exception is unchanged; no new ignore or dependency change was introduced.
+
+Phase 2 supplies data storage and read permissions, with all new application mutations closed. Editor-node validation/safe rendering, uploads, public article projections, lifecycle/reassignment/slug redirects, and atomic content/history capture remain future work. Unicode tag-entry normalization, real taxonomy/navigation decisions, retention, and identity-deletion semantics remain unresolved where documented. Representative query performance requires the later content queries and load evidence. Optional catalog-attribute assertions for the existing private helper remain deferred; its stable/security-definer/empty-search-path attributes were inspected and behavior tests cover grants and recursion.
+
+No hosted Supabase/OAuth setup is needed to review this data-only phase. Independent human maintainer review remains outstanding under the existing Git workflow. Pre-launch session adapter/refresh/logout coverage and real Google HTTPS smoke tests remain listed below; hosted service ownership/setup, accessibility review of later UI, and operational recovery verification remain in [deployment](deployment.md) and the [runbooks](runbooks/README.md).
 
 ## Session coverage still needed before hosted launch
 
