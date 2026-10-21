@@ -10,7 +10,7 @@
 
 **Spec:** [Accepted content contract](../specs/2026-10-21-content-foundation-design.md), [Approved MVP design](../specs/2026-10-16-the-gavel-mvp-design.md), [product requirements](../../product-requirements.md), [data model](../../data-model.md), [API contracts](../../api-contracts.md), and [security matrix](../../security-and-permissions.md#authorization-matrix).
 
-**Status:** Tasks 0–6 complete as of 2026-10-21. The owner approved the content contract after reviewing the summary and excerpt/slug explanation. Taxonomy, private articles, category/tag/contributor associations, and protected history storage are implemented and verified; Task 7 integrated verification remains pending. The owner approved execution of this plan. Pause at the Task 6 review checkpoint before final integrated verification; unresolved later-phase/client decisions remain unresolved.
+**Status:** Tasks 0–6 complete as of 2026-10-21. The owner approved the content contract after reviewing the summary and excerpt/slug explanation. Taxonomy, private articles, category/tag/contributor associations, and protected history storage are implemented and verified; Task 7 local integration checks and whole-phase technical review passed; final task-branch hosted CI remains pending. The owner approved execution of this plan. Final handoff awaits the Task 7 hosted gate and owner review; unresolved later-phase/client decisions remain unresolved.
 
 ## Scope and outcome
 
@@ -182,13 +182,15 @@ Task 6 evidence: 122 history assertions and all 648 database assertions passed; 
 
 **Interfaces:** Consumes all five new migrations, all SQL assertion suites, generated types, and the pre-Task-2 foundation snapshot. Produces an evidence-backed phase handoff; no new application endpoint.
 
-- [ ] Before any reset, confirm all five migrations applied incrementally to the populated pre-phase local schema. Compare the existing foundation snapshot and run the whole SQL denial suite. Record this as upgrade proof; if the original baseline/snapshot is unavailable, reproduce a separate controlled pre-phase environment rather than claiming upgrade coverage from a reset.
-- [ ] Then run `pnpm supabase db reset` for separate clean-install proof and run all SQL tests again. Verify the new-table empty seed state is expected; synthetic content fixtures belong inside tests.
-- [ ] Run database lint/type drift, `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, and `pnpm test:e2e`. Expected: exit 0 throughout; report actual assertion counts and failures. Browser fixtures may mutate only the fixed local synthetic identities after upgrade preservation is already checked.
+- [x] Before any reset, confirm all five migrations applied incrementally to the populated pre-phase local schema. Compare the existing foundation snapshot and run the whole SQL denial suite. Record this as upgrade proof; if the original baseline/snapshot is unavailable, reproduce a separate controlled pre-phase environment rather than claiming upgrade coverage from a reset.
+- [x] Then run `pnpm supabase db reset` for separate clean-install proof and run all SQL tests again. Verify the new-table empty seed state is expected; synthetic content fixtures belong inside tests.
+- [x] Run database lint/type drift, `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, and `pnpm test:e2e`. Expected: exit 0 throughout; report actual assertion counts and failures. Browser fixtures may mutate only the fixed local synthetic identities after upgrade preservation is already checked.
 - [ ] Review hosted CI on the final branch commit. Keep the exact approved dependency exception and unfiltered production scan; do not add ignores to make unrelated findings pass.
-- [ ] Update implemented/planned labels, record the new migration/read boundaries and remaining editor/media/publication/capture/manual-launch work, and commit `docs: record content foundation verification` if those changes exist.
+- [x] Update implemented/planned labels, record the new migration/read boundaries and remaining editor/media/publication/capture/manual-launch work, and commit `docs: record content foundation verification` if those changes exist.
 
 **Review outcome:** Clean and upgrade paths preserve foundation access, all new-table denials pass, and docs describe the actual data-only capability. Pause for owner review before the next product slice. Independent human review and pre-launch session coverage remain separately tracked.
+
+Task 7 local evidence: exact pre-phase snapshot preserved before reset; 648 SQL assertions passed on upgrade and again after clean reset. All nine content tables start empty. Database lint/type drift, formatting/lint/types, 44 unit/component tests, build, and 16 desktop/mobile browser tests passed. Whole-phase static/security review found no findings. Final task-branch hosted CI is still pending; this is not yet a completed phase handoff. No new application code, tests, dependency, or policy change was needed.
 
 ## Review cadence and change costs
 
