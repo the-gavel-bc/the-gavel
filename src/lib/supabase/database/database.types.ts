@@ -34,6 +34,48 @@ export type Database = {
   };
   public: {
     Tables: {
+      categories: {
+        Row: {
+          active: boolean;
+          created_at: string;
+          id: string;
+          name: string;
+          navigation_order: number;
+          section_id: string;
+          slug: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          active?: boolean;
+          created_at?: string;
+          id?: string;
+          name: string;
+          navigation_order?: number;
+          section_id: string;
+          slug: string;
+          updated_at?: string;
+        };
+        Update: {
+          active?: boolean;
+          created_at?: string;
+          id?: string;
+          name?: string;
+          navigation_order?: number;
+          section_id?: string;
+          slug?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "categories_section_id_fkey";
+            columns: ["section_id"];
+            isOneToOne: false;
+            referencedRelation: "sections";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       memberships: {
         Row: {
           active: boolean;
@@ -91,6 +133,62 @@ export type Database = {
           created_at?: string;
           display_name?: string;
           id?: string;
+          slug?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      sections: {
+        Row: {
+          active: boolean;
+          created_at: string;
+          id: string;
+          name: string;
+          navigation_order: number;
+          slug: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          active?: boolean;
+          created_at?: string;
+          id?: string;
+          name: string;
+          navigation_order?: number;
+          slug: string;
+          updated_at?: string;
+        };
+        Update: {
+          active?: boolean;
+          created_at?: string;
+          id?: string;
+          name?: string;
+          navigation_order?: number;
+          slug?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      tags: {
+        Row: {
+          created_at: string;
+          id: string;
+          name: string;
+          slug: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          name: string;
+          slug: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          name?: string;
           slug?: string;
           updated_at?: string;
         };

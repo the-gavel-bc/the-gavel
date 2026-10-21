@@ -1,6 +1,6 @@
 # Security and permissions
 
-Status: Foundation membership, trusted identity checks, server access checks, and session controls implemented; publishing and hosted provider controls remain planned.
+Status: Foundation access/session controls and SELECT-only taxonomy implemented; article access, publishing, and hosted provider controls remain planned.
 
 ## Security objective
 
@@ -64,6 +64,14 @@ The following requirements continue to govern later tables and operations:
 - Prefer user-scoped operations subject to RLS; elevated credentials are reserved for necessary administrative tasks.
 - Protect privileged database functions with fixed search paths, explicit grants, validated inputs, and review.
 - Enforce ownership, lifecycle, and relational integrity in the database as well as application logic.
+
+### Implemented taxonomy controls
+
+`sections`, `categories`, and `tags` ship with RLS and SELECT-only grants for anonymous and authenticated roles. There are no application insert/update/delete grants or mutation policies, even for administrators. Privileged test fixtures do not represent application write access.
+
+Anonymous and ordinary authenticated readers see active sections and active categories only when their parent section is active, plus all tags. Separate anonymous policies avoid invoking private administrator helpers. Authenticated policies reuse the existing trusted-identity/active-administrator predicate to allow inactive taxonomy reads only for eligible active administrators. Inactive memberships and non-Google, unconfirmed, or out-of-domain identities receive no expanded visibility. These policies do not change foundation profile or membership permissions.
+
+The authorization matrix above describes the final MVP. Its taxonomy-management permissions and public article reads remain future workflows. Task 2 introduces no article storage, management UI, public route, or mutation RPC. Migration constraints and the [accepted contract](superpowers/specs/2026-10-21-content-foundation-design.md) define the stored taxonomy boundary; [testing coverage](testing.md#implemented-taxonomy-coverage) proves direct reads and write denials.
 
 ## Content and input safety
 
