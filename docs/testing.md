@@ -1,20 +1,20 @@
 # Testing and validation
 
-Status: Foundation tooling and taxonomy database coverage implemented; broader MVP coverage remains planned.
+Status: Foundation tooling, taxonomy, and private article database coverage implemented; broader MVP coverage remains planned.
 
 ## Commands
 
 Run commands with Node.js 22 and the pnpm version recorded in `package.json`.
 
-| Check            | Command             | Current scope                                                         |
-| ---------------- | ------------------- | --------------------------------------------------------------------- |
-| Formatting       | `pnpm format:check` | Repository source and documentation                                   |
-| Lint             | `pnpm lint`         | Next.js and TypeScript source                                         |
-| Types            | `pnpm typecheck`    | Strict TypeScript compilation                                         |
-| Unit/component   | `pnpm test`         | Vitest and Testing Library                                            |
-| Browser          | `pnpm test:e2e`     | Playwright desktop and mobile projects                                |
-| Production build | `pnpm build`        | Next.js production compilation                                        |
-| Database         | `pnpm test:db`      | Local Supabase identity and taxonomy constraints/RLS (209 assertions) |
+| Check            | Command             | Current scope                                                              |
+| ---------------- | ------------------- | -------------------------------------------------------------------------- |
+| Formatting       | `pnpm format:check` | Repository source and documentation                                        |
+| Lint             | `pnpm lint`         | Next.js and TypeScript source                                              |
+| Types            | `pnpm typecheck`    | Strict TypeScript compilation                                              |
+| Unit/component   | `pnpm test`         | Vitest and Testing Library                                                 |
+| Browser          | `pnpm test:e2e`     | Playwright desktop and mobile projects                                     |
+| Production build | `pnpm build`        | Next.js production compilation                                             |
+| Database         | `pnpm test:db`      | Local Supabase identity/taxonomy/articles constraints/RLS (377 assertions) |
 
 Install the Playwright Chromium runtime once with `pnpm exec playwright install chromium`. Start local Supabase with `pnpm supabase start` using a Docker-compatible runtime. Run `pnpm supabase db reset`, `pnpm test:db`, `pnpm supabase db lint`, and `pnpm db:types:check`. Regenerate formatted types with `pnpm --silent db:types > src/lib/supabase/database/database.types.ts`. The drift check compares without overwriting the committed file.
 
@@ -32,6 +32,14 @@ Install the Playwright Chromium runtime once with `pnpm exec playwright install 
 The additive Task 2 migration was applied to the populated foundation database without resetting it. A private local snapshot confirmed existing profiles, memberships, and synthetic Auth identity fields were unchanged after the tests. The focused taxonomy suite, all 209 database assertions, database lint, and generated-type drift check passed. These statements cover Task 2; they do not claim Phase 2's later article/association/history or clean-reset proof is complete.
 
 During the Phase 2 upgrade sequence, apply each migration with `pnpm supabase migration up --local` and retain the ignored baseline snapshot. Do not run `db reset` until Task 7 verifies upgrade preservation; Task 7 then performs the separate clean-reset proof. The normal reset workflow above applies outside this in-progress upgrade proof.
+
+## Implemented private article coverage
+
+`supabase/tests/005_article_access.test.sql` adds 168 transaction-local assertions for required/optional text bounds and whitespace, canonical unique slugs, SQL NULL versus invalid JSON shapes, and exact serialized 1 MiB acceptance/one-byte-over rejection with ASCII and multibyte bodies. All twelve status/timestamp combinations are checked, plus defaults, restrictive owner/section references, and updated-at behavior.
+
+Direct SQL tests prove cross-owner read denial, owner access without credits, administrator reads, anonymous grant denial (including published fixtures), inactive/ineligible identity denial, private Auth linkage protection, and all-role insert/body/owner/lifecycle/delete denial. The private predicate rejects missing/unreadable IDs and rechecks identity and current membership. These are stored-state/read-boundary tests, not workflow or publication-readiness tests.
+
+Task 3 was applied incrementally without a reset. The original foundation snapshot remained unchanged. The focused article suite and full 377-assertion database suite passed; database lint found no schema errors. Association/history and the Task 7 clean-reset proof remain pending.
 
 ## Session coverage still needed before hosted launch
 

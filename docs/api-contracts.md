@@ -1,6 +1,6 @@
 # API contracts
 
-Status: Foundation access/session interfaces implemented; publishing operations remain planned.
+Status: Foundation access/session interfaces and private article read storage implemented; publishing operations remain planned.
 
 ## Style and ownership
 
@@ -28,6 +28,12 @@ Authoritative request schemas will live beside the implemented server operations
 - `getCurrentAccess()` returns `signedOut | pending | active`. Active access carries user ID, profile ID, display name, and role. `requireActiveMembership()` redirects denied identities; dashboard layout and page both call it.
 - `public.current_profile()` is a parameterless database function returning only the active caller's profile ID/display name. Its grants, fixed search path, and membership filter are authoritative in the migration. It never exposes identity links from other profiles.
 - Sign-out is a server action that clears the local Supabase session. Session cookies are HttpOnly, SameSite=Lax, and Secure on HTTPS origins; the foundation browser client performs anonymous reads only.
+
+## Implemented Phase 2 data reads
+
+Taxonomy SELECT access and private article SELECT access are enforced by database grants/RLS; see the [data model](data-model.md#implemented-article-storage) and [security controls](security-and-permissions.md#implemented-private-article-controls). `private.can_read_article(check_article_id uuid) -> boolean` is an internal policy predicate for the authenticated caller, not a public mutation or arbitrary-user lookup RPC. It returns false for missing or unreadable article IDs. It does not accept an identity argument or expose private profile links.
+
+No application article-fetch wrapper, editor endpoint, public article projection, or new mutation RPC is implemented yet. Generated database Insert/Update types describe the row shape; they do not grant write permission. All new-table application writes remain denied, including administrator writes.
 
 ## Planned public operations
 

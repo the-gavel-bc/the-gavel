@@ -1,6 +1,6 @@
 # Data model
 
-Status: Foundation identity and Phase 2 taxonomy implemented; article, association, and history storage remain planned.
+Status: Foundation identity, taxonomy, and private article storage implemented; association and history storage remain planned.
 
 ## Storage
 
@@ -68,29 +68,21 @@ Anonymous and ordinary authenticated readers see active sections and only active
 
 No real publication taxonomy is seeded. Fixtures are synthetic and transaction-local. Future tag-entry normalization, including Unicode and punctuation rules, remains unresolved until its create interface is designed. Article associations and taxonomy management screens are not implemented.
 
+## Implemented article storage
+
+`supabase/migrations/20261021010000_content_articles.sql` is authoritative for `articles`, `article_status`, constraints, indexes, triggers, grants, and the private read predicate. It adds storage without changing existing identity or taxonomy rows/policies.
+
+An article requires an owner profile, primary section, trimmed nonblank title, and unique canonical slug. The [accepted content contract](superpowers/specs/2026-10-21-content-foundation-design.md#accepted-storage-constraints) defines the text bounds. Owner and section references restrict deletion and identity changes. UUIDs and timestamps are supplied automatically, and updates reuse the existing updated-at trigger.
+
+New rows default to `draft`; excerpt, JSONB body, SEO keyphrase, and meta description may be SQL NULL. Present optional text must be trimmed and nonblank. Body storage permits only JSON objects of at most 1,048,576 serialized UTF-8 bytes. This does not validate editor nodes or safe rendering. No editor or renderer is implemented.
+
+Draft rows require both lifecycle timestamps NULL; published rows require publication only; archived rows require publication and archive timestamps. These constraints describe stored states, not authorized transitions or publication readiness. Required publication content/media checks belong to the future publishing operation. Media columns are absent until the media contract exists; the eventual main-image requirement is unchanged.
+
+Authenticated eligible active members read owned articles; eligible active administrators read all. The stable fixed-search-path `private.can_read_article(uuid)` resolves ownership through private profile Auth links and current membership without exposing those links or recursing through article RLS. Anonymous readers have no article grant, even for synthetic published rows. Every application write remains denied, including administrator writes. See [article security controls](security-and-permissions.md#implemented-private-article-controls).
+
 ## Planned publishing entities
 
-The [accepted Phase 2 content contract](superpowers/specs/2026-10-21-content-foundation-design.md) defines approved field bounds and phase-specific permissions. Taxonomy is implemented above; article, association, and history tables are not implemented yet.
-
-### articles
-
-| Field                   | Type                                     | Rules                                                                       |
-| ----------------------- | ---------------------------------------- | --------------------------------------------------------------------------- |
-| id                      | UUID                                     | Primary key                                                                 |
-| owner_profile_id        | UUID                                     | Required; exactly one owner                                                 |
-| section_id              | UUID                                     | Required                                                                    |
-| title                   | text                                     | Required; bounded length                                                    |
-| slug                    | text                                     | Required, unique and stable after publication except managed redirects      |
-| excerpt                 | text                                     | Required for cards and metadata fallback                                    |
-| content                 | structured JSON or constrained rich text | Required before publication                                                 |
-| status                  | enum                                     | `draft`, `published`, or `archived`                                         |
-| main_image_id           | UUID nullable                            | Required before publication unless an editorial exception is approved later |
-| image_credit            | text nullable                            | Public credit                                                               |
-| seo_keyphrase           | text nullable                            | Editorial aid                                                               |
-| meta_description        | text nullable                            | Bounded search/social description                                           |
-| published_at            | timestamptz nullable                     | Set on first publication                                                    |
-| archived_at             | timestamptz nullable                     | Set while archived                                                          |
-| created_at / updated_at | timestamptz                              | Required                                                                    |
+Taxonomy and private article storage are implemented above. Association and history tables, public article projections, and all mutation/workflow interfaces remain unimplemented. Follow the [accepted contract](superpowers/specs/2026-10-21-content-foundation-design.md) for later Phase 2 storage slices.
 
 ### article_contributors
 
