@@ -1,6 +1,6 @@
 # Security and permissions
 
-Status: Foundation access/session controls, SELECT-only taxonomy, private articles, and article/category reads implemented; publishing and hosted provider controls remain planned.
+Status: Foundation access/session controls, SELECT-only taxonomy, private articles, and category/tag/contributor reads implemented; publishing and hosted provider controls remain planned.
 
 ## Security objective
 
@@ -86,6 +86,12 @@ This is the accepted intermediate Phase 2 boundary. Final public article access,
 `article_categories` enables RLS and grants SELECT only to authenticated users, with its single read policy reusing `private.can_read_article(article_id)`. It adds no helper or public RPC and changes no existing policies. Anonymous users have no grant; owners cannot read other owners' links; inactive/ineligible identities receive no rows. Untrusted credit-looking claims never confer access. All application inserts, updates, and deletes remain denied, including administrator operations.
 
 Composite restrictive foreign keys enforce section consistency for association writes and both parent updates/deletions. Tests exercise these constraints as privileged fixtures, including full rollback after failed link replacement. These tests do not expose an application section-change operation or establish future atomic history capture. No UI or public route changes in this task.
+
+### Implemented tag and credit controls
+
+`article_tags` and `article_contributors` enable RLS, grant SELECT only to authenticated users, and reuse `private.can_read_article(article_id)`. No policy checks a credited profile as authority. Tests give Author B real writer/editor credits on Author A's article and still deny B access to that article and all private associations. Owner reads do not require a credit. Anonymous users have no grants; inactive/ineligible identities receive no rows; eligible active administrators read all associations. All application writes remain denied, including administrators.
+
+Required restrictive parent references and unique association keys prevent dangling/duplicate links. A guest profile without login can receive credit without gaining a session or permissions. This migration adds no helper, public RPC, tag-entry normalization, mutation interface, or UI and changes no earlier policy. Contributor rendering, atomic mutation/history capture, and public projections remain future work.
 
 ## Content and input safety
 

@@ -68,6 +68,74 @@ export type Database = {
           },
         ];
       };
+      article_contributors: {
+        Row: {
+          article_id: string;
+          contribution_role: Database["public"]["Enums"]["contribution_role"];
+          display_order: number;
+          profile_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          article_id: string;
+          contribution_role: Database["public"]["Enums"]["contribution_role"];
+          display_order?: number;
+          profile_id: string;
+        };
+        Update: {
+          article_id?: string;
+          contribution_role?: Database["public"]["Enums"]["contribution_role"];
+          display_order?: number;
+          profile_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "article_contributors_article_id_fkey";
+            columns: ["article_id"];
+            isOneToOne: false;
+            referencedRelation: "articles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "article_contributors_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      article_tags: {
+        Row: {
+          article_id: string;
+          tag_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          article_id: string;
+          tag_id: string;
+        };
+        Update: {
+          article_id?: string;
+          tag_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "article_tags_article_id_fkey";
+            columns: ["article_id"];
+            isOneToOne: false;
+            referencedRelation: "articles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "article_tags_tag_id_fkey";
+            columns: ["tag_id"];
+            isOneToOne: false;
+            referencedRelation: "tags";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       articles: {
         Row: {
           archived_at: string | null;
@@ -311,6 +379,7 @@ export type Database = {
     Enums: {
       app_role: "author" | "administrator";
       article_status: "draft" | "published" | "archived";
+      contribution_role: "writer" | "editor" | "creative";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -443,6 +512,7 @@ export const Constants = {
     Enums: {
       app_role: ["author", "administrator"],
       article_status: ["draft", "published", "archived"],
+      contribution_role: ["writer", "editor", "creative"],
     },
   },
 } as const;

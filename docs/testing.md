@@ -1,6 +1,6 @@
 # Testing and validation
 
-Status: Foundation, taxonomy, private articles, and article/category database coverage implemented; broader MVP coverage remains planned.
+Status: Foundation, taxonomy, private articles, and category/tag/contributor database coverage implemented; broader MVP coverage remains planned.
 
 ## Commands
 
@@ -14,7 +14,7 @@ Run commands with Node.js 22 and the pnpm version recorded in `package.json`.
 | Unit/component   | `pnpm test`         | Vitest and Testing Library                                           |
 | Browser          | `pnpm test:e2e`     | Playwright desktop and mobile projects                               |
 | Production build | `pnpm build`        | Next.js production compilation                                       |
-| Database         | `pnpm test:db`      | Local Supabase identity/content constraints and RLS (436 assertions) |
+| Database         | `pnpm test:db`      | Local Supabase identity/content constraints and RLS (526 assertions) |
 
 Install the Playwright Chromium runtime once with `pnpm exec playwright install chromium`. Start local Supabase with `pnpm supabase start` using a Docker-compatible runtime. Run `pnpm supabase db reset`, `pnpm test:db`, `pnpm supabase db lint`, and `pnpm db:types:check`. Regenerate formatted types with `pnpm --silent db:types > src/lib/supabase/database/database.types.ts`. The drift check compares without overwriting the committed file.
 
@@ -45,9 +45,17 @@ Task 3 was applied incrementally without a reset. The original foundation snapsh
 
 `supabase/tests/006_article_categories.test.sql` adds 59 assertions for valid same-section many-to-many links, duplicate/missing/null references, mismatches from either parent, direct link changes, restricted parent section/identity changes, and referenced deletion. Privileged subtransactions demonstrate valid remove/change/reattach operations and restoration of original parents and links after a failed final insert, from both parent directions. All fixtures roll back with the test's outer transaction.
 
-Exact-ID reads cover owner A, owner B with untrusted credit/owner-looking metadata, and administrator access. Anonymous, inactive, non-Google, unconfirmed, out-of-domain, and deactivated administrator paths are denied. Every application role is denied link insert/update/delete. Actual contributor-credit storage and its denial tests remain Task 5.
+Exact-ID reads cover owner A, owner B with untrusted credit/owner-looking metadata, and administrator access. Anonymous, inactive, non-Google, unconfirmed, out-of-domain, and deactivated administrator paths are denied. Every application role is denied link insert/update/delete. Actual contributor-credit storage and its denial tests are recorded below.
 
-Task 4 applied incrementally without a reset; the original foundation snapshot was unchanged. The focused suite and all 436 database assertions passed, and database lint found no schema errors. Tag/credit links, history, and final clean-reset proof remain pending.
+Task 4 applied incrementally without a reset; the original foundation snapshot was unchanged. The focused suite and all 436 database assertions passed, and database lint found no schema errors. At Task 4, tag/credit links, history, and final clean-reset proof remained pending; tag/credit coverage is recorded below.
+
+## Implemented tag and contributor coverage
+
+`supabase/tests/007_article_tags_contributors.test.sql` adds 90 assertions for duplicate/required/missing references, restrictive deletion and identity changes, supported credit roles, default/non-negative order, ties, multiple roles per profile/article, and guest contributors without Auth links. Separate tag-only and credit-only article fixtures ensure other foreign keys cannot mask missing article reference restrictions.
+
+Author B receives actual writer/editor credits on Author A's private article but can still read only B's own article and associations. Exact-ID checks cover articles, categories, tags, and credits; A retains owner reads without any credit. Administrator, anonymous, inactive, ineligible, and deactivated administrator paths plus all-role insert/update/delete denials exercise both new tables.
+
+Task 5 applied incrementally without a reset. The original foundation snapshot remained unchanged. The focused suite and full 526-assertion database suite passed; database lint found no schema errors. History and the final upgrade/clean-reset proof remain pending. No application mutation, content renderer, or tag-entry normalization is established by these tests.
 
 ## Session coverage still needed before hosted launch
 

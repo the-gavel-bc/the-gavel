@@ -1,6 +1,6 @@
 # Data model
 
-Status: Foundation identity, taxonomy, private articles, and article/category integrity implemented; tags/credits associations and history storage remain planned.
+Status: Foundation identity, taxonomy, private articles, and category/tag/contributor associations implemented; history storage remains planned.
 
 ## Storage
 
@@ -66,7 +66,7 @@ Sections and categories have names, canonical slugs, non-negative navigation ord
 
 Anonymous and ordinary authenticated readers see active sections and only active categories with active parents; all tags are readable. Eligible active administrators can also read inactive taxonomy. All application writes remain denied, including administrator writes. See [security controls](security-and-permissions.md#implemented-taxonomy-controls) and the [accepted contract](superpowers/specs/2026-10-21-content-foundation-design.md).
 
-No real publication taxonomy is seeded. Fixtures are synthetic and transaction-local. Future tag-entry normalization, including Unicode and punctuation rules, remains unresolved until its create interface is designed. Article/category links are implemented below; tag/credit associations and taxonomy management screens remain planned.
+No real publication taxonomy is seeded. Fixtures are synthetic and transaction-local. Future tag-entry normalization, including Unicode and punctuation rules, remains unresolved until its create interface is designed. Article/category/tag/contributor links are implemented below; taxonomy management screens remain planned.
 
 ## Implemented article storage
 
@@ -86,22 +86,19 @@ Authenticated eligible active members read owned articles; eligible active admin
 
 Privileged transactions may remove affected links, change a parent section, and attach only matching links atomically. Failed operations restore the original parent and links. This is an integrity capability exercised by transaction-local tests, not an application mutation interface. Normal application writes remain denied to every role, including administrators.
 
-Association reads reuse the private article predicate: eligible active owners read their article's links and eligible active administrators read all. Anonymous, inactive, ineligible, and other-owner reads remain denied. Catalog visibility or untrusted credit-looking metadata grants no private association access. Actual contributor relationships and their denial tests belong to Task 5.
+Association reads reuse the private article predicate: eligible active owners read their article's links and eligible active administrators read all. Anonymous, inactive, ineligible, and other-owner reads remain denied. Catalog visibility or untrusted credit-looking metadata grants no private association access. Actual contributor relationships and their denial tests are implemented below.
+
+## Implemented article tags and credits
+
+`supabase/migrations/20261021030000_article_tags_contributors.sql` is authoritative for `article_tags`, `article_contributors`, and `contribution_role`. Tag links require an article and tag, uniquely identified by that pair. Credits require an article, profile, and role (`writer`, `editor`, or `creative`), uniquely identified by all three. All parent references restrict deletion and identity changes. Reverse tag/profile indexes complement article-leading primary keys.
+
+Credit display order defaults to zero, must be non-negative and non-NULL, and permits ties. One profile may hold different roles on the same article, but cannot repeat the same role. Profiles without Auth identities can receive credits. A future presentation layer must supply a deterministic tie-breaker; this migration introduces no renderer.
+
+Both tables grant authenticated SELECT only, with RLS reusing the existing private article predicate. Actual credits never grant private article, category, tag, or credit access: a credited author on another owner's article still cannot read it. Owners retain read access without credits; eligible active administrators read all associations. All application writes remain denied, including administrator writes. No tag-entry normalization, create-tag operation, or credit-management interface is exposed.
 
 ## Planned publishing entities
 
-Taxonomy, private articles, and article/category links are implemented above. Tag/credit associations, history tables, public article projections, and all mutation/workflow interfaces remain unimplemented. Follow the [accepted contract](superpowers/specs/2026-10-21-content-foundation-design.md) for later Phase 2 storage slices.
-
-### article_contributors
-
-| Field             | Type    | Rules                             |
-| ----------------- | ------- | --------------------------------- |
-| article_id        | UUID    | Required                          |
-| profile_id        | UUID    | Required                          |
-| contribution_role | enum    | `writer`, `editor`, or `creative` |
-| display_order     | integer | Non-negative                      |
-
-Credits do not grant edit access. The owner may also have a writer credit.
+Taxonomy, private articles, and category/tag/contributor links are implemented above. History tables, public article projections, and all mutation/workflow interfaces remain unimplemented. Follow the [accepted contract](superpowers/specs/2026-10-21-content-foundation-design.md) for later Phase 2 storage slices.
 
 ### media_assets
 
