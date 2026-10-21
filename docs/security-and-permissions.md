@@ -1,6 +1,6 @@
 # Security and permissions
 
-Status: Foundation access/session controls, SELECT-only taxonomy, private articles, and category/tag/contributor reads implemented; publishing and hosted provider controls remain planned.
+Status: Foundation access/session controls and Phase 2 content/history read permissions implemented; publishing and hosted provider controls remain planned.
 
 ## Security objective
 
@@ -92,6 +92,12 @@ Composite restrictive foreign keys enforce section consistency for association w
 `article_tags` and `article_contributors` enable RLS, grant SELECT only to authenticated users, and reuse `private.can_read_article(article_id)`. No policy checks a credited profile as authority. Tests give Author B real writer/editor credits on Author A's article and still deny B access to that article and all private associations. Owner reads do not require a credit. Anonymous users have no grants; inactive/ineligible identities receive no rows; eligible active administrators read all associations. All application writes remain denied, including administrators.
 
 Required restrictive parent references and unique association keys prevent dangling/duplicate links. A guest profile without login can receive credit without gaining a session or permissions. This migration adds no helper, public RPC, tag-entry normalization, mutation interface, or UI and changes no earlier policy. Contributor rendering, atomic mutation/history capture, and public projections remain future work.
+
+### Implemented history controls
+
+`article_revisions` and `audit_events` enable RLS with authenticated SELECT-only grants. Revision reads reuse `private.can_read_article(article_id)`; audit reads use `private.is_active_administrator()`. Neither actor identity nor contributor credit confers access. Anonymous users have no table grants; inactive/ineligible identities receive no rows. Ordinary owners cannot read audit records. All application insert/update/delete operations remain denied, including administrator tampering and forged actor fields.
+
+Revisions require version-one bounded JSON objects. Audits permit only the seven accepted content actions and the closed metadata column set, with no article body or arbitrary payload. References protect actors and revision articles, while audit resource identifiers deliberately survive independently of article rows. These constraints add no capture, restore, delete, or mutation interface and change no earlier policy/helper. Future writes must derive the actor from trusted identity and commit content/history atomically; no automatic capture is claimed here.
 
 ## Content and input safety
 

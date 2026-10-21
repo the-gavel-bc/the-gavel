@@ -105,6 +105,42 @@ export type Database = {
           },
         ];
       };
+      article_revisions: {
+        Row: {
+          actor_user_id: string;
+          article_id: string;
+          created_at: string;
+          id: string;
+          snapshot: NonNullable<Json>;
+          snapshot_version: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          actor_user_id: string;
+          article_id: string;
+          created_at?: string;
+          id?: string;
+          snapshot: NonNullable<Json>;
+          snapshot_version?: number;
+        };
+        Update: {
+          actor_user_id?: string;
+          article_id?: string;
+          created_at?: string;
+          id?: string;
+          snapshot?: NonNullable<Json>;
+          snapshot_version?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "article_revisions_article_id_fkey";
+            columns: ["article_id"];
+            isOneToOne: false;
+            referencedRelation: "articles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       article_tags: {
         Row: {
           article_id: string;
@@ -202,6 +238,37 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      audit_events: {
+        Row: {
+          action: string;
+          actor_user_id: string;
+          correlation_id: string | null;
+          created_at: string;
+          id: string;
+          resource_id: string;
+          resource_type: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          action: string;
+          actor_user_id: string;
+          correlation_id?: string | null;
+          created_at?: string;
+          id?: string;
+          resource_id: string;
+          resource_type: string;
+        };
+        Update: {
+          action?: string;
+          actor_user_id?: string;
+          correlation_id?: string | null;
+          created_at?: string;
+          id?: string;
+          resource_id?: string;
+          resource_type?: string;
+        };
+        Relationships: [];
       };
       categories: {
         Row: {

@@ -1,6 +1,6 @@
 # Data model
 
-Status: Foundation identity, taxonomy, private articles, and category/tag/contributor associations implemented; history storage remains planned.
+Status: Foundation identity and Phase 2 content storage/read permissions implemented; application mutation/publishing workflows remain planned.
 
 ## Storage
 
@@ -96,17 +96,23 @@ Credit display order defaults to zero, must be non-negative and non-NULL, and pe
 
 Both tables grant authenticated SELECT only, with RLS reusing the existing private article predicate. Actual credits never grant private article, category, tag, or credit access: a credited author on another owner's article still cannot read it. Owners retain read access without credits; eligible active administrators read all associations. All application writes remain denied, including administrator writes. No tag-entry normalization, create-tag operation, or credit-management interface is exposed.
 
+## Implemented revision and audit storage
+
+`supabase/migrations/20261021040000_content_history.sql` is authoritative for `article_revisions` and `audit_events`. Both have generated UUIDs, required actor Auth references, and creation timestamps. Actor references restrict identity changes/deletion. Revision article references also restrict changes/deletion; indexes cover article/resource and actor lookups.
+
+Revisions require an article, snapshot version 1, and a JSON object snapshot of at most 2,097,152 serialized UTF-8 bytes. Owners and eligible active administrators read revisions through the existing private article predicate. A revision's actor or an article credit grants no read authority. Snapshots are intended to include article fields and associations, but automatic capture, full snapshot validation, and restoration are not implemented.
+
+Audit rows contain only actor, allowlisted action, `article` resource type, resource UUID, creation time, and optional UUID correlation ID. The [accepted contract](superpowers/specs/2026-10-21-content-foundation-design.md#revision-and-audit-storage) defines the seven content actions. There is no arbitrary metadata, body, or snapshot column. Resource IDs have no article foreign key, so records can retain identifiers independently of current article rows. Only eligible active administrators read audits.
+
+All application history insert/update/delete operations remain denied, including administrator operations and forged actors. These tables do not emit automatic events or provide an application mutation/capture API. They establish protected storage rather than a completed audit workflow. Restrictive references do not settle future identity-deletion or archive-retention policy; a later deletion design must reconcile those retained references before exposing deletion.
+
 ## Planned publishing entities
 
-Taxonomy, private articles, and category/tag/contributor links are implemented above. History tables, public article projections, and all mutation/workflow interfaces remain unimplemented. Follow the [accepted contract](superpowers/specs/2026-10-21-content-foundation-design.md) for later Phase 2 storage slices.
+Taxonomy, private articles, category/tag/contributor links, and protected history storage are implemented above. Public article projections and all mutation/workflow interfaces remain unimplemented. Follow the [accepted contract](superpowers/specs/2026-10-21-content-foundation-design.md) for later Phase 2 storage slices.
 
 ### media_assets
 
 Tracks owner/uploader, object path, media type, byte size, dimensions, checksum if used, alt text, creation time, and lifecycle state. Access remains subject to Storage and database policies.
-
-### article_revisions
-
-Immutable snapshots sufficient to restore prior title, excerpt, content, taxonomy, credits, and metadata. Record article, editor identity, creation time, and revision payload/version.
 
 ### homepage_selections
 
@@ -115,10 +121,6 @@ Stores active lead, ordered Featured News, and ordered Read This selections. Ref
 ### site_settings
 
 Allowlisted editable values such as mission text, contact email, social URLs, and submission instructions. Do not create a generic store for secrets or executable content.
-
-### audit_events
-
-Append-only records containing actor, action, resource type/id, timestamp, request correlation identifier where available, and safe metadata. Never store tokens or full sensitive payloads.
 
 ### slug_redirects
 
