@@ -1,20 +1,20 @@
 # Testing and validation
 
-Status: Foundation tooling implemented; broader MVP coverage remains planned.
+Status: Foundation tooling and taxonomy database coverage implemented; broader MVP coverage remains planned.
 
 ## Commands
 
 Run commands with Node.js 22 and the pnpm version recorded in `package.json`.
 
-| Check            | Command             | Current scope                                                    |
-| ---------------- | ------------------- | ---------------------------------------------------------------- |
-| Formatting       | `pnpm format:check` | Repository source and documentation                              |
-| Lint             | `pnpm lint`         | Next.js and TypeScript source                                    |
-| Types            | `pnpm typecheck`    | Strict TypeScript compilation                                    |
-| Unit/component   | `pnpm test`         | Vitest and Testing Library                                       |
-| Browser          | `pnpm test:e2e`     | Playwright desktop and mobile projects                           |
-| Production build | `pnpm build`        | Next.js production compilation                                   |
-| Database         | `pnpm test:db`      | Local Supabase membership/profile grants and RLS (46 assertions) |
+| Check            | Command             | Current scope                                                         |
+| ---------------- | ------------------- | --------------------------------------------------------------------- |
+| Formatting       | `pnpm format:check` | Repository source and documentation                                   |
+| Lint             | `pnpm lint`         | Next.js and TypeScript source                                         |
+| Types            | `pnpm typecheck`    | Strict TypeScript compilation                                         |
+| Unit/component   | `pnpm test`         | Vitest and Testing Library                                            |
+| Browser          | `pnpm test:e2e`     | Playwright desktop and mobile projects                                |
+| Production build | `pnpm build`        | Next.js production compilation                                        |
+| Database         | `pnpm test:db`      | Local Supabase identity and taxonomy constraints/RLS (209 assertions) |
 
 Install the Playwright Chromium runtime once with `pnpm exec playwright install chromium`. Start local Supabase with `pnpm supabase start` using a Docker-compatible runtime. Run `pnpm supabase db reset`, `pnpm test:db`, `pnpm supabase db lint`, and `pnpm db:types:check`. Regenerate formatted types with `pnpm --silent db:types > src/lib/supabase/database/database.types.ts`. The drift check compares without overwriting the committed file.
 
@@ -24,6 +24,14 @@ Install the Playwright Chromium runtime once with `pnpm exec playwright install 
 - pgTAP covers grants, RLS, profile ownership, inactive-member edit denial, membership read/write/delete denials, administrator approval, scoped profile lookup, and direct-operation denials for non-Google, unconfirmed, and out-of-domain identities.
 - Playwright covers desktop/mobile homepage landmarks, keyboard focus/contrast and overflow; signed-out, inactive, unapproved Google, non-`bc.edu`, author, administrator, and forged-cookie access paths. Access tests run with JavaScript disabled.
 - Browser fixtures are isolated to the fixed local Docker project. They set synthetic Auth metadata only; passwords and hosted Google credentials are not used. `db reset` restores the original passwordless fixtures.
+
+## Implemented taxonomy coverage
+
+`supabase/tests/004_content_taxonomy.test.sql` adds 163 transaction-local assertions for taxonomy bounds (1/120 accepted, 121 rejected), whitespace and canonical-slug rejection, case-insensitive names and scoped slug uniqueness, required/restrictive parent references, defaults, and updated-at behavior. Catalog tests check exact visible IDs, including an active category under an inactive parent. Anonymous, inactive, two-author, and administrator identities exercise reads and all insert/update/delete denials. Non-Google, unconfirmed, out-of-domain, and deactivated administrators cannot expand catalog visibility.
+
+The additive Task 2 migration was applied to the populated foundation database without resetting it. A private local snapshot confirmed existing profiles, memberships, and synthetic Auth identity fields were unchanged after the tests. The focused taxonomy suite, all 209 database assertions, database lint, and generated-type drift check passed. These statements cover Task 2; they do not claim Phase 2's later article/association/history or clean-reset proof is complete.
+
+During the Phase 2 upgrade sequence, apply each migration with `pnpm supabase migration up --local` and retain the ignored baseline snapshot. Do not run `db reset` until Task 7 verifies upgrade preservation; Task 7 then performs the separate clean-reset proof. The normal reset workflow above applies outside this in-progress upgrade proof.
 
 ## Session coverage still needed before hosted launch
 

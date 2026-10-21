@@ -1,6 +1,6 @@
 # Data model
 
-Status: Foundation identity schema implemented; publishing entities remain conceptual.
+Status: Foundation identity and Phase 2 taxonomy implemented; article, association, and history storage remain planned.
 
 ## Storage
 
@@ -58,9 +58,19 @@ Generated application types live at `src/lib/supabase/database/database.types.ts
 
 `supabase/migrations/20261018010000_identity_eligibility.sql` adds the trusted Auth identity predicate and tightens existing write/admin policies and the scoped accessor. This additive migration changes no stored rows or table columns. Existing application clients remain compatible; identities outside the approved boundary lose privileges intentionally. Apply it before deploying clients that depend on the consistent boundary. Reverting to earlier policies would weaken authorization and is not a safe security rollback.
 
+## Implemented taxonomy
+
+`supabase/migrations/20261021000000_content_taxonomy.sql` is authoritative for the `sections`, `categories`, and `tags` columns, constraints, indexes, updated-at triggers, grants, and RLS. It is an additive migration and changes no existing identity rows.
+
+Sections and categories have names, canonical slugs, non-negative navigation order, and active state. Categories require a section; references restrict deletion and identity changes. Section names are case-insensitively unique and section slugs globally unique. Category names and slugs are unique within their section. Tags have globally unique canonical slugs and case-insensitively unique names, without activation or ordering fields. Names must be nonblank and trimmed; names and slugs accept 1–120 characters. All three tables supply UUIDs and creation/update timestamps.
+
+Anonymous and ordinary authenticated readers see active sections and only active categories with active parents; all tags are readable. Eligible active administrators can also read inactive taxonomy. All application writes remain denied, including administrator writes. See [security controls](security-and-permissions.md#implemented-taxonomy-controls) and the [accepted contract](superpowers/specs/2026-10-21-content-foundation-design.md).
+
+No real publication taxonomy is seeded. Fixtures are synthetic and transaction-local. Future tag-entry normalization, including Unicode and punctuation rules, remains unresolved until its create interface is designed. Article associations and taxonomy management screens are not implemented.
+
 ## Planned publishing entities
 
-The [accepted Phase 2 content contract](superpowers/specs/2026-10-21-content-foundation-design.md) defines approved field bounds and phase-specific permissions. The design is accepted; its publishing tables are not implemented yet.
+The [accepted Phase 2 content contract](superpowers/specs/2026-10-21-content-foundation-design.md) defines approved field bounds and phase-specific permissions. Taxonomy is implemented above; article, association, and history tables are not implemented yet.
 
 ### articles
 
@@ -92,14 +102,6 @@ The [accepted Phase 2 content contract](superpowers/specs/2026-10-21-content-fou
 | display_order     | integer | Non-negative                      |
 
 Credits do not grant edit access. The owner may also have a writer credit.
-
-### sections and categories
-
-Sections have unique names/slugs, navigation order, and active state. Categories belong to exactly one section and have names/slugs unique within that section. `article_categories` provides the many-to-many relationship; constraints ensure selected categories belong to the article's primary section.
-
-### tags
-
-Tags have a canonical name and unique normalized slug. `article_tags` associates zero or more tags with an article. Normalize case and punctuation to prevent duplicates.
 
 ### media_assets
 

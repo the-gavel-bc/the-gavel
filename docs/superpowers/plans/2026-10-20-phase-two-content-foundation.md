@@ -10,7 +10,7 @@
 
 **Spec:** [Accepted content contract](../specs/2026-10-21-content-foundation-design.md), [Approved MVP design](../specs/2026-10-16-the-gavel-mvp-design.md), [product requirements](../../product-requirements.md), [data model](../../data-model.md), [API contracts](../../api-contracts.md), and [security matrix](../../security-and-permissions.md#authorization-matrix).
 
-**Status:** Tasks 0 and 1 complete as of 2026-10-21. The owner approved the content contract after reviewing the summary and excerpt/slug explanation. Tasks 2–7 below are implementation steps, not implemented behavior. Review this concrete execution plan before starting migrations; unresolved later-phase/client decisions remain unresolved.
+**Status:** Tasks 0–2 complete as of 2026-10-21. The owner approved the content contract after reviewing the summary and excerpt/slug explanation. Task 2 taxonomy is implemented and verified; Tasks 3–7 remain implementation steps, not implemented behavior. The owner approved execution of this plan. Pause at the Task 2 review checkpoint before article storage; unresolved later-phase/client decisions remain unresolved.
 
 ## Scope and outcome
 
@@ -100,13 +100,15 @@ For every migration task, read the full test output, then run `pnpm test:db`, `p
 
 **Interfaces:** Consumes existing `private.set_updated_at()` and `private.is_active_administrator(uuid default auth.uid()) -> boolean`. Produces `public.sections`, `public.categories`, `public.tags` with the accepted columns/constraints and SELECT-only application access. Creates no public RPC.
 
-- [ ] Write pgTAP tests: valid 120-character names/slugs; reject 121, empty, whitespace-only, leading/trailing whitespace, uppercase/noncanonical slugs, and negative navigation order. Duplicate slug/name fails globally for sections/tags and within a section for categories. Same category name/slug in different sections succeeds; missing section fails.
-- [ ] Add role tests with active/inactive sections and categories: anon/inactive/ineligible users see only active categories with active parents, and all tags; eligible active administrator sees inactive taxonomy too. Non-Google, unconfirmed, or out-of-domain administrator metadata must not expand reads. All new-table writes fail with SQLSTATE `42501` for anon and authenticated owner/other-author/admin roles.
-- [ ] Run `pnpm supabase test db supabase/tests/004_content_taxonomy.test.sql`; expect missing-table failure before the migration.
-- [ ] Implement the three tables with accepted UUID/timestamps/defaults and constraints. Use unique indexes on `lower(name)` in the accepted scope, plus slug uniqueness. References restrict parent deletion/update. Install updated-at triggers; enable RLS; revoke table privileges from PUBLIC/anon/authenticated, grant SELECT only. Use separate anon and authenticated policies so anon never invokes a private administrator predicate it cannot execute.
-- [ ] Apply with `pnpm supabase migration up --local`. Run the focused tests and shared migration checks above; update implemented labels and commit `feat: add secured content taxonomy`.
+- [x] Write pgTAP tests: valid 120-character names/slugs; reject 121, empty, whitespace-only, leading/trailing whitespace, uppercase/noncanonical slugs, and negative navigation order. Duplicate slug/name fails globally for sections/tags and within a section for categories. Same category name/slug in different sections succeeds; missing section fails.
+- [x] Add role tests with active/inactive sections and categories: anon/inactive/ineligible users see only active categories with active parents, and all tags; eligible active administrator sees inactive taxonomy too. Non-Google, unconfirmed, or out-of-domain administrator metadata must not expand reads. All new-table writes fail with SQLSTATE `42501` for anon and authenticated owner/other-author/admin roles.
+- [x] Run `pnpm supabase test db supabase/tests/004_content_taxonomy.test.sql`; expect missing-table failure before the migration.
+- [x] Implement the three tables with accepted UUID/timestamps/defaults and constraints. Use unique indexes on `lower(name)` in the accepted scope, plus slug uniqueness. References restrict parent deletion/update. Install updated-at triggers; enable RLS; revoke table privileges from PUBLIC/anon/authenticated, grant SELECT only. Use separate anon and authenticated policies so anon never invokes a private administrator predicate it cannot execute.
+- [x] Apply with `pnpm supabase migration up --local`. Run the focused tests and shared migration checks above; update implemented labels and commit `feat: add secured content taxonomy`.
 
 **Review outcome:** Catalog filtering and direct write denial are proven. Fixtures are transaction-local synthetic labels; no client content question is settled by a seed.
+
+Task 2 evidence: 163 taxonomy assertions and all 209 database assertions passed; database lint, generated-type drift, strict types, lint, formatting, and unit/component checks passed. The populated local upgrade preserved all baseline identity rows. No editor, taxonomy mutation interface, or article storage was added. Independent human review remains outstanding under the existing Git workflow.
 
 ### Task 3: Add owned draft article storage
 
