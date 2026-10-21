@@ -73,25 +73,25 @@ Playwright is configured for desktop and mobile browser checks. Install its Chro
 
 ## Documentation index
 
-| Document                                                                                    | Purpose                                                                    |
-| ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| [Project instructions](AGENTS.md)                                                           | Codex working rules and project preferences                                |
-| [Product requirements](docs/product-requirements.md)                                        | Users, MVP scope, deferred work, acceptance criteria, and client questions |
-| [MVP design](docs/superpowers/specs/2026-10-16-the-gavel-mvp-design.md)                     | Approved product, architecture, content, and security design               |
-| [Project foundation plan](docs/superpowers/plans/2026-10-17-project-foundation.md)          | Test-first scaffolding, local Supabase, membership access, and CI plan     |
-| [Phase 2 task plan](docs/superpowers/plans/2026-10-20-phase-two-content-foundation.md)      | Manageable content-data tasks, decision gates, and validation              |
-| [Proposed content contract](docs/superpowers/specs/2026-10-21-content-foundation-design.md) | Task 1 schema and permission proposals awaiting review                     |
-| [Architecture](docs/architecture.md)                                                        | Systems, boundaries, environments, and data flow                           |
-| [Component hierarchy](docs/component-hierarchy.md)                                          | Planned routes and UI responsibilities                                     |
-| [API contracts](docs/api-contracts.md)                                                      | Interface conventions and planned operations                               |
-| [Data model](docs/data-model.md)                                                            | Entities, relationships, constraints, and migrations                       |
-| [Design system](docs/design-system.md)                                                      | Brand direction, accessibility, and interaction rules                      |
-| [Security and permissions](docs/security-and-permissions.md)                                | Authentication, roles, RLS, uploads, and incident preparation              |
-| [Testing](docs/testing.md)                                                                  | Required verification and future commands                                  |
-| [Phase 1 review](docs/reviews/phase-1-foundation.md)                                        | Review evidence, remaining session coverage, and maintainer checklist      |
-| [Development workflow](docs/development-workflow.md)                                        | Task process and definition of done                                        |
-| [Coding style](docs/coding-style.md)                                                        | Planned TypeScript and project conventions                                 |
-| [Git and GitHub](docs/git-github.md)                                                        | Branch, review, CI, and release policy                                     |
-| [Deployment](docs/deployment.md)                                                            | Environments, configuration, release, and recovery                         |
-| [Decisions](docs/decisions/README.md)                                                       | Architecture decision records                                              |
-| [Runbooks](docs/runbooks/README.md)                                                         | Operational procedures                                                     |
+| Document                                                                                    | Purpose                                                                         |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| [Project instructions](AGENTS.md)                                                           | Codex working rules and project preferences                                     |
+| [Product requirements](docs/product-requirements.md)                                        | Users, MVP scope, deferred work, acceptance criteria, and client questions      |
+| [MVP design](docs/superpowers/specs/2026-10-16-the-gavel-mvp-design.md)                     | Approved product, architecture, content, and security design                    |
+| [Project foundation plan](docs/superpowers/plans/2026-10-17-project-foundation.md)          | Test-first scaffolding, local Supabase, membership access, and CI plan          |
+| [Phase 2 task plan](docs/superpowers/plans/2026-10-20-phase-two-content-foundation.md)      | Manageable content-data tasks, decision gates, and validation                   |
+| [Accepted content contract](docs/superpowers/specs/2026-10-21-content-foundation-design.md) | Approved Task 1 schema and permission design; implementation tracked separately |
+| [Architecture](docs/architecture.md)                                                        | Systems, boundaries, environments, and data flow                                |
+| [Component hierarchy](docs/component-hierarchy.md)                                          | Planned routes and UI responsibilities                                          |
+| [API contracts](docs/api-contracts.md)                                                      | Interface conventions and planned operations                                    |
+| [Data model](docs/data-model.md)                                                            | Entities, relationships, constraints, and migrations                            |
+| [Design system](docs/design-system.md)                                                      | Brand direction, accessibility, and interaction rules                           |
+| [Security and permissions](docs/security-and-permissions.md)                                | Authentication, roles, RLS, uploads, and incident preparation                   |
+| [Testing](docs/testing.md)                                                                  | Required verification and future commands                                       |
+| [Phase 1 review](docs/reviews/phase-1-foundation.md)                                        | Review evidence, remaining session coverage, and maintainer checklist           |
+| [Development workflow](docs/development-workflow.md)                                        | Task process and definition of done                                             |
+| [Coding style](docs/coding-style.md)                                                        | Planned TypeScript and project conventions                                      |
+| [Git and GitHub](docs/git-github.md)                                                        | Branch, review, CI, and release policy                                          |
+| [Deployment](docs/deployment.md)                                                            | Environments, configuration, release, and recovery                              |
+| [Decisions](docs/decisions/README.md)                                                       | Architecture decision records                                                   |
+| [Runbooks](docs/runbooks/README.md)                                                         | Operational procedures                                                          |

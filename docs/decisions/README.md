@@ -14,3 +14,5 @@ Copy [template.md](template.md) to `0001-descriptive-title.md`, increasing the n
 - [0004: Wait for dependency audit remediation](0004-wait-for-dependency-audit-remediation.md) — Superseded by 0005
 
 - [0005: Temporarily ignore the development braces advisory in CI](0005-temporary-ci-audit-exception.md) — Accepted
+
+- [0006: Store structured content behind a closed write boundary](0006-content-foundation-storage-boundary.md) — Accepted; implementation pending
