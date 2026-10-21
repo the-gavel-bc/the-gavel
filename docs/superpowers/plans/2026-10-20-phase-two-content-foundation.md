@@ -10,7 +10,7 @@
 
 **Spec:** [Approved MVP design](../specs/2026-10-16-the-gavel-mvp-design.md), [product requirements](../../product-requirements.md), [data model](../../data-model.md), [API contracts](../../api-contracts.md), and [security matrix](../../security-and-permissions.md#authorization-matrix).
 
-**Status:** The owner instructed execution of these tasks on 2026-10-20. Task 0 is in progress; this authorizes the content-foundation work sequence, not unresolved schema decisions. Task 1 must settle schema-affecting decisions and produce an approved, executable design before dependent implementation begins. The editor remains a later phase. No unresolved product decision or client answer is selected here.
+**Status:** The owner instructed execution of these tasks on 2026-10-20. Task 0 verification is in progress; Task 1 has a [proposed contract](../specs/2026-10-21-content-foundation-design.md) awaiting the owner’s schema decisions; this authorizes the content-foundation work sequence, not unresolved schema decisions. Task 1 must settle schema-affecting decisions and produce an approved, executable design before dependent implementation begins. The editor remains a later phase. No unresolved product decision or client answer is selected here.
 
 ## Proposed scope and outcome
 
@@ -34,7 +34,7 @@ Rich-text editor UI, uploads/Storage, publishing/archive/restore/delete operatio
 ## Starting state and carry-forwards
 
 - Planning baseline: main `a3bb502aaea39b1cafaa2277444322e7b6511928`. Its [hosted run 39448856662](https://github.com/dylandrozario/the-gavel/actions/runs/39448856662) passed when checked on 2026-10-20.
-- PR #3's documentation cleanup is merged into main. PR #4 merged into `docs/phase-one-review`, its base branch, rather than main. The colocation change `f220aee` is still absent from main as checked on 2026-10-20. Integrate it through a reviewed follow-up PR before assuming the new source paths exist on main.
+- PR #3’s documentation cleanup and PR #5’s task plan are merged. PR #6 integrated the folder refactor into main at `3c1a2412b0cb349d00300541f584b8c1b59a5dff` on 2026-10-21. The original CI run for that exact merge was cancelled; a fresh main-branch run was dispatched to verify the integrated baseline. The source paths now exist on main; final Task 0 completion still requires successful CI for that exact commit.
 - The [Phase 1 review record](../../reviews/phase-1-foundation.md) still tracks human review. No solo-maintainer policy exception has been approved. Proceeding with planning does not close that requirement.
 - [Session issuance/refresh/logout coverage](../../testing.md#session-coverage-still-needed-before-hosted-launch) remains pre-launch work. Existing synthetic browser sessions do not verify real Google login.
 - [ADR 0005](../../decisions/0005-temporary-ci-audit-exception.md) remains the only approved audit exception; remove it when compatible upstream remediation is available.
@@ -56,7 +56,7 @@ The following are planned file locations, not implemented files. Reserve actual 
 
 | Owner                      | Planned locations and responsibility                                                                                                                           |
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Content contract           | `docs/superpowers/specs/2026-10-20-content-foundation-design.md`; accepted storage, permissions, constraints, and deferred fields                              |
+| Content contract           | `docs/superpowers/specs/2026-10-21-content-foundation-design.md`; accepted storage, permissions, constraints, and deferred fields                              |
 | Schema                     | New additive files in `supabase/migrations/`; existing foundation migrations stay unchanged                                                                    |
 | Taxonomy assertions        | `supabase/tests/004_content_taxonomy.test.sql`                                                                                                                 |
 | Article assertions         | `supabase/tests/005_article_access.test.sql`                                                                                                                   |
@@ -83,9 +83,13 @@ Tasks proceed in order: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7. If a task i
 
 Task 0 execution record (2026-10-20): GitHub reports PR #6 as mergeable. Its [current CI run](https://github.com/dylandrozario/the-gavel/actions/runs/39515089794) passed; an [earlier run on the same source commit](https://github.com/dylandrozario/the-gavel/actions/runs/39448247160) passed. These do not establish success for the eventual merged main commit. Task 0 remains incomplete pending owner review/merge, main-tree verification, and the main CI result. No schema work has started.
 
+Task 0 continuation (2026-10-21): PR #6 is merged at `3c1a241`. The original merge CI was cancelled. A [fresh exact-main run](https://github.com/dylandrozario/the-gavel/actions/runs/39678683063) failed on its first attempt during Supabase initial-schema container startup (Docker exit 125), before project migrations. The failed job was retried once without source changes. Task 0 is still open until a successful exact-main result is recorded; no application/schema defect or permanent infrastructure fix is asserted from this single startup failure.
+
 ### Task 1: Resolve the content schema contract
 
 **Deliverable:** A short written design grounded in the linked MVP requirements, plus an implementation-ready checklist with exact fields/types/functions/migration files. This is the decision task; dependent code tasks remain blocked until it is approved.
+
+Execution status (2026-10-21): [Proposed contract](../specs/2026-10-21-content-foundation-design.md) prepared for owner review. Storage and behavior suggestions are explicitly unapproved. No new database table, dependency, RPC, or application mutation has been added.
 
 - [ ] Resolve stored article-body representation and validation boundaries. An editor library remains a separate choice unless the stored format requires it; do not install one during planning.
 - [ ] Resolve required versus optional draft fields, exact field limits, slug normalization/collision/edit rules, and taxonomy normalization. Distinguish draft validation from future publication requirements.

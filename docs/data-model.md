@@ -60,6 +60,8 @@ Generated application types live at `src/lib/supabase/database/database.types.ts
 
 ## Planned publishing entities
 
+A [proposed Phase 2 content contract](superpowers/specs/2026-10-21-content-foundation-design.md) makes suggested field bounds and phase-specific permissions concrete for review. It is not an accepted schema and does not change the implemented foundation.
+
 ### articles
 
 | Field                   | Type                                     | Rules                                                                       |
