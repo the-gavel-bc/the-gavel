@@ -1,20 +1,20 @@
 # Testing and validation
 
-Status: Foundation, taxonomy, private articles, and category/tag/contributor database coverage implemented; broader MVP coverage remains planned.
+Status: Foundation and Phase 2 content/history database coverage implemented; broader MVP coverage remains planned.
 
 ## Commands
 
 Run commands with Node.js 22 and the pnpm version recorded in `package.json`.
 
-| Check            | Command             | Current scope                                                        |
-| ---------------- | ------------------- | -------------------------------------------------------------------- |
-| Formatting       | `pnpm format:check` | Repository source and documentation                                  |
-| Lint             | `pnpm lint`         | Next.js and TypeScript source                                        |
-| Types            | `pnpm typecheck`    | Strict TypeScript compilation                                        |
-| Unit/component   | `pnpm test`         | Vitest and Testing Library                                           |
-| Browser          | `pnpm test:e2e`     | Playwright desktop and mobile projects                               |
-| Production build | `pnpm build`        | Next.js production compilation                                       |
-| Database         | `pnpm test:db`      | Local Supabase identity/content constraints and RLS (526 assertions) |
+| Check            | Command             | Current scope                                                                |
+| ---------------- | ------------------- | ---------------------------------------------------------------------------- |
+| Formatting       | `pnpm format:check` | Repository source and documentation                                          |
+| Lint             | `pnpm lint`         | Next.js and TypeScript source                                                |
+| Types            | `pnpm typecheck`    | Strict TypeScript compilation                                                |
+| Unit/component   | `pnpm test`         | Vitest and Testing Library                                                   |
+| Browser          | `pnpm test:e2e`     | Playwright desktop and mobile projects                                       |
+| Production build | `pnpm build`        | Next.js production compilation                                               |
+| Database         | `pnpm test:db`      | Local Supabase identity/content/history constraints and RLS (648 assertions) |
 
 Install the Playwright Chromium runtime once with `pnpm exec playwright install chromium`. Start local Supabase with `pnpm supabase start` using a Docker-compatible runtime. Run `pnpm supabase db reset`, `pnpm test:db`, `pnpm supabase db lint`, and `pnpm db:types:check`. Regenerate formatted types with `pnpm --silent db:types > src/lib/supabase/database/database.types.ts`. The drift check compares without overwriting the committed file.
 
@@ -55,7 +55,15 @@ Task 4 applied incrementally without a reset; the original foundation snapshot w
 
 Author B receives actual writer/editor credits on Author A's private article but can still read only B's own article and associations. Exact-ID checks cover articles, categories, tags, and credits; A retains owner reads without any credit. Administrator, anonymous, inactive, ineligible, and deactivated administrator paths plus all-role insert/update/delete denials exercise both new tables.
 
-Task 5 applied incrementally without a reset. The original foundation snapshot remained unchanged. The focused suite and full 526-assertion database suite passed; database lint found no schema errors. History and the final upgrade/clean-reset proof remain pending. No application mutation, content renderer, or tag-entry normalization is established by these tests.
+Task 5 applied incrementally without a reset. The original foundation snapshot remained unchanged. The focused suite and full 526-assertion database suite passed; database lint found no schema errors. At Task 5, history and the final upgrade/clean-reset proof remained pending; history coverage is recorded below. No application mutation, content renderer, or tag-entry normalization is established by these tests.
+
+## Implemented history coverage
+
+`supabase/tests/008_content_history.test.sql` adds 122 assertions for revision version/object/required fields and exact serialized 2 MiB acceptance/one-byte-over rejection with ASCII and multibyte snapshots. Isolated actors and a revision-only article prevent unrelated foundation/association foreign keys from masking restrictive history references. Audit tests cover all seven accepted actions, rejected action/resource types, nullable UUID correlation, retained resource IDs without an article, required fields, defaults, and the exact closed metadata column set.
+
+Crossed revision actors plus real contributor credits prove that history reads depend on article ownership, not actor/credit identity. Exact owner/admin reads, ordinary-owner audit denial, anonymous/inactive/ineligible/deactivated administrator denials, and all-role insert/payload/actor/delete denials exercise both tables. Privileged fixtures do not establish an application actor-forging or capture interface.
+
+Task 6 applied incrementally without resetting. The original foundation snapshot remained unchanged. The focused suite and full 648-assertion database suite passed; database lint found no schema errors. Final integrated upgrade/clean-reset proof remains Task 7. Automatic capture, restore, rich snapshot validation, and retention/deletion workflows are not implemented or claimed tested.
 
 ## Session coverage still needed before hosted launch
 

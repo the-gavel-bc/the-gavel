@@ -10,7 +10,7 @@
 
 **Spec:** [Accepted content contract](../specs/2026-10-21-content-foundation-design.md), [Approved MVP design](../specs/2026-10-16-the-gavel-mvp-design.md), [product requirements](../../product-requirements.md), [data model](../../data-model.md), [API contracts](../../api-contracts.md), and [security matrix](../../security-and-permissions.md#authorization-matrix).
 
-**Status:** Tasks 0–5 complete as of 2026-10-21. The owner approved the content contract after reviewing the summary and excerpt/slug explanation. Taxonomy, private articles, and category/tag/contributor associations are implemented and verified; Tasks 6–7 remain implementation steps, not implemented behavior. The owner approved execution of this plan. Pause at the Task 5 review checkpoint before history storage; unresolved later-phase/client decisions remain unresolved.
+**Status:** Tasks 0–6 complete as of 2026-10-21. The owner approved the content contract after reviewing the summary and excerpt/slug explanation. Taxonomy, private articles, category/tag/contributor associations, and protected history storage are implemented and verified; Task 7 integrated verification remains pending. The owner approved execution of this plan. Pause at the Task 6 review checkpoint before final integrated verification; unresolved later-phase/client decisions remain unresolved.
 
 ## Scope and outcome
 
@@ -165,14 +165,16 @@ Task 5 evidence: 90 tag/credit assertions and all 526 database assertions passed
 
 **Interfaces:** Consumes article/administrator predicates and Auth identities. Produces `public.article_revisions` and `public.audit_events` with the exact accepted contract columns, snapshot version/bounds, action allowlist, and restrictive references. Creates no write or capture function.
 
-- [ ] Write tests: revision snapshot must be an object, version exactly 1, serialized size <= 2,097,152 bytes, with invalid version/shape/oversize rejected. Actor and article references must exist; referenced identity/article deletion fails.
-- [ ] Test all seven accepted article audit actions and reject other action/resource types. Audit storage has no body, arbitrary metadata, or snapshot column. Resource ID is not an article FK; a privileged fixture audit event can retain an ID without a current article row. Correlation ID accepts NULL or a UUID.
-- [ ] Test owners read only own revisions; administrator reads all revisions and audit rows. Other authors, including credited contributors, cannot read those revisions; ordinary owners cannot read audit rows. Inactive/ineligible identities fail. Every app-role insert/update/delete on both tables fails with `42501`, including forged actor writes.
-- [ ] Run focused tests; observe intended missing-table failure.
-- [ ] Implement accepted schema, indexes on revision article IDs and audit resource IDs, RLS, and authenticated SELECT-only grants through the existing predicates. Do not add capture/restore/deletion endpoints or claim automatic events exist.
-- [ ] Apply incrementally, run focused/shared checks, update docs, and commit `feat: add protected content history storage`.
+- [x] Write tests: revision snapshot must be an object, version exactly 1, serialized size <= 2,097,152 bytes, with invalid version/shape/oversize rejected. Actor and article references must exist; referenced identity/article deletion fails.
+- [x] Test all seven accepted article audit actions and reject other action/resource types. Audit storage has no body, arbitrary metadata, or snapshot column. Resource ID is not an article FK; a privileged fixture audit event can retain an ID without a current article row. Correlation ID accepts NULL or a UUID.
+- [x] Test owners read only own revisions; administrator reads all revisions and audit rows. Other authors, including credited contributors, cannot read those revisions; ordinary owners cannot read audit rows. Inactive/ineligible identities fail. Every app-role insert/update/delete on both tables fails with `42501`, including forged actor writes.
+- [x] Run focused tests; observe intended missing-table failure.
+- [x] Implement accepted schema, indexes on revision article IDs and audit resource IDs, RLS, and authenticated SELECT-only grants through the existing predicates. Do not add capture/restore/deletion endpoints or claim automatic events exist.
+- [x] Apply incrementally, run focused/shared checks, update docs, and commit `feat: add protected content history storage`.
 
 **Review outcome:** Stored history is private and cannot be forged by normal requests. Atomic capture remains closed future work, not an unfinished callable API.
+
+Task 6 evidence: 122 history assertions and all 648 database assertions passed; database lint, generated-type drift, strict types, lint, formatting, and 44 unit/component tests passed. Crossed actors and credits cannot grant revision access; audits remain administrator-only and all application tampering is denied. The original foundation snapshot remains unchanged. Automatic capture/restore/deletion APIs remain future work. Independent human review remains outstanding.
 
 ### Task 7: Verify the integrated schema and hand off
 

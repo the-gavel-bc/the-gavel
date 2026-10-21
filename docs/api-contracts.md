@@ -1,6 +1,6 @@
 # API contracts
 
-Status: Foundation access/session interfaces and private article read storage implemented; publishing operations remain planned.
+Status: Foundation access/session interfaces and Phase 2 private content/history read storage implemented; publishing operations remain planned.
 
 ## Style and ownership
 
@@ -33,7 +33,7 @@ Authoritative request schemas will live beside the implemented server operations
 
 Taxonomy SELECT access, private article SELECT access, and category/tag/contributor association SELECT access are enforced by database grants/RLS; see the [data model](data-model.md#implemented-article-storage) and [security controls](security-and-permissions.md#implemented-private-article-controls). `private.can_read_article(check_article_id uuid) -> boolean` is an internal policy predicate for the authenticated caller, not a public mutation or arbitrary-user lookup RPC. It returns false for missing or unreadable article IDs. It does not accept an identity argument or expose private profile links.
 
-All article associations follow article read authority; credits confer no additional access. Article/category links enforce same-section membership through composite references. No application section-change, tag-entry, credit-management, or link-mutation interface is exposed. No application article-fetch wrapper, editor endpoint, public article projection, or new mutation RPC is implemented yet. Generated database Insert/Update types describe the row shape; they do not grant write permission. All new-table application writes remain denied, including administrator writes.
+All article associations and revisions follow article read authority; credits and revision actor IDs confer no additional access. Audit reads require an eligible active administrator. Article/category links enforce same-section membership through composite references. No application section-change, tag-entry, credit-management, or link-mutation interface is exposed. No application article-fetch wrapper, editor endpoint, public article projection, history capture/restore interface, or new mutation RPC is implemented yet. Generated database Insert/Update types describe the row shape; they do not grant write permission. All new-table application writes remain denied, including administrator writes.
 
 ## Planned public operations
 
