@@ -127,6 +127,14 @@ Evidence: [Task 4 verification](../../testing.md#phase-3-task-4-versioned-draft-
 - [ ] Typed actions validate first, invoke user-scoped RPCs, parse the result union, revalidate only private draft/list surfaces and never accept ownership/actor/status/history fields. Treat transport uncertainty as `unavailable` so the same request UUID can be retried. No automatic new command after lost response. Configure/test near-limit transport without weakening canonical DB bounds.
 - [ ] GREEN focused/full unit, types/lint/format/build and SQL/contract regression. Commit `feat: add checked draft queries and actions`.
 
+Task 5 execution details: keep commits under 300 changed lines; implement cursor, private fetch, listing, catalog options, detail, action schemas/actions and final evidence separately. Add focused `draft-options/` and `draft-action-contract/` modules when their owning implementation needs them, with colocated tests.
+
+- `ArticlePage` contains `items` (id/title/slug/status/sectionId/version/updatedAt only) and nullable `nextCursor`. Invalid page inputs and query failures throw safe errors; access redirects from the existing guard propagate.
+- `DraftDetailResult` uses `kind: "editable" | "readOnly" | "unsupportedContent" | "notFound"`. Editable data includes articleId/version/updatedAt, canonical draft and unavailable-selection IDs; read-only/unsupported states never return an unsafe body. Fetch article plus associations in one embedded SQL read to avoid mixing versions.
+- `DraftOptions` contains active sections/categories, existing tags and active contributor profiles; category choices require an active matching parent. Unavailable current IDs are retained as IDs, with generic labels supplied by the form later.
+- Queries use request-time rendering and user-scoped no-store fetches. Actions strictly validate the command, use the existing verified access lookup, call only one matching RPC with its original request ID, and validate the returned union. Known failures expose stable codes. Confirmed successful commits remain acknowledged if private-path revalidation fails; future dynamic reads fetch current data.
+- Preserve DB timestamp precision in strict version-one cursors. The accepted transport limit is 4 MiB; canonical draft/body limits stay unchanged. Invalid action envelopes are rejected before RPC; database quota applies to every attempted RPC.
+
 ### Task 6: My Articles listing
 
 **Files:** Modify `src/app/(dashboard)/dashboard/page.tsx` and its test; create route `loading.tsx`/`error.tsx` when needed and `src/components/dashboard/article-list/article-list.tsx`, `.module.css`, `.test.tsx`; create `e2e/drafts/drafts.spec.ts` and extend local-only fixture helper.
