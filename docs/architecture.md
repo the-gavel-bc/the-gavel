@@ -15,16 +15,16 @@ Browser
 
 ## Technology choices
 
-| Area           | Technology                 | Reason                                                            | Status      |
-| -------------- | -------------------------- | ----------------------------------------------------------------- | ----------- |
-| Language       | TypeScript                 | Shared types and strict boundary validation                       | Approved    |
-| Web framework  | Next.js                    | Server rendering, routing, metadata, and Vercel integration       | Approved    |
-| Hosting        | Vercel                     | Managed deployments, previews, TLS, edge protection, and rollback | Approved    |
-| Authentication | Supabase Auth with Google  | Managed OAuth and Supabase session integration                    | Approved    |
-| Database       | Supabase PostgreSQL        | Relational integrity, search support, migrations, and RLS         | Approved    |
-| Media          | Supabase Storage           | Managed object storage integrated with RLS                        | Approved    |
-| Styling        | Global CSS and CSS Modules | Small publication-owned design system                             | Implemented |
-| Editor library | Not selected               | Select during article-editor planning                             | Open        |
+| Area           | Technology                 | Reason                                                            | Status                  |
+| -------------- | -------------------------- | ----------------------------------------------------------------- | ----------------------- |
+| Language       | TypeScript                 | Shared types and strict boundary validation                       | Approved                |
+| Web framework  | Next.js                    | Server rendering, routing, metadata, and Vercel integration       | Approved                |
+| Hosting        | Vercel                     | Managed deployments, previews, TLS, edge protection, and rollback | Approved                |
+| Authentication | Supabase Auth with Google  | Managed OAuth and Supabase session integration                    | Approved                |
+| Database       | Supabase PostgreSQL        | Relational integrity, search support, migrations, and RLS         | Approved                |
+| Media          | Supabase Storage           | Managed object storage integrated with RLS                        | Approved                |
+| Styling        | Global CSS and CSS Modules | Small publication-owned design system                             | Implemented             |
+| Editor library | Tiptap                     | Constrained JSON adapter; explicit Save; see ADR 0007             | Accepted; not installed |
 
 ## Boundaries and responsibilities
 

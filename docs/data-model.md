@@ -146,3 +146,7 @@ Maps previous public paths to current destinations when published slugs or route
 Known deferred constraint: deleting an approving Auth identity is currently rejected by approval-state invariants despite the foreign key's `SET NULL` clause. Choose preserved-history versus deletion semantics before introducing infrastructure identity deletion procedures; ordinary membership deactivation does not delete Auth users.
 
 Local reset, pgTAP, lint, and type generation require a running Docker-compatible container runtime. The local project is not linked to a hosted Supabase project.
+
+## Accepted Phase 3 additions — not implemented
+
+The [accepted draft contract](superpowers/specs/2026-10-22-private-draft-workflow-design.md) adds an article edit version and private request-receipt/quota records in later migrations. It defines their semantics and snapshot shape. Existing migrations and generated types remain unchanged at this planning checkpoint. See [ADR 0007](decisions/0007-private-draft-editor-and-mutations.md) and the [implementation plan](superpowers/plans/2026-10-22-phase-three-private-drafts.md).

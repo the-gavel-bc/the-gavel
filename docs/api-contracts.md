@@ -83,3 +83,7 @@ Anonymous operations return published, non-archived data only.
 ## Contract verification
 
 Implementation must include schema tests, authorization tests, malformed-input tests, idempotency/regression coverage for sensitive mutations, and generated or manually maintained examples using synthetic data. An OpenAPI document is optional unless public HTTP APIs expand beyond the web application.
+
+## Accepted Phase 3 interfaces — not implemented
+
+The [accepted private-draft contract](superpowers/specs/2026-10-22-private-draft-workflow-design.md) defines `create_article_draft(p_request_id uuid,p_draft jsonb)` and `save_article_draft(p_article_id uuid,p_expected_version integer,p_request_id uuid,p_draft jsonb)`, both returning JSONB. It is authoritative for document/request/result grammar, errors, pagination, retry/version/quota rules and complete history snapshots. [ADR 0007](decisions/0007-private-draft-editor-and-mutations.md) records the decision. No callable interface or grant is added by this acceptance; implementation follows the [task plan](superpowers/plans/2026-10-22-phase-three-private-drafts.md).
