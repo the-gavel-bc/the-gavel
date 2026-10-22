@@ -14,6 +14,7 @@ export default defineConfig({
       ...configDefaults.exclude,
       "e2e/**",
       "scripts/draft-contract-check/**",
+      "scripts/draft-concurrency/**",
     ],
     setupFiles: ["./vitest.setup.ts"],
   },
