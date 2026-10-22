@@ -1,3 +1,12 @@
+import {
+  checkDraftInput,
+  isValidDraftDocument,
+  type DraftInput,
+} from "../draft-contract/draft-contract";
+import {
+  loadDraftOptions,
+  type DraftOptions,
+} from "../draft-options/draft-options";
 import { connection } from "next/server";
 import { z } from "zod";
 import { requireActiveMembership } from "@/lib/auth/access/access";
@@ -72,17 +81,15 @@ export async function getMyArticlesPage(input: {
       .array(summaryRow)
       .max(parsed.data.pageSize + 1)
       .parse(data);
-    const items = rows
-      .slice(0, parsed.data.pageSize)
-      .map((row) => ({
-        id: row.id,
-        title: row.title,
-        slug: row.slug,
-        status: row.status,
-        sectionId: row.section_id,
-        version: row.edit_version,
-        updatedAt: row.updated_at,
-      }));
+    const items = rows.slice(0, parsed.data.pageSize).map((row) => ({
+      id: row.id,
+      title: row.title,
+      slug: row.slug,
+      status: row.status,
+      sectionId: row.section_id,
+      version: row.edit_version,
+      updatedAt: row.updated_at,
+    }));
     const last = items.at(-1);
     return {
       items,
@@ -93,5 +100,105 @@ export async function getMyArticlesPage(input: {
     };
   } catch {
     throw new Error("Unable to load articles.");
+  }
+}
+
+export type DraftDetailResult =
+  | {
+      kind: "editable";
+      articleId: string;
+      version: number;
+      updatedAt: string;
+      draft: DraftInput;
+      unavailableSelections: {
+        sectionId: string | null;
+        categoryIds: string[];
+        tagIds: string[];
+        contributorIds: string[];
+      };
+    }
+  | { kind: "readOnly"; status: "published" | "archived" }
+  | { kind: "unsupportedContent" }
+  | { kind: "notFound" };
+
+export async function getDraftOptions(
+  sectionId?: string,
+): Promise<DraftOptions> {
+  if (sectionId !== undefined && !isDraftUuid(sectionId))
+    throw new Error("Invalid section ID.");
+  const { client } = await reader();
+  return loadDraftOptions(client, sectionId);
+}
+
+export async function getDraftDetail(
+  articleId: string,
+): Promise<DraftDetailResult> {
+  if (!isDraftUuid(articleId)) throw new Error("Invalid article ID.");
+  const { access, client } = await reader();
+  try {
+    let query = client
+      .from("articles")
+      .select(
+        "id,title,slug,status,section_id,edit_version,updated_at,excerpt,content,seo_keyphrase,meta_description,article_categories(category_id),article_tags(tag_id),article_contributors(profile_id,contribution_role,display_order)",
+      )
+      .eq("id", articleId);
+    if (access.role !== "administrator")
+      query = query.eq("owner_profile_id", access.profileId);
+    const { data, error } = await query.maybeSingle();
+    if (error) throw error;
+    if (!data) return { kind: "notFound" };
+    const summary = summaryRow.parse(data);
+    if (summary.status !== "draft")
+      return { kind: "readOnly", status: summary.status };
+    if (!isValidDraftDocument(data.content))
+      return { kind: "unsupportedContent" };
+    const checked = checkDraftInput({
+      schemaVersion: 1,
+      title: data.title,
+      slug: data.slug,
+      sectionId: data.section_id,
+      excerpt: data.excerpt,
+      content: data.content,
+      seoKeyphrase: data.seo_keyphrase,
+      metaDescription: data.meta_description,
+      categoryIds: data.article_categories.map((row) => row.category_id),
+      tagIds: data.article_tags.map((row) => row.tag_id),
+      contributors: data.article_contributors.map((row) => ({
+        profileId: row.profile_id,
+        role: row.contribution_role,
+        displayOrder: row.display_order,
+      })),
+    });
+    if (!checked.ok) throw new Error("Invalid stored draft.");
+    const draft = checked.value;
+    const options = await loadDraftOptions(client, draft.sectionId);
+    const missing = (ids: string[], choices: { id: string }[]) =>
+      ids.filter((id) => !choices.some((choice) => choice.id === id));
+    return {
+      kind: "editable",
+      articleId: summary.id,
+      version: summary.edit_version,
+      updatedAt: summary.updated_at,
+      draft,
+      unavailableSelections: {
+        sectionId: options.sections.some(
+          (section) => section.id === draft.sectionId,
+        )
+          ? null
+          : draft.sectionId,
+        categoryIds: missing(draft.categoryIds, options.categories),
+        tagIds: missing(draft.tagIds, options.tags),
+        contributorIds: [
+          ...new Set(
+            missing(
+              draft.contributors.map((credit) => credit.profileId),
+              options.contributors,
+            ),
+          ),
+        ],
+      },
+    };
+  } catch {
+    throw new Error("Unable to load draft.");
   }
 }
