@@ -23,7 +23,7 @@
 - The only audit exception remains ADR 0005; no dependency ignore is added. Real client labels, retention/deletion choices and human/pre-launch review carry-forwards stay unresolved.
 - Keep each module/component with its owned tests/styles/schema/fixtures. Preserve unrelated screenshots and existing worktree files.
 - Before the first migration save a private populated-baseline snapshot; apply incrementally through Tasks 2–4. Do not reset until Task 11 proves preservation. SQL fixtures roll back.
-- Each task has a cohesive commit containing its code/tests/docs/types and reports actual validation. Pause at the owner checkpoint after each completed task.
+- Each task has focused commits, each targeting at most 300 changed lines, with code/tests/docs/types for its independently testable step and actual validation. Pause at the owner checkpoint after each completed task.
 
 ## Review focus
 
@@ -76,7 +76,7 @@ Evidence: [Task 2 verification](../../testing.md#phase-3-task-2-draft-validation
 
 ### Task 3: safe draft create transaction
 
-**Files:** Create `supabase/migrations/20261022010000_create_article_draft.sql`, `supabase/tests/010_create_draft.test.sql`, `scripts/draft-concurrency/draft-concurrency.test.ts` and its dedicated config; update types, test scripts/CI and API/data/security/testing docs.
+**Files:** Create additive Task 3 migrations `20261022010000_draft_write_state.sql`, `20261022010100_draft_write_guards.sql`, `20261022010200_draft_snapshot.sql`, `20261022010300_create_article_draft.sql` under `supabase/migrations/`; create focused suites `010_draft_write_state.test.sql`, `011_draft_write_guards.test.sql`, `012_draft_snapshot.test.sql`, `013_create_draft.test.sql` under `supabase/tests/`, `scripts/draft-concurrency/draft-concurrency.test.ts` and its dedicated config; update types, test scripts/CI and API/data/security/testing docs.
 
 **Interfaces:** `public.create_article_draft(p_request_id uuid,p_draft jsonb)->jsonb`; private `draft_write_receipts`/`draft_write_limits` per accepted spec; `articles.edit_version integer NOT NULL DEFAULT 1 CHECK >=1`. Private helpers `capture_draft_snapshot(p_article_id uuid)->jsonb`, `lock_draft_actor()->uuid` (eligible active caller profile ID), `check_draft_references(p_draft jsonb)->boolean`, `consume_draft_attempt(p_actor_id uuid)->boolean`, and `draft_request_hash(p_operation text,p_article_id uuid,p_expected_version integer,p_draft jsonb)->bytea`. Helpers have no client execution grants, and helpers reading private identity/history use fixed-search-path definer privileges only where needed.
 
@@ -85,7 +85,20 @@ Evidence: [Task 2 verification](../../testing.md#phase-3-task-2-draft-validation
 - [ ] Observe focused RED, then implement additive schema and function. Lock caller identity/membership/profile rows before checking active trusted state, then the caller quota row to serialize replay/quota decisions. Recheck eligibility after any wait; lock selected references before validating them. Request failures are structured results; guarded business subtransaction rolls back content/history/receipt while quota can commit. Unexpected errors return safe `unavailable`, logging only SQLSTATE/correlation privately. All direct table grants remain closed.
 - [ ] Hash the validated/canonical request with built-in SHA-256; receipts PK `(actor_user_id,request_id)` stores operation, article UUID, expected/result versions, payload hash, result timestamp/changed flag and creation time. No article FK on receipt resource ID; actor FKs restrict deletion. Quota row contains actor/window start/count; index receipts by actor/time only if used by a real query. Snapshot captures an explicit closed article-field list (including edit_version), sorted IDs and contributor selections; do not use a future-column-blind `to_jsonb(row)` copy. Private tables have no app grants. Revoke PUBLIC/anon and grant authenticated EXECUTE only on the create signature.
 - [ ] Concurrency suite uses independent local psql processes/transactions over stdin: simultaneous same-actor request creates one draft/history set; a blocked call observes deactivated identity/profile/membership or taxonomy after the lock clears. Create `scripts/draft-concurrency/vitest.config.ts` with repository root, node environment and only its owned test; exclude that directory in root unit config. Set `test:draft-concurrency` to `vitest run --config scripts/draft-concurrency/vitest.config.ts`; add CI step after DB checks. No service-role client, passwords, hosted URL or new DB driver.
-- [ ] Apply incrementally, GREEN focused/shared/concurrency checks and preservation snapshot comparison. Commit `feat: create private drafts with atomic history`.
+- [ ] Apply incrementally, GREEN focused/shared/concurrency checks and preservation snapshot comparison. Use the commit sequence below, checking each step before committing.
+
+Task 3 commit boundaries (owner requested small commits):
+
+1. Record commit-size preference and refine this sequence (documentation only).
+2. Add private receipt/quota storage and edit versions, with schema/grant/upgrade tests and generated types.
+3. Add private actor/reference locking, quota and hashing guards with focused tests.
+4. Add closed bounded revision snapshot construction with focused tests.
+5. Add create transaction, actor/replay/grant tests and generated RPC types.
+6. Add separate validation/quota and rollback regression suites as needed, each with at most 300 changed lines.
+7. Add bounded real-session concurrency support, then focused races/CI wiring in separate commits.
+8. Record final checks and documentation. Fix review defects in separate focused commits.
+
+The public RPC is enabled only after its guards and snapshot helper exist. Each intermediate migration is additive and keeps prior clients compatible. Task 4 retains its `20261022020000` timestamp. Supplementary test filenames may use descriptive suffixes within the Task 3 number range; no copied large JSON fixtures.
 
 ### Task 4: versioned atomic draft save
 
