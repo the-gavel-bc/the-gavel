@@ -10,7 +10,7 @@
 
 **Spec:** [Accepted private-draft contract](../specs/2026-10-22-private-draft-workflow-design.md), approved by the owner on 2026-10-22. Existing [Phase 2 contract](../specs/2026-10-21-content-foundation-design.md), [API](../../api-contracts.md), [data](../../data-model.md), [security](../../security-and-permissions.md), [style](../../coding-style.md), and [testing](../../testing.md) remain authoritative for their existing boundaries.
 
-**Status:** Tasks 0 and 1 complete as documentation/baseline work. Tasks 2–4 validation and draft create/save are complete. Tasks 5–11 are not implemented. The owner requested native planning/execution followed by task-completion notifications and review checkpoints; preserve that approach. This plan refines the accepted work packages without approving any extra product scope.
+**Status:** Tasks 0 and 1 complete as documentation/baseline work. Tasks 2–5 validation, draft create/save and server queries/actions are complete. Tasks 6–11 are not implemented. The owner requested native planning/execution followed by task-completion notifications and review checkpoints; preserve that approach. This plan refines the accepted work packages without approving any extra product scope.
 
 ## Global constraints
 
@@ -122,10 +122,10 @@ Evidence: [Task 4 verification](../../testing.md#phase-3-task-4-versioned-draft-
 
 **Interfaces:** `getMyArticlesPage(input:{cursor?:string;pageSize?:number}):Promise<ArticlePage>`; `getDraftDetail(articleId:string):Promise<DraftDetailResult>`; `getDraftOptions(sectionId?:string):Promise<DraftOptions>`; server actions `createDraftAction(command:CreateDraftCommand):Promise<DraftWriteResult>` and `saveDraftAction(command:SaveDraftCommand):Promise<DraftWriteResult>`. ArticlePage has bounded summaries plus nextCursor, no body. Detail result is editable `{articleId,version,updatedAt,draft,unavailableSelections}` or read-only `{status}`, unsupported-content state, or missing. Export these owned types from their modules; no barrel-only files.
 
-- [ ] RED unit tests independently call every boundary, checking verified active guard, no service-role client, exact RPC args, strict command fields, stable errors without raw SQL/body logs, replay preservation and private/no-store behavior. Reject invalid page size/cursor/UUID; profile ownership filter must apply even to administrators.
-- [ ] Implement default 20/max 50 page size and `(updated_at DESC,id DESC)` keyset cursor with a strict opaque version-one timestamp/UUID object preserving DB timestamp precision. Select listing summaries only; current caller profile always supplies the owner filter. Detail uses existing RLS, validates body before editor load and returns safe unsupported/read-only states. Catalog choices explicitly filter active section/category/profile rows even for admin; unavailable existing IDs get a generic label, not broader read grants.
-- [ ] Typed actions validate first, invoke user-scoped RPCs, parse the result union, revalidate only private draft/list surfaces and never accept ownership/actor/status/history fields. Treat transport uncertainty as `unavailable` so the same request UUID can be retried. No automatic new command after lost response. Configure/test near-limit transport without weakening canonical DB bounds.
-- [ ] GREEN focused/full unit, types/lint/format/build and SQL/contract regression. Commit `feat: add checked draft queries and actions`.
+- [x] RED unit tests independently call every boundary, checking verified active guard, no service-role client, exact RPC args, strict command fields, stable errors without raw SQL/body logs, replay preservation and private/no-store behavior. Reject invalid page size/cursor/UUID; profile ownership filter must apply even to administrators.
+- [x] Implement default 20/max 50 page size and `(updated_at DESC,id DESC)` keyset cursor with a strict opaque version-one timestamp/UUID object preserving DB timestamp precision. Select listing summaries only; current caller profile always supplies the owner filter. Detail uses existing RLS, validates body before editor load and returns safe unsupported/read-only states. Catalog choices explicitly filter active section/category/profile rows even for admin; unavailable existing IDs get a generic label, not broader read grants.
+- [x] Typed actions validate first, invoke user-scoped RPCs, parse the result union, revalidate only private draft/list surfaces and never accept ownership/actor/status/history fields. Treat transport uncertainty as `unavailable` so the same request UUID can be retried. No automatic new command after lost response. Configure/test near-limit transport without weakening canonical DB bounds.
+- [x] GREEN focused/full unit, types/lint/format/build and SQL/contract regression. Committed as focused cursor/client/list/options/detail/schema/action/transport fixes plus documentation, each below 300 changed lines.
 
 Task 5 execution details: keep commits under 300 changed lines; implement cursor, private fetch, listing, catalog options, detail, action schemas/actions and final evidence separately. Add focused `draft-options/` and `draft-action-contract/` modules when their owning implementation needs them, with colocated tests.
 
@@ -134,6 +134,8 @@ Task 5 execution details: keep commits under 300 changed lines; implement cursor
 - `DraftOptions` contains active sections/categories, existing tags and active contributor profiles; category choices require an active matching parent. Unavailable current IDs are retained as IDs, with generic labels supplied by the form later.
 - Queries use request-time rendering and user-scoped no-store fetches. Actions strictly validate the command, use the existing verified access lookup, call only one matching RPC with its original request ID, and validate the returned union. Known failures expose stable codes. Confirmed successful commits remain acknowledged if private-path revalidation fails; future dynamic reads fetch current data.
 - Preserve DB timestamp precision in strict version-one cursors. The accepted transport limit is 4 MiB; canonical draft/body limits stay unchanged. Invalid action envelopes are rejected before RPC; database quota applies to every attempted RPC.
+
+Task 5 completion: [verification evidence](../../testing.md#phase-3-task-5-server-queryaction-boundary). Separate review resolved the catalog row-cap issue; human security review and future draft route/form browser coverage remain outstanding. Owner review checkpoint before Task 6.
 
 ### Task 6: My Articles listing
 
