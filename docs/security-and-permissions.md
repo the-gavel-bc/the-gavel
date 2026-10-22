@@ -157,3 +157,7 @@ Never log passwords, OAuth tokens, session cookies, secret keys, complete reques
 ## Verification
 
 Required permission, content-safety, upload, session, caching, and recovery checks are defined in `testing.md`. Use OWASP ASVS as the application-security verification baseline during implementation and pre-launch review.
+
+## Accepted Phase 3 write extension — not implemented
+
+[ADR 0007](decisions/0007-private-draft-editor-and-mutations.md) accepts two narrow authenticated draft mutation functions with explicit database identity/profile/membership, owner/admin, status and content checks. Direct table writes remain closed. The [contract](superpowers/specs/2026-10-22-private-draft-workflow-design.md) requires private receipt/quota state, authorization rechecks after waits and atomic content/history/receipt capture; quota bookkeeping may survive an ordinary failed business operation. These controls require implementation and negative/concurrency tests before exposure. Existing implemented grants and policies are unchanged by this decision.
