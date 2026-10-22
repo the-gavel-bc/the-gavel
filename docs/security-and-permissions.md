@@ -158,9 +158,9 @@ Never log passwords, OAuth tokens, session cookies, secret keys, complete reques
 
 Required permission, content-safety, upload, session, caching, and recovery checks are defined in `testing.md`. Use OWASP ASVS as the application-security verification baseline during implementation and pre-launch review.
 
-## Accepted Phase 3 write extension — not implemented
+## Accepted Phase 3 write extension
 
-[ADR 0007](decisions/0007-private-draft-editor-and-mutations.md) accepts two narrow authenticated draft mutation functions with explicit database identity/profile/membership, owner/admin, status and content checks. Direct table writes remain closed. The [contract](superpowers/specs/2026-10-22-private-draft-workflow-design.md) requires private receipt/quota state, authorization rechecks after waits and atomic content/history/receipt capture; quota bookkeeping may survive an ordinary failed business operation. These controls require implementation and negative/concurrency tests before exposure. Existing implemented grants and policies are unchanged by this decision.
+[ADR 0007](decisions/0007-private-draft-editor-and-mutations.md) accepts two narrow authenticated draft mutation functions with explicit database identity/profile/membership, owner/admin, status and content checks. Direct table writes remain closed. The [contract](superpowers/specs/2026-10-22-private-draft-workflow-design.md) requires private receipt/quota state, authorization rechecks after waits and atomic content/history/receipt capture; quota bookkeeping may survive an ordinary failed business operation. Create-time controls are implemented and tested below; save remains planned. Existing direct table grants and policies remain unchanged.
 
 ## Implemented Phase 3 validation boundary
 
@@ -169,3 +169,9 @@ Task 2 implements only the [draft input validators](api-contracts.md#implemented
 Shared adversarial fixtures exercise exact keys/types, document parent grammar, unsafe links/attributes, Unicode and size/depth/node bounds, duplicate selections and canonicalization against both TypeScript and the real local database. Grant catalog assertions and actual anonymous/authenticated invocation denials cover the helper boundary. Existing privileged content fixtures remain unchanged; adding a validator does not retroactively validate stored rows or make arbitrary JSON safe to render.
 
 Internationalized-domain support is deferred by owner decision; the [authoritative link contract](superpowers/specs/2026-10-22-private-draft-workflow-design.md#draft-payload-and-content) excludes unchecked punycode host labels. This resolves the SQL/browser discrepancy found during independent Task 2 review without adding a dependency or weakening either validation boundary.
+
+## Implemented Phase 3 draft creation
+
+The [create RPC](api-contracts.md#implemented-draft-creation) is the only new application write entry point. It is a fixed-search-path security-definer boundary; its five guard helpers and snapshot helper remain private invokers without application execution. Auth identity, membership and owner-profile SHARE locks preserve eligibility through commit; selected reference locks prevent activation/parent changes during capture. Post-wait checks and actor quota serialization are exercised with independent authenticated sessions.
+
+All article/association/history direct writes remain denied, including administrators. Eligible callers receive one self-owned draft with internally derived actor/history; credit grants no authority. Exact successful authorized retries are free; other eligible attempts consume the fixed quota. A guarded business subtransaction covers article/links/revision/audit/receipt together. SQL diagnostics remain private, with only SQLSTATE/request ID logged. No hosted credentials, new services or dependencies are introduced. Save/lifecycle/reassignment/restore and editor UI are not enabled; existing human/pre-launch review requirements remain separate.

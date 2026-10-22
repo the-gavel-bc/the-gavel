@@ -17,4 +17,4 @@ Copy [template.md](template.md) to `0001-descriptive-title.md`, increasing the n
 
 - [0006: Store structured content behind a closed write boundary](0006-content-foundation-storage-boundary.md) — Accepted; data-only storage implemented
 
-- [0007: Use a constrained editor and atomic private draft mutations](0007-private-draft-editor-and-mutations.md) — Accepted; validators implemented; mutations/editor pending
+- [0007: Use a constrained editor and atomic private draft mutations](0007-private-draft-editor-and-mutations.md) — Accepted; validators and draft creation implemented; save/editor pending

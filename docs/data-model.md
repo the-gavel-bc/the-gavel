@@ -1,6 +1,6 @@
 # Data model
 
-Status: Foundation identity and Phase 2 content storage/read permissions implemented; application mutation/publishing workflows remain planned.
+Status: Foundation identity, content storage/read permissions and atomic private draft creation implemented; draft save/editor/publishing remain planned.
 
 ## Storage
 
@@ -100,7 +100,7 @@ Both tables grant authenticated SELECT only, with RLS reusing the existing priva
 
 `supabase/migrations/20261021040000_content_history.sql` is authoritative for `article_revisions` and `audit_events`. Both have generated UUIDs, required actor Auth references, and creation timestamps. Actor references restrict identity changes/deletion. Revision article references also restrict changes/deletion; indexes cover article/resource and actor lookups.
 
-Revisions require an article, snapshot version 1, and a JSON object snapshot of at most 2,097,152 serialized UTF-8 bytes. Owners and eligible active administrators read revisions through the existing private article predicate. A revision's actor or an article credit grants no read authority. Snapshots are intended to include article fields and associations, but automatic capture, full snapshot validation, and restoration are not implemented.
+Revisions require an article, snapshot version 1, and a JSON object snapshot of at most 2,097,152 serialized UTF-8 bytes. Owners and eligible active administrators read revisions through the existing private article predicate. A revision's actor or an article credit grants no read authority. Storage alone does not capture history or implement restoration. Phase 3 create-time capture is described below; restoration remains planned.
 
 Audit rows contain only actor, allowlisted action, `article` resource type, resource UUID, creation time, and optional UUID correlation ID. The [accepted contract](superpowers/specs/2026-10-21-content-foundation-design.md#revision-and-audit-storage) defines the seven content actions. There is no arbitrary metadata, body, or snapshot column. Resource IDs have no article foreign key, so records can retain identifiers independently of current article rows. Only eligible active administrators read audits.
 
@@ -147,12 +147,14 @@ Known deferred constraint: deleting an approving Auth identity is currently reje
 
 Local reset, pgTAP, lint, and type generation require a running Docker-compatible container runtime. The local project is not linked to a hosted Supabase project.
 
-## Accepted Phase 3 additions — not implemented
+## Phase 3 write support
 
-The [accepted draft contract](superpowers/specs/2026-10-22-private-draft-workflow-design.md) adds an article edit version and private request-receipt/quota records in later migrations. It defines their semantics and snapshot shape. Existing migrations and generated types remain unchanged at this planning checkpoint. See [ADR 0007](decisions/0007-private-draft-editor-and-mutations.md) and the [implementation plan](superpowers/plans/2026-10-22-phase-three-private-drafts.md).
+The [accepted draft contract](superpowers/specs/2026-10-22-private-draft-workflow-design.md) defines the edit version, private request-receipt/quota records and snapshot semantics implemented in the Task 3 migrations below. Generated public types include the new version field and create RPC. See [ADR 0007](decisions/0007-private-draft-editor-and-mutations.md) and the [implementation plan](superpowers/plans/2026-10-22-phase-three-private-drafts.md).
 
 ### Phase 3 write-state support
 
 `20261022010000_draft_write_state.sql` adds `articles.edit_version` (existing/new rows default to 1) and private quota/receipt tables from the [accepted contract](superpowers/specs/2026-10-22-private-draft-workflow-design.md#additive-support-and-transaction-rules). These tables contain bounded metadata, restrict actor deletion and expose no application privileges. This increment alone enables no mutation. Transactional upgrade evidence confirms pre-existing article fields remain unchanged when the default version is added.
 
 `20261022010200_draft_snapshot.sql` adds private snapshot capture: a `gavel-article-snapshot` version-one envelope with an explicit 15-field article object and sorted category/tag/contributor selections. The helper preserves stored bodies and enforces the existing snapshot byte bound; UTC formatting avoids session-dependent timestamps. It creates no revision itself, grants no application execution, and enables no restore endpoint.
+
+`20261022010100_draft_write_guards.sql` implements private locking/quota/hash helpers; `20261022010110_draft_numeric_order.sql` fixes canonical integer-valued credit orders through a new migration. `20261022010300_create_article_draft.sql` enables the narrow authenticated create transaction. Receipts have no article FK or body; actor references remain restrictive. All existing direct table grants/policies are unchanged.

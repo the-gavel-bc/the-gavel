@@ -33,7 +33,7 @@ Authoritative request schemas will live beside the implemented server operations
 
 Taxonomy SELECT access, private article SELECT access, and category/tag/contributor association SELECT access are enforced by database grants/RLS; see the [data model](data-model.md#implemented-article-storage) and [security controls](security-and-permissions.md#implemented-private-article-controls). `private.can_read_article(check_article_id uuid) -> boolean` is an internal policy predicate for the authenticated caller, not a public mutation or arbitrary-user lookup RPC. It returns false for missing or unreadable article IDs. It does not accept an identity argument or expose private profile links.
 
-All article associations and revisions follow article read authority; credits and revision actor IDs confer no additional access. Audit reads require an eligible active administrator. Article/category links enforce same-section membership through composite references. No application section-change, tag-entry, credit-management, or link-mutation interface is exposed. No application article-fetch wrapper, editor endpoint, public article projection, history capture/restore interface, or new mutation RPC is implemented yet. Generated database Insert/Update types describe the row shape; they do not grant write permission. All new-table application writes remain denied, including administrator writes.
+All article associations and revisions follow article read authority; credits and revision actor IDs confer no additional access. Audit reads require an eligible active administrator. Article/category links enforce same-section membership through composite references. No application section-change, tag-entry, credit-management, or link-mutation interface is exposed. Application article-fetch wrappers, editor UI, public projections and restore interfaces remain planned. The narrow draft-create RPC and its atomic history capture are documented below. Generated database Insert/Update types describe the row shape; they do not grant write permission. All direct new-table application writes remain denied, including administrator writes.
 
 ## Planned public operations
 
@@ -84,9 +84,9 @@ Anonymous operations return published, non-archived data only.
 
 Implementation must include schema tests, authorization tests, malformed-input tests, idempotency/regression coverage for sensitive mutations, and generated or manually maintained examples using synthetic data. An OpenAPI document is optional unless public HTTP APIs expand beyond the web application.
 
-## Accepted Phase 3 interfaces — not implemented
+## Accepted Phase 3 interface contract
 
-The [accepted private-draft contract](superpowers/specs/2026-10-22-private-draft-workflow-design.md) defines `create_article_draft(p_request_id uuid,p_draft jsonb)` and `save_article_draft(p_article_id uuid,p_expected_version integer,p_request_id uuid,p_draft jsonb)`, both returning JSONB. It is authoritative for document/request/result grammar, errors, pagination, retry/version/quota rules and complete history snapshots. [ADR 0007](decisions/0007-private-draft-editor-and-mutations.md) records the decision. No callable interface or grant is added by this acceptance; implementation follows the [task plan](superpowers/plans/2026-10-22-phase-three-private-drafts.md).
+The [accepted private-draft contract](superpowers/specs/2026-10-22-private-draft-workflow-design.md) defines `create_article_draft(p_request_id uuid,p_draft jsonb)` and `save_article_draft(p_article_id uuid,p_expected_version integer,p_request_id uuid,p_draft jsonb)`, both returning JSONB. It is authoritative for document/request/result grammar, errors, pagination, retry/version/quota rules and complete history snapshots. [ADR 0007](decisions/0007-private-draft-editor-and-mutations.md) records the decision. Create is implemented below; save remains planned. Implementation follows the [task plan](superpowers/plans/2026-10-22-phase-three-private-drafts.md).
 
 ## Implemented draft input validation
 

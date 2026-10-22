@@ -4,7 +4,7 @@ The Gavel is a security-first public publishing platform for Boston College stud
 
 ## Project status
 
-Architecture and MVP requirements are approved. The application shell, local Supabase membership boundary, server-side sign-in/access flow, protected empty dashboard, taxonomy schema, private articles, category/tag/contributor associations, and protected revision/audit storage are implemented. Article editing, publishing, administrator management pages, and hosted provider setup remain planned. Phase 2 data storage and automated verification are complete, with upgrade, clean-install, build/browser checks, and hosted CI evidence recorded. Owner handoff review and the separately required human maintainer review remain outstanding. See [integration evidence and remaining work](docs/testing.md#phase-2-integrated-verification). Documents describe intended behavior unless explicitly marked implemented.
+Architecture and MVP requirements are approved. The application shell, local Supabase membership boundary, server-side sign-in/access flow, protected empty dashboard, taxonomy schema, private articles, category/tag/contributor associations, protected revision/audit storage, and the authenticated draft-create database operation are implemented. Article editing, publishing, administrator management pages, and hosted provider setup remain planned. Phase 2 data storage and automated verification are complete, with upgrade, clean-install, build/browser checks, and hosted CI evidence recorded. Owner handoff review and the separately required human maintainer review remain outstanding. See [integration evidence and remaining work](docs/testing.md#phase-2-integrated-verification). Documents describe intended behavior unless explicitly marked implemented.
 
 The CI workflow is implemented and hosted execution is verified; human maintainer review remains outstanding. CI temporarily ignores one approved development-tool advisory while retaining an unfiltered production audit; see [testing](docs/testing.md#ci-and-security-gates). See the [Phase 1 review and checklist](docs/reviews/phase-1-foundation.md) for evidence and remaining review work.
 
@@ -71,7 +71,7 @@ pnpm build
 
 Playwright is configured for desktop and mobile browser checks. Install its Chromium runtime once with `pnpm exec playwright install chromium`, start local Supabase, then run `pnpm test:e2e`. Browser tests prepare only fixed synthetic users in the local Docker project and verify access with JavaScript disabled.
 
-The [Phase 3 private-draft contract](docs/superpowers/specs/2026-10-22-private-draft-workflow-design.md) is accepted, including Tiptap, explicit Save, and controlled atomic mutations. The [implementation plan](docs/superpowers/plans/2026-10-22-phase-three-private-drafts.md) defines task boundaries and review checkpoints; Task 2 input validators are implemented and tested; draft mutations and editor UI remain planned. See [ADR 0007](docs/decisions/0007-private-draft-editor-and-mutations.md).
+The [Phase 3 private-draft contract](docs/superpowers/specs/2026-10-22-private-draft-workflow-design.md) is accepted, including Tiptap, explicit Save, and controlled atomic mutations. The [implementation plan](docs/superpowers/plans/2026-10-22-phase-three-private-drafts.md) defines task boundaries and review checkpoints; Tasks 2–3 input validation and atomic draft creation are implemented and tested; save operations and editor UI remain planned. See [ADR 0007](docs/decisions/0007-private-draft-editor-and-mutations.md).
 
 ## Documentation index
 
