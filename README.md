@@ -71,7 +71,7 @@ pnpm build
 
 Playwright is configured for desktop and mobile browser checks. Install its Chromium runtime once with `pnpm exec playwright install chromium`, start local Supabase, then run `pnpm test:e2e`. Browser tests prepare only fixed synthetic users in the local Docker project and verify access with JavaScript disabled.
 
-The [Phase 3 private-draft contract](docs/superpowers/specs/2026-10-22-private-draft-workflow-design.md) is accepted, including Tiptap, explicit Save, and controlled atomic mutations. The [implementation plan](docs/superpowers/plans/2026-10-22-phase-three-private-drafts.md) defines task boundaries and review checkpoints; no Phase 3 feature is implemented yet. See [ADR 0007](docs/decisions/0007-private-draft-editor-and-mutations.md).
+The [Phase 3 private-draft contract](docs/superpowers/specs/2026-10-22-private-draft-workflow-design.md) is accepted, including Tiptap, explicit Save, and controlled atomic mutations. The [implementation plan](docs/superpowers/plans/2026-10-22-phase-three-private-drafts.md) defines task boundaries and review checkpoints; Task 2 input validators are implemented and tested; draft mutations and editor UI remain planned. See [ADR 0007](docs/decisions/0007-private-draft-editor-and-mutations.md).
 
 ## Documentation index
 

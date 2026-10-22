@@ -54,6 +54,7 @@ jobs:
       - run: pnpm test:db
       - run: pnpm supabase db lint
       - run: pnpm db:types:check
+      - run: pnpm test:draft-contract
       - run: pnpm build
       - name: Install browser runtime
         run: pnpm exec playwright install --with-deps chromium

@@ -161,3 +161,11 @@ Required permission, content-safety, upload, session, caching, and recovery chec
 ## Accepted Phase 3 write extension — not implemented
 
 [ADR 0007](decisions/0007-private-draft-editor-and-mutations.md) accepts two narrow authenticated draft mutation functions with explicit database identity/profile/membership, owner/admin, status and content checks. Direct table writes remain closed. The [contract](superpowers/specs/2026-10-22-private-draft-workflow-design.md) requires private receipt/quota state, authorization rechecks after waits and atomic content/history/receipt capture; quota bookkeeping may survive an ordinary failed business operation. These controls require implementation and negative/concurrency tests before exposure. Existing implemented grants and policies are unchanged by this decision.
+
+## Implemented Phase 3 validation boundary
+
+Task 2 implements only the [draft input validators](api-contracts.md#implemented-draft-input-validation). The four private SQL functions are immutable invokers with an empty search path and explicit PUBLIC/anon/authenticated EXECUTE revocations. They access no tables. They do not bypass RLS, grant application validation access, enforce membership themselves or expose create/save RPCs. All existing table and role/ownership denials remain in effect; future mutation functions must invoke these checks and independently enforce identity, authority, active references and quotas.
+
+Shared adversarial fixtures exercise exact keys/types, document parent grammar, unsafe links/attributes, Unicode and size/depth/node bounds, duplicate selections and canonicalization against both TypeScript and the real local database. Grant catalog assertions and actual anonymous/authenticated invocation denials cover the helper boundary. Existing privileged content fixtures remain unchanged; adding a validator does not retroactively validate stored rows or make arbitrary JSON safe to render.
+
+Internationalized-domain support is deferred by owner decision; the [authoritative link contract](superpowers/specs/2026-10-22-private-draft-workflow-design.md#draft-payload-and-content) excludes unchecked punycode host labels. This resolves the SQL/browser discrepancy found during independent Task 2 review without adding a dependency or weakening either validation boundary.

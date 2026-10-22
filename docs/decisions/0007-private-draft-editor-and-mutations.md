@@ -1,6 +1,6 @@
 # 0007: Use a constrained editor and atomic private draft mutations
 
-- Status: Accepted; implementation pending
+- Status: Accepted; Task 2 validators implemented, mutations/editor pending
 - Date: 2026-10-22
 - Related requirements: [Accepted Phase 3 contract](../superpowers/specs/2026-10-22-private-draft-workflow-design.md), [implementation plan](../superpowers/plans/2026-10-22-phase-three-private-drafts.md)
 - Supersedes / superseded by: None; extends the data-only boundary in [ADR 0006](0006-content-foundation-storage-boundary.md) for Phase 3
@@ -25,6 +25,8 @@ SQL and TypeScript validation need shared adversarial fixtures and real database
 
 Publishing, uploads, public routes, lifecycle/reassignment, retention/deletion policy, unresolved client labels and human/pre-launch reviews remain separate. Current application writes remain denied until the planned functions are implemented and verified.
 
+On 2026-10-22 the owner explicitly deferred internationalized domains after review found a PostgreSQL/browser punycode-validation mismatch. The contract now excludes `xn--` host labels; ordinary domains and international text in content/URL paths remain supported. Revisit support through a new migration, matching TypeScript checks and shared standards-based fixtures before enabling these domains.
+
 ## Validation
 
-The owner accepted the written contract. The executable plan assigns security denials, byte boundaries, real-session races, adapter round trips and accessible recovery states to specific tasks. This record does not claim runtime validation of Phase 3; implementation evidence belongs with each task and the final integrated verification.
+The owner accepted the written contract. The executable plan assigns security denials, byte boundaries, real-session races, adapter round trips and accessible recovery states to specific tasks. Task 2 implements and tests the private input validators; see [verification evidence](../testing.md#phase-3-task-2-draft-validation). This does not claim implementation of mutations/editor or completion of Phase 3.
