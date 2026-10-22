@@ -10,7 +10,11 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
-    exclude: [...configDefaults.exclude, "e2e/**"],
+    exclude: [
+      ...configDefaults.exclude,
+      "e2e/**",
+      "scripts/draft-contract-check/**",
+    ],
     setupFiles: ["./vitest.setup.ts"],
   },
 });

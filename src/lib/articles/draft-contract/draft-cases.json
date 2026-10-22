@@ -1,0 +1,2976 @@
+{
+  "baseDraft": {
+    "schemaVersion": 1,
+    "title": "Synthetic draft",
+    "slug": "synthetic-draft",
+    "sectionId": "20000000-0000-0000-0000-000000000001",
+    "excerpt": null,
+    "content": null,
+    "seoKeyphrase": null,
+    "metaDescription": null,
+    "categoryIds": [],
+    "tagIds": [],
+    "contributors": []
+  },
+  "cases": [
+    {
+      "name": "incomplete body",
+      "target": "content",
+      "value": null,
+      "want": "ok"
+    },
+    {
+      "name": "empty paragraph",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        }
+      },
+      "want": "ok"
+    },
+    {
+      "name": "all supported formatting",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "heading",
+              "attrs": {
+                "level": 2
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Headline",
+                  "marks": [
+                    {
+                      "type": "bold"
+                    },
+                    {
+                      "type": "italic"
+                    },
+                    {
+                      "type": "link",
+                      "attrs": {
+                        "href": "https://example.test/story"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "attrs": {
+                "level": 3
+              }
+            },
+            {
+              "type": "blockquote",
+              "content": [
+                {
+                  "type": "paragraph"
+                }
+              ]
+            },
+            {
+              "type": "bulletList",
+              "content": [
+                {
+                  "type": "listItem",
+                  "content": [
+                    {
+                      "type": "paragraph"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "orderedList",
+              "attrs": {
+                "start": 2147483647
+              },
+              "content": [
+                {
+                  "type": "listItem",
+                  "content": [
+                    {
+                      "type": "paragraph"
+                    },
+                    {
+                      "type": "blockquote",
+                      "content": [
+                        {
+                          "type": "paragraph"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Body"
+                },
+                {
+                  "type": "hardBreak"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "ok"
+    },
+    {
+      "name": "json scalar",
+      "target": "content",
+      "value": false,
+      "want": "invalid_input"
+    },
+    {
+      "name": "array",
+      "target": "content",
+      "value": [],
+      "want": "invalid_input"
+    },
+    {
+      "name": "old object",
+      "target": "content",
+      "value": {},
+      "want": "unsupported_content"
+    },
+    {
+      "name": "unknown format",
+      "target": "content",
+      "value": {
+        "format": "html",
+        "version": 1,
+        "document": {}
+      },
+      "want": "unsupported_content"
+    },
+    {
+      "name": "unknown version",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 2,
+        "document": {}
+      },
+      "want": "unsupported_content"
+    },
+    {
+      "name": "empty root",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": []
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "inline at root",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "text",
+              "text": "x"
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "item at root",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "nested doc",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "unknown node",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "image",
+              "attrs": {
+                "src": "x"
+              }
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "paragraph attr",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {}
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "empty quote",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "blockquote",
+              "content": []
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "list without items",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "bulletList",
+              "content": [
+                {
+                  "type": "paragraph"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "item missing first paragraph",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "bulletList",
+              "content": [
+                {
+                  "type": "listItem",
+                  "content": [
+                    {
+                      "type": "heading",
+                      "attrs": {
+                        "level": 2
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "empty text",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": ""
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "break attrs",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "hardBreak",
+                  "attrs": {}
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "block in paragraph",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "paragraph"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "null content",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": null
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "heading missing attrs",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "heading"
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "root extra",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ],
+          "html": "<p>x</p>"
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "envelope extra",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "html": "x"
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "heading level 1",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "heading",
+              "attrs": {
+                "level": 1
+              }
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "heading level 4",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "heading",
+              "attrs": {
+                "level": 4
+              }
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "heading level 0",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "heading",
+              "attrs": {
+                "level": 0
+              }
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "heading level 2.5",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "heading",
+              "attrs": {
+                "level": 2.5
+              }
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "heading level 2147483648",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "heading",
+              "attrs": {
+                "level": 2147483648
+              }
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "list start 0",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "orderedList",
+              "attrs": {
+                "start": 0
+              },
+              "content": [
+                {
+                  "type": "listItem",
+                  "content": [
+                    {
+                      "type": "paragraph"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "list start -1",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "orderedList",
+              "attrs": {
+                "start": -1
+              },
+              "content": [
+                {
+                  "type": "listItem",
+                  "content": [
+                    {
+                      "type": "paragraph"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "list start 1.5",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "orderedList",
+              "attrs": {
+                "start": 1.5
+              },
+              "content": [
+                {
+                  "type": "listItem",
+                  "content": [
+                    {
+                      "type": "paragraph"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "list start 2147483648",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "orderedList",
+              "attrs": {
+                "start": 2147483648
+              },
+              "content": [
+                {
+                  "type": "listItem",
+                  "content": [
+                    {
+                      "type": "paragraph"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "list start 1",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "orderedList",
+              "attrs": {
+                "start": "1"
+              },
+              "content": [
+                {
+                  "type": "listItem",
+                  "content": [
+                    {
+                      "type": "paragraph"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "list start None",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "orderedList",
+              "attrs": {
+                "start": null
+              },
+              "content": [
+                {
+                  "type": "listItem",
+                  "content": [
+                    {
+                      "type": "paragraph"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "duplicate marks",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "x",
+                  "marks": [
+                    {
+                      "type": "bold"
+                    },
+                    {
+                      "type": "bold"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "extra mark attrs",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "x",
+                  "marks": [
+                    {
+                      "type": "bold",
+                      "attrs": {}
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "unknown mark",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "x",
+                  "marks": [
+                    {
+                      "type": "underline"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "empty href",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "x",
+                  "marks": [
+                    {
+                      "type": "link",
+                      "attrs": {
+                        "href": ""
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "link target",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "x",
+                  "marks": [
+                    {
+                      "type": "link",
+                      "attrs": {
+                        "href": "https://example.test",
+                        "target": "_blank"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "null marks",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "x",
+                  "marks": null
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "safe https://example.test",
+      "target": "link",
+      "value": "https://example.test",
+      "want": "ok"
+    },
+    {
+      "name": "safe http://localhost:0/a?b=c#d",
+      "target": "link",
+      "value": "http://localhost:0/a?b=c#d",
+      "want": "ok"
+    },
+    {
+      "name": "deferred valid punycode hostname",
+      "target": "link",
+      "value": "https://xn--bcher-kva.example/a",
+      "want": "invalid_input"
+    },
+    {
+      "name": "safe http://127.0.0.1:65535/",
+      "target": "link",
+      "value": "http://127.0.0.1:65535/",
+      "want": "ok"
+    },
+    {
+      "name": "safe https://[::1]:443/a",
+      "target": "link",
+      "value": "https://[::1]:443/a",
+      "want": "ok"
+    },
+    {
+      "name": "safe http://[::ffff:192.0.2.1]/",
+      "target": "link",
+      "value": "http://[::ffff:192.0.2.1]/",
+      "want": "ok"
+    },
+    {
+      "name": "safe https://EXAMPLE.test./é",
+      "target": "link",
+      "value": "https://EXAMPLE.test./é",
+      "want": "ok"
+    },
+    {
+      "name": "safe https://example.test/%20",
+      "target": "link",
+      "value": "https://example.test/%20",
+      "want": "ok"
+    },
+    {
+      "name": "unsafe None",
+      "target": "link",
+      "value": null,
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe ",
+      "target": "link",
+      "value": "",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe /relative",
+      "target": "link",
+      "value": "/relative",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe mailto:a@example.test",
+      "target": "link",
+      "value": "mailto:a@example.test",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe javascript:alert(1)",
+      "target": "link",
+      "value": "javascript:alert(1)",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe data:text/html,x",
+      "target": "link",
+      "value": "data:text/html,x",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe HTTPS://example.test",
+      "target": "link",
+      "value": "HTTPS://example.test",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe https://user:pass@example.test",
+      "target": "link",
+      "value": "https://user:pass@example.test",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe https://example.test\\@evil.test",
+      "target": "link",
+      "value": "https://example.test\\@evil.test",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe https://example.test/ x",
+      "target": "link",
+      "value": "https://example.test/ x",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe https://example.test/\n",
+      "target": "link",
+      "value": "https://example.test/\n",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe https://example.test/",
+      "target": "link",
+      "value": "https://example.test/",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe https://example.test/ ",
+      "target": "link",
+      "value": "https://example.test/ ",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe https://example.test/﻿",
+      "target": "link",
+      "value": "https://example.test/﻿",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe https://bücher.example",
+      "target": "link",
+      "value": "https://bücher.example",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe https://",
+      "target": "link",
+      "value": "https://",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe https://a..test",
+      "target": "link",
+      "value": "https://a..test",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe https://-bad.test",
+      "target": "link",
+      "value": "https://-bad.test",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe https://bad-.test",
+      "target": "link",
+      "value": "https://bad-.test",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe https://example.test:65536",
+      "target": "link",
+      "value": "https://example.test:65536",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe https://example.test:",
+      "target": "link",
+      "value": "https://example.test:",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe https://example.test:abc",
+      "target": "link",
+      "value": "https://example.test:abc",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe https://[bad]/",
+      "target": "link",
+      "value": "https://[bad]/",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe https://[::1%25eth0]/",
+      "target": "link",
+      "value": "https://[::1%25eth0]/",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe https://127.1",
+      "target": "link",
+      "value": "https://127.1",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe https://0x7f000001",
+      "target": "link",
+      "value": "https://0x7f000001",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe https://999.1.1.1",
+      "target": "link",
+      "value": "https://999.1.1.1",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe https://example.123",
+      "target": "link",
+      "value": "https://example.123",
+      "want": "invalid_input"
+    },
+    {
+      "name": "unsafe https://example.test/",
+      "target": "link",
+      "value": "https://example.test/",
+      "want": "invalid_input"
+    },
+    {
+      "name": "minimal draft",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "ok"
+    },
+    {
+      "name": "invalid schemaVersion 2",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 2,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "invalid title ",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "invalid title  space",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": " space",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "invalid title space ",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "space ",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "invalid slug Bad Slug",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "Bad Slug",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "invalid slug a--b",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "a--b",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "invalid sectionId bad",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "bad",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "invalid sectionId None",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": null,
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "invalid excerpt ",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": "",
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "invalid seoKeyphrase 5",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": 5,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "invalid categoryIds None",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": null,
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "invalid categoryIds ['bad']",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": ["bad"],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "invalid categoryIds ['20000000-0000-0000-0000-000000000",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [
+          "20000000-0000-0000-0000-000000000001",
+          "20000000-0000-0000-0000-000000000001"
+        ],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "invalid contributors [{'profileId': '10000000-0000-0000-",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": [
+          {
+            "profileId": "10000000-0000-0000-0000-000000000001",
+            "role": "owner",
+            "displayOrder": 0
+          }
+        ]
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "invalid contributors [{'profileId': '10000000-0000-0000-",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": [
+          {
+            "profileId": "10000000-0000-0000-0000-000000000001",
+            "role": "writer",
+            "displayOrder": -1
+          }
+        ]
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "protected ownerProfileId",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": [],
+        "ownerProfileId": "forged"
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "protected actorUserId",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": [],
+        "actorUserId": "forged"
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "protected status",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": [],
+        "status": "forged"
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "protected updatedAt",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": [],
+        "updatedAt": "forged"
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "protected __proto__",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": [],
+        "__proto__": "forged"
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "missing content",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "canonical sorting",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [
+          "20000000-0000-0000-0000-000000000002",
+          "20000000-0000-0000-0000-000000000001"
+        ],
+        "tagIds": [],
+        "contributors": [
+          {
+            "profileId": "10000000-0000-0000-0000-000000000002",
+            "role": "writer",
+            "displayOrder": 2
+          },
+          {
+            "profileId": "10000000-0000-0000-0000-000000000001",
+            "role": "creative",
+            "displayOrder": 0
+          }
+        ]
+      },
+      "want": "ok"
+    },
+    {
+      "name": "array node type",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": ["paragraph"],
+              "content": [
+                {
+                  "type": "paragraph"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "array credit role",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": [
+          {
+            "profileId": "20000000-0000-0000-0000-000000000001",
+            "role": ["writer"],
+            "displayOrder": 0
+          }
+        ]
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "malformed node type None",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": null,
+              "content": [
+                {
+                  "type": "paragraph"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "malformed node type 5",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": 5,
+              "content": [
+                {
+                  "type": "paragraph"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "malformed node type True",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": true,
+              "content": [
+                {
+                  "type": "paragraph"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "malformed node type ['text']",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": ["text"],
+              "content": [
+                {
+                  "type": "paragraph"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "malformed node type {}",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": {},
+              "content": [
+                {
+                  "type": "paragraph"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "malformed request None",
+      "target": "draft",
+      "value": null,
+      "want": "invalid_input"
+    },
+    {
+      "name": "malformed mark None",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "x",
+                  "marks": [null]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "malformed request []",
+      "target": "draft",
+      "value": [],
+      "want": "invalid_input"
+    },
+    {
+      "name": "malformed mark []",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "x",
+                  "marks": [[]]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "malformed request True",
+      "target": "draft",
+      "value": true,
+      "want": "invalid_input"
+    },
+    {
+      "name": "malformed mark True",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "x",
+                  "marks": [true]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "malformed request 0",
+      "target": "draft",
+      "value": 0,
+      "want": "invalid_input"
+    },
+    {
+      "name": "malformed mark 0",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "x",
+                  "marks": [0]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "malformed request 1",
+      "target": "draft",
+      "value": "1",
+      "want": "invalid_input"
+    },
+    {
+      "name": "malformed mark 1",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "x",
+                  "marks": ["1"]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "heading attrs {'level': '2'}",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "heading",
+              "attrs": {
+                "level": "2"
+              }
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "heading attrs {'level': True}",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "heading",
+              "attrs": {
+                "level": true
+              }
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "heading attrs {'level': 2, 'style': 'red'}",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "heading",
+              "attrs": {
+                "level": 2,
+                "style": "red"
+              }
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "heading attrs None",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "heading",
+              "attrs": null
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "heading attrs []",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "heading",
+              "attrs": []
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "credit order -1",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": [
+          {
+            "profileId": "20000000-0000-0000-0000-000000000001",
+            "role": "writer",
+            "displayOrder": -1
+          }
+        ]
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "credit order 0",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": [
+          {
+            "profileId": "20000000-0000-0000-0000-000000000001",
+            "role": "writer",
+            "displayOrder": 0
+          }
+        ]
+      },
+      "want": "ok"
+    },
+    {
+      "name": "credit order 1.5",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": [
+          {
+            "profileId": "20000000-0000-0000-0000-000000000001",
+            "role": "writer",
+            "displayOrder": 1.5
+          }
+        ]
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "credit order 2147483648",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": [
+          {
+            "profileId": "20000000-0000-0000-0000-000000000001",
+            "role": "writer",
+            "displayOrder": 2147483648
+          }
+        ]
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "credit order \"0\"",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": [
+          {
+            "profileId": "20000000-0000-0000-0000-000000000001",
+            "role": "writer",
+            "displayOrder": "0"
+          }
+        ]
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "credit order True",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": [
+          {
+            "profileId": "20000000-0000-0000-0000-000000000001",
+            "role": "writer",
+            "displayOrder": true
+          }
+        ]
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "credit order None",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": [
+          {
+            "profileId": "20000000-0000-0000-0000-000000000001",
+            "role": "writer",
+            "displayOrder": null
+          }
+        ]
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "max credit order",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": [
+          {
+            "profileId": "20000000-0000-0000-0000-000000000001",
+            "role": "creative",
+            "displayOrder": 2147483647
+          }
+        ]
+      },
+      "want": "ok"
+    },
+    {
+      "name": "uppercase UUID normalization",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "ABCDEF01-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": ["ABCDEF01-0000-0000-0000-000000000001"],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "ok"
+    },
+    {
+      "name": "case-insensitive duplicate UUID",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [
+          "ABCDEF01-0000-0000-0000-000000000001",
+          "abcdef01-0000-0000-0000-000000000001"
+        ],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "non-array categoryIds",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": {},
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "non-array tagIds",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": {},
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "non-array contributors",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": {}
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "missing credit profileId",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": [
+          {
+            "role": "writer",
+            "displayOrder": 0
+          }
+        ]
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "missing credit role",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": [
+          {
+            "profileId": "20000000-0000-0000-0000-000000000001",
+            "displayOrder": 0
+          }
+        ]
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "missing credit displayOrder",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": [
+          {
+            "profileId": "20000000-0000-0000-0000-000000000001",
+            "role": "writer"
+          }
+        ]
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "credit extra field",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": [
+          {
+            "profileId": "20000000-0000-0000-0000-000000000001",
+            "role": "writer",
+            "displayOrder": 0,
+            "owner": true
+          }
+        ]
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "URL control 128",
+      "target": "link",
+      "value": "https://example.test/",
+      "want": "invalid_input"
+    },
+    {
+      "name": "URL control 159",
+      "target": "link",
+      "value": "https://example.test/",
+      "want": "invalid_input"
+    },
+    {
+      "name": "URL control 9",
+      "target": "link",
+      "value": "https://example.test/\t",
+      "want": "invalid_input"
+    },
+    {
+      "name": "URL control 160",
+      "target": "link",
+      "value": "https://example.test/ ",
+      "want": "invalid_input"
+    },
+    {
+      "name": "URL control 8232",
+      "target": "link",
+      "value": "https://example.test/ ",
+      "want": "invalid_input"
+    },
+    {
+      "name": "URL control 12288",
+      "target": "link",
+      "value": "https://example.test/　",
+      "want": "invalid_input"
+    },
+    {
+      "name": "bad authority https://[::ffff:192.168.001.1]/",
+      "target": "link",
+      "value": "https://[::ffff:192.168.001.1]/",
+      "want": "invalid_input"
+    },
+    {
+      "name": "bad authority https://01.2.3.4/",
+      "target": "link",
+      "value": "https://01.2.3.4/",
+      "want": "invalid_input"
+    },
+    {
+      "name": "bad authority https://example.test:000080",
+      "target": "link",
+      "value": "https://example.test:000080",
+      "want": "invalid_input"
+    },
+    {
+      "name": "bad authority https://a_b.test",
+      "target": "link",
+      "value": "https://a_b.test",
+      "want": "invalid_input"
+    },
+    {
+      "name": "bad authority https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.test",
+      "target": "link",
+      "value": "https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.test",
+      "want": "invalid_input"
+    },
+    {
+      "name": "bad authority https://[12345::]/",
+      "target": "link",
+      "value": "https://[12345::]/",
+      "want": "invalid_input"
+    },
+    {
+      "name": "bad authority https://example.test/#x\r",
+      "target": "link",
+      "value": "https://example.test/#x\r",
+      "want": "invalid_input"
+    },
+    {
+      "name": "title edge whitespace 133",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "text",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "title edge whitespace 5760",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "text ",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "title edge whitespace 8199",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "text ",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "title edge whitespace 8239",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "text ",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "title edge whitespace 12288",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "text　",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "excerpt edge whitespace 133",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": "text",
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "excerpt edge whitespace 5760",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": "text ",
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "excerpt edge whitespace 8199",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": "text ",
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "excerpt edge whitespace 8239",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": "text ",
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "excerpt edge whitespace 12288",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": "text　",
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "seoKeyphrase edge whitespace 133",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": "text",
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "seoKeyphrase edge whitespace 5760",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": "text ",
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "seoKeyphrase edge whitespace 8199",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": "text ",
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "seoKeyphrase edge whitespace 8239",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": "text ",
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "seoKeyphrase edge whitespace 12288",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": "text　",
+        "metaDescription": null,
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "metaDescription edge whitespace 133",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": "text",
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "metaDescription edge whitespace 5760",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": "text ",
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "metaDescription edge whitespace 8199",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": "text ",
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "metaDescription edge whitespace 8239",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": "text ",
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "metaDescription edge whitespace 12288",
+      "target": "draft",
+      "value": {
+        "schemaVersion": 1,
+        "title": "Synthetic draft",
+        "slug": "synthetic-draft",
+        "sectionId": "20000000-0000-0000-0000-000000000001",
+        "excerpt": null,
+        "content": null,
+        "seoKeyphrase": null,
+        "metaDescription": "text　",
+        "categoryIds": [],
+        "tagIds": [],
+        "contributors": []
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "invalid punycode xn--a.test",
+      "target": "link",
+      "value": "https://xn--a.test/",
+      "want": "invalid_input"
+    },
+    {
+      "name": "invalid punycode document xn--a.test",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "invalid link",
+                  "marks": [
+                    {
+                      "type": "link",
+                      "attrs": {
+                        "href": "https://xn--a.test/"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "invalid punycode xn--abc.test",
+      "target": "link",
+      "value": "https://xn--abc.test/",
+      "want": "invalid_input"
+    },
+    {
+      "name": "invalid punycode document xn--abc.test",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "invalid link",
+                  "marks": [
+                    {
+                      "type": "link",
+                      "attrs": {
+                        "href": "https://xn--abc.test/"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "invalid punycode xn--0.test",
+      "target": "link",
+      "value": "https://xn--0.test/",
+      "want": "invalid_input"
+    },
+    {
+      "name": "invalid punycode document xn--0.test",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 1,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "invalid link",
+                  "marks": [
+                    {
+                      "type": "link",
+                      "attrs": {
+                        "href": "https://xn--0.test/"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "deferred uppercase punycode subdomain",
+      "target": "link",
+      "value": "https://news.XN--BCHER-KVA.example./a",
+      "want": "invalid_input"
+    },
+    {
+      "name": "deferred punycode first label",
+      "target": "link",
+      "value": "https://xn--bcher-kva.news.example/a",
+      "want": "invalid_input"
+    },
+    {
+      "name": "international path and punycode path text remain allowed",
+      "target": "link",
+      "value": "https://example.test/bücher/xn--bcher-kva?q=é",
+      "want": "ok"
+    }
+  ]
+}

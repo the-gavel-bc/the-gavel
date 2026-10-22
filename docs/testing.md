@@ -6,15 +6,15 @@ Status: Foundation and Phase 2 content/history database coverage implemented; br
 
 Run commands with Node.js 22 and the pnpm version recorded in `package.json`.
 
-| Check            | Command             | Current scope                                                                |
-| ---------------- | ------------------- | ---------------------------------------------------------------------------- |
-| Formatting       | `pnpm format:check` | Repository source and documentation                                          |
-| Lint             | `pnpm lint`         | Next.js and TypeScript source                                                |
-| Types            | `pnpm typecheck`    | Strict TypeScript compilation                                                |
-| Unit/component   | `pnpm test`         | Vitest and Testing Library                                                   |
-| Browser          | `pnpm test:e2e`     | Playwright desktop and mobile projects                                       |
-| Production build | `pnpm build`        | Next.js production compilation                                               |
-| Database         | `pnpm test:db`      | Local Supabase identity/content/history constraints and RLS (648 assertions) |
+| Check            | Command             | Current scope                                                                                       |
+| ---------------- | ------------------- | --------------------------------------------------------------------------------------------------- |
+| Formatting       | `pnpm format:check` | Repository source and documentation                                                                 |
+| Lint             | `pnpm lint`         | Next.js and TypeScript source                                                                       |
+| Types            | `pnpm typecheck`    | Strict TypeScript compilation                                                                       |
+| Unit/component   | `pnpm test`         | Vitest and Testing Library                                                                          |
+| Browser          | `pnpm test:e2e`     | Playwright desktop and mobile projects                                                              |
+| Production build | `pnpm build`        | Next.js production compilation                                                                      |
+| Database         | `pnpm test:db`      | Local Supabase identity/content/history constraints and RLS, plus draft validation (683 assertions) |
 
 Install the Playwright Chromium runtime once with `pnpm exec playwright install chromium`. Start local Supabase with `pnpm supabase start` using a Docker-compatible runtime. Run `pnpm supabase db reset`, `pnpm test:db`, `pnpm supabase db lint`, and `pnpm db:types:check`. Regenerate formatted types with `pnpm --silent db:types > src/lib/supabase/database/database.types.ts`. The drift check compares without overwriting the committed file.
 
@@ -152,3 +152,15 @@ Test anonymous, inactive, author A, author B, and administrator identities again
 ## Completion evidence
 
 Every change reports the exact checks run, results, and limitations. No check is called passing unless it completed successfully.
+
+## Phase 3 Task 2: draft validation
+
+`pnpm test:draft-contract` runs the isolated Node Vitest configuration in `scripts/draft-contract-check/`. Start the fixed local Docker Supabase project and apply pending migrations with `pnpm supabase migration up --local` first. This command never resets the DB. It passes shared literal/generated synthetic fixtures through TypeScript and private PostgreSQL functions in a rollback transaction, comparing outcomes, canonical results and serialized UTF-8 sizes. Fixture JSON is hex-encoded over psql stdin with no shell interpolation or hosted credentials. CI runs this additional gate after the existing DB checks. Default `pnpm test` excludes this Docker-dependent suite.
+
+Task 2 verification: 265 unit/component tests (221 draft cases plus the existing 44), 216 parity assertions and 683 pgTAP assertions (35 new plus the existing 648) passed. Cases cover every enabled node/mark, invalid parent/type/attribute combinations, unsafe URLs/hosts/ports, ASCII/multibyte/escaped exact 1 MiB bodies, node/depth/link/selection/scalar bounds, duplicate/forged fields, canonical IDs/credits and helper privilege denials. The byte helper accepts exactly 1,100,000 serialized bytes and rejects one more. The strict draft grammar's combined field caps keep valid requests below that larger transport guard; no valid exact-cap request is fabricated using unknown padding fields.
+
+The additive validation migration was applied without a reset. Private before/after row fingerprints cover all existing public content/identity tables and synthetic Auth users/identities. Database lint, strict types, lint and generated-type drift checks passed. This establishes input validation only; caller/reference locks, quotas, atomic history, idempotent mutations, editor/adapter integration and browser journeys remain assigned to Tasks 3–11.
+
+Compatibility: existing readers, writers and stored bodies are unchanged. New helpers have no application execution grants or consumers until the mutation tasks. If a later deployment must roll back application code, leave the additive helpers in place; no data rewrite or destructive migration is needed. Changes to these helpers after release use a new migration, preserving applied history. Keep the populated upgrade evidence through Tasks 3–4 and prove preservation before the separate clean-install reset in Task 11.
+
+Independent review found a malformed-punycode SQL/browser mismatch and no other reported defects. The owner explicitly deferred internationalized domains. New regression cases were observed failing before the fix; both validators now reject all case-insensitive `xn--` host labels while ordinary ASCII domains and international text in URL paths remain accepted. The final suites above pass with the review fix. Production build and before/after row-fingerprint comparison passed; no reset was performed. Browser behavior is unchanged by this task; no editor, mutation action or new route is enabled.
