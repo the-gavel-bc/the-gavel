@@ -150,3 +150,7 @@ Local reset, pgTAP, lint, and type generation require a running Docker-compatibl
 ## Accepted Phase 3 additions — not implemented
 
 The [accepted draft contract](superpowers/specs/2026-10-22-private-draft-workflow-design.md) adds an article edit version and private request-receipt/quota records in later migrations. It defines their semantics and snapshot shape. Existing migrations and generated types remain unchanged at this planning checkpoint. See [ADR 0007](decisions/0007-private-draft-editor-and-mutations.md) and the [implementation plan](superpowers/plans/2026-10-22-phase-three-private-drafts.md).
+
+### Phase 3 write-state support
+
+`20261022010000_draft_write_state.sql` adds `articles.edit_version` (existing/new rows default to 1) and private quota/receipt tables from the [accepted contract](superpowers/specs/2026-10-22-private-draft-workflow-design.md#additive-support-and-transaction-rules). These tables contain bounded metadata, restrict actor deletion and expose no application privileges. This increment alone enables no mutation. Transactional upgrade evidence confirms pre-existing article fields remain unchanged when the default version is added.

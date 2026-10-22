@@ -177,6 +177,7 @@ export type Database = {
           archived_at: string | null;
           content: Json | null;
           created_at: string;
+          edit_version: number;
           excerpt: string | null;
           id: string;
           meta_description: string | null;
@@ -194,6 +195,7 @@ export type Database = {
           archived_at?: string | null;
           content?: Json | null;
           created_at?: string;
+          edit_version?: number;
           excerpt?: string | null;
           id?: string;
           meta_description?: string | null;
@@ -210,6 +212,7 @@ export type Database = {
           archived_at?: string | null;
           content?: Json | null;
           created_at?: string;
+          edit_version?: number;
           excerpt?: string | null;
           id?: string;
           meta_description?: string | null;
