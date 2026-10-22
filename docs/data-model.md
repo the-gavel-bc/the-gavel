@@ -1,6 +1,6 @@
 # Data model
 
-Status: Foundation identity, content storage/read permissions and atomic private draft creation implemented; draft save/editor/publishing remain planned.
+Status: Foundation identity, content storage/read permissions and atomic private draft create/save implemented; editor/publishing remain planned.
 
 ## Storage
 
@@ -158,3 +158,7 @@ The [accepted draft contract](superpowers/specs/2026-10-22-private-draft-workflo
 `20261022010200_draft_snapshot.sql` adds private snapshot capture: a `gavel-article-snapshot` version-one envelope with an explicit 15-field article object and sorted category/tag/contributor selections. The helper preserves stored bodies and enforces the existing snapshot byte bound; UTC formatting avoids session-dependent timestamps. It creates no revision itself, grants no application execution, and enables no restore endpoint.
 
 `20261022010100_draft_write_guards.sql` implements private locking/quota/hash helpers; `20261022010110_draft_numeric_order.sql` fixes canonical integer-valued credit orders through a new migration. `20261022010300_create_article_draft.sql` enables the narrow authenticated create transaction. Receipts have no article FK or body; actor references remain restrictive. All existing direct table grants/policies are unchanged.
+
+### Versioned draft save boundary
+
+`20261022020000_save_article_draft.sql` adds the save RPC and changes no table columns, existing rows or policies. It reuses the Task 3 version, private receipt/quota and snapshot state. An authorized changed save replaces allowlisted draft fields and associations under an article row lock, increments once and captures the resulting complete state. No-op receipts preserve version/time and emit no history. Old successful receipts return their original result without changing later content. Supported stored bodies are required before any new save; unsupported legacy data is preserved for a separately reviewed transition. The [API](api-contracts.md#implemented-versioned-draft-saving) defines observed error behavior.

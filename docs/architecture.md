@@ -114,3 +114,5 @@ The foundation uses ordinary dynamic rendering for authenticated routes with pri
 - No known authorization bypass in required role and ownership tests.
 - Recoverable deployment and verified database restoration before launch.
 - Performance budgets and browser support will be finalized during implementation planning.
+
+The private database draft create/save operations are implemented behind explicit caller authorization, validation, versions, quotas, receipts and atomic revision/audit capture. The [API contracts](api-contracts.md#implemented-versioned-draft-saving) describe the callable boundaries. Server-side article queries/actions and editor components remain planned; existing direct table writes stay denied.
