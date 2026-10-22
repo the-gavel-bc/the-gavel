@@ -40,16 +40,18 @@ export type DraftInput = {
   tagIds: string[];
   contributors: DraftContributor[];
 };
-export type DraftErrorCode =
-  | "invalid_input"
-  | "unsupported_content"
-  | "forbidden"
-  | "not_found"
-  | "conflict"
-  | "slug_conflict"
-  | "request_conflict"
-  | "rate_limited"
-  | "unavailable";
+export const DRAFT_ERROR_CODES = [
+  "invalid_input",
+  "unsupported_content",
+  "forbidden",
+  "not_found",
+  "conflict",
+  "slug_conflict",
+  "request_conflict",
+  "rate_limited",
+  "unavailable",
+] as const;
+export type DraftErrorCode = (typeof DRAFT_ERROR_CODES)[number];
 export type DraftFailure = {
   ok: false;
   code: DraftErrorCode;
@@ -93,7 +95,7 @@ const integer = (value: unknown, min: number): value is number =>
   value >= min &&
   value <= 2147483647;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
-const isUuid = (value: unknown): value is string =>
+export const isDraftUuid = (value: unknown): value is string =>
   typeof value === "string" && UUID.test(value);
 // Match the existing PostgreSQL scalar trim constraint, not JS trim's different BOM/NEL rules.
 const EDGE_SPACE =
@@ -264,7 +266,7 @@ export function checkDraftInput(value: unknown): DraftCheckResult {
     typeof value.slug !== "string" ||
     value.slug.length > 180 ||
     !/^[a-z0-9]+(-[a-z0-9]+)*$/u.test(value.slug) ||
-    !isUuid(value.sectionId) ||
+    !isDraftUuid(value.sectionId) ||
     !scalar(value.excerpt, 600, true) ||
     !scalar(value.seoKeyphrase, 160, true) ||
     !scalar(value.metaDescription, 320, true)
@@ -276,7 +278,7 @@ export function checkDraftInput(value: unknown): DraftCheckResult {
     ["tagIds", 64],
   ] as const) {
     const ids = value[field];
-    if (!Array.isArray(ids) || ids.length > cap || !ids.every(isUuid))
+    if (!Array.isArray(ids) || ids.length > cap || !ids.every(isDraftUuid))
       return invalid;
     const canonical = ids.map((id) => id.toLowerCase());
     if (new Set(canonical).size !== ids.length) return invalid;
@@ -290,7 +292,7 @@ export function checkDraftInput(value: unknown): DraftCheckResult {
     if (
       !isObject(credit) ||
       !keys(credit, ["profileId", "role", "displayOrder"]) ||
-      !isUuid(credit.profileId) ||
+      !isDraftUuid(credit.profileId) ||
       typeof credit.role !== "string" ||
       !["writer", "editor", "creative"].includes(credit.role) ||
       !integer(credit.displayOrder, 0)

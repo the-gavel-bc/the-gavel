@@ -1,10 +1,6 @@
+import { isDraftUuid } from "../draft-contract/draft-contract";
+export { isDraftUuid };
 export type DraftCursor = { version: 1; updatedAt: string; id: string };
-export const isDraftUuid = (value: unknown): value is string =>
-  typeof value === "string" &&
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu.test(
-    value,
-  );
-
 // Preserve PostgreSQL microseconds: converting through Date would lose ordering precision.
 export function isDatabaseTimestamp(value: unknown): value is string {
   if (typeof value !== "string") return false;
