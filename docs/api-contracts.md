@@ -1,6 +1,6 @@
 # API contracts
 
-Status: Foundation access/session interfaces and Phase 2 private content/history read storage implemented; publishing operations remain planned.
+Status: Foundation access/session interfaces, Phase 2 private content/history storage and Phase 3 private draft queries/actions implemented; editor UI and publishing operations remain planned.
 
 ## Style and ownership
 
@@ -33,7 +33,7 @@ Authoritative request schemas will live beside the implemented server operations
 
 Taxonomy SELECT access, private article SELECT access, and category/tag/contributor association SELECT access are enforced by database grants/RLS; see the [data model](data-model.md#implemented-article-storage) and [security controls](security-and-permissions.md#implemented-private-article-controls). `private.can_read_article(check_article_id uuid) -> boolean` is an internal policy predicate for the authenticated caller, not a public mutation or arbitrary-user lookup RPC. It returns false for missing or unreadable article IDs. It does not accept an identity argument or expose private profile links.
 
-All article associations and revisions follow article read authority; credits and revision actor IDs confer no additional access. Audit reads require an eligible active administrator. Article/category links enforce same-section membership through composite references. No application section-change, tag-entry, credit-management, or link-mutation interface is exposed. Application article-fetch wrappers, editor UI, public projections and restore interfaces remain planned. The narrow draft-create RPC and its atomic history capture are documented below. Generated database Insert/Update types describe the row shape; they do not grant write permission. All direct new-table application writes remain denied, including administrator writes.
+All article associations and revisions follow article read authority; credits and revision actor IDs confer no additional access. Audit reads require an eligible active administrator. Article/category links enforce same-section membership through composite references. No application section-change, tag-entry, credit-management, or link-mutation interface is exposed. Private application article-fetch wrappers are implemented below; editor UI, public projections and restore interfaces remain planned. The narrow draft-create RPC and its atomic history capture are documented below. Generated database Insert/Update types describe the row shape; they do not grant write permission. All direct new-table application writes remain denied, including administrator writes.
 
 ## Planned public operations
 
@@ -48,11 +48,6 @@ Anonymous operations return published, non-archived data only.
 
 ## Planned authenticated operations
 
-- Fetch current membership and profile.
-- List owned articles.
-- Create article.
-- Update owned article.
-- Save draft.
 - Publish now.
 - Archive owned article.
 - Update own public profile.
@@ -90,7 +85,7 @@ The [accepted private-draft contract](superpowers/specs/2026-10-22-private-draft
 
 ## Implemented draft input validation
 
-Phase 3 Task 2 adds `src/lib/articles/draft-contract/draft-contract.ts`: `checkDraftInput(unknown)` returns `{ok:true,value:DraftInput}` or a safe `DraftFailure`; `isValidDraftDocument(unknown)` and `isValidDraftLink(unknown)` expose the same content/link rules for future adapters. Types for create/save commands and write results are defined here, but no action or RPC implements them yet. The [accepted contract](superpowers/specs/2026-10-22-private-draft-workflow-design.md#draft-payload-and-content) remains authoritative for the grammar and bounds.
+Phase 3 Task 2 adds `src/lib/articles/draft-contract/draft-contract.ts`: `checkDraftInput(unknown)` returns `{ok:true,value:DraftInput}` or a safe `DraftFailure`; `isValidDraftDocument(unknown)` and `isValidDraftLink(unknown)` expose the same content/link rules for future adapters. Create/save command and result types live here; the RPC and server action implementations are documented below. The [accepted contract](superpowers/specs/2026-10-22-private-draft-workflow-design.md#draft-payload-and-content) remains authoritative for the grammar and bounds.
 
 `supabase/migrations/20261022000000_draft_validation.sql` supplies private immutable invoker helpers `check_draft_input(jsonb)`, `is_valid_draft_document(jsonb)`, `is_valid_draft_link(text)` and their strict-key helper. They return canonical input or a validation failure without reading identity/catalog rows or writing data. UUIDs normalize to lowercase; category/tag IDs and profile/role credits sort deterministically. Display order is retained. Structural validation does not establish reference existence, activation or caller authority; Tasks 3–4 must enforce these under transaction locks.
 
@@ -100,8 +95,21 @@ Internationalized hostnames, including all case-insensitive `xn--` labels, are d
 
 ## Implemented draft creation
 
-`public.create_article_draft(uuid,jsonb)` implements the accepted create contract. Only authenticated callers can execute it; the function derives owner/actor, locks and checks trusted identity/active profile/membership, serializes actor receipt/quota decisions, validates canonical input and locked selections, and atomically inserts the draft, links, complete revision, audit and receipt. Successful authorized replays return the stored result without a new attempt/history entry. Structured failures retain only eligible-caller quota bookkeeping; unexpected diagnostics expose only a safe error and are logged privately with SQLSTATE/request ID. Direct table writes remain denied. Save is implemented below; editor/actions remain pending.
+`public.create_article_draft(uuid,jsonb)` implements the accepted create contract. Only authenticated callers can execute it; the function derives owner/actor, locks and checks trusted identity/active profile/membership, serializes actor receipt/quota decisions, validates canonical input and locked selections, and atomically inserts the draft, links, complete revision, audit and receipt. Successful authorized replays return the stored result without a new attempt/history entry. Structured failures retain only eligible-caller quota bookkeeping; unexpected diagnostics expose only a safe error and are logged privately with SQLSTATE/request ID. Direct table writes remain denied. Save and server actions are implemented below; editor UI remains pending.
 
 ## Implemented versioned draft saving
 
-`public.save_article_draft(uuid,integer,uuid,jsonb)` implements the accepted save boundary using the existing private guards, quota, canonical fingerprints and receipts. New writes require current owner/admin authority, draft status, supported stored content, the expected edit version and active valid selections. Changed saves atomically replace allowed fields/links and capture one revision/audit; semantic no-ops keep version/time and record only a receipt. Exact authorized retries return their original result even after later edits. Missing/cross-owner IDs share `not_found`; wrong status, stale/exhausted versions return `conflict`. Direct table writes remain denied; server actions/editor UI remain pending.
+`public.save_article_draft(uuid,integer,uuid,jsonb)` implements the accepted save boundary using the existing private guards, quota, canonical fingerprints and receipts. New writes require current owner/admin authority, draft status, supported stored content, the expected edit version and active valid selections. Changed saves atomically replace allowed fields/links and capture one revision/audit; semantic no-ops keep version/time and record only a receipt. Exact authorized retries return their original result even after later edits. Missing/cross-owner IDs share `not_found`; wrong status, stale/exhausted versions return `conflict`. Direct table writes remain denied; server actions are implemented below and editor UI remains pending.
+
+## Implemented private draft server boundary
+
+Task 5 implements the following interfaces in `src/lib/articles/`. The [accepted contract](superpowers/specs/2026-10-22-private-draft-workflow-design.md) remains authoritative for payload limits and write semantics. Routes/forms consuming these interfaces remain Tasks 6–10.
+
+- `draft-queries/draft-queries.ts`: `getMyArticlesPage({cursor?,pageSize?}) -> ArticlePage` defaults to 20, accepts 1–50, and always filters the verified caller's profile, including administrators. Items contain only id/title/slug/status/sectionId/version/updatedAt. `nextCursor` is null or an opaque strict version-one UTC timestamp/UUID cursor ordered by `(updated_at DESC,id DESC)`, preserving database microseconds. The cursor supplies continuation, never authority.
+- `getDraftDetail(articleId) -> DraftDetailResult`: one embedded read loads the article and associations under RLS. Authors also receive an explicit owner filter; administrators retain their existing detail authority. The discriminant `kind` is `editable`, `readOnly`, `unsupportedContent` or `notFound`. Only editable results contain a validated `DraftInput`, articleId/version/updatedAt and unavailable selection IDs. Read-only results contain status only; unsupported results contain no stored body. Missing and RLS-hidden records share `notFound`.
+- `getDraftOptions(sectionId?) -> DraftOptions`: active sections, categories under the selected active parent, existing tags and active contributor profiles. Explicit active filters apply even to administrators. Catalogs use stable ordered 500-row pages below the API row cap. No section means no category choices. Existing unavailable selection IDs remain in detail results for deliberate removal; the form will provide generic labels without wider grants.
+- Queries run at request time with the existing active-membership guard and cookie-scoped publishable-key client. The server client explicitly forces `cache: "no-store"`. Malformed inputs and read failures throw bounded safe errors; membership redirects propagate unchanged.
+- `draft-actions/draft-actions.ts`: `createDraftAction(CreateDraftCommand)` and `saveDraftAction(SaveDraftCommand)` return `DraftWriteResult`. Strict envelopes reject unknown/protected fields before auth/RPC. Each accepted attempt uses verified current access and one user-scoped RPC with the caller's original request UUID. Missing/ineligible access returns `forbidden`; access/transport uncertainty or malformed responses return `unavailable`. No new UUID or automatic application retry is generated. Only checked result fields are returned, preserving replay/no-op metadata.
+- Confirmed success revalidates `/dashboard` and the private `/dashboard/articles/<id>` path only. If revalidation fails after commit, the confirmed receipt still returns; a static private diagnostic includes only the request UUID. Request-time reads remain authoritative on refresh.
+
+`experimental.serverActions.bodySizeLimit` is 4 MiB to accommodate Flight encoding and metadata around the accepted body. The draft body/request database limits remain unchanged. Pinned Next encoder tests exercise near-1-MiB ASCII, multibyte and escaped bodies; actual browser action dispatch and malformed-wire behavior will be tested when form routes exist. Default same-origin action protections are unchanged.
