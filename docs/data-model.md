@@ -154,3 +154,5 @@ The [accepted draft contract](superpowers/specs/2026-10-22-private-draft-workflo
 ### Phase 3 write-state support
 
 `20261022010000_draft_write_state.sql` adds `articles.edit_version` (existing/new rows default to 1) and private quota/receipt tables from the [accepted contract](superpowers/specs/2026-10-22-private-draft-workflow-design.md#additive-support-and-transaction-rules). These tables contain bounded metadata, restrict actor deletion and expose no application privileges. This increment alone enables no mutation. Transactional upgrade evidence confirms pre-existing article fields remain unchanged when the default version is added.
+
+`20261022010200_draft_snapshot.sql` adds private snapshot capture: a `gavel-article-snapshot` version-one envelope with an explicit 15-field article object and sorted category/tag/contributor selections. The helper preserves stored bodies and enforces the existing snapshot byte bound; UTC formatting avoids session-dependent timestamps. It creates no revision itself, grants no application execution, and enables no restore endpoint.
