@@ -1,0 +1,35 @@
+begin;
+select no_plan();
+\ir support/draft-fixtures/draft-fixtures.inc
+create temp table target as select public.create_article_draft('80000000-0000-0000-0000-000000000071',pg_temp.draft_input()) result;
+grant select on target to authenticated;
+select has_function('public','save_article_draft',array['uuid','integer','uuid','jsonb'],'versioned save boundary exists');
+create function pg_temp.save_request(v integer,r uuid,patch jsonb default '{}') returns jsonb language sql as $$
+select public.save_article_draft((select (result->>'articleId')::uuid from target),v,r,pg_temp.draft_input(patch));
+$$;
+create temp table results(label text primary key,result jsonb);
+grant select,insert on results to authenticated;
+set local role authenticated;
+insert into results values('first',pg_temp.save_request(1,'80000000-0000-0000-0000-000000000072','{"title":"Changed Draft"}'));
+reset role;
+select is((select result->>'ok' from results where label='first'),'true','authenticated owner saves');
+select is((select result->'version' from results where label='first'),'2'::jsonb,'changed save increments once');
+select is((select result->'changed' from results where label='first'),'true'::jsonb,'changed result is explicit');
+select is((select title from public.articles),'Changed Draft','new title committed');
+select is((select owner_profile_id from public.articles),'10000000-0000-0000-0000-000000000002'::uuid,'save preserves ownership');
+select is((select count(*)::integer from public.article_revisions),2,'changed save adds exactly one revision');
+select is((select count(*)::integer from public.audit_events where action='article.updated'),1,'changed save adds exactly one update audit');
+select is((select snapshot #>> '{article,editVersion}' from public.article_revisions where snapshot #>> '{article,editVersion}'='2'),'2','revision records committed version');
+select is(pg_temp.save_request(1,gen_random_uuid(),'{"title":"Stale"}')->>'code','conflict','stale expected version changes nothing');
+select is((select title from public.articles),'Changed Draft','stale save preserves current title');
+select is(pg_temp.save_request(1,'80000000-0000-0000-0000-000000000072','{"title":"Changed Draft"}')->>'replayed','true','exact lost-response retry replays');
+select is(pg_temp.save_request(2,'80000000-0000-0000-0000-000000000073','{"title":"Later Draft"}')->>'version','3','later command advances version');
+select is(pg_temp.save_request(1,'80000000-0000-0000-0000-000000000072','{"title":"Changed Draft"}')->>'version','2','old replay returns old receipt version');
+select is((select title from public.articles),'Later Draft','old replay never reapplies old content');
+insert into results values('noop',pg_temp.save_request(3,'80000000-0000-0000-0000-000000000074','{"title":"Later Draft"}'));
+select is((select result->'changed' from results where label='noop'),'false'::jsonb,'semantic no-op is explicit');
+select is((select (result->>'updatedAt')::timestamptz from results where label='noop'),(select updated_at from public.articles),'no-op preserves committed timestamp');
+select is((select count(*)::integer from public.article_revisions),3,'no-op and replays emit no extra revisions');
+select is((select edit_version from public.articles),3,'no-op does not increment version');
+select * from finish();
+rollback;
