@@ -16,7 +16,8 @@
     "test:e2e": "playwright test",
     "db:types": "node scripts/database-types/database-types.mjs",
     "db:types:check": "node scripts/database-types/database-types.mjs --check",
-    "test:draft-contract": "vitest run --config scripts/draft-contract-check/vitest.config.ts"
+    "test:draft-contract": "vitest run --config scripts/draft-contract-check/vitest.config.ts",
+    "test:draft-concurrency": "vitest run --config scripts/draft-concurrency/vitest.config.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

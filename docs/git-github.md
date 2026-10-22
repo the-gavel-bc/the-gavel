@@ -13,7 +13,7 @@ Status: Foundation CI workflow implemented and hosted execution verified; human 
 ## Commits
 
 - Use Conventional Commits.
-- Keep commits cohesive and reviewable.
+- Keep commits cohesive and reviewable. Target at most 300 changed lines per commit, following the owner’s request for a few hundred lines. Split large tasks into independently testable commits; avoid bulky repeated fixtures. Do not rewrite already-pushed history without an explicit request.
 - Include schema, tests, and documentation with the behavior they describe.
 - Commit the dependency lockfile.
 - Never commit secrets, credentials, production data, or generated local environment files.

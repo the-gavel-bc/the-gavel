@@ -1,0 +1,28 @@
+begin;
+select no_plan();
+\ir support/draft-fixtures/draft-fixtures.inc
+create function pg_temp.denied_create() returns jsonb language sql as $$select public.create_article_draft(gen_random_uuid(),pg_temp.draft_input());$$;
+update auth.users set raw_app_meta_data='{"provider":"email","providers":["email"]}' where id=auth.uid();
+select is(pg_temp.denied_create()->>'code','forbidden','non-Google identity denied');
+update auth.users set raw_app_meta_data='{"provider":"google"}',email_confirmed_at=null where id=auth.uid();
+select is(pg_temp.denied_create()->>'code','forbidden','unconfirmed identity denied');
+update auth.users set email_confirmed_at=now(),email='synthetic@example.test' where id=auth.uid();
+select is(pg_temp.denied_create()->>'code','forbidden','non-bc.edu identity denied');
+update auth.users set email='synthetic@bc.edu' where id=auth.uid();
+update public.profiles set active=false where auth_user_id=auth.uid();
+select is(pg_temp.denied_create()->>'code','forbidden','inactive owner profile denied');
+update public.profiles set active=true where auth_user_id=auth.uid();
+update public.memberships set active=false where user_id=auth.uid();
+select is(pg_temp.denied_create()->>'code','forbidden','inactive author denied');
+update public.memberships set active=true where user_id=auth.uid();
+delete from public.profiles where auth_user_id=auth.uid();
+select is(pg_temp.denied_create()->>'code','forbidden','missing linked profile denied');
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);
+update public.memberships set active=false where user_id=auth.uid();
+select is(pg_temp.denied_create()->>'code','forbidden','deactivated administrator denied');
+select set_config('request.jwt.claim.sub','',true);
+select is(pg_temp.denied_create()->>'code','forbidden','missing identity denied');
+select is((select count(*)::integer from public.articles),0,'eligibility denials write no content');
+select is((select count(*)::integer from private.draft_write_receipts),0,'eligibility denials write no successful receipt');
+select * from finish();
+rollback;

@@ -78,7 +78,7 @@ The editor adapter maps supported engine JSON into this canonical document. Any 
 
 ### Callable operations and errors
 
-Accepted interfaces, not yet implemented RPCs:
+Accepted interfaces (create implemented in Task 3; save remains planned):
 
 - `public.create_article_draft(p_request_id uuid, p_draft jsonb) -> jsonb`.
 - `public.save_article_draft(p_article_id uuid, p_expected_version integer, p_request_id uuid, p_draft jsonb) -> jsonb`.

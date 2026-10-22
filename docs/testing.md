@@ -6,15 +6,15 @@ Status: Foundation and Phase 2 content/history database coverage implemented; br
 
 Run commands with Node.js 22 and the pnpm version recorded in `package.json`.
 
-| Check            | Command             | Current scope                                                                                       |
-| ---------------- | ------------------- | --------------------------------------------------------------------------------------------------- |
-| Formatting       | `pnpm format:check` | Repository source and documentation                                                                 |
-| Lint             | `pnpm lint`         | Next.js and TypeScript source                                                                       |
-| Types            | `pnpm typecheck`    | Strict TypeScript compilation                                                                       |
-| Unit/component   | `pnpm test`         | Vitest and Testing Library                                                                          |
-| Browser          | `pnpm test:e2e`     | Playwright desktop and mobile projects                                                              |
-| Production build | `pnpm build`        | Next.js production compilation                                                                      |
-| Database         | `pnpm test:db`      | Local Supabase identity/content/history constraints and RLS, plus draft validation (683 assertions) |
+| Check            | Command             | Current scope                                                                                              |
+| ---------------- | ------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Formatting       | `pnpm format:check` | Repository source and documentation                                                                        |
+| Lint             | `pnpm lint`         | Next.js and TypeScript source                                                                              |
+| Types            | `pnpm typecheck`    | Strict TypeScript compilation                                                                              |
+| Unit/component   | `pnpm test`         | Vitest and Testing Library                                                                                 |
+| Browser          | `pnpm test:e2e`     | Playwright desktop and mobile projects                                                                     |
+| Production build | `pnpm build`        | Next.js production compilation                                                                             |
+| Database         | `pnpm test:db`      | Local Supabase identity/content/history constraints and RLS, plus draft validation/create (926 assertions) |
 
 Install the Playwright Chromium runtime once with `pnpm exec playwright install chromium`. Start local Supabase with `pnpm supabase start` using a Docker-compatible runtime. Run `pnpm supabase db reset`, `pnpm test:db`, `pnpm supabase db lint`, and `pnpm db:types:check`. Regenerate formatted types with `pnpm --silent db:types > src/lib/supabase/database/database.types.ts`. The drift check compares without overwriting the committed file.
 
@@ -164,3 +164,13 @@ The additive validation migration was applied without a reset. Private before/af
 Compatibility: existing readers, writers and stored bodies are unchanged. New helpers have no application execution grants or consumers until the mutation tasks. If a later deployment must roll back application code, leave the additive helpers in place; no data rewrite or destructive migration is needed. Changes to these helpers after release use a new migration, preserving applied history. Keep the populated upgrade evidence through Tasks 3–4 and prove preservation before the separate clean-install reset in Task 11.
 
 Independent review found a malformed-punycode SQL/browser mismatch and no other reported defects. The owner explicitly deferred internationalized domains. New regression cases were observed failing before the fix; both validators now reject all case-insensitive `xn--` host labels while ordinary ASCII domains and international text in URL paths remain accepted. The final suites above pass with the review fix. Production build and before/after row-fingerprint comparison passed; no reset was performed. Browser behavior is unchanged by this task; no editor, mutation action or new route is enabled.
+
+## Phase 3 Task 3: draft creation
+
+Task 3 was implemented in focused commits targeting at most 300 changed lines each. `pnpm test:db` passes 926 assertions across 18 suites; the new 243 assertions cover private write-state grants/defaults, caller/reference guards, numeric normalization, snapshots, authenticated creates/replays, all eligibility denials, quota/window/slug/request conflicts, complete selections and six injected failure stages. Existing direct-table role/ownership denials remain green.
+
+`pnpm test:draft-concurrency` runs independent psql sessions against the fixed local Docker project. All 10 tests pass: session independence, fixture cleanup, duplicate creates with one committed history set plus replay, quota competition, and blocked calls observing committed identity/membership/owner-profile/section/category/credited-profile deactivation. Barriers inspect real PostgreSQL lock waits before releasing the competing transaction; statement/lock/process timeouts bound execution. Reserved synthetic fixture IDs are refused if already present; successful runs delete only their owned rows. Run this suite sequentially with pgTAP because its short-lived fixtures are committed for cross-session visibility. CI runs it after DB/contract gates; default unit tests exclude it.
+
+The pre-Task-2 private fingerprints still match after all Task 3 migrations/tests, with no reset. A transaction-local pre-migration article fixture additionally proved that adding edit_version supplies 1 without changing existing fields. Types were regenerated; full database lint, type drift and repository checks are recorded in the task ledger/PR. New tables remain empty outside test transactions after fixture cleanup. Clean-install proof runs in hosted CI; the local reset stays deferred until Task 11 preserves all upgrade evidence.
+
+Independent read-only review found no blocking production SQL defects. Review of the new race harness required the dedicated CI step, now added; a trailing EOF whitespace finding was removed. Human security/migration review remains outstanding. No UI changed, so new draft browser journeys belong to the later form/editor tasks. No new dependency or audit exception is introduced. Roll back application consumers without dropping the additive schema; if disabling the RPC is required, revoke its execution in a new forward migration. Do not restore broad direct writes or destructively remove quota/receipt/history data.

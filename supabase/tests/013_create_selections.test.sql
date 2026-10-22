@@ -1,0 +1,24 @@
+begin;
+select no_plan();
+\ir support/draft-fixtures/draft-fixtures.inc
+create temp table selection_input as select pg_temp.draft_input('{"excerpt":"Synthetic excerpt","seoKeyphrase":"Synthetic SEO","metaDescription":"Synthetic description","content":{"format":"gavel-draft","version":1,"document":{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Synthetic body"}]}]}},"categoryIds":["30000000-0000-0000-0000-000000000051"],"tagIds":["40000000-0000-0000-0000-000000000051"],"contributors":[{"profileId":"10000000-0000-0000-0000-000000000051","role":"writer","displayOrder":1.0},{"profileId":"10000000-0000-0000-0000-000000000003","role":"editor","displayOrder":1}]}') value;
+create temp table selection_result as select public.create_article_draft('80000000-0000-0000-0000-000000000063',value) result from selection_input;
+select is((select result->>'ok' from selection_result),'true','complete accepted payload creates');
+select is((select content #>> '{document,content,0,content,0,text}' from public.articles),'Synthetic body','validated body persists');
+select is((select excerpt from public.articles),'Synthetic excerpt','metadata persists');
+select is((select count(*)::integer from public.article_categories),1,'category selection persists');
+select is((select count(*)::integer from public.article_tags),1,'tag selection persists');
+select is((select count(*)::integer from public.article_contributors),2,'guest and linked profile credits persist');
+select is((select snapshot #>> '{contributors,0,profileId}' from public.article_revisions),'10000000-0000-0000-0000-000000000003','snapshot credits sort deterministically');
+select is((select snapshot #>> '{contributors,1,displayOrder}' from public.article_revisions),'1','decimal order is captured canonically');
+select is(public.create_article_draft('80000000-0000-0000-0000-000000000063',(select jsonb_set(value,'{contributors}',jsonb_build_array(value #> '{contributors,1}',value #> '{contributors,0}')) from selection_input))->>'replayed','true','selection ordering is not a different command');
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000003',true);
+set local role authenticated;
+select is((select count(*)::integer from public.articles),0,'real editor credit grants no private article access');
+select throws_ok($$insert into public.article_revisions(article_id,actor_user_id,snapshot) values(gen_random_uuid(),auth.uid(),'{}')$$,'42501',null,'credits grant no history write authority');
+reset role;
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',true);
+update public.articles set owner_profile_id='10000000-0000-0000-0000-000000000003';
+select is(public.create_article_draft('80000000-0000-0000-0000-000000000063',(select value from selection_input))->>'code','not_found','replay rechecks current resource authority');
+select * from finish();
+rollback;
