@@ -141,3 +141,26 @@ it("guards the public options query and validates its optional section", async (
   });
   expect(mocks.guard).toHaveBeenCalledTimes(2);
 });
+it("does not mark a selected tag after catalog row 1000 unavailable", async () => {
+  http.respond({ ...row, article_tags: [{ tag_id: articleId }] });
+  http.network.mockImplementation(async (input) => {
+    const url = new URL(String(input));
+    const rows = url.pathname.endsWith("/tags")
+      ? url.searchParams.get("offset") === "1500"
+        ? [{ id: articleId, name: "Selected tag" }]
+        : Array.from({ length: 500 }, () => ({
+            id: profileId,
+            name: "Other tag",
+          }))
+      : [];
+    return new Response(JSON.stringify(rows), {
+      headers: { "Content-Type": "application/json" },
+    });
+  });
+  const result = await getDraftDetail(articleId);
+  expect(result.kind).toBe("editable");
+  if (result.kind === "editable") {
+    expect(result.draft.tagIds).toEqual([articleId]);
+    expect(result.unavailableSelections.tagIds).toEqual([]);
+  }
+});

@@ -50,3 +50,34 @@ it("fails safely rather than returning partial catalogs", async () => {
     /^Unable to load draft options\.$/,
   );
 });
+it("reads beyond the API row cap so valid selected IDs are not labeled unavailable", async () => {
+  const http = queryTestClient();
+  http.network.mockImplementation(async (input) => {
+    const url = new URL(String(input));
+    const rows = url.pathname.endsWith("/tags")
+      ? url.searchParams.get("offset") === "1500"
+        ? [{ id: profileId, name: "Last tag" }]
+        : Array.from({ length: 500 }, () => ({ id: profileId, name: "Tag" }))
+      : [];
+    return new Response(JSON.stringify(rows), {
+      headers: { "Content-Type": "application/json" },
+    });
+  });
+  const options = await loadDraftOptions(http.client);
+  expect(options.tags).toHaveLength(1501);
+  expect(options.tags.at(-1)?.name).toBe("Last tag");
+  const urls = http.network.mock.calls
+    .map((call) => new URL(String(call[0])))
+    .filter((url) => url.pathname.endsWith("/tags"));
+  expect(
+    urls.map((url) => [
+      url.searchParams.get("offset"),
+      url.searchParams.get("limit"),
+    ]),
+  ).toEqual([
+    ["0", "500"],
+    ["500", "500"],
+    ["1000", "500"],
+    ["1500", "500"],
+  ]);
+});
