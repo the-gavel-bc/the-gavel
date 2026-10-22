@@ -449,6 +449,15 @@ export type Database = {
           id: string;
         }[];
       };
+      save_article_draft: {
+        Args: {
+          p_article_id: string;
+          p_draft: Json;
+          p_expected_version: number;
+          p_request_id: string;
+        };
+        Returns: Json;
+      };
     };
     Enums: {
       app_role: "author" | "administrator";

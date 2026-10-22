@@ -1,6 +1,6 @@
 # 0007: Use a constrained editor and atomic private draft mutations
 
-- Status: Accepted; validators and draft creation implemented; save/editor pending
+- Status: Accepted; validators and draft create/save implemented; editor pending
 - Date: 2026-10-22
 - Related requirements: [Accepted Phase 3 contract](../superpowers/specs/2026-10-22-private-draft-workflow-design.md), [implementation plan](../superpowers/plans/2026-10-22-phase-three-private-drafts.md)
 - Supersedes / superseded by: None; extends the data-only boundary in [ADR 0006](0006-content-foundation-storage-boundary.md) for Phase 3
@@ -29,4 +29,4 @@ On 2026-10-22 the owner explicitly deferred internationalized domains after revi
 
 ## Validation
 
-The owner accepted the written contract. The executable plan assigns security denials, byte boundaries, real-session races, adapter round trips and accessible recovery states to specific tasks. Tasks 2–3 implement and test private input validation and atomic draft creation; see [verification evidence](../testing.md#phase-3-task-2-draft-validation). This does not claim implementation of draft save/editor or completion of Phase 3.
+The owner accepted the written contract. The executable plan assigns security denials, byte boundaries, real-session races, adapter round trips and accessible recovery states to specific tasks. Tasks 2–4 implement and test private input validation and atomic draft create/save; see [verification evidence](../testing.md#phase-3-task-2-draft-validation). This does not claim application query/actions, editor implementation or completion of Phase 3.

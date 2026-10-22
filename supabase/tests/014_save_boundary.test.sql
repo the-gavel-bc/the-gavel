@@ -1,0 +1,22 @@
+begin;
+select no_plan();
+\ir support/draft-fixtures/draft-fixtures.inc
+create temp table target as select (public.create_article_draft('80000000-0000-0000-0000-000000000101',pg_temp.draft_input())->>'articleId')::uuid id;
+select is(public.save_article_draft(null,1,gen_random_uuid(),pg_temp.draft_input())->>'code','invalid_input','NULL resource rejected');
+select is(public.save_article_draft((select id from target),v,gen_random_uuid(),pg_temp.draft_input())->>'code','invalid_input','invalid expected version rejected') from (values (null::integer),(0),(-1)) versions(v);
+select is(public.save_article_draft((select id from target),1,null,pg_temp.draft_input())->>'code','invalid_input','NULL request rejected');
+select is(public.save_article_draft((select id from target),1,gen_random_uuid(),null)->>'code','invalid_input','NULL draft rejected');
+select is(public.save_article_draft((select id from target),1,'80000000-0000-0000-0000-000000000101',pg_temp.draft_input())->>'code','request_conflict','create receipt cannot be reused as save');
+select is(public.create_article_draft(gen_random_uuid(),pg_temp.draft_input('{"slug":"synthetic-other"}'))->>'ok','true','second reserved slug fixture created');
+select is(public.save_article_draft((select id from target),1,gen_random_uuid(),pg_temp.draft_input('{"slug":"synthetic-other"}'))->>'code','slug_conflict','duplicate slug save rolls back safely');
+select is((select edit_version from public.articles where id=(select id from target)),1,'slug conflict preserves version');
+select is(public.save_article_draft((select id from target),1,'80000000-0000-0000-0000-000000000102',pg_temp.draft_input('{"title":"Saved Once"}'))->>'version','2','valid save fixture committed');
+update public.articles set owner_profile_id='10000000-0000-0000-0000-000000000003' where id=(select id from target);
+select is(public.save_article_draft((select id from target),1,'80000000-0000-0000-0000-000000000102',pg_temp.draft_input('{"title":"Saved Once"}'))->>'code','not_found','old save replay rechecks current ownership');
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);
+select is(public.save_article_draft((select id from target),2,gen_random_uuid(),pg_temp.draft_input('{"categoryIds":["30000000-0000-0000-0000-000000000053"]}'))->>'code','invalid_input','administrator follows same active-selection write rule');
+select ok(has_function_privilege('authenticated','public.save_article_draft(uuid,integer,uuid,jsonb)','EXECUTE'),'authenticated signature granted');
+select ok(not has_function_privilege('anon','public.save_article_draft(uuid,integer,uuid,jsonb)','EXECUTE'),'anon signature revoked');
+select ok(p.prosecdef and p.provolatile='v' and p.proconfig @> array['search_path=""','TimeZone=UTC'],'save privilege/snapshot configuration is explicit') from pg_proc p where oid='public.save_article_draft(uuid,integer,uuid,jsonb)'::regprocedure;
+select * from finish();
+rollback;
