@@ -67,4 +67,3 @@ begin
   return jsonb_set('{"ok":true,"value":null}'::jsonb, '{value}', canonical);
 end;
 $$;
-

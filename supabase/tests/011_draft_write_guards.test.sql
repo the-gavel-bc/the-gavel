@@ -26,5 +26,11 @@ select is(private.lock_draft_actor(),null::uuid,'inactive membership denied');
 update public.memberships set active=true where user_id=auth.uid();
 update auth.users set raw_app_meta_data='{"provider":"email","providers":["email"]}' where id=auth.uid();
 select is(private.lock_draft_actor(),null::uuid,'untrusted identity denied');
+select ok(not has_function_privilege(role,signature,'EXECUTE'),role||' cannot execute '||signature)
+from unnest(array['anon','authenticated']) role cross join unnest(array['private.lock_draft_actor()','private.consume_draft_attempt(uuid)','private.canonical_draft_json(jsonb)','private.draft_request_hash(text,uuid,integer,jsonb)','private.check_draft_references(jsonb)']) signature;
+select ok(not p.prosecdef and p.proconfig @> array['search_path=""'],p.proname||' remains a private fixed-path invoker') from pg_proc p where p.oid in ('private.lock_draft_actor()'::regprocedure,'private.consume_draft_attempt(uuid)'::regprocedure,'private.canonical_draft_json(jsonb)'::regprocedure,'private.draft_request_hash(text,uuid,integer,jsonb)'::regprocedure,'private.check_draft_references(jsonb)'::regprocedure);
+set local role authenticated;
+select throws_ok($$select private.lock_draft_actor()$$,'42501',null,'authenticated caller cannot invoke elevated-boundary helpers directly');
+reset role;
 select * from finish();
 rollback;
