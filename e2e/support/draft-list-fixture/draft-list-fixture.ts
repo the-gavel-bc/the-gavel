@@ -50,7 +50,7 @@ export function draftListFixture(project: string) {
           if exists(select 1 from auth.users where id in (${quoted(userIds)}))
             or exists(select 1 from public.profiles where id in (${quoted(userIds)}))
             or exists(select 1 from public.sections where id='${id(99)}')
-            or exists(select 1 from public.articles where id in (${quoted(Array.from({ length: 23 }, (_, i) => id(i + 1)))}))
+            or exists(select 1 from public.articles where id in (${quoted(Array.from({ length: 24 }, (_, i) => id(i + 1)))}))
           then raise exception 'Reserved draft browser fixture IDs already exist'; end if;
         end $$;
         insert into auth.users (id,instance_id,aud,role,email,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,encrypted_password,confirmation_token,recovery_token,email_change_token_new,email_change_token_current,email_change,phone_change,phone_change_token,reauthentication_token)
@@ -76,9 +76,18 @@ export function draftListFixture(project: string) {
       `);
       installed = true;
     },
+    failRead() {
+      if (!installed) throw new Error("Fixture is not installed.");
+      // PostgreSQL accepts infinity; our bounded summary contract deliberately rejects it.
+      sql(`insert into public.articles(id,owner_profile_id,section_id,title,slug,updated_at)
+        values('${id(24)}','${uuid(users.author)}','${id(99)}','Synthetic unsupported timestamp','task6-${project}-read-failure','infinity');`);
+    },
+    recoverRead() {
+      if (installed) sql(`delete from public.articles where id='${id(24)}';`);
+    },
     cleanup() {
       if (!installed) return;
-      sql(`delete from public.articles where id in (${quoted(Array.from({ length: 23 }, (_, i) => id(i + 1)))});
+      sql(`delete from public.articles where id in (${quoted(Array.from({ length: 24 }, (_, i) => id(i + 1)))});
         delete from public.sections where id='${id(99)}';
         delete from public.memberships where user_id in (${quoted(userIds)});
         delete from public.profiles where id in (${quoted(userIds)});

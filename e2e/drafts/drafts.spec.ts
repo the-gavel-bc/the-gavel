@@ -67,7 +67,7 @@ test("author pages through only owned records without JavaScript", async ({
   ).toBe(true);
   await page.screenshot({
     path: info.outputPath("article-list.png"),
-    fullPage: true,
+    fullPage: false,
   });
   await page.getByRole("link", { name: "Next page" }).click();
   await expect(list.getByRole("listitem")).toHaveCount(1);
@@ -134,6 +134,30 @@ test("empty state and invalid-cursor recovery are safe", async ({
   );
   await page.getByRole("link", { name: "Newest articles" }).click();
   await expect(page.getByText("No articles on this page.")).toBeVisible();
+});
+
+test("server read failure offers a working retry without JavaScript", async ({
+  context,
+  page,
+}) => {
+  await setLocalSession(context, fixture.users.author);
+  fixture.failRead();
+  try {
+    await page.goto("/dashboard");
+    await expect(page.getByRole("alert")).toContainText(
+      "Unable to load your articles",
+    );
+    await expect(
+      page.getByText("Synthetic unsupported timestamp", { exact: true }),
+    ).toHaveCount(0);
+    fixture.recoverRead();
+    await page.getByRole("link", { name: "Try again" }).click();
+    await expect(
+      page.getByRole("region", { name: "Your articles" }).getByRole("listitem"),
+    ).toHaveCount(20);
+  } finally {
+    fixture.recoverRead();
+  }
 });
 
 test.describe("client pagination", () => {
