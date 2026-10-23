@@ -1,6 +1,6 @@
 # 0005: Temporarily ignore the development braces advisory in CI
 
-- Status: Accepted — explicitly authorized by the maintainer
+- Status: Retired on 2026-10-23 — upstream advisory withdrawn; unfiltered audits clean
 - Date: 2026-10-19
 - Related requirements: [Security gates](../testing.md#ci-and-security-gates)
 - Supersedes / superseded by: Supersedes [0004](0004-wait-for-dependency-audit-remediation.md)
@@ -41,3 +41,7 @@ Verified locally using Node.js 22.20.0 and pnpm 11.25.0:
 - Dedicated workflow lint was unavailable because `actionlint` is not installed in the current environment; hosted CI validation was pending at the time of this local check.
 
 Subsequent verification: [hosted main-branch run 39349263352](https://github.com/dylandrozario/the-gavel/actions/runs/39349263352) passed for merged commit `66f2f82` on 2026-10-20, including both audit steps. Human review remains a separate requirement.
+
+## Retirement
+
+On 2026-10-23 the [upstream advisory](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) is marked withdrawn. Unfiltered production and full audits of the existing lockfile report zero known vulnerabilities. The obsolete CI ignore command/comments are removed under the maintainer's earlier removal instruction; both production and full high/critical scans now run without exceptions. This records withdrawal, not a claim that braces was patched. No workspace ignore or dependency-chain override is introduced. The decision above is retained as history.

@@ -15,7 +15,7 @@ Status: Approved working process.
 
 ## Foundation verification
 
-Use the commands in [testing.md](testing.md) with Node.js 22 and the pinned pnpm version. Run local Supabase before database and browser checks. The CI workflow mirrors formatting, lint, strict types, tests, database reset/pgTAP/lint/type drift, build, browser tests, and security scans. A known finding is not automatically an accepted exception. Any exception requires explicit maintainer approval and a documented scope and removal condition. The current CI-only development dependency exception is approved in [ADR 0005](decisions/0005-temporary-ci-audit-exception.md); all other high/critical findings remain blocking.
+Use the commands in [testing.md](testing.md) with Node.js 22 and the pinned pnpm version. Run local Supabase before database and browser checks. The CI workflow mirrors formatting, lint, strict types, tests, database reset/pgTAP/lint/type drift, build, browser tests, and security scans. A known finding is not automatically an accepted exception. Any exception requires explicit maintainer approval and a documented scope and removal condition. The former CI-only exception is retired in [ADR 0005](decisions/0005-temporary-ci-audit-exception.md); current production/full audits are unfiltered and high/critical findings remain blocking.
 
 ## Security-sensitive work
 
