@@ -1,6 +1,6 @@
 # Component hierarchy
 
-Status: Foundation shell and access routes implemented; publication and dashboard feature routes below remain planned.
+Status: Foundation shell, access routes and private My Articles listing implemented; publication and other dashboard feature routes below remain planned.
 
 ## Implemented foundation routes
 
@@ -10,7 +10,7 @@ Status: Foundation shell and access routes implemented; publication and dashboar
 | `/sign-in`        | Server action initiating Google sign-in; hosted provider setup remains manual |
 | `/auth/callback`  | PKCE code exchange and safe access routing                                    |
 | `/access-pending` | Denied/pending membership experience and sign-out                             |
-| `/dashboard`      | Protected empty dashboard with role-aware shell and sign-out                  |
+| `/dashboard`      | Protected owned-article listing with pagination, role-aware shell and sign-out                  |
 
 The header's section links and dashboard profile/administration links identify future destinations; those feature routes are not implemented. Both dashboard layout and page independently call the server membership guard. Components live in named folders under `src/components/site`, `src/components/dashboard`, and `src/components/ui`, alongside their owned CSS Modules and existing tests. See [file colocation](coding-style.md#file-colocation).
 
@@ -95,3 +95,12 @@ RootLayout
 - Do not create a global client store without a demonstrated cross-route requirement.
 - Every async surface provides loading, empty, error, success, and disabled states.
 - Shared public components use semantic HTML, keyboard operation, visible focus, and responsive layouts.
+
+
+## Implemented My Articles listing
+
+Phase 3 Task 6 connects `/dashboard?cursor=<opaque cursor>` to the checked own-list query. Layout and page retain independent membership guards. Server-owned rows show title, status and UTC update time; only drafts expose edit links. `ArticleList` owns its semantic list and CSS; `ArticlePageLink` owns client-navigation loading feedback; `ArticleListError` shares safe error presentation between server reads and the unexpected client-error boundary.
+
+Initial reads and bounded read/input errors render fully on the server, including without JavaScript. Native next/newest/retry links preserve that behavior; client pagination additionally announces pending work without replacing initial HTML with a streaming loading fallback. The URL owns the cursor; no editor provider or global store is introduced.
+
+Create links target `/dashboard/articles/new` and draft edit links target `/dashboard/articles/[id]`, as specified by the accepted task sequence. Those destinations remain unimplemented until Tasks 7/8 and currently return not-found; prefetch is disabled. This intermediate listing task does not claim working creation/editing. See [screenshots and verification](testing.md#phase-3-task-6-my-articles-listing).
