@@ -19,7 +19,7 @@ test("owner formats saves and reopens a private body with a second versioned sav
   const body = page.getByRole("textbox", { name: "Article body" });
   await expect(body).toBeVisible();
   await body.fill("A synthetic body paragraph.");
-  await body.press("ControlOrMeta+A");
+  await body.selectText();
   await page.getByRole("button", { name: "Bold", exact: true }).click();
   await page.getByLabel("Link URL").fill("https://example.org/story");
   await page.getByRole("button", { name: "Apply link" }).click();
