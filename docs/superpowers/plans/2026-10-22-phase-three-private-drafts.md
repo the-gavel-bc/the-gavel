@@ -10,7 +10,7 @@
 
 **Spec:** [Accepted private-draft contract](../specs/2026-10-22-private-draft-workflow-design.md), approved by the owner on 2026-10-22. Existing [Phase 2 contract](../specs/2026-10-21-content-foundation-design.md), [API](../../api-contracts.md), [data](../../data-model.md), [security](../../security-and-permissions.md), [style](../../coding-style.md), and [testing](../../testing.md) remain authoritative for their existing boundaries.
 
-**Status:** Tasks 0 and 1 complete as documentation/baseline work. Tasks 2–5 validation, draft create/save and server queries/actions are complete. Tasks 6–11 are not implemented. The owner requested native planning/execution followed by task-completion notifications and review checkpoints; preserve that approach. This plan refines the accepted work packages without approving any extra product scope.
+**Status:** Tasks 0 and 1 complete as documentation/baseline work. Tasks 2–6 validation, draft create/save, server queries/actions and My Articles listing are complete. Tasks 7–11 are not implemented. The owner requested native planning/execution followed by task-completion notifications and review checkpoints; preserve that approach. This plan refines the accepted work packages without approving any extra product scope.
 
 ## Global constraints
 
@@ -143,9 +143,11 @@ Task 5 completion: [verification evidence](../../testing.md#phase-3-task-5-serve
 
 **Interfaces:** `ArticleList({page:ArticlePage}):React.JSX.Element`; server route consumes Task 5 own-list query and existing independent membership guards.
 
-- [ ] RED component/browser assertions for owned rows, empty/loading/error/next-page behavior and keyboard create/edit links. Admin's My Articles remains own-only; authored A/B content must not leak through list or cursor. Fixtures are synthetic and bound to the fixed local project.
-- [ ] Implement semantic list/table and paging links using shared primitives/tokens/CSS Modules. Draft rows link to edit; published/archived entries do not imply write capability. Errors expose retry UI without internals. No editor/provider/global store.
-- [ ] GREEN component/full unit/build, relevant SQL and desktop/mobile draft tests. Commit `feat: list owned articles in the dashboard`.
+- [x] RED component/browser assertions for owned rows, empty/loading/error/next-page behavior and keyboard create/edit links. Admin's My Articles remains own-only; authored A/B content must not leak through list or cursor. Fixtures are synthetic and bound to the fixed local project.
+- [x] Implement semantic list/table and paging links using shared primitives/tokens/CSS Modules. Draft rows link to edit; published/archived entries do not imply write capability. Errors expose retry UI without internals. No editor/provider/global store.
+- [x] GREEN component/full unit/build, relevant SQL and desktop/mobile draft tests. Committed in focused list, route/recovery, browser and review-fix changes, each below 300 changed lines.
+
+Task 6 completion: [evidence and review screenshots](../../testing.md#phase-3-task-6-my-articles-listing). Initial no-JS reads and error recovery render on the server; pagination pending feedback uses a small client link component instead of automatic loading.tsx. Create/edit destinations intentionally remain Tasks 7/8. Owner review checkpoint before Task 7.
 
 ### Task 7: new draft form
 
