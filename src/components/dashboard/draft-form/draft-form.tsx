@@ -64,6 +64,16 @@ export function DraftForm({
   useEffect(() => {
     if (command.failure) summary.current?.focus();
   }, [command.failure]);
+  useEffect(() => {
+    if (!editorFailure) return;
+    // Invalid native input may differ from the last valid canonical body tracked by the controller.
+    const warn = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [editorFailure]);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!ready || !options.sections.length || editorFailure) return;

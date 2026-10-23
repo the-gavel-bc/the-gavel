@@ -123,4 +123,7 @@ it("blocks submission after the editor rejects a paste instead of saving the old
   );
   fireEvent.submit(container.querySelector("form")!);
   expect(mocks.create).not.toHaveBeenCalled();
+  const leaving = new Event("beforeunload", { cancelable: true });
+  window.dispatchEvent(leaving);
+  expect(leaving.defaultPrevented).toBe(true);
 });

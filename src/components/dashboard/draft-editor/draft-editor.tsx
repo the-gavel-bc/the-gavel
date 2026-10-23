@@ -8,11 +8,11 @@ import {
   fromEditorDocument,
 } from "@/lib/articles/draft-document/draft-document";
 import {
-  draftJsonbByteLength,
   type DraftDocument,
   type DraftFailure,
 } from "@/lib/articles/draft-contract/draft-contract";
 import styles from "./draft-editor.module.css";
+import { insertDraftText } from "./draft-paste";
 // Compare already-validated JSON independent of PostgreSQL's object key ordering.
 const key = (value: unknown) =>
   JSON.stringify(value, (_, item: unknown) =>
@@ -68,22 +68,22 @@ export function DraftEditor({
         "aria-describedby": "draft-body-help",
       },
       handleDOMEvents: {
-        paste: (_, event) => {
+        paste: (view, event) => {
+          event.preventDefault();
+          if (!view.editable) return true;
           const data = event.clipboardData;
-          const text = data?.getData("text/plain") ?? "";
-          const bytes = draftJsonbByteLength(text);
           if (
             !data ||
             data.files.length ||
             data.getData("text/html") ||
-            bytes === null ||
-            bytes > 1048576
+            Array.from(data.types ?? []).some((type) => type !== "text/plain")
           ) {
-            event.preventDefault();
             blockedPaste();
             return true;
           }
-          return false;
+          const error = insertDraftText(view, data.getData("text/plain"));
+          if (error) reject(error);
+          return true;
         },
         drop: (_, event) => {
           event.preventDefault();
@@ -135,6 +135,22 @@ export function DraftEditor({
         errorOnInvalidContent: true,
       });
   }, [source, editor, disabled, onError]);
+  useEffect(() => {
+    if (!editor) return;
+    editor.setOptions({
+      editorProps: {
+        ...editor.options.editorProps,
+        attributes: {
+          id: "draft-content",
+          role: "textbox",
+          "aria-label": "Article body",
+          "aria-multiline": "true",
+          "aria-invalid": failure ? "true" : "false",
+          "aria-describedby": `draft-body-help${failure ? " draft-content-error" : ""}`,
+        },
+      },
+    });
+  }, [editor, failure]);
   const error = !source.ok ? source : failure;
   return (
     <section className={styles.editor} aria-label="Draft body">

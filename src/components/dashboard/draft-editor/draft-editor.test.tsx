@@ -52,6 +52,8 @@ it("rejects HTML paste before it can create nodes or fetch resources", async () 
   fireEvent(body, paste);
   await waitFor(() => expect(error).toHaveBeenCalled());
   expect(body.querySelector("img")).toBeNull();
+  await waitFor(() => expect(body).toHaveAttribute("aria-invalid", "true"));
+  expect(body).toHaveAccessibleDescription(/Paste was blocked/);
   expect(change).not.toHaveBeenCalled();
 });
 it("does not load unknown stored content", async () => {
