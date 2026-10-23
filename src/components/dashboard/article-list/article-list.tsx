@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArticlePageLink } from "../article-page-link/article-page-link";
 import { LinkButton } from "@/components/ui/link-button/link-button";
 import type { ArticlePage } from "@/lib/articles/draft-queries/draft-queries";
 import styles from "./article-list.module.css";
@@ -22,7 +23,7 @@ export function ArticleList({ page }: { page: ArticlePage }) {
         </LinkButton>
       </div>
       {page.items.length === 0 ? (
-        <p>You have no articles yet.</p>
+        <p>No articles on this page.</p>
       ) : (
         <ul className={styles.rows}>
           {page.items.map((article) => (
@@ -52,12 +53,11 @@ export function ArticleList({ page }: { page: ArticlePage }) {
       )}
       {page.nextCursor && (
         <nav aria-label="Article pages">
-          <Link
+          <ArticlePageLink
             href={`/dashboard?${new URLSearchParams({ cursor: page.nextCursor })}`}
-            prefetch={false}
           >
             Next page
-          </Link>
+          </ArticlePageLink>
         </nav>
       )}
     </section>

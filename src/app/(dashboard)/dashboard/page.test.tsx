@@ -68,13 +68,27 @@ it("loads the requested page and offers a way back to newest", async () => {
     "/dashboard",
   );
 });
-it("rejects repeated cursors and lets query failures reach the safe error boundary", async () => {
+it("server-renders safe recovery for repeated cursors and read failures", async () => {
   access.mockResolvedValue({ status: "active" });
-  await expect(DashboardPage(params(["one", "two"]))).rejects.toThrow(
-    "Invalid article page request.",
+  const first = render(await DashboardPage(params(["one", "two"])));
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    "Unable to load your articles",
   );
-  query.mockRejectedValue(new Error("Unable to load articles."));
-  await expect(DashboardPage(params())).rejects.toThrow(
-    "Unable to load articles.",
+  first.unmount();
+  query.mockRejectedValue(new Error("private SQL error"));
+  render(await DashboardPage(params()));
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    "Unable to load your articles",
   );
+  expect(screen.queryByText(/private SQL error/)).not.toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "Try again" })).toHaveAttribute(
+    "href",
+    "/dashboard",
+  );
+});
+it("does not mask a query guard's redirect during recovery", async () => {
+  access.mockResolvedValue({ status: "active" });
+  const { redirect } = await import("next/navigation");
+  query.mockImplementation(() => redirect("/access-pending"));
+  await expect(DashboardPage(params())).rejects.toThrow("NEXT_REDIRECT");
 });

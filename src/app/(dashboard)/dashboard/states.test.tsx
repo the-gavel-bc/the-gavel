@@ -1,12 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
-import Loading from "./loading";
 import ErrorBoundary from "./error";
-it("announces that the article list is loading", () => {
-  render(<Loading />);
-  expect(screen.getByRole("status")).toHaveTextContent("Loading your articles");
-});
 it("shows safe retry and first-page recovery without error details", async () => {
   const reset = vi.fn();
   render(

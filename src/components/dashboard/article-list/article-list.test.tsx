@@ -14,7 +14,7 @@ const row = {
 } as const;
 it("shows an explicit empty state with a keyboard-accessible create link", async () => {
   render(<ArticleList page={{ items: [], nextCursor: null }} />);
-  expect(screen.getByText("You have no articles yet.")).toBeVisible();
+  expect(screen.getByText("No articles on this page.")).toBeVisible();
   expect(screen.queryByRole("list")).not.toBeInTheDocument();
   await userEvent.tab();
   expect(screen.getByRole("link", { name: "Create draft" })).toHaveFocus();

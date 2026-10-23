@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import { ArticleListError } from "@/components/dashboard/article-list-error/article-list-error";
 import { Button } from "@/components/ui/button/button";
 export default function ErrorBoundary({
   reset,
@@ -8,17 +8,8 @@ export default function ErrorBoundary({
   reset: () => void;
 }) {
   return (
-    <section aria-label="Article loading error">
-      <p role="alert">
-        Unable to load your articles. Try again or return to the newest
-        articles.
-      </p>
+    <ArticleListError>
       <Button onClick={reset}>Try again</Button>
-      <p>
-        <Link href="/dashboard" prefetch={false}>
-          Newest articles
-        </Link>
-      </p>
-    </section>
+    </ArticleListError>
   );
 }
