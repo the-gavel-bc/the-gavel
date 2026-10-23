@@ -9,7 +9,7 @@ export type ContractCase = {
   value: unknown;
   want: string;
 };
-export const baseDraft = fixtures.baseDraft;
+export const baseDraft = { ...fixtures.baseDraft, schemaVersion: 1 as const };
 export const literalCases = fixtures.cases as ContractCase[];
 const paragraph = { type: "paragraph" };
 export function body(text: string): unknown {

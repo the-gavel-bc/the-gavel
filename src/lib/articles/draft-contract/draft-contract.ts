@@ -136,6 +136,21 @@ export function draftMetadataErrors(
   return errors;
 }
 
+function hasValidDraftMetadata(
+  value: JsonObject,
+): value is JsonObject &
+  Pick<
+    DraftInput,
+    | "title"
+    | "slug"
+    | "sectionId"
+    | "excerpt"
+    | "seoKeyphrase"
+    | "metaDescription"
+  > {
+  return Object.keys(draftMetadataErrors(value)).length === 0;
+}
+
 export function isValidDraftDocument(
   value: unknown,
 ): value is DraftDocument | null {
@@ -287,7 +302,7 @@ export function checkDraftInput(value: unknown): DraftCheckResult {
     value.schemaVersion !== 1
   )
     return invalid;
-  if (Object.keys(draftMetadataErrors(value)).length) return invalid;
+  if (!hasValidDraftMetadata(value)) return invalid;
   const sortedIds: string[][] = [];
   for (const [field, cap] of [
     ["categoryIds", 32],
