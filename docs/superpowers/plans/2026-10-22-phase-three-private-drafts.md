@@ -10,7 +10,7 @@
 
 **Spec:** [Accepted private-draft contract](../specs/2026-10-22-private-draft-workflow-design.md), approved by the owner on 2026-10-22. Existing [Phase 2 contract](../specs/2026-10-21-content-foundation-design.md), [API](../../api-contracts.md), [data](../../data-model.md), [security](../../security-and-permissions.md), [style](../../coding-style.md), and [testing](../../testing.md) remain authoritative for their existing boundaries.
 
-**Status:** Tasks 0 and 1 complete as documentation/baseline work. Tasks 2–6 validation, draft create/save, server queries/actions and My Articles listing are complete. Tasks 7–11 are not implemented. The owner requested native planning/execution followed by task-completion notifications and review checkpoints; preserve that approach. This plan refines the accepted work packages without approving any extra product scope.
+**Status:** Tasks 0 and 1 complete as documentation/baseline work. Tasks 2–7 validation, draft create/save, server queries/actions, My Articles listing and new-draft metadata form are complete. Tasks 8–11 are not implemented. The owner requested native planning/execution followed by task-completion notifications and review checkpoints; preserve that approach. This plan refines the accepted work packages without approving any extra product scope.
 
 ## Global constraints
 
@@ -155,9 +155,11 @@ Task 6 completion: [evidence and review screenshots](../../testing.md#phase-3-ta
 
 **Interfaces:** `DraftForm({initialDraft:DraftInput,options:DraftOptions,article?:{id:string;version:number;updatedAt:string}}):React.JSX.Element`; create mode initially uses NULL body/empty association arrays, all accepted metadata fields and explicit canonical slug. The same form supports edit mode in Task 8; Task 9 adds selectors.
 
-- [ ] RED tests for title/section/slug requirements, nullable optional metadata, global slug conflict, create/list navigation and uncertain retries with stable request ID. Failed/dirty forms retain inputs; keyboard labels/error summaries/status announcements are functional. Mutation server guards are tested independently of rendered controls.
-- [ ] Implement creation using accepted action, no publishing/upload buttons or silently renamed slug. Redirect successful creation to My Articles until Task 8 enables the edit route; add create-to-edit navigation there. Basic dirty/saving/error/retry behavior ships here; do not defer it until Task 10. Add synthetic dev/test catalog fixtures through local-only helpers, not real unresolved labels or hosted data.
-- [ ] GREEN unit/types/lint/format/build and desktop/mobile create journey. Commit `feat: create drafts from the dashboard`.
+- [x] RED tests for title/section/slug requirements, nullable optional metadata, global slug conflict, create/list navigation and uncertain retries with stable request ID. Failed/dirty forms retain inputs; keyboard labels/error summaries/status announcements are functional. Mutation server guards are tested independently of rendered controls.
+- [x] Implement creation using accepted action, no publishing/upload buttons or silently renamed slug. Redirect successful creation to My Articles until Task 8 enables the edit route; add create-to-edit navigation there. Basic dirty/saving/error/retry behavior ships here; do not defer it until Task 10. Add synthetic dev/test catalog fixtures through local-only helpers, not real unresolved labels or hosted data.
+- [x] GREEN unit/types/lint/format/build and desktop/mobile create journey. Committed as focused shared validation/controller/fields/form/route/review-fix/browser/evidence changes, each below 300 changed lines.
+
+Task 7 completion: [verification and screenshots](../../testing.md#phase-3-task-7-new-draft-form). Basic form locks pending/uncertain values and keeps one request UUID through later access failures; only confirmed success resolves uncertainty. Task 10 still owns editable-in-flight state/reconciliation and stronger navigation warnings. Owner checkpoint before Task 8.
 
 ### Task 8: body editor and edit route
 

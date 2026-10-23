@@ -110,6 +110,47 @@ function scalar(value: unknown, max: number, nullable = false): boolean {
   );
 }
 
+export function draftMetadataErrors(
+  value: Record<string, unknown>,
+): Record<string, string> {
+  const errors: Record<string, string> = {};
+  if (!scalar(value.title, 240))
+    errors.title =
+      "Enter a title of 1–240 characters without leading or trailing whitespace.";
+  if (
+    typeof value.slug !== "string" ||
+    value.slug.length > 180 ||
+    !/^[a-z0-9]+(-[a-z0-9]+)*$/u.test(value.slug)
+  )
+    errors.slug =
+      "Use 1–180 lowercase letters, numbers and single hyphens for the slug.";
+  if (!isDraftUuid(value.sectionId)) errors.sectionId = "Select a section.";
+  for (const [field, max] of [
+    ["excerpt", 600],
+    ["seoKeyphrase", 160],
+    ["metaDescription", 320],
+  ] as const)
+    if (!scalar(value[field], max, true))
+      errors[field] =
+        `Use up to ${max} characters without leading or trailing whitespace, or leave this field empty.`;
+  return errors;
+}
+
+function hasValidDraftMetadata(
+  value: JsonObject,
+): value is JsonObject &
+  Pick<
+    DraftInput,
+    | "title"
+    | "slug"
+    | "sectionId"
+    | "excerpt"
+    | "seoKeyphrase"
+    | "metaDescription"
+  > {
+  return Object.keys(draftMetadataErrors(value)).length === 0;
+}
+
 export function isValidDraftDocument(
   value: unknown,
 ): value is DraftDocument | null {
@@ -261,17 +302,7 @@ export function checkDraftInput(value: unknown): DraftCheckResult {
     value.schemaVersion !== 1
   )
     return invalid;
-  if (
-    !scalar(value.title, 240) ||
-    typeof value.slug !== "string" ||
-    value.slug.length > 180 ||
-    !/^[a-z0-9]+(-[a-z0-9]+)*$/u.test(value.slug) ||
-    !isDraftUuid(value.sectionId) ||
-    !scalar(value.excerpt, 600, true) ||
-    !scalar(value.seoKeyphrase, 160, true) ||
-    !scalar(value.metaDescription, 320, true)
-  )
-    return invalid;
+  if (!hasValidDraftMetadata(value)) return invalid;
   const sortedIds: string[][] = [];
   for (const [field, cap] of [
     ["categoryIds", 32],

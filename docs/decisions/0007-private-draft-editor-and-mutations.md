@@ -29,4 +29,4 @@ On 2026-10-22 the owner explicitly deferred internationalized domains after revi
 
 ## Validation
 
-The owner accepted the written contract. The executable plan assigns security denials, byte boundaries, real-session races, adapter round trips and accessible recovery states to specific tasks. Tasks 2–5 implement and test private input validation, atomic draft create/save and the private server query/action boundary; see [verification evidence](../testing.md#phase-3-task-2-draft-validation). This does not claim article-list/editor UI implementation or completion of Phase 3.
+The owner accepted the written contract. The executable plan assigns security denials, byte boundaries, real-session races, adapter round trips and accessible recovery states to specific tasks. Tasks 2–7 implement and test private input validation, atomic draft create/save, private server queries/actions, My Articles and the new-draft metadata form; see [verification evidence](../testing.md#phase-3-task-2-draft-validation). The edit route/body editor, association selectors and advanced reconciliation remain later tasks; Phase 3 is not complete.
