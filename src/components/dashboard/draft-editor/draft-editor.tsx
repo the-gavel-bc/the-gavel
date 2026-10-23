@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { DraftToolbar } from "../draft-toolbar/draft-toolbar";
 import { createDraftExtensions } from "@/lib/articles/draft-document/draft-extensions";
@@ -33,6 +33,7 @@ export function DraftEditor({
   onError: (failure: DraftFailure) => void;
   disabled: boolean;
 }) {
+  const emitted = useRef(new WeakSet<DraftDocument>());
   const source = useMemo(() => toEditorDocument(value), [value]);
   const [extensions] = useState(createDraftExtensions);
   const [failure, setFailure] = useState<DraftFailure | null>(null);
@@ -65,7 +66,8 @@ export function DraftEditor({
         role: "textbox",
         "aria-label": "Article body",
         "aria-multiline": "true",
-        "aria-describedby": "draft-body-help",
+        "aria-invalid": failure ? "true" : "false",
+        "aria-describedby": `draft-body-help${failure ? " draft-content-error" : ""}`,
       },
       handleDOMEvents: {
         paste: (view, event) => {
@@ -109,6 +111,7 @@ export function DraftEditor({
     onUpdate: ({ editor: current }) => {
       const result = fromEditorDocument(current.getJSON());
       if (result.ok) {
+        emitted.current.add(result.document);
         setFailure(null);
         onChange(result.document);
       } else reject(result);
@@ -122,7 +125,12 @@ export function DraftEditor({
       return;
     }
     if (!editor) return;
-    editor.setEditable(!disabled, false);
+    if (editor.isEditable !== !disabled) editor.setEditable(!disabled, false);
+    // A delayed echo of our own change must not replace newer native input.
+    if (value !== null && emitted.current.has(value)) {
+      emitted.current.delete(value);
+      return;
+    }
     const current = fromEditorDocument(editor.getJSON());
     const expected = fromEditorDocument(source.document);
     if (
@@ -134,23 +142,7 @@ export function DraftEditor({
         emitUpdate: false,
         errorOnInvalidContent: true,
       });
-  }, [source, editor, disabled, onError]);
-  useEffect(() => {
-    if (!editor) return;
-    editor.setOptions({
-      editorProps: {
-        ...editor.options.editorProps,
-        attributes: {
-          id: "draft-content",
-          role: "textbox",
-          "aria-label": "Article body",
-          "aria-multiline": "true",
-          "aria-invalid": failure ? "true" : "false",
-          "aria-describedby": `draft-body-help${failure ? " draft-content-error" : ""}`,
-        },
-      },
-    });
-  }, [editor, failure]);
+  }, [source, value, editor, disabled, onError]);
   const error = !source.ok ? source : failure;
   return (
     <section className={styles.editor} aria-label="Draft body">

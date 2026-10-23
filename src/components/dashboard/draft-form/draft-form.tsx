@@ -157,7 +157,7 @@ export function DraftForm({
           onError={reportEditorFailure}
           onChange={(content) => {
             setEditorFailure(null);
-            command.update({ ...command.draft, content });
+            command.update((current) => ({ ...current, content }));
           }}
         />
       </fieldset>

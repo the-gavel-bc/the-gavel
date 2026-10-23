@@ -159,3 +159,20 @@ it("warns on unload for dirty or uncertain input and clears after confirmation",
   window.dispatchEvent(after);
   expect(after.defaultPrevented).toBe(false);
 });
+
+it("submits the latest input even before React renders the update", async () => {
+  actions.create.mockResolvedValue(success);
+  const { result } = renderHook(() => useDraftCommand(baseDraft));
+  let saving!: Promise<unknown>;
+  act(() => {
+    const command = result.current;
+    command.update({ ...baseDraft, title: "Latest native edit" });
+    saving = command.submit();
+  });
+  await act(async () => {
+    await saving;
+  });
+  expect(actions.create.mock.calls[0][0].draft.title).toBe(
+    "Latest native edit",
+  );
+});
