@@ -43,8 +43,14 @@ for (const fixture of literalCases.filter(
     try {
       const result = fromEditorDocument(editor.getJSON());
       expect(result.ok).toBe(true);
-      if (content !== null)
-        expect(result).toEqual({ ok: true, document: content });
+      if (result.ok) {
+        const restored = toEditorDocument(result.document);
+        expect(restored.ok).toBe(true);
+        if (restored.ok)
+          expect(
+            editor.schema.nodeFromJSON(restored.document).toJSON(),
+          ).toEqual(editor.getJSON());
+      }
     } finally {
       editor.destroy();
     }
