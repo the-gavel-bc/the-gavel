@@ -70,3 +70,36 @@ it("exports fixed link/list defaults and a hard break after formatted text", () 
     editor.destroy();
   }
 });
+it("accepts a dense linked body despite native fixed-attribute overhead", () => {
+  const content: DraftDocument = {
+    format: "gavel-draft",
+    version: 1,
+    document: {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: Array.from({ length: 2000 }, (_, n) => ({
+            type: "text",
+            text: "x".repeat(400),
+            marks: [
+              { type: "link", attrs: { href: `https://example.org/${n}` } },
+            ],
+          })),
+        },
+      ],
+    },
+  };
+  const loaded = toEditorDocument(content);
+  expect(loaded.ok).toBe(true);
+  if (!loaded.ok) return;
+  const editor = new Editor({
+    extensions: createDraftExtensions(),
+    content: loaded.document,
+  });
+  try {
+    expect(fromEditorDocument(editor.getJSON()).ok).toBe(true);
+  } finally {
+    editor.destroy();
+  }
+});

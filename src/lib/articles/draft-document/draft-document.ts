@@ -75,7 +75,7 @@ export function toEditorDocument(
   return { ok: true, document: translate(content.document, true) };
 }
 export function fromEditorDocument(value: unknown): DraftDocumentResult {
-  const bytes = draftJsonbByteLength(value);
+  const bytes = draftJsonbByteLength(value, 2 * 1024 * 1024);
   // Native fixed attributes add overhead; the canonical body still has its separate 1 MiB cap.
   if (bytes === null || bytes > 2 * 1024 * 1024)
     return { ok: false, code: "invalid_input" };
