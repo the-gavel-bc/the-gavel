@@ -1,6 +1,6 @@
 # Component hierarchy
 
-Status: Foundation shell, access routes and private My Articles listing implemented; publication and other dashboard feature routes below remain planned.
+Status: Foundation shell, access routes and private My Articles listing and new-draft metadata form implemented; publication and other dashboard feature routes below remain planned.
 
 ## Implemented foundation routes
 
@@ -103,4 +103,15 @@ Phase 3 Task 6 connects `/dashboard?cursor=<opaque cursor>` to the checked own-l
 
 Initial reads and bounded read/input errors render fully on the server, including without JavaScript. Native next/newest/retry links preserve that behavior; client pagination additionally announces pending work without replacing initial HTML with a streaming loading fallback. The URL owns the cursor; no editor provider or global store is introduced.
 
-Create links target `/dashboard/articles/new` and draft edit links target `/dashboard/articles/[id]`, as specified by the accepted task sequence. Those destinations remain unimplemented until Tasks 7/8 and currently return not-found; prefetch is disabled. This intermediate listing task does not claim working creation/editing. See [screenshots and verification](testing.md#phase-3-task-6-my-articles-listing).
+Create links target the implemented `/dashboard/articles/new` form. Draft edit links target `/dashboard/articles/[id]`, which remains Task 8 and currently returns not-found; prefetch is disabled. Body editing is not implemented yet. See [screenshots and verification](testing.md#phase-3-task-6-my-articles-listing).
+
+
+## Implemented new-draft form
+
+Task 7 implements `/dashboard/articles/new` with an independent membership guard and the checked options query. It starts with empty title/slug/section, NULL optional metadata/body and empty associations. With no active sections, it explains the missing catalog and disables creation rather than inventing taxonomy.
+
+`DraftForm` owns submission/status/error focus and navigation; `DraftMetadataFields` owns controlled metadata and field styling; the colocated `use-draft-command` hook owns basic dirty/saving/error/retry state. Shared metadata feedback comes from the existing draft validator. The optional article/version prop prepares this same form for Task 8; no edit route or rich-text engine ships here.
+
+The client form starts disabled in server HTML and explains its JavaScript requirement, avoiding a default GET submission of private fields. Confirmed creation returns to My Articles. Fields lock during saving, uncertainty and confirmed-create navigation; an uncertain attempt retains its original request UUID/payload even if a later retry loses access. Only confirmed success resolves that uncertainty. Initial definitive failures keep input editable and permit a new corrected command.
+
+Native Back navigation has a best-effort unload warning for dirty/pending work. Task 10 still owns editable-in-flight state reduction, stronger in-app navigation warnings, conflict reconciliation and multi-tab interactions; this task does not claim those completed. See [form verification](testing.md#phase-3-task-7-new-draft-form).

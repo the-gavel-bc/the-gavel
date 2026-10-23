@@ -192,3 +192,10 @@ No schema/grant, auth model, dependency, audit exception, public projection, edi
 ## Implemented My Articles surface
 
 Task 6 exposes only the existing caller-owned summary query through `/dashboard`. Layout/page/query guards remain independent, administrators' My Articles stays owner-filtered, and a cursor cannot select another owner. Draft text renders as React text; no body, excerpt or privileged labels enter list results. Draft-only edit links imply no authority and existing published/archived rows expose no edit control. Safe server read recovery rethrows Next control-flow exceptions, preserving auth redirects. Browser checks cover signed-out/ineligible access, cross-owner cursors for authors/admins, no-store responses and recovery without JavaScript; see [evidence](testing.md#phase-3-task-6-my-articles-listing). No grants, RPC, auth model or lifecycle operation changed.
+
+
+## Implemented new-draft submission surface
+
+Task 7 uses existing verified query/action guards and controlled RPCs; client fields never supply owner, actor, status or history. Required metadata validation/feedback shares the existing validator. Global slug conflicts disclose only the accepted safe collision state. No active section means no enabled create action. Without JavaScript the form explains its dependency and stays disabled; no default GET submission of draft values is enabled.
+
+Pending/uncertain commands are kept in memory only, lock input and reuse their UUID/payload. Once uncertain, a subsequent forbidden response does not prove the original write failed; the same command remains pending until confirmed success. Real browser checks cover committed-but-lost responses, access revocation/restoration, exact replay and single history capture, plus malformed action encoding/protected-field rejection. No service-role client, direct table grant, dependency, schema, publishing or upload capability changed. Human security and screen-reader review remain separate requirements.

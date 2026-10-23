@@ -113,3 +113,10 @@ Task 5 implements the following interfaces in `src/lib/articles/`. The [accepted
 - Confirmed success revalidates `/dashboard` and the private `/dashboard/articles/<id>` path only. If revalidation fails after commit, the confirmed receipt still returns; a static private diagnostic includes only the request UUID. Request-time reads remain authoritative on refresh.
 
 `experimental.serverActions.bodySizeLimit` is 4 MiB to accommodate Flight encoding and metadata around the accepted body. The draft body/request database limits remain unchanged. Pinned Next encoder tests exercise near-1-MiB ASCII, multibyte and escaped bodies; actual browser action dispatch and malformed-wire behavior will be tested when form routes exist. Default same-origin action protections are unchanged.
+
+
+## Implemented draft form adapter
+
+Task 7 adds `draftMetadataErrors` beside `checkDraftInput`, sharing the same metadata constraints for form feedback. The strict full-payload validator and database functions remain authoritative. The new form maps exactly empty optional metadata to NULL, never silently trims/renames a slug, and creates only with NULL body/empty associations. It submits the existing `CreateDraftCommand`; no transport or database interface changed. Its optional article/version prop uses the existing save command for later route reuse.
+
+Basic UI command state retains the submitted payload/request UUID until a success is confirmed. A later authorization or other failure cannot resolve an earlier unknown result, so those retries remain locked to the original command. A first definitive failure allows correction/new UUID. Confirmed creation navigates to My Articles and locks the form during that transition. Edit-in-flight/conflict reconciliation remains Task 10; see [current form boundaries](component-hierarchy.md#implemented-new-draft-form).
