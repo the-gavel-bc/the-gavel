@@ -15,7 +15,7 @@ async function fill(page: import("@playwright/test").Page, slug: string) {
   await page.getByLabel(/Slug/).fill(slug);
   await page.getByLabel(/Section/).selectOption(fixture.id(99));
 }
-test("creates a private draft and returns to its owned listing", async ({
+test("creates a private draft and opens it for editing", async ({
   context,
   page,
 }, info) => {
@@ -29,8 +29,19 @@ test("creates a private draft and returns to its owned listing", async ({
   ).toBeFocused();
   const slug = `task7-${info.project.name}-created`;
   await fill(page, slug);
+  await expect(
+    page.getByRole("textbox", { name: "Article body" }),
+  ).toBeVisible();
   await page.getByLabel(/Section/).focus();
-  await page.keyboard.press("Tab");
+  for (let step = 0; step < 20; step++) {
+    await page.keyboard.press("Tab");
+    if (
+      await page
+        .getByRole("button", { name: "Create draft" })
+        .evaluate((element) => element === document.activeElement)
+    )
+      break;
+  }
   await expectVisibleFocus(page.getByRole("button", { name: "Create draft" }));
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({
@@ -43,7 +54,9 @@ test("creates a private draft and returns to its owned listing", async ({
       transport = { actionId, body: request.postData()! };
   });
   await page.keyboard.press("Enter");
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page).toHaveURL(/\/dashboard\/articles\/[0-9a-f-]+$/);
+  await expect(page.getByRole("heading", { name: "Edit draft" })).toBeVisible();
+  await page.getByRole("link", { name: "Back to My articles" }).click();
   await expect(
     page.getByRole("heading", {
       name: `${fixture.label} created draft`,
@@ -144,7 +157,7 @@ test("lost action response retries the same command and creates one history set"
   await expect(page.getByLabel(/Title/)).toBeDisabled();
   fixture.setCreateAccess(true);
   await page.getByRole("button", { name: "Retry same request" }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page).toHaveURL(/\/dashboard\/articles\/[0-9a-f-]+$/);
   expect(bodies).toHaveLength(3);
   expect(bodies[1]).toBe(bodies[0]);
   expect(bodies[2]).toBe(bodies[0]);
