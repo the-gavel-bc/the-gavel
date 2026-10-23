@@ -50,7 +50,7 @@ it("preserves input on slug collision and never silently renames it", async () =
   expect(screen.getByLabelText(/Slug/)).toHaveValue(baseDraft.slug);
   expect(mocks.push).not.toHaveBeenCalled();
 });
-it("creates NULL optional metadata and returns confirmed success to My Articles", async () => {
+it("creates NULL optional metadata and opens the confirmed draft for editing", async () => {
   mocks.create.mockResolvedValue({
     ok: true,
     articleId: baseDraft.sectionId,
@@ -61,7 +61,7 @@ it("creates NULL optional metadata and returns confirmed success to My Articles"
   });
   render(<DraftForm initialDraft={baseDraft} options={options} />);
   await userEvent.type(screen.getByLabelText(/Title/), " updated");
-  expect(screen.getByRole("status")).toHaveTextContent("Unsaved changes");
+  expect(screen.getByText("Unsaved changes.")).toBeVisible();
   await userEvent.click(screen.getByRole("button", { name: "Create draft" }));
   await waitFor(() =>
     expect(mocks.push).toHaveBeenCalledWith(
