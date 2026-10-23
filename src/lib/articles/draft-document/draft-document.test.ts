@@ -64,6 +64,30 @@ it("maps only verified native defaults and leaves its input untouched", () => {
   expect(JSON.stringify(native)).toBe(before);
 });
 it.each([
+  { type: "doc", content: [{ type: "paragraph", attrs: [] }] },
+  {
+    type: "doc",
+    content: [
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "x",
+            marks: [
+              {
+                type: "link",
+                attrs: {
+                  href: "https://example.org",
+                  title: "Meaningful title",
+                },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
   { type: "doc", content: [] },
   {
     type: "doc",

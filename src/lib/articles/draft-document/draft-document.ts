@@ -9,6 +9,7 @@ export const DRAFT_LINK_ATTRIBUTES = {
   target: "_blank",
   rel: "noopener noreferrer nofollow",
   class: null,
+  title: null,
 } as const;
 export type EditorDocumentResult =
   { ok: true; document: JSONContent } | DraftFailure;
@@ -17,6 +18,13 @@ export type DraftDocumentResult =
 function translate(value: unknown, native: boolean): JSONContent {
   const copy = JSON.parse(JSON.stringify(value)) as JSONContent;
   const visit = (node: JSONContent) => {
+    if (
+      Object.hasOwn(node, "attrs") &&
+      (node.attrs === null ||
+        typeof node.attrs !== "object" ||
+        Array.isArray(node.attrs))
+    )
+      throw new Error("Unsupported attribute shape.");
     if (node.type === "link" && node.attrs) {
       const attrs = node.attrs;
       if (!native) {
