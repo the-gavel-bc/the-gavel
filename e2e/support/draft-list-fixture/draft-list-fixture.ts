@@ -1,10 +1,15 @@
 import { execFileSync } from "node:child_process";
 import { localSupabase } from "../local-supabase/local-supabase";
 
-export function draftListFixture(project: string) {
+export function draftListFixture(
+  project: string,
+  suite: "list" | "create" = "list",
+) {
   if (project !== "desktop" && project !== "mobile")
     throw new Error("Unknown local browser project.");
-  const base = project === "desktop" ? 860 : 880;
+  const base =
+    (project === "desktop" ? 860 : 880) + (suite === "create" ? 40 : 0);
+  const prefix = `${suite === "create" ? "task7" : "task6"}-${project}`;
   const uuid = (n: number) =>
     `00000000-0000-0000-0000-${String(n).padStart(12, "0")}`;
   const id = (n: number) =>
@@ -17,11 +22,11 @@ export function draftListFixture(project: string) {
   };
   const userIds = Object.values(users).map(uuid);
   const quoted = (ids: string[]) => ids.map((id) => `'${id}'`).join(",");
-  const label = `Task 6 ${project}`;
+  const label = `Task ${suite === "create" ? 7 : 6} ${project}`;
   let installed = false;
   function sql(statement: string) {
     localSupabase();
-    execFileSync(
+    return execFileSync(
       "docker",
       [
         "exec",
@@ -32,12 +37,12 @@ export function draftListFixture(project: string) {
         "postgres",
         "-d",
         "postgres",
-        "-Xq",
+        "-XqAt",
         "--single-transaction",
         "-v",
         "ON_ERROR_STOP=1",
       ],
-      { input: statement, stdio: ["pipe", "pipe", "pipe"] },
+      { input: statement, encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] },
     );
   }
   return {
@@ -62,17 +67,17 @@ export function draftListFixture(project: string) {
         insert into public.memberships(user_id,role,active,approved_by,approved_at)
         select id,case when id='${uuid(users.admin)}' then 'administrator'::public.app_role else 'author'::public.app_role end,true,'${uuid(users.admin)}',now()
         from auth.users where id in (${quoted(userIds)});
-        insert into public.sections(id,name,slug) values('${id(99)}','Synthetic ${project} list section','task6-${project}');
+        insert into public.sections(id,name,slug) values('${id(99)}','Synthetic ${project} ${suite} section','${prefix}');
         insert into public.articles(id,owner_profile_id,section_id,title,slug,status,published_at,archived_at,updated_at)
         select ('86000000-0000-0000-0000-' || lpad((${base * 100}+n)::text,12,'0'))::uuid,
-          '${uuid(users.author)}','${id(99)}','${label} own ' || n,'task6-${project}-own-' || n,
+          '${uuid(users.author)}','${id(99)}','${label} own ' || n,'${prefix}-own-' || n,
           case n when 20 then 'published'::public.article_status when 19 then 'archived'::public.article_status else 'draft'::public.article_status end,
           case when n in (19,20) then '2026-10-22T12:00:00Z'::timestamptz else null end,
           case n when 19 then '2026-10-22T13:00:00Z'::timestamptz else null end,'2026-10-22T12:00:00.123456Z'
         from generate_series(1,21) n;
         insert into public.articles(id,owner_profile_id,section_id,title,slug) values
-          ('${id(22)}','${uuid(users.other)}','${id(99)}','${label} other private','task6-${project}-other'),
-          ('${id(23)}','${uuid(users.admin)}','${id(99)}','${label} admin own','task6-${project}-admin');
+          ('${id(22)}','${uuid(users.other)}','${id(99)}','${label} other private','${prefix}-other'),
+          ('${id(23)}','${uuid(users.admin)}','${id(99)}','${label} admin own','${prefix}-admin');
       `);
       installed = true;
     },
@@ -80,14 +85,47 @@ export function draftListFixture(project: string) {
       if (!installed) throw new Error("Fixture is not installed.");
       // PostgreSQL accepts infinity; our bounded summary contract deliberately rejects it.
       sql(`insert into public.articles(id,owner_profile_id,section_id,title,slug,updated_at)
-        values('${id(24)}','${uuid(users.author)}','${id(99)}','Synthetic unsupported timestamp','task6-${project}-read-failure','infinity');`);
+        values('${id(24)}','${uuid(users.author)}','${id(99)}','Synthetic unsupported timestamp','${prefix}-read-failure','infinity');`);
     },
     recoverRead() {
       if (installed) sql(`delete from public.articles where id='${id(24)}';`);
     },
+    setCreateAccess(active: boolean) {
+      if (!installed) throw new Error("Fixture is not installed.");
+      sql(
+        `update public.memberships set active=${active ? "true" : "false"},revoked_at=${active ? "null" : "now()"} where user_id='${uuid(users.empty)}';`,
+      );
+    },
+    createdCount() {
+      if (!installed) throw new Error("Fixture is not installed.");
+      return Number(
+        sql(
+          `select count(*) from public.articles where owner_profile_id='${uuid(users.empty)}';`,
+        ),
+      );
+    },
+    created(slug: string) {
+      if (
+        !installed ||
+        !/^[a-z0-9]+(-[a-z0-9]+)*$/u.test(slug) ||
+        slug.length > 180
+      )
+        throw new Error("Invalid fixture lookup.");
+      return JSON.parse(
+        sql(`select jsonb_build_object('status',a.status,'excerpt',a.excerpt,'content',a.content,'seoKeyphrase',a.seo_keyphrase,'metaDescription',a.meta_description,'version',a.edit_version,
+        'revisions',(select count(*) from public.article_revisions r where r.article_id=a.id),
+        'audits',(select count(*) from public.audit_events e where e.resource_id=a.id),
+        'receipts',(select count(*) from private.draft_write_receipts r where r.article_id=a.id))
+        from public.articles a where a.slug='${slug}' and a.owner_profile_id='${uuid(users.empty)}';`),
+      );
+    },
     cleanup() {
       if (!installed) return;
-      sql(`delete from public.articles where id in (${quoted(Array.from({ length: 24 }, (_, i) => id(i + 1)))});
+      sql(`delete from private.draft_write_receipts where actor_user_id in (${quoted(userIds)});
+        delete from private.draft_write_limits where actor_user_id in (${quoted(userIds)});
+        delete from public.audit_events where actor_user_id in (${quoted(userIds)});
+        delete from public.article_revisions where actor_user_id in (${quoted(userIds)});
+        delete from public.articles where owner_profile_id in (${quoted(userIds)});
         delete from public.sections where id='${id(99)}';
         delete from public.memberships where user_id in (${quoted(userIds)});
         delete from public.profiles where id in (${quoted(userIds)});
