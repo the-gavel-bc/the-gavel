@@ -29,5 +29,5 @@
   margin: var(--space-2) 0 0;
 }
 .fields [aria-invalid="true"] {
-  outline: 2px solid var(--color-ink);
+  border: 2px solid var(--color-ink);
 }

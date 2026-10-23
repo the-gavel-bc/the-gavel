@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useSyncExternalStore, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button/button";
 import { DraftMetadataFields } from "../draft-metadata-fields/draft-metadata-fields";
@@ -10,6 +10,9 @@ import type {
 import type { DraftOptions } from "@/lib/articles/draft-options/draft-options";
 import { useDraftCommand, type DraftArticle } from "./use-draft-command";
 import styles from "./draft-form.module.css";
+const subscribeReady = () => () => {};
+const clientReady = () => true;
+const serverReady = () => false;
 const messages: Record<DraftErrorCode, string> = {
   invalid_input: "Review the highlighted fields and active selections.",
   slug_conflict: "That slug is already in use. Choose another slug.",
@@ -38,10 +41,7 @@ export function DraftForm({
   const command = useDraftCommand(initialDraft, article);
   const router = useRouter();
   const summary = useRef<HTMLDivElement>(null);
-  const [ready, setReady] = useState(false);
-  useEffect(() => {
-    setReady(true);
-  }, []);
+  const ready = useSyncExternalStore(subscribeReady, clientReady, serverReady);
   useEffect(() => {
     if (command.failure) summary.current?.focus();
   }, [command.failure]);
@@ -83,6 +83,13 @@ export function DraftForm({
       {command.failure && (
         <div role="alert" tabIndex={-1} ref={summary} className={styles.errors}>
           <p>{messages[command.failure.code]}</p>
+          {command.phase === "uncertain" &&
+            command.failure.code !== "unavailable" && (
+              <p>
+                The earlier save is still unconfirmed. Resolve this error, then
+                retry the same request.
+              </p>
+            )}
           {Object.keys(command.fieldErrors).length > 0 && (
             <ul>
               {Object.entries(command.fieldErrors).map(([field, message]) => (
@@ -95,7 +102,12 @@ export function DraftForm({
         </div>
       )}
       <fieldset
-        disabled={!ready || command.locked || !options.sections.length}
+        disabled={
+          !ready ||
+          command.locked ||
+          (!article && command.phase === "saved") ||
+          !options.sections.length
+        }
         className={styles.fields}
       >
         <legend>Draft details</legend>
@@ -106,15 +118,15 @@ export function DraftForm({
           onChange={command.update}
         />
       </fieldset>
-      <p>
-        Body editing and association selectors will be available in the next
-        steps.
-      </p>
+      <p>Your draft stays private.</p>
       <div>
         <Button
           type="submit"
           disabled={
-            !ready || command.phase === "saving" || !options.sections.length
+            !ready ||
+            command.phase === "saving" ||
+            command.phase === "saved" ||
+            !options.sections.length
           }
         >
           {command.phase === "uncertain"

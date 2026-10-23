@@ -22,11 +22,12 @@ export function useDraftCommand(
     "idle" | "saving" | "saved" | "error" | "uncertain"
   >("idle");
   const [failure, setFailure] = useState<DraftFailure | null>(null);
-  const baseline = useRef(JSON.stringify(initialDraft));
+  const [baseline, setBaseline] = useState(() => JSON.stringify(initialDraft));
   const resource = useRef(article);
   const pending = useRef<Pending | null>(null);
   const busy = useRef(false);
-  const dirty = JSON.stringify(draft) !== baseline.current;
+  const uncertain = useRef(false);
+  const dirty = JSON.stringify(draft) !== baseline;
   const locked = phase === "saving" || phase === "uncertain";
   useEffect(() => {
     if (!dirty && !pending.current) return;
@@ -85,14 +86,17 @@ export function useDraftCommand(
         version: result.version,
         updatedAt: result.updatedAt,
       };
-      baseline.current = JSON.stringify(command.draft);
+      setBaseline(JSON.stringify(command.draft));
       pending.current = null;
+      uncertain.current = false;
       setPhase("saved");
       return true;
     }
     setFailure(result);
-    if (result.code === "unavailable") setPhase("uncertain");
-    else {
+    if (result.code === "unavailable" || uncertain.current) {
+      uncertain.current = true;
+      setPhase("uncertain");
+    } else {
       pending.current = null;
       setPhase("error");
     }

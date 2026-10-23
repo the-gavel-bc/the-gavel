@@ -118,3 +118,38 @@ it("retains committed versions when the same form is used for edit mode", async 
   });
   expect(result.current.dirty).toBe(false);
 });
+it("keeps an earlier uncertain command when later access denial cannot resolve it", async () => {
+  actions.create
+    .mockResolvedValueOnce({ ok: false, code: "unavailable" })
+    .mockResolvedValueOnce({ ok: false, code: "forbidden" })
+    .mockResolvedValueOnce({ ...success, replayed: true });
+  const { result } = renderHook(() => useDraftCommand(baseDraft));
+  await act(async () => {
+    await result.current.submit();
+  });
+  await act(async () => {
+    await result.current.submit();
+  });
+  expect(result.current.phase).toBe("uncertain");
+  expect(result.current.locked).toBe(true);
+  await act(async () => {
+    expect(await result.current.submit()).toBe(true);
+  });
+  expect(actions.create.mock.calls.map((call) => call[0])).toEqual(
+    Array(3).fill(actions.create.mock.calls[0][0]),
+  );
+});
+it("warns on unload for dirty or uncertain input and clears after confirmation", async () => {
+  actions.create.mockResolvedValue(success);
+  const { result } = renderHook(() => useDraftCommand(baseDraft));
+  act(() => result.current.update({ ...baseDraft, title: "Unsaved title" }));
+  const before = new Event("beforeunload", { cancelable: true });
+  window.dispatchEvent(before);
+  expect(before.defaultPrevented).toBe(true);
+  await act(async () => {
+    await result.current.submit();
+  });
+  const after = new Event("beforeunload", { cancelable: true });
+  window.dispatchEvent(after);
+  expect(after.defaultPrevented).toBe(false);
+});

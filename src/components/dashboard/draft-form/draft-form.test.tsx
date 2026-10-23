@@ -64,6 +64,8 @@ it("creates NULL optional metadata and returns confirmed success to My Articles"
   expect(screen.getByRole("status")).toHaveTextContent("Unsaved changes");
   await userEvent.click(screen.getByRole("button", { name: "Create draft" }));
   await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/dashboard"));
+  expect(screen.getByRole("button", { name: "Create draft" })).toBeDisabled();
+  expect(screen.getByLabelText(/Title/)).toBeDisabled();
   expect(mocks.create.mock.calls[0][0].draft).toMatchObject({
     excerpt: null,
     seoKeyphrase: null,
