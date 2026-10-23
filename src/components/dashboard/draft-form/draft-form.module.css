@@ -1,0 +1,29 @@
+.form {
+  display: grid;
+  gap: var(--space-4);
+  max-width: var(--reading-width);
+}
+.fields {
+  border: 0;
+  margin: 0;
+  min-width: 0;
+  padding: 0;
+}
+.fields legend {
+  font-weight: bold;
+  margin-bottom: var(--space-4);
+}
+.errors {
+  background: var(--color-surface);
+  border-left: 3px solid var(--color-ink);
+  padding: var(--space-4);
+  overflow-wrap: anywhere;
+}
+.form .errors ul {
+  list-style: disc;
+  padding-left: var(--space-6);
+}
+.form button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
