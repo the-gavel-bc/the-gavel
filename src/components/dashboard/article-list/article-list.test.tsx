@@ -45,7 +45,7 @@ it("renders titles as text and exposes edit only for draft rows", async () => {
     screen.queryByRole("link", { name: /Published story|Archived story/ }),
   ).not.toBeInTheDocument();
   expect(
-    screen.getByRole("link", { name: "Edit Campus news" }),
+    screen.getByRole("link", { name: "Edit draft: Campus news" }),
   ).toHaveAttribute("href", `/dashboard/articles/${row.id}`);
   expect(screen.getByRole("link", { name: "Next page" })).toHaveAttribute(
     "href",
@@ -53,7 +53,9 @@ it("renders titles as text and exposes edit only for draft rows", async () => {
   );
   await userEvent.tab();
   await userEvent.tab();
-  expect(screen.getByRole("link", { name: "Edit Campus news" })).toHaveFocus();
+  expect(
+    screen.getByRole("link", { name: "Edit draft: Campus news" }),
+  ).toHaveFocus();
   expect(screen.getAllByText(/UTC/)).toHaveLength(3);
 });
 it("does not offer a next page without a cursor or interpret title markup", () => {

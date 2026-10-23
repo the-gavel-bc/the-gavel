@@ -42,7 +42,7 @@ export function ArticleList({ page }: { page: ArticlePage }) {
                 <Link
                   href={`/dashboard/articles/${article.id}`}
                   prefetch={false}
-                  aria-label={`Edit ${article.title}`}
+                  aria-label={`Edit draft: ${article.title}`}
                 >
                   Edit draft
                 </Link>

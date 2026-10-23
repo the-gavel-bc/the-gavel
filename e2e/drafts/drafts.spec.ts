@@ -26,7 +26,7 @@ test("author pages through only owned records without JavaScript", async ({
   await expect(list.getByText("Archived", { exact: true })).toBeVisible();
   await expect(
     list.getByRole("link", {
-      name: `Edit ${fixture.label} own 20`,
+      name: `Edit draft: ${fixture.label} own 20`,
       exact: true,
     }),
   ).toHaveCount(0);
@@ -39,7 +39,7 @@ test("author pages through only owned records without JavaScript", async ({
   ).toHaveAttribute("href", "/dashboard/articles/new");
   await expect(
     page.getByRole("link", {
-      name: `Edit ${fixture.label} own 21`,
+      name: `Edit draft: ${fixture.label} own 21`,
       exact: true,
     }),
   ).toHaveAttribute("href", `/dashboard/articles/${fixture.id(21)}`);
@@ -56,7 +56,7 @@ test("author pages through only owned records without JavaScript", async ({
   await page.keyboard.press("Tab");
   await expectVisibleFocus(
     page.getByRole("link", {
-      name: `Edit ${fixture.label} own 21`,
+      name: `Edit draft: ${fixture.label} own 21`,
       exact: true,
     }),
   );
