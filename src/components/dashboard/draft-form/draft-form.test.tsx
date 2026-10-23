@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
 import { baseDraft } from "@/lib/articles/draft-contract/draft-test-cases";
@@ -63,7 +63,11 @@ it("creates NULL optional metadata and returns confirmed success to My Articles"
   await userEvent.type(screen.getByLabelText(/Title/), " updated");
   expect(screen.getByRole("status")).toHaveTextContent("Unsaved changes");
   await userEvent.click(screen.getByRole("button", { name: "Create draft" }));
-  await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/dashboard"));
+  await waitFor(() =>
+    expect(mocks.push).toHaveBeenCalledWith(
+      `/dashboard/articles/${baseDraft.sectionId}`,
+    ),
+  );
   expect(screen.getByRole("button", { name: "Create draft" })).toBeDisabled();
   expect(screen.getByLabelText(/Title/)).toBeDisabled();
   expect(mocks.create.mock.calls[0][0].draft).toMatchObject({
@@ -98,4 +102,25 @@ it("does not invent a section when the active catalog is empty", () => {
   );
   expect(screen.getByText(/No active sections/)).toBeVisible();
   expect(screen.getByRole("button", { name: "Create draft" })).toBeDisabled();
+});
+
+it("blocks submission after the editor rejects a paste instead of saving the old body", async () => {
+  const { container } = render(
+    <DraftForm initialDraft={baseDraft} options={options} />,
+  );
+  const body = await screen.findByRole("textbox", { name: "Article body" });
+  const paste = new Event("paste", { bubbles: true, cancelable: true });
+  Object.defineProperty(paste, "clipboardData", {
+    value: {
+      files: [],
+      getData: (type: string) =>
+        type === "text/html" ? "<img src=x>" : "text",
+    },
+  });
+  fireEvent(body, paste);
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "Create draft" })).toBeDisabled(),
+  );
+  fireEvent.submit(container.querySelector("form")!);
+  expect(mocks.create).not.toHaveBeenCalled();
 });

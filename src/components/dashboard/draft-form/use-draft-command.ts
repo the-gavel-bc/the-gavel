@@ -44,14 +44,14 @@ export function useDraftCommand(
     setFailure(null);
     setPhase("idle");
   }
-  async function submit(): Promise<boolean> {
-    if (busy.current) return false;
+  async function submit(): Promise<DraftArticle | null> {
+    if (busy.current) return null;
     if (!pending.current) {
       const checked = checkDraftInput(draft);
       if (!checked.ok) {
         setFailure(checked);
         setPhase("error");
-        return false;
+        return null;
       }
       pending.current = {
         requestId: crypto.randomUUID(),
@@ -90,7 +90,7 @@ export function useDraftCommand(
       pending.current = null;
       uncertain.current = false;
       setPhase("saved");
-      return true;
+      return resource.current;
     }
     setFailure(result);
     if (result.code === "unavailable" || uncertain.current) {
@@ -100,7 +100,7 @@ export function useDraftCommand(
       pending.current = null;
       setPhase("error");
     }
-    return false;
+    return null;
   }
   const fieldErrors =
     failure?.code === "slug_conflict"
