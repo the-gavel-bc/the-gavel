@@ -29,4 +29,10 @@ On 2026-10-22 the owner explicitly deferred internationalized domains after revi
 
 ## Validation
 
-The owner accepted the written contract. The executable plan assigns security denials, byte boundaries, real-session races, adapter round trips and accessible recovery states to specific tasks. Tasks 2–7 implement and test private input validation, atomic draft create/save, private server queries/actions, My Articles and the new-draft metadata form; see [verification evidence](../testing.md#phase-3-task-2-draft-validation). The edit route/body editor, association selectors and advanced reconciliation remain later tasks; Phase 3 is not complete.
+The owner accepted the written contract. The executable plan assigns security denials, byte boundaries, real-session races, adapter round trips and accessible recovery states to specific tasks. Tasks 2–8 implement and test private input validation, atomic draft create/save, server queries/actions, My Articles and private create/edit with the constrained body editor; see [verification evidence](../testing.md#phase-3-task-2-draft-validation). Association selectors and advanced reconciliation remain Tasks 9/10; Phase 3 is not complete.
+
+## Task 8 implementation evidence
+
+Thirteen explicit MIT packages are pinned to Tiptap 3.32.0; required React peers include the pinned React 19 line. Actual React/Next/Node 22 runtime/build tests pass. Only the accepted schema is enabled; no paid/cloud/StarterKit capability is enabled. The adapter owns canonical/native translation, including verified default attributes and the native overhead budget, leaving stored body/RPC contracts unchanged.
+
+The editor uses client-only dynamic loading and `immediatelyRender:false` per [official Next integration](https://tiptap.dev/docs/editor/getting-started/install/nextjs). Plain-text-only paste is an explicit conservative policy: unsupported rich formats are rejected rather than silently shortened. An unavailable-selection edit gate remains until Task 9 adds deliberate replacement/removal. Validation and real-browser evidence are recorded in [testing](../testing.md#phase-3-task-8-constrained-body-editor).

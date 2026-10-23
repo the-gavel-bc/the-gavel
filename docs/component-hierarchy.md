@@ -1,16 +1,16 @@
 # Component hierarchy
 
-Status: Foundation shell, access routes and private My Articles listing and new-draft metadata form implemented; publication and other dashboard feature routes below remain planned.
+Status: Foundation shell, access routes and private My Articles listing, create form and constrained draft edit route implemented; publication and other dashboard feature routes below remain planned.
 
 ## Implemented foundation routes
 
-| Route             | Behavior                                                                      |
-| ----------------- | ----------------------------------------------------------------------------- |
-| `/`               | Accessible foundation homepage; final publication composition remains planned |
-| `/sign-in`        | Server action initiating Google sign-in; hosted provider setup remains manual |
-| `/auth/callback`  | PKCE code exchange and safe access routing                                    |
-| `/access-pending` | Denied/pending membership experience and sign-out                             |
-| `/dashboard`      | Protected owned-article listing with pagination, role-aware shell and sign-out                  |
+| Route             | Behavior                                                                       |
+| ----------------- | ------------------------------------------------------------------------------ |
+| `/`               | Accessible foundation homepage; final publication composition remains planned  |
+| `/sign-in`        | Server action initiating Google sign-in; hosted provider setup remains manual  |
+| `/auth/callback`  | PKCE code exchange and safe access routing                                     |
+| `/access-pending` | Denied/pending membership experience and sign-out                              |
+| `/dashboard`      | Protected owned-article listing with pagination, role-aware shell and sign-out |
 
 The header's section links and dashboard profile/administration links identify future destinations; those feature routes are not implemented. Both dashboard layout and page independently call the server membership guard. Components live in named folders under `src/components/site`, `src/components/dashboard`, and `src/components/ui`, alongside their owned CSS Modules and existing tests. See [file colocation](coding-style.md#file-colocation).
 
@@ -96,22 +96,28 @@ RootLayout
 - Every async surface provides loading, empty, error, success, and disabled states.
 - Shared public components use semantic HTML, keyboard operation, visible focus, and responsive layouts.
 
-
 ## Implemented My Articles listing
 
 Phase 3 Task 6 connects `/dashboard?cursor=<opaque cursor>` to the checked own-list query. Layout and page retain independent membership guards. Server-owned rows show title, status and UTC update time; only drafts expose edit links. `ArticleList` owns its semantic list and CSS; `ArticlePageLink` owns client-navigation loading feedback; `ArticleListError` shares safe error presentation between server reads and the unexpected client-error boundary.
 
 Initial reads and bounded read/input errors render fully on the server, including without JavaScript. Native next/newest/retry links preserve that behavior; client pagination additionally announces pending work without replacing initial HTML with a streaming loading fallback. The URL owns the cursor; no editor provider or global store is introduced.
 
-Create links target the implemented `/dashboard/articles/new` form. Draft edit links target `/dashboard/articles/[id]`, which remains Task 8 and currently returns not-found; prefetch is disabled. Body editing is not implemented yet. See [screenshots and verification](testing.md#phase-3-task-6-my-articles-listing).
-
+Create links target the implemented `/dashboard/articles/new` form. Draft edit links target the implemented `/dashboard/articles/[id]` route; prefetch remains disabled. See [screenshots and verification](testing.md#phase-3-task-6-my-articles-listing).
 
 ## Implemented new-draft form
 
 Task 7 implements `/dashboard/articles/new` with an independent membership guard and the checked options query. It starts with empty title/slug/section, NULL optional metadata/body and empty associations. With no active sections, it explains the missing catalog and disables creation rather than inventing taxonomy.
 
-`DraftForm` owns submission/status/error focus and navigation; `DraftMetadataFields` owns controlled metadata and field styling; the colocated `use-draft-command` hook owns basic dirty/saving/error/retry state. Shared metadata feedback comes from the existing draft validator. The optional article/version prop prepares this same form for Task 8; no edit route or rich-text engine ships here.
+`DraftForm` owns submission/status/error focus and navigation; `DraftMetadataFields` owns controlled metadata and field styling; the colocated `use-draft-command` hook owns basic dirty/saving/error/retry state. Shared metadata feedback comes from the existing draft validator. The optional article/version prop is now consumed by the Task 8 edit route; the same form/controller serves both modes.
 
-The client form starts disabled in server HTML and explains its JavaScript requirement, avoiding a default GET submission of private fields. Confirmed creation returns to My Articles. Fields lock during saving, uncertainty and confirmed-create navigation; an uncertain attempt retains its original request UUID/payload even if a later retry loses access. Only confirmed success resolves that uncertainty. Initial definitive failures keep input editable and permit a new corrected command.
+The client form starts disabled in server HTML and explains its JavaScript requirement, avoiding a default GET submission of private fields. Confirmed creation now opens its private edit route. Fields lock during saving, uncertainty and confirmed-create navigation; an uncertain attempt retains its original request UUID/payload even if a later retry loses access. Only confirmed success resolves that uncertainty. Initial definitive failures keep input editable and permit a new corrected command.
 
 Native Back navigation has a best-effort unload warning for dirty/pending work. Task 10 still owns editable-in-flight state reduction, stronger in-app navigation warnings, conflict reconciliation and multi-tab interactions; this task does not claim those completed. See [form verification](testing.md#phase-3-task-7-new-draft-form).
+
+## Implemented constrained body editor
+
+Task 8 adds `DraftEditor`/`DraftToolbar` with owned CSS/tests and a small prospective-paste helper. `DraftForm` dynamically loads the editor with SSR disabled; Tiptap also uses `immediatelyRender:false`. Loading NULL presents an empty editing surface without converting the stored NULL or marking the form dirty. Successful creates open the edit route; confirmed edit saves retain the acknowledged version for subsequent saves.
+
+The edit route independently guards membership and uses the checked snapshot query. Missing/cross-owner IDs share not-found; published/archived and unsupported legacy bodies expose no save controls. Existing unavailable selections currently show generic IDs with no edit form, preserving data until Task 9 implements deliberate replacement/removal. This is an interim gate, not an automatic cleanup.
+
+Only paragraph, H2/H3, quote, ordered/bulleted list, hard break, bold, italic and safe links are enabled. Native format translation belongs to `draft-document/`; engine types remain inside that boundary and editor/toolbar components. Only plain-text clipboard payloads are accepted. HTML, files, other rich MIME types and drops are explicitly blocked before parsing; plain text becomes a bounded model whose full prospective body validates before dispatch. Invalid native edits block saving, expose associated body errors and retain best-effort unload protection.

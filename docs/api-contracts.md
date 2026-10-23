@@ -1,6 +1,6 @@
 # API contracts
 
-Status: Foundation access/session interfaces, Phase 2 private content/history storage and Phase 3 private draft queries/actions implemented; editor UI and publishing operations remain planned.
+Status: Foundation access/session interfaces, Phase 2 private content/history storage and Phase 3 private draft queries/actions implemented; association selectors, advanced reconciliation and publishing remain planned.
 
 ## Style and ownership
 
@@ -114,9 +114,16 @@ Task 5 implements the following interfaces in `src/lib/articles/`. The [accepted
 
 `experimental.serverActions.bodySizeLimit` is 4 MiB to accommodate Flight encoding and metadata around the accepted body. The draft body/request database limits remain unchanged. Pinned Next encoder tests exercise near-1-MiB ASCII, multibyte and escaped bodies; actual browser action dispatch and malformed-wire behavior will be tested when form routes exist. Default same-origin action protections are unchanged.
 
-
 ## Implemented draft form adapter
 
 Task 7 adds `draftMetadataErrors` beside `checkDraftInput`, sharing the same metadata constraints for form feedback. The strict full-payload validator and database functions remain authoritative. The new form maps exactly empty optional metadata to NULL, never silently trims/renames a slug, and creates only with NULL body/empty associations. It submits the existing `CreateDraftCommand`; no transport or database interface changed. Its optional article/version prop uses the existing save command for later route reuse.
 
-Basic UI command state retains the submitted payload/request UUID until a success is confirmed. A later authorization or other failure cannot resolve an earlier unknown result, so those retries remain locked to the original command. A first definitive failure allows correction/new UUID. Confirmed creation navigates to My Articles and locks the form during that transition. Edit-in-flight/conflict reconciliation remains Task 10; see [current form boundaries](component-hierarchy.md#implemented-new-draft-form).
+Basic UI command state retains the submitted payload/request UUID until a success is confirmed. A later authorization or other failure cannot resolve an earlier unknown result, so those retries remain locked to the original command. A first definitive failure allows correction/new UUID. Confirmed creation opens the private edit route and locks the form during that transition. Edit-in-flight/conflict reconciliation remains Task 10; see [current form boundaries](component-hierarchy.md#implemented-new-draft-form).
+
+## Implemented editor adapter and edit route
+
+Task 8 implements `toEditorDocument(DraftDocument|null)` and `fromEditorDocument(unknown)` in `draft-document/`, returning checked editor/canonical results or safe `unsupported_content`/`invalid_input` failures. Native-only defaults are verified before normalization: ordered-list `type:null`, and links with fixed `_blank` target, `noopener noreferrer nofollow` rel and NULL class/title. Other meaningful fields are rejected. Native mark ordering follows the configured schema and is preserved; native export → canonical → native equality proves no formatting is lost.
+
+`DraftEditor({value,onChange,onError,disabled})` is client-only, controlled through canonical values, with no callback on initial NULL load. Delayed echoes of emitted document objects cannot replace newer native edits; fresh external document values still replace the editor. The controller snapshots its latest input at submit time, including updates before React renders. Body errors block form submission and remain associated with the textbox across rerenders. Plain-text paste validates the prospective complete body before dispatch; rich clipboard formats and drops are rejected explicitly. Native edits that fail conversion remain visible/unsaved until corrected and participate in basic unload warnings. No raw HTML import or renderer is exposed.
+
+`/dashboard/articles/[id]` consumes the existing guarded detail/options interfaces and reuses `DraftForm` with the current article/version. Confirmed creates open this route; confirmed edit saves update the controller's acknowledged version. Missing, read-only, unsupported and temporarily unavailable-selection states never expose a save operation. Server action/RPC signatures, direct-write denials and canonical limits are unchanged. Task 9 supplies selectors; Task 10 still supplies editable-in-flight/conflict/in-app-navigation reconciliation.
