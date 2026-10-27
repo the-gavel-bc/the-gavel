@@ -1,0 +1,22 @@
+.fields {
+  display: grid;
+  gap: var(--space-6);
+}
+.fields fieldset {
+  min-width: 0;
+}
+.fields legend {
+  font-weight: bold;
+}
+.choice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 2.75rem;
+  overflow-wrap: anywhere;
+}
+.choice input {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+}
