@@ -180,7 +180,7 @@ test("another author cannot edit while an administrator can save the same draft"
   expect(after.article.edit_version).toBe(before.article.edit_version + 1);
   expect(after.article.content).toEqual(before.article.content);
 });
-test("published archived legacy and unavailable selections never expose save controls", async ({
+test("published archived and legacy content stay read-only; unavailable sections are repairable", async ({
   context,
   page,
 }) => {
@@ -213,10 +213,13 @@ test("published archived legacy and unavailable selections never expose save con
   try {
     await page.goto(`/dashboard/articles/${fixture.id(21)}`);
     await expect(
-      page.getByText(`Unavailable selection: ${fixture.id(99)}`),
-    ).toBeVisible();
-    await expect(page.getByRole("button", { name: "Save draft" })).toHaveCount(
-      0,
+      page.getByRole("option", {
+        name: `Unavailable section: ${fixture.id(99)}`,
+      }),
+    ).toHaveCount(1);
+    await page.getByRole("button", { name: "Save draft" }).click();
+    await expect(page.getByRole("alert")).toContainText(
+      "Choose an active section",
     );
   } finally {
     fixture.setSectionActive(true);
