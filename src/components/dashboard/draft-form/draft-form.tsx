@@ -173,10 +173,7 @@ export function DraftForm({
       )}
       <fieldset
         disabled={
-          !ready ||
-          command.locked ||
-          (!article && command.phase === "saved") ||
-          !options.sections.length
+          !ready || command.locked || (!article && command.phase === "saved")
         }
         className={styles.fields}
       >

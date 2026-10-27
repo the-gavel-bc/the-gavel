@@ -165,3 +165,31 @@ it("requires deliberate removal of unavailable selections and submits selected c
     ],
   });
 });
+it("leaves unavailable-selection repair usable when there are no active sections", async () => {
+  render(
+    <DraftForm
+      initialDraft={{
+        ...baseDraft,
+        categoryIds: ["00000000-0000-0000-0000-000000000099"],
+      }}
+      options={{ ...options, sections: [] }}
+      article={{
+        id: baseDraft.sectionId,
+        version: 1,
+        updatedAt: "2026-10-23T12:00:00Z",
+      }}
+    />,
+  );
+  expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
+  expect(screen.getByLabelText(/Title/)).toBeEnabled();
+  const unavailable = screen.getByLabelText(/Unavailable category/);
+  expect(unavailable).toBeEnabled();
+  await userEvent.click(unavailable);
+  expect(
+    screen.queryByLabelText(/Unavailable category/),
+  ).not.toBeInTheDocument();
+  await userEvent.type(screen.getByLabelText(/Title/), " retained");
+  expect(screen.getByLabelText(/Title/)).toHaveValue(
+    `${baseDraft.title} retained`,
+  );
+});

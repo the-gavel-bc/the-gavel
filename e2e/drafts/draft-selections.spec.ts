@@ -24,10 +24,13 @@ test("creates and reopens categories tags and multiple guest credits", async ({
     exact: true,
   });
   await expect(category).toBeVisible();
-  await category.check();
+  await category.focus();
+  await page.keyboard.press("Space");
+  await expect(category).toBeChecked();
   await page
     .getByLabel(`Synthetic ${info.project.name} topic`, { exact: true })
-    .check();
+    .focus();
+  await page.keyboard.press("Space");
   await page.getByRole("button", { name: "Add contributor" }).click();
   await page
     .getByLabel("Contributor 1", { exact: true })
@@ -55,6 +58,11 @@ test("creates and reopens categories tags and multiple guest credits", async ({
   await expect(
     page.getByRole("textbox", { name: "Article body" }),
   ).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
   await page.screenshot({
     path: `docs/reviews/assets/phase-3-task9-${info.project.name}.png`,
     fullPage: true,

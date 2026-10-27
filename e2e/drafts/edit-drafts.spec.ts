@@ -217,10 +217,10 @@ test("published archived and legacy content stay read-only; unavailable sections
         name: `Unavailable section: ${fixture.id(99)}`,
       }),
     ).toHaveCount(1);
-    await page.getByRole("button", { name: "Save draft" }).click();
-    await expect(page.getByRole("alert")).toContainText(
-      "Choose an active section",
-    );
+    await expect(page.getByLabel("Title (required)")).toBeEnabled();
+    await expect(
+      page.getByRole("button", { name: "Save draft" }),
+    ).toBeVisible();
   } finally {
     fixture.setSectionActive(true);
   }
