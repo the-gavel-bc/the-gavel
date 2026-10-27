@@ -10,7 +10,7 @@
 
 **Spec:** [Accepted private-draft contract](../specs/2026-10-22-private-draft-workflow-design.md); [parent plan Task 9](2026-10-22-phase-three-private-drafts.md#task-9-taxonomy-and-contributor-selection).
 
-**Baseline:** GitHub main `ecf3d62`, including merged PR #23/editor head `01f1d9b`. Isolated worktree `/private/tmp/the-gavel-task9`, branch `feat/draft-association-selectors`. Planning only; implementation and fresh baseline tests have not started.
+**Baseline:** GitHub main `ecf3d62`, including merged PR #23/editor head `01f1d9b`. Isolated worktree `/private/tmp/the-gavel-task9`, branch `feat/draft-association-selectors`. Implementation and local verification complete; owner handoff review and hosted CI remain outstanding. See [verification](../../testing.md#phase-3-task-9-draft-association-selection).
 
 ## Global constraints
 
@@ -44,10 +44,10 @@ Routine implementation choices: no custom combobox; labels distinguish duplicate
 
 **Interfaces:** Export `loadDraftCategories(client:SupabaseClient<Database>,sectionId:string):Promise<DraftOptions["categories"]>` from the options owner and reuse it inside `loadDraftOptions`. Export server action `getDraftCategoriesAction(sectionId:string):Promise<{ok:true;categories:DraftOptions["categories"]}|{ok:false;code:"invalid_input"|"unavailable"}>`. Independently invoke the existing active-membership guard and cookie-scoped no-store client. Preserve auth redirects; return safe errors for ordinary read failures.
 
-- [ ] Write failing tests for invalid UUID, independent access guard, active category/parent filters, pagination beyond the API cap, safe query failures and unchanged initial no-section behavior.
-- [ ] Run `pnpm test -- src/lib/articles/draft-options src/lib/articles/draft-category-action`; expect failures for missing exports/action.
-- [ ] Extract the existing category query into the helper, implement the guarded action and run the same command; expect PASS.
-- [ ] Commit the boundary and tests together; document its read-only contract in `docs/api-contracts.md`.
+- [x] Write failing tests for invalid UUID, independent access guard, active category/parent filters, pagination beyond the API cap, safe query failures and unchanged initial no-section behavior.
+- [x] Run `pnpm test -- src/lib/articles/draft-options src/lib/articles/draft-category-action`; expect failures for missing exports/action.
+- [x] Extract the existing category query into the helper, implement the guarded action and run the same command; expect PASS.
+- [x] Commit the boundary and tests together; document its read-only contract in `docs/api-contracts.md`.
 
 ## Work package 2: controlled selection fields
 
@@ -55,10 +55,10 @@ Routine implementation choices: no custom combobox; labels distinguish duplicate
 
 **Interfaces:** `DraftTaxonomyFields({draft,options,errors,onChange})` consumes DraftInput, DraftOptions, Record<string,string> and `(next:DraftInput)=>void`. `DraftContributorFields({value,options,error,onChange})` consumes DraftInput["contributors"], DraftOptions["contributors"], optional error and complete-value change callback. `draftSelectionErrors(draft:DraftInput,options:DraftOptions):Record<string,string>` provides usability checks; existing validators/RPC remain authoritative.
 
-- [ ] Write failing tests for add/remove, exact caps and one over, duplicate IDs/profile-role pairs, wrong-section/unavailable selections, multiple roles, guest profiles, tied/invalid integer order and empty catalogs. Assert untouched fields/credits remain identical.
-- [ ] Run focused tests; expect missing modules/components to fail before implementation.
-- [ ] Implement native fieldsets/legends, labels, hints, associated errors and explicit removal controls; generic unavailable labels reveal no hidden catalog data. Add operations stop at caps; removal remains possible.
-- [ ] Run `pnpm test -- src/components/dashboard/draft-taxonomy-fields src/components/dashboard/draft-contributor-fields src/lib/articles/draft-selections`; expect PASS. Commit in focused field/helper increments.
+- [x] Write failing tests for add/remove, exact caps and one over, duplicate IDs/profile-role pairs, wrong-section/unavailable selections, multiple roles, guest profiles, tied/invalid integer order and empty catalogs. Assert untouched fields/credits remain identical.
+- [x] Run focused tests; expect missing modules/components to fail before implementation.
+- [x] Implement native fieldsets/legends, labels, hints, associated errors and explicit removal controls; generic unavailable labels reveal no hidden catalog data. Add operations stop at caps; removal remains possible.
+- [x] Run `pnpm test -- src/components/dashboard/draft-taxonomy-fields src/components/dashboard/draft-contributor-fields src/lib/articles/draft-selections`; expect PASS. Commit in focused field/helper increments.
 
 ## Work package 3: form and route integration
 
@@ -66,20 +66,20 @@ Routine implementation choices: no custom combobox; labels distinguish duplicate
 
 **Interfaces:** Preserve existing DraftForm and command-hook props. Add section-choice coordination inside the form; seed categories from initial options. Metadata fields show an unavailable current section as a generic selected option. The edit route renders the form for valid canonical bodies even with unavailable associations; read-only/unsupported/not-found guards remain unchanged.
 
-- [ ] Write RED tests for changing section without category removal, deliberate removal/reselection, rapid A→B→A responses, load failure/retry, no false initial dirtiness, unavailable-ID repair, retained values after save rejection and complete save payload.
-- [ ] Cover pending/uncertain field locking, caps/errors linked from summary, keyboard access and no-section behavior. Block only new submissions while catalog/selection feedback is unresolved; uncertain retries must still replay the original command.
-- [ ] Implement category-loading state with stale-response protection and no automatic mutation of selections. Integrate controlled fields, pre-submit usability feedback and safe retry UI.
-- [ ] Run `pnpm test -- src/components/dashboard/draft-form src/components/dashboard/draft-metadata-fields 'src/app/(dashboard)/dashboard/articles/[id]/page.test.tsx'`; expect PASS. Commit focused integration changes.
+- [x] Write RED tests for changing section without category removal, deliberate removal/reselection, rapid A→B→A responses, load failure/retry, no false initial dirtiness, unavailable-ID repair, retained values after save rejection and complete save payload.
+- [x] Cover pending/uncertain field locking, caps/errors linked from summary, keyboard access and no-section behavior. Block only new submissions while catalog/selection feedback is unresolved; uncertain retries must still replay the original command.
+- [x] Implement category-loading state with stale-response protection and no automatic mutation of selections. Integrate controlled fields, pre-submit usability feedback and safe retry UI.
+- [x] Run `pnpm test -- src/components/dashboard/draft-form src/components/dashboard/draft-metadata-fields 'src/app/(dashboard)/dashboard/articles/[id]/page.test.tsx'`; expect PASS. Commit focused integration changes.
 
 ## Work package 4: real journeys and handoff
 
 **Files:** Create `e2e/drafts/draft-selections.spec.ts`; extend `e2e/support/draft-list-fixture/draft-list-fixture.ts` only as necessary; update affected README, component/security/API/testing documentation and the parent Task 9 checkboxes.
 
-- [ ] Add synthetic, local-only desktop/mobile create→select→save→reopen and edit→repair→save journeys. Include section mismatch preservation, failed save retention, guest/multiple-role/tied-order credits, credited-author-B denial and administrator active-selection rules. Deactivate a fixture reference after options load and assert safe rejection with retained input.
-- [ ] Run the new browser cases against a production build; inspect desktop/mobile screenshots and keyboard behavior. Preserve fixture fingerprints and the populated baseline; do not reset the shared database.
-- [ ] Run `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:db`, `pnpm db:types:check`, `pnpm supabase db lint`, `pnpm test:draft-contract`, `pnpm build`, and `pnpm test:e2e -- e2e/drafts`. Expect each exit 0; record actual counts and any unavailable environment requirements.
-- [ ] Run unfiltered `pnpm audit --prod --audit-level=high` and `pnpm audit --audit-level=high`, plus `git diff --check`. Expect no blocking finding or whitespace error.
-- [ ] Review the whole Task 9 change with a fresh reviewer, fix important findings with observed regression tests, record evidence and outstanding human security/screen-reader review. Do not claim hosted CI, create/merge a PR or begin Task 10 as part of this handoff.
+- [x] Add synthetic, local-only desktop/mobile create→select→save→reopen and edit→repair→save journeys. Include section mismatch preservation, failed save retention, guest/multiple-role/tied-order credits, credited-author-B denial and administrator active-selection rules. Deactivate a fixture reference after options load and assert safe rejection with retained input.
+- [x] Run the new browser cases against a production build; inspect desktop/mobile screenshots and keyboard behavior. Preserve fixture fingerprints and the populated baseline; do not reset the shared database.
+- [x] Run `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:db`, `pnpm db:types:check`, `pnpm supabase db lint`, `pnpm test:draft-contract`, `pnpm build` through Playwright’s configured webServer, and `pnpm exec playwright test` (all browser suites). Expect each exit 0; record actual counts and any unavailable environment requirements.
+- [x] Run unfiltered `pnpm audit --prod --audit-level=high` and `pnpm audit --audit-level=high`, plus `git diff --check`. Expect no blocking finding or whitespace error.
+- [x] Review the whole Task 9 change with a fresh reviewer, fix important findings with observed regression tests, record evidence and outstanding human security/screen-reader review. Do not claim hosted CI, create/merge a PR or begin Task 10 as part of this handoff.
 
 ## Acceptance and rollback
 
