@@ -2,7 +2,10 @@ import { execFileSync } from "node:child_process";
 import { createHmac } from "node:crypto";
 import type { BrowserContext } from "@playwright/test";
 
+let verifiedLocal: Readonly<Record<string, string>> | undefined;
+
 export function localSupabase() {
+  if (verifiedLocal) return verifiedLocal;
   const status = JSON.parse(
     execFileSync("pnpm", ["exec", "supabase", "status", "-o", "json"], {
       encoding: "utf8",
@@ -17,7 +20,8 @@ export function localSupabase() {
     throw new Error(
       "Browser tests require the isolated local Supabase project.",
     );
-  return status;
+  verifiedLocal = Object.freeze(status);
+  return verifiedLocal;
 }
 
 export async function setLocalSession(

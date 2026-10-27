@@ -1,15 +1,29 @@
 "use client";
-import { useEffect, useRef, useSyncExternalStore, type FormEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useSyncExternalStore,
+  useState,
+  useCallback,
+  type FormEvent,
+} from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button/button";
 import { DraftMetadataFields } from "../draft-metadata-fields/draft-metadata-fields";
 import type {
   DraftInput,
   DraftErrorCode,
+  DraftFailure,
 } from "@/lib/articles/draft-contract/draft-contract";
 import type { DraftOptions } from "@/lib/articles/draft-options/draft-options";
 import { useDraftCommand, type DraftArticle } from "./use-draft-command";
 import styles from "./draft-form.module.css";
+const DraftEditor = dynamic(
+  () =>
+    import("../draft-editor/draft-editor").then((module) => module.DraftEditor),
+  { ssr: false, loading: () => <p role="status">Loading body editor…</p> },
+);
 const subscribeReady = () => () => {};
 const clientReady = () => true;
 const serverReady = () => false;
@@ -39,17 +53,33 @@ export function DraftForm({
   article?: DraftArticle;
 }) {
   const command = useDraftCommand(initialDraft, article);
+  const [editorFailure, setEditorFailure] = useState<DraftFailure | null>(null);
+  const reportEditorFailure = useCallback(
+    (failure: DraftFailure) => setEditorFailure(failure),
+    [],
+  );
   const router = useRouter();
   const summary = useRef<HTMLDivElement>(null);
   const ready = useSyncExternalStore(subscribeReady, clientReady, serverReady);
   useEffect(() => {
     if (command.failure) summary.current?.focus();
   }, [command.failure]);
+  useEffect(() => {
+    if (!editorFailure) return;
+    // Invalid native input may differ from the last valid canonical body tracked by the controller.
+    const warn = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [editorFailure]);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!ready || !options.sections.length) return;
-    if ((await command.submit()) && !article) {
-      router.push("/dashboard");
+    if (!ready || !options.sections.length || editorFailure) return;
+    const saved = await command.submit();
+    if (saved && !article) {
+      router.push(`/dashboard/articles/${saved.id}`);
       router.refresh();
     }
   }
@@ -73,7 +103,9 @@ export function DraftForm({
           without it.
         </p>
       </noscript>
-      <p role="status">{status}</p>
+      <p role="status">
+        {editorFailure ? "Body needs attention before saving." : status}
+      </p>
       {!options.sections.length && (
         <p>
           No active sections are available. Ask an administrator to configure a
@@ -117,6 +149,17 @@ export function DraftForm({
           errors={command.fieldErrors}
           onChange={command.update}
         />
+        <DraftEditor
+          value={command.draft.content}
+          disabled={
+            !ready || command.locked || (!article && command.phase === "saved")
+          }
+          onError={reportEditorFailure}
+          onChange={(content) => {
+            setEditorFailure(null);
+            command.update((current) => ({ ...current, content }));
+          }}
+        />
       </fieldset>
       <p>Your draft stays private.</p>
       <div>
@@ -126,6 +169,7 @@ export function DraftForm({
             !ready ||
             command.phase === "saving" ||
             command.phase === "saved" ||
+            Boolean(editorFailure) ||
             !options.sections.length
           }
         >

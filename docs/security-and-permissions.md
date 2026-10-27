@@ -188,14 +188,20 @@ Task 5 uses the existing verified access lookup and cookie-scoped publishable-ke
 
 No schema/grant, auth model, dependency, audit exception, public projection, editor rendering or lifecycle capability changed. The global server-action transport cap is 4 MiB while canonical database bounds remain unchanged. Human security review remains required; unit/SQL tests and agent review do not substitute for it.
 
-
 ## Implemented My Articles surface
 
 Task 6 exposes only the existing caller-owned summary query through `/dashboard`. Layout/page/query guards remain independent, administrators' My Articles stays owner-filtered, and a cursor cannot select another owner. Draft text renders as React text; no body, excerpt or privileged labels enter list results. Draft-only edit links imply no authority and existing published/archived rows expose no edit control. Safe server read recovery rethrows Next control-flow exceptions, preserving auth redirects. Browser checks cover signed-out/ineligible access, cross-owner cursors for authors/admins, no-store responses and recovery without JavaScript; see [evidence](testing.md#phase-3-task-6-my-articles-listing). No grants, RPC, auth model or lifecycle operation changed.
-
 
 ## Implemented new-draft submission surface
 
 Task 7 uses existing verified query/action guards and controlled RPCs; client fields never supply owner, actor, status or history. Required metadata validation/feedback shares the existing validator. Global slug conflicts disclose only the accepted safe collision state. No active section means no enabled create action. Without JavaScript the form explains its dependency and stays disabled; no default GET submission of draft values is enabled.
 
 Pending/uncertain commands are kept in memory only, lock input and reuse their UUID/payload. Once uncertain, a subsequent forbidden response does not prove the original write failed; the same command remains pending until confirmed success. Real browser checks cover committed-but-lost responses, access revocation/restoration, exact replay and single history capture, plus malformed action encoding/protected-field rejection. No service-role client, direct table grant, dependency, schema, publishing or upload capability changed. Human security and screen-reader review remain separate requirements.
+
+## Implemented constrained private body editor
+
+Task 8 enables only the reviewed node/mark schema, validates stored canonical input before engine loading, verifies fixed native defaults and rejects meaningful unsupported attributes. Editor output still passes the existing strict action and authoritative database validators; no auth model, RLS/grant, lifecycle, media or public projection changes. Unsupported legacy content and read-only statuses remain preserved, including for administrators.
+
+Clipboard interception happens before Tiptap's parser. Only plain text is accepted; line/node allocation is bounded before model construction, and the prospective whole document validates before dispatch. HTML/files/other rich formats and drops are explicitly rejected. Links reuse the accepted URL validator, have application-fixed target/rel, disable automatic linking/click navigation and fetch no previews. Body errors block saves, expose accessible associations and preserve best-effort native unload warnings, including native edits not present in the controller's last valid body.
+
+The former CI advisory exception is retired after upstream withdrawal; production/full audits are unfiltered and clean. Human rich-content/security and screen-reader review remain outstanding; automated/agent review does not substitute. Advanced SPA navigation/reconciliation remains Task 10; no autosave or persistent recovery is claimed.

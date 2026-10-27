@@ -3,13 +3,14 @@ import { localSupabase } from "../local-supabase/local-supabase";
 
 export function draftListFixture(
   project: string,
-  suite: "list" | "create" = "list",
+  suite: "list" | "create" | "edit" = "list",
 ) {
   if (project !== "desktop" && project !== "mobile")
     throw new Error("Unknown local browser project.");
   const base =
-    (project === "desktop" ? 860 : 880) + (suite === "create" ? 40 : 0);
-  const prefix = `${suite === "create" ? "task7" : "task6"}-${project}`;
+    (project === "desktop" ? 860 : 880) +
+    (suite === "edit" ? 80 : suite === "create" ? 40 : 0);
+  const prefix = `${suite === "edit" ? "task8" : suite === "create" ? "task7" : "task6"}-${project}`;
   const uuid = (n: number) =>
     `00000000-0000-0000-0000-${String(n).padStart(12, "0")}`;
   const id = (n: number) =>
@@ -22,7 +23,7 @@ export function draftListFixture(
   };
   const userIds = Object.values(users).map(uuid);
   const quoted = (ids: string[]) => ids.map((id) => `'${id}'`).join(",");
-  const label = `Task ${suite === "create" ? 7 : 6} ${project}`;
+  const label = `Task ${suite === "edit" ? 8 : suite === "create" ? 7 : 6} ${project}`;
   let installed = false;
   function sql(statement: string) {
     localSupabase();
@@ -42,7 +43,12 @@ export function draftListFixture(
         "-v",
         "ON_ERROR_STOP=1",
       ],
-      { input: statement, encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] },
+      {
+        input: statement,
+        encoding: "utf8",
+        maxBuffer: 5 * 1024 * 1024,
+        stdio: ["pipe", "pipe", "pipe"],
+      },
     );
   }
   return {
@@ -89,6 +95,27 @@ export function draftListFixture(
     },
     recoverRead() {
       if (installed) sql(`delete from public.articles where id='${id(24)}';`);
+    },
+    article(number: number) {
+      if (!installed || !Number.isInteger(number) || number < 1 || number > 24)
+        throw new Error("Invalid fixture article.");
+      return JSON.parse(
+        sql(
+          `select jsonb_build_object('article',to_jsonb(a),'revisions',(select count(*) from public.article_revisions r where r.article_id=a.id),'audits',(select count(*) from public.audit_events e where e.resource_id=a.id)) from public.articles a where a.id='${id(number)}';`,
+        ),
+      );
+    },
+    legacy() {
+      if (!installed) throw new Error("Fixture is not installed.");
+      sql(
+        `update public.articles set content='{"format":"legacy","payload":"preserve synthetic legacy"}'::jsonb where id='${id(18)}';`,
+      );
+    },
+    setSectionActive(active: boolean) {
+      if (!installed) throw new Error("Fixture is not installed.");
+      sql(
+        `update public.sections set active=${active ? "true" : "false"} where id='${id(99)}';`,
+      );
     },
     setCreateAccess(active: boolean) {
       if (!installed) throw new Error("Fixture is not installed.");

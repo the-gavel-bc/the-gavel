@@ -23,6 +23,7 @@ export function useDraftCommand(
   >("idle");
   const [failure, setFailure] = useState<DraftFailure | null>(null);
   const [baseline, setBaseline] = useState(() => JSON.stringify(initialDraft));
+  const currentDraft = useRef(initialDraft);
   const resource = useRef(article);
   const pending = useRef<Pending | null>(null);
   const busy = useRef(false);
@@ -38,20 +39,23 @@ export function useDraftCommand(
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty, phase]);
-  function update(value: DraftInput) {
+  function update(value: DraftInput | ((current: DraftInput) => DraftInput)) {
     if (busy.current || pending.current) return;
-    setDraft(value);
+    const next =
+      typeof value === "function" ? value(currentDraft.current) : value;
+    currentDraft.current = next;
+    setDraft(next);
     setFailure(null);
     setPhase("idle");
   }
-  async function submit(): Promise<boolean> {
-    if (busy.current) return false;
+  async function submit(): Promise<DraftArticle | null> {
+    if (busy.current) return null;
     if (!pending.current) {
-      const checked = checkDraftInput(draft);
+      const checked = checkDraftInput(currentDraft.current);
       if (!checked.ok) {
         setFailure(checked);
         setPhase("error");
-        return false;
+        return null;
       }
       pending.current = {
         requestId: crypto.randomUUID(),
@@ -90,7 +94,7 @@ export function useDraftCommand(
       pending.current = null;
       uncertain.current = false;
       setPhase("saved");
-      return true;
+      return resource.current;
     }
     setFailure(result);
     if (result.code === "unavailable" || uncertain.current) {
@@ -100,7 +104,7 @@ export function useDraftCommand(
       pending.current = null;
       setPhase("error");
     }
-    return false;
+    return null;
   }
   const fieldErrors =
     failure?.code === "slug_conflict"

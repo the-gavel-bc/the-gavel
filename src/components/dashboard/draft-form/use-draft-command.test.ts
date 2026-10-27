@@ -36,7 +36,10 @@ it("retries uncertainty with the exact submitted UUID/payload and retains input"
   );
   expect(result.current.draft.title).toBe(baseDraft.title);
   await act(async () => {
-    expect(await result.current.submit()).toBe(true);
+    expect(await result.current.submit()).toMatchObject({
+      id: success.articleId,
+      version: 1,
+    });
   });
   expect(actions.create.mock.calls[1][0]).toEqual(
     actions.create.mock.calls[0][0],
@@ -67,12 +70,12 @@ it("blocks duplicate in-flight submits and input changes", async () => {
     }),
   );
   const { result } = renderHook(() => useDraftCommand(baseDraft));
-  let first!: Promise<boolean>;
+  let first!: Promise<unknown>;
   act(() => {
     first = result.current.submit();
   });
   await act(async () => {
-    expect(await result.current.submit()).toBe(false);
+    expect(await result.current.submit()).toBeNull();
   });
   act(() => result.current.update({ ...baseDraft, title: "New input" }));
   expect(result.current.draft.title).toBe(baseDraft.title);
@@ -133,7 +136,10 @@ it("keeps an earlier uncertain command when later access denial cannot resolve i
   expect(result.current.phase).toBe("uncertain");
   expect(result.current.locked).toBe(true);
   await act(async () => {
-    expect(await result.current.submit()).toBe(true);
+    expect(await result.current.submit()).toMatchObject({
+      id: success.articleId,
+      version: 1,
+    });
   });
   expect(actions.create.mock.calls.map((call) => call[0])).toEqual(
     Array(3).fill(actions.create.mock.calls[0][0]),
@@ -152,4 +158,21 @@ it("warns on unload for dirty or uncertain input and clears after confirmation",
   const after = new Event("beforeunload", { cancelable: true });
   window.dispatchEvent(after);
   expect(after.defaultPrevented).toBe(false);
+});
+
+it("submits the latest input even before React renders the update", async () => {
+  actions.create.mockResolvedValue(success);
+  const { result } = renderHook(() => useDraftCommand(baseDraft));
+  let saving!: Promise<unknown>;
+  act(() => {
+    const command = result.current;
+    command.update({ ...baseDraft, title: "Latest native edit" });
+    saving = command.submit();
+  });
+  await act(async () => {
+    await saving;
+  });
+  expect(actions.create.mock.calls[0][0].draft.title).toBe(
+    "Latest native edit",
+  );
 });

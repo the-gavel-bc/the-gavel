@@ -1,6 +1,9 @@
 // Match JSONB text size for JSON-safe integer inputs; key order does not affect size.
 // This is a bounded walk, not JSON.stringify(untrustedObject), which may invoke toJSON.
-export function draftJsonbByteLength(value: unknown): number | null {
+export function draftJsonbByteLength(
+  value: unknown,
+  maxBytes = 1100000,
+): number | null {
   const stack: { value: unknown; depth: number; exit?: boolean }[] = [
     { value, depth: 0 },
   ];
@@ -27,7 +30,7 @@ export function draftJsonbByteLength(value: unknown): number | null {
     if (item.depth > 64 || ++visited > 100000) return null;
     if (current === null) bytes += 4;
     else if (typeof current === "string") {
-      if (current.length > 1100000) return null;
+      if (current.length > maxBytes) return null;
       const length = stringBytes(current);
       if (length === null) return null;
       bytes += length;
@@ -67,7 +70,7 @@ export function draftJsonbByteLength(value: unknown): number | null {
         }
       }
     } else return null;
-    if (bytes > 1100000) return null;
+    if (bytes > maxBytes) return null;
   }
   return bytes;
 }
