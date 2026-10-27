@@ -127,3 +127,41 @@ it("blocks submission after the editor rejects a paste instead of saving the old
   window.dispatchEvent(leaving);
   expect(leaving.defaultPrevented).toBe(true);
 });
+it("requires deliberate removal of unavailable selections and submits selected credits/tags", async () => {
+  mocks.create.mockResolvedValue({ ok: false, code: "slug_conflict" });
+  render(
+    <DraftForm
+      initialDraft={{
+        ...baseDraft,
+        categoryIds: ["00000000-0000-0000-0000-000000000099"],
+      }}
+      options={{
+        ...options,
+        tags: [{ id: baseDraft.sectionId, name: "Topic" }],
+        contributors: [
+          { id: baseDraft.sectionId, displayName: "Guest", slug: "guest" },
+        ],
+      }}
+    />,
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Create draft" }));
+  expect(screen.getByRole("alert")).toHaveTextContent(/remove or replace/i);
+  expect(mocks.create).not.toHaveBeenCalled();
+  await userEvent.click(screen.getByLabelText(/Unavailable category/));
+  await userEvent.click(screen.getByLabelText("Topic"));
+  await userEvent.click(
+    screen.getByRole("button", { name: "Add contributor" }),
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Create draft" }));
+  await waitFor(() =>
+    expect(screen.getByRole("alert")).toHaveTextContent(/slug/i),
+  );
+  expect(screen.getByLabelText("Topic")).toBeChecked();
+  expect(mocks.create.mock.calls[0][0].draft).toMatchObject({
+    categoryIds: [],
+    tagIds: [baseDraft.sectionId],
+    contributors: [
+      { profileId: baseDraft.sectionId, role: "writer", displayOrder: 0 },
+    ],
+  });
+});

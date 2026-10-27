@@ -19,6 +19,12 @@ import type {
 import type { DraftOptions } from "@/lib/articles/draft-options/draft-options";
 import { useDraftCommand, type DraftArticle } from "./use-draft-command";
 import styles from "./draft-form.module.css";
+import { DraftTaxonomyFields } from "../draft-taxonomy-fields/draft-taxonomy-fields";
+import { DraftContributorFields } from "../draft-contributor-fields/draft-contributor-fields";
+import { draftMetadataErrors } from "@/lib/articles/draft-contract/draft-contract";
+import { draftSelectionErrors } from "@/lib/articles/draft-selections/draft-selections";
+import { useDraftCategories } from "./use-draft-categories";
+
 const DraftEditor = dynamic(
   () =>
     import("../draft-editor/draft-editor").then((module) => module.DraftEditor),
@@ -58,12 +64,27 @@ export function DraftForm({
     (failure: DraftFailure) => setEditorFailure(failure),
     [],
   );
+  const categories = useDraftCategories(
+    command.draft.sectionId,
+    initialDraft.sectionId,
+    options.categories,
+  );
+  const currentOptions = { ...options, categories: categories.categories };
+  const [selectionErrors, setSelectionErrors] = useState<
+    Record<string, string>
+  >({});
+  const errors = { ...command.fieldErrors, ...selectionErrors };
+  const update: typeof command.update = (value) => {
+    setSelectionErrors({});
+    command.update(value);
+  };
   const router = useRouter();
   const summary = useRef<HTMLDivElement>(null);
   const ready = useSyncExternalStore(subscribeReady, clientReady, serverReady);
   useEffect(() => {
-    if (command.failure) summary.current?.focus();
-  }, [command.failure]);
+    if (command.failure || Object.keys(selectionErrors).length)
+      summary.current?.focus();
+  }, [command.failure, selectionErrors]);
   useEffect(() => {
     if (!editorFailure) return;
     // Invalid native input may differ from the last valid canonical body tracked by the controller.
@@ -77,6 +98,19 @@ export function DraftForm({
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!ready || !options.sections.length || editorFailure) return;
+    if (command.phase !== "uncertain") {
+      const invalid = {
+        ...draftMetadataErrors(command.draft),
+        ...draftSelectionErrors(command.draft, currentOptions),
+      };
+      if (categories.loading || categories.error)
+        invalid.categoryIds =
+          "Wait for category choices or retry loading them before saving.";
+      if (Object.keys(invalid).length) {
+        setSelectionErrors(invalid);
+        return;
+      }
+    }
     const saved = await command.submit();
     if (saved && !article) {
       router.push(`/dashboard/articles/${saved.id}`);
@@ -112,19 +146,23 @@ export function DraftForm({
           section.
         </p>
       )}
-      {command.failure && (
+      {(command.failure || Object.keys(selectionErrors).length > 0) && (
         <div role="alert" tabIndex={-1} ref={summary} className={styles.errors}>
-          <p>{messages[command.failure.code]}</p>
+          <p>
+            {command.failure
+              ? messages[command.failure.code]
+              : "Review the highlighted selections."}
+          </p>
           {command.phase === "uncertain" &&
-            command.failure.code !== "unavailable" && (
+            command.failure?.code !== "unavailable" && (
               <p>
                 The earlier save is still unconfirmed. Resolve this error, then
                 retry the same request.
               </p>
             )}
-          {Object.keys(command.fieldErrors).length > 0 && (
+          {Object.keys(errors).length > 0 && (
             <ul>
-              {Object.entries(command.fieldErrors).map(([field, message]) => (
+              {Object.entries(errors).map(([field, message]) => (
                 <li key={field}>
                   <a href={`#draft-${field}`}>{message}</a>
                 </li>
@@ -145,9 +183,34 @@ export function DraftForm({
         <legend>Draft details</legend>
         <DraftMetadataFields
           draft={command.draft}
-          options={options}
-          errors={command.fieldErrors}
-          onChange={command.update}
+          options={currentOptions}
+          errors={errors}
+          onChange={update}
+        />
+        {categories.loading && <p role="status">Loading categories…</p>}
+        {categories.error && (
+          <div>
+            <p role="alert">
+              Unable to load categories. Your selections are still here.
+            </p>
+            <Button type="button" onClick={categories.retry}>
+              Retry categories
+            </Button>
+          </div>
+        )}
+        <DraftTaxonomyFields
+          draft={command.draft}
+          options={currentOptions}
+          errors={errors}
+          onChange={update}
+        />
+        <DraftContributorFields
+          value={command.draft.contributors}
+          options={options.contributors}
+          error={errors.contributors}
+          onChange={(contributors) =>
+            update((current) => ({ ...current, contributors }))
+          }
         />
         <DraftEditor
           value={command.draft.content}
@@ -157,7 +220,7 @@ export function DraftForm({
           onError={reportEditorFailure}
           onChange={(content) => {
             setEditorFailure(null);
-            command.update((current) => ({ ...current, content }));
+            update((current) => ({ ...current, content }));
           }}
         />
       </fieldset>
@@ -170,6 +233,8 @@ export function DraftForm({
             command.phase === "saving" ||
             command.phase === "saved" ||
             Boolean(editorFailure) ||
+            (command.phase !== "uncertain" &&
+              (categories.loading || categories.error)) ||
             !options.sections.length
           }
         >

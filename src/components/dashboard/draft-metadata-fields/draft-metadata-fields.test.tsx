@@ -44,3 +44,17 @@ it("associates field errors with the controls", () => {
   expect(slug).toHaveAttribute("aria-invalid", "true");
   expect(slug).toHaveAccessibleDescription(/Slug collision/);
 });
+it("keeps the unavailable current section visible until explicitly replaced", () => {
+  render(
+    <DraftMetadataFields
+      draft={baseDraft}
+      options={{ ...options, sections: [] }}
+      errors={{}}
+      onChange={() => {}}
+    />,
+  );
+  expect(screen.getByLabelText(/Section/)).toHaveValue(baseDraft.sectionId);
+  expect(screen.getByLabelText(/Section/)).toHaveDisplayValue(
+    /Unavailable section/,
+  );
+});

@@ -51,25 +51,6 @@ export default async function EditDraftPage({
         <Link href="/dashboard">My articles</Link>
       </>
     );
-  const unavailable = Object.values(detail.unavailableSelections)
-    .flat()
-    .filter((value): value is string => typeof value === "string");
-  if (unavailable.length)
-    return (
-      <>
-        <h1>Article details</h1>
-        <p>
-          Some selections are unavailable and must be replaced or removed before
-          saving. Selection controls are not available yet.
-        </p>
-        <ul>
-          {unavailable.map((value, index) => (
-            <li key={`${index}-${value}`}>Unavailable selection: {value}</li>
-          ))}
-        </ul>
-        <Link href="/dashboard">My articles</Link>
-      </>
-    );
   let options;
   try {
     options = await getDraftOptions(detail.draft.sectionId);

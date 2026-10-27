@@ -81,13 +81,13 @@ it("guards direct access and masks missing or invalid IDs", async () => {
     Page({ params: Promise.resolve({ id: "invalid" }) }),
   ).rejects.toThrow("NEXT_HTTP_ERROR_FALLBACK");
 });
-it("shows unavailable selection IDs without offering an unsavable form", async () => {
+it("offers deliberate repair controls for unavailable selections", async () => {
   mocks.detail.mockResolvedValue({
     kind: "editable",
     articleId: id,
     version: 1,
     updatedAt: "2026-10-23T12:00:00Z",
-    draft: baseDraft,
+    draft: { ...baseDraft, categoryIds: [id] },
     unavailableSelections: {
       sectionId: id,
       categoryIds: [],
@@ -96,8 +96,6 @@ it("shows unavailable selection IDs without offering an unsavable form", async (
     },
   });
   render(await Page(params));
-  expect(screen.getByText(`Unavailable selection: ${id}`)).toBeVisible();
-  expect(
-    screen.queryByRole("button", { name: "Save draft" }),
-  ).not.toBeInTheDocument();
+  expect(screen.getByLabelText(`Unavailable category: ${id}`)).toBeChecked();
+  expect(screen.getByRole("button", { name: "Save draft" })).toBeVisible();
 });
