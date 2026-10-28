@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   createDraftAction,
   saveDraftAction,
@@ -8,111 +8,141 @@ import {
   checkDraftInput,
   draftMetadataErrors,
   type DraftInput,
-  type DraftFailure,
   type DraftWriteResult,
 } from "@/lib/articles/draft-contract/draft-contract";
-export type DraftArticle = { id: string; version: number; updatedAt: string };
-type Pending = { requestId: string; draft: DraftInput; article?: DraftArticle };
+import {
+  createDraftSaveState,
+  reduceDraftSave,
+  isDraftSaveDirty,
+  type DraftArticle,
+  type DraftSaveEvent,
+} from "@/lib/articles/draft-save-state/draft-save-state";
+export type { DraftArticle };
 export function useDraftCommand(
   initialDraft: DraftInput,
   article?: DraftArticle,
 ) {
-  const [draft, setDraft] = useState(initialDraft);
-  const [phase, setPhase] = useState<
-    "idle" | "saving" | "saved" | "error" | "uncertain"
-  >("idle");
-  const [failure, setFailure] = useState<DraftFailure | null>(null);
-  const [baseline, setBaseline] = useState(() => JSON.stringify(initialDraft));
-  const currentDraft = useRef(initialDraft);
-  const resource = useRef(article);
-  const pending = useRef<Pending | null>(null);
-  const busy = useRef(false);
-  const uncertain = useRef(false);
-  const dirty = JSON.stringify(draft) !== baseline;
-  const locked = phase === "saving" || phase === "uncertain";
+  const [state, setState] = useState(() =>
+    createDraftSaveState(initialDraft, article),
+  );
+  const current = useRef(state);
+  const dirty = isDraftSaveDirty(state);
+  const dispatch = useCallback((event: DraftSaveEvent) => {
+    const next = reduceDraftSave(current.current, event);
+    current.current = next;
+    setState(next);
+    return next;
+  }, []);
   useEffect(() => {
-    if (!dirty && !pending.current) return;
+    if (!dirty && !state.pending) return;
     const warn = (event: BeforeUnloadEvent) => {
       event.preventDefault();
       event.returnValue = "";
     };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
-  }, [dirty, phase]);
-  function update(value: DraftInput | ((current: DraftInput) => DraftInput)) {
-    if (busy.current || pending.current) return;
-    const next =
-      typeof value === "function" ? value(currentDraft.current) : value;
-    currentDraft.current = next;
-    setDraft(next);
-    setFailure(null);
-    setPhase("idle");
+  }, [dirty, state.pending]);
+  function update(
+    value: DraftInput | ((input: DraftInput) => DraftInput),
+    validBody = false,
+  ) {
+    const input =
+      typeof value === "function" ? value(current.current.current) : value;
+    dispatch({
+      type: "edit",
+      input,
+      nativeInvalid: validBody ? false : current.current.nativeInvalid,
+    });
   }
+  const editorInvalid = useCallback(() => {
+    dispatch({
+      type: "edit",
+      input: current.current.current,
+      nativeInvalid: true,
+    });
+  }, [dispatch]);
   async function submit(): Promise<DraftArticle | null> {
-    if (busy.current) return null;
-    if (!pending.current) {
-      const checked = checkDraftInput(currentDraft.current);
-      if (!checked.ok) {
-        setFailure(checked);
-        setPhase("error");
+    let before = current.current;
+    if (before.phase === "saving" || before.phase === "conflict") return null;
+    if (!before.pending) {
+      const checked = checkDraftInput(before.current);
+      if (!checked.ok || before.nativeInvalid) {
+        dispatch({
+          type: "reject",
+          failure: !checked.ok
+            ? checked
+            : {
+                ok: false,
+                code: "invalid_input",
+                fieldErrors: { content: "Correct the body before saving." },
+              },
+        });
         return null;
       }
-      pending.current = {
-        requestId: crypto.randomUUID(),
-        draft: checked.value,
-        article: resource.current,
-      };
-    }
-    const command = pending.current;
-    busy.current = true;
-    setPhase("saving");
-    setFailure(null);
+      const requestId = crypto.randomUUID();
+      const resource = before.article;
+      dispatch({
+        type: "submit",
+        pending: resource
+          ? {
+              kind: "save",
+              command: {
+                requestId,
+                draft: checked.value,
+                articleId: resource.id,
+                expectedVersion: resource.version,
+              },
+            }
+          : { kind: "create", command: { requestId, draft: checked.value } },
+      });
+    } else dispatch({ type: "submit", pending: before.pending });
+    before = current.current;
+    const pending = before.pending;
+    if (!pending || before.phase !== "saving") return null;
     let result: DraftWriteResult;
     try {
-      result = command.article
-        ? await saveDraftAction({
-            requestId: command.requestId,
-            draft: command.draft,
-            articleId: command.article.id,
-            expectedVersion: command.article.version,
-          })
-        : await createDraftAction({
-            requestId: command.requestId,
-            draft: command.draft,
-          });
+      result =
+        pending.kind === "save"
+          ? await saveDraftAction(pending.command)
+          : await createDraftAction(pending.command);
     } catch {
       result = { ok: false, code: "unavailable" };
     }
-    busy.current = false;
-    if (result.ok) {
-      resource.current = {
-        id: result.articleId,
-        version: result.version,
-        updatedAt: result.updatedAt,
-      };
-      // Inputs stay locked during saving: acknowledge the canonical submitted value too.
-      currentDraft.current = command.draft;
-      setDraft(command.draft);
-      setBaseline(JSON.stringify(command.draft));
-      pending.current = null;
-      uncertain.current = false;
-      setPhase("saved");
-      return resource.current;
-    }
-    setFailure(result);
-    if (result.code === "unavailable" || uncertain.current) {
-      uncertain.current = true;
-      setPhase("uncertain");
-    } else {
-      pending.current = null;
-      setPhase("error");
-    }
-    return null;
+    const next = dispatch({
+      type: "resolve",
+      requestId: pending.command.requestId,
+      result,
+    });
+    return result.ok && next.pending === null ? (next.article ?? null) : null;
   }
+  const failure =
+    state.lastResult && !state.lastResult.ok ? state.lastResult : null;
   const fieldErrors =
     failure?.code === "slug_conflict"
       ? { slug: "This slug is already in use. Choose another." }
       : (failure?.fieldErrors ??
-        (failure?.code === "invalid_input" ? draftMetadataErrors(draft) : {}));
-  return { draft, update, submit, phase, failure, fieldErrors, locked, dirty };
+        (failure?.code === "invalid_input"
+          ? draftMetadataErrors(state.current)
+          : {}));
+  function reload(input: DraftInput, resource: DraftArticle) {
+    const before = current.current;
+    return dispatch({ type: "reload", input, article: resource }) !== before;
+  }
+  return {
+    draft: state.current,
+    update,
+    submit,
+    phase: state.phase,
+    failure,
+    fieldErrors,
+    locked: false,
+    dirty,
+    article: state.article,
+    pending: state.pending,
+    nativeInvalid: state.nativeInvalid,
+    editorInvalid,
+    reload,
+    hasUncommitted: () =>
+      isDraftSaveDirty(current.current) || Boolean(current.current.pending),
+  };
 }
