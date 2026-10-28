@@ -152,17 +152,17 @@ test("lost action response retries the same command and creates one history set"
   });
   await page.getByRole("button", { name: "Create draft" }).click();
   await expect(
-    page.getByRole("button", { name: "Retry same request" }),
+    page.getByRole("button", { name: "Retry original save" }),
   ).toBeVisible();
-  await expect(page.getByLabel(/Title/)).toBeDisabled();
+  await expect(page.getByLabel(/Title/)).toBeEnabled();
   fixture.setCreateAccess(false);
-  await page.getByRole("button", { name: "Retry same request" }).click();
+  await page.getByRole("button", { name: "Retry original save" }).click();
   await expect(
     page.getByRole("alert").filter({ hasText: "Your access" }),
   ).toBeVisible();
-  await expect(page.getByLabel(/Title/)).toBeDisabled();
+  await expect(page.getByLabel(/Title/)).toBeEnabled();
   fixture.setCreateAccess(true);
-  await page.getByRole("button", { name: "Retry same request" }).click();
+  await page.getByRole("button", { name: "Retry original save" }).click();
   await expect(page).toHaveURL(/\/dashboard\/articles\/[0-9a-f-]+$/);
   expect(bodies).toHaveLength(3);
   expect(bodies[1]).toBe(bodies[0]);
