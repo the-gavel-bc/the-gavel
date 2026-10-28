@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   createDraftAction,
   saveDraftAction,
@@ -33,15 +33,6 @@ export function useDraftCommand(
     setState(next);
     return next;
   }, []);
-  useEffect(() => {
-    if (!dirty && !state.pending) return;
-    const warn = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = "";
-    };
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [dirty, state.pending]);
   function update(
     value: DraftInput | ((input: DraftInput) => DraftInput),
     validBody = false,

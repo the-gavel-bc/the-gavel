@@ -146,21 +146,6 @@ it("keeps an earlier uncertain command when later access denial cannot resolve i
     Array(3).fill(actions.create.mock.calls[0][0]),
   );
 });
-it("warns on unload for dirty or uncertain input and clears after confirmation", async () => {
-  actions.create.mockResolvedValue(success);
-  const { result } = renderHook(() => useDraftCommand(baseDraft));
-  act(() => result.current.update({ ...baseDraft, title: "Unsaved title" }));
-  const before = new Event("beforeunload", { cancelable: true });
-  window.dispatchEvent(before);
-  expect(before.defaultPrevented).toBe(true);
-  await act(async () => {
-    await result.current.submit();
-  });
-  const after = new Event("beforeunload", { cancelable: true });
-  window.dispatchEvent(after);
-  expect(after.defaultPrevented).toBe(false);
-});
-
 it("submits the latest input even before React renders the update", async () => {
   actions.create.mockResolvedValue(success);
   const { result } = renderHook(() => useDraftCommand(baseDraft));
@@ -195,9 +180,6 @@ it("acknowledges canonical association ordering without a false unsaved warning"
     await result.current.submit();
   });
   expect(result.current.dirty).toBe(false);
-  const after = new Event("beforeunload", { cancelable: true });
-  window.dispatchEvent(after);
-  expect(after.defaultPrevented).toBe(false);
 });
 
 it("preserves newer input through a delayed success and saves it with the acknowledged version", async () => {

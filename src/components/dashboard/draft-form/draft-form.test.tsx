@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   save: vi.fn(),
   push: vi.fn(),
   refresh: vi.fn(),
+  review: vi.fn(),
 }));
 vi.mock("@/lib/articles/draft-actions/draft-actions", () => ({
   createDraftAction: mocks.create,
@@ -20,6 +21,9 @@ vi.mock("@/lib/articles/draft-actions/draft-actions", () => ({
 }));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mocks.push, refresh: mocks.refresh }),
+}));
+vi.mock("@/lib/articles/draft-reload-action/draft-reload-action", () => ({
+  reviewDraftAction: mocks.review,
 }));
 import { DraftForm } from "./draft-form";
 const options = {
@@ -241,4 +245,70 @@ it("retains newer create input in the mounted form until a subsequent explicit s
     expectedVersion: 1,
     draft: { title: `${baseDraft.title} newest` },
   });
+});
+
+it("preserves conflict input until confirmed reload and then uses the reviewed version", async () => {
+  mocks.save
+    .mockResolvedValueOnce({ ok: false, code: "conflict" })
+    .mockResolvedValueOnce({
+      ok: true,
+      articleId: baseDraft.sectionId,
+      version: 3,
+      updatedAt: "2026-10-28T12:00:00Z",
+      changed: true,
+      replayed: false,
+    });
+  mocks.review.mockResolvedValue({
+    ok: true,
+    detail: {
+      kind: "editable",
+      articleId: baseDraft.sectionId,
+      version: 2,
+      updatedAt: "2026-10-28T12:00:00Z",
+      draft: { ...baseDraft, title: "Latest saved" },
+      unavailableSelections: {
+        sectionId: null,
+        categoryIds: [],
+        tagIds: [],
+        contributorIds: [],
+      },
+    },
+    options,
+  });
+  const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+  render(
+    <DraftForm
+      initialDraft={baseDraft}
+      options={options}
+      article={{
+        id: baseDraft.sectionId,
+        version: 1,
+        updatedAt: "2026-10-28T12:00:00Z",
+      }}
+    />,
+  );
+  await userEvent.type(screen.getByLabelText(/Title/), " local");
+  await userEvent.click(screen.getByRole("button", { name: "Save draft" }));
+  await userEvent.click(
+    await screen.findByRole("button", { name: "Review latest saved version" }),
+  );
+  await userEvent.click(
+    await screen.findByRole("button", { name: "Load latest saved version" }),
+  );
+  expect(screen.getByLabelText(/Title/)).toHaveValue(
+    `${baseDraft.title} local`,
+  );
+  confirm.mockReturnValue(true);
+  await userEvent.click(
+    screen.getByRole("button", { name: "Load latest saved version" }),
+  );
+  expect(screen.getByLabelText(/Title/)).toHaveValue("Latest saved");
+  expect(screen.getByText(`${baseDraft.title} local`)).toBeVisible();
+  await userEvent.type(screen.getByLabelText(/Title/), " reconciled");
+  await userEvent.click(screen.getByRole("button", { name: "Save draft" }));
+  expect(mocks.save.mock.calls[1][0]).toMatchObject({
+    expectedVersion: 2,
+    draft: { title: "Latest saved reconciled" },
+  });
+  confirm.mockRestore();
 });

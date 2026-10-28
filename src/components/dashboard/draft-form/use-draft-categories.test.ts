@@ -36,3 +36,15 @@ it("ignores stale section responses and permits retry after failure", async () =
   await waitFor(() => expect(result.current.loading).toBe(false));
   expect(result.current.categories).toEqual(initial);
 });
+it("adopts checked reload choices atomically even when the section is unchanged", () => {
+  const original = [{ id: "old", name: "Old", sectionId: "a" }];
+  const replacement = [{ id: "new", name: "New", sectionId: "a" }];
+  const { result, rerender } = renderHook(
+    ({ revision, categories }) =>
+      useDraftCategories("a", "a", categories, revision),
+    { initialProps: { revision: 0, categories: original } },
+  );
+  rerender({ revision: 1, categories: replacement });
+  expect(result.current.categories).toEqual(replacement);
+  expect(result.current.loading).toBe(false);
+});

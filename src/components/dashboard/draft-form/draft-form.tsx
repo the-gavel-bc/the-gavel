@@ -24,6 +24,9 @@ import { DraftContributorFields } from "../draft-contributor-fields/draft-contri
 import { draftMetadataErrors } from "@/lib/articles/draft-contract/draft-contract";
 import { draftSelectionErrors } from "@/lib/articles/draft-selections/draft-selections";
 import { useDraftCategories } from "./use-draft-categories";
+import { DraftConflictPanel } from "../draft-conflict-panel/draft-conflict-panel";
+import { useDraftNavigationGuard } from "../draft-navigation-guard/draft-navigation-guard";
+import { GuardedDashboardLink } from "../guarded-dashboard-link/guarded-dashboard-link";
 
 const DraftEditor = dynamic(
   () =>
@@ -67,12 +70,23 @@ export function DraftForm({
     },
     [command.editorInvalid],
   );
+  const [catalog, setCatalog] = useState({
+    options,
+    sectionId: initialDraft.sectionId,
+    revision: 0,
+  });
+  const [recoveryVisible, setRecoveryVisible] = useState(false);
+  const [recoveryBlocked, setRecoveryBlocked] = useState(false);
   const categories = useDraftCategories(
     command.draft.sectionId,
-    initialDraft.sectionId,
-    options.categories,
+    catalog.sectionId,
+    catalog.options.categories,
+    catalog.revision,
   );
-  const currentOptions = { ...options, categories: categories.categories };
+  const currentOptions = {
+    ...catalog.options,
+    categories: categories.categories,
+  };
   const [selectionErrors, setSelectionErrors] = useState<
     Record<string, string>
   >({});
@@ -94,21 +108,15 @@ export function DraftForm({
     )
       summary.current?.focus();
   }, [command.failure, hasSelectionErrors]);
-  useEffect(() => {
-    if (!editorFailure) return;
-    // Invalid native input may differ from the last valid canonical body tracked by the controller.
-    const warn = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = "";
-    };
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [editorFailure]);
+  useDraftNavigationGuard(
+    command.dirty || Boolean(command.pending) || Boolean(editorFailure),
+  );
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (recoveryBlocked && !command.pending) return;
     if (
       !ready ||
-      (!command.pending && (!options.sections.length || editorFailure))
+      (!command.pending && (!catalog.options.sections.length || editorFailure))
     )
       return;
     if (!command.pending) {
@@ -153,7 +161,7 @@ export function DraftForm({
       <p role="status">
         {editorFailure ? "Body needs attention before saving." : status}
       </p>
-      {!options.sections.length && (
+      {!catalog.options.sections.length && (
         <p>
           No active sections are available. Ask an administrator to configure a
           section.
@@ -184,6 +192,47 @@ export function DraftForm({
           )}
         </div>
       )}
+      {command.article &&
+        (recoveryVisible ||
+          (!command.pending &&
+            [
+              "conflict",
+              "forbidden",
+              "not_found",
+              "unsupported_content",
+            ].includes(command.failure?.code ?? ""))) && (
+          <DraftConflictPanel
+            articleId={command.article.id}
+            local={command.draft}
+            options={currentOptions}
+            nativeInvalid={Boolean(editorFailure)}
+            disabled={Boolean(command.pending)}
+            onBlocked={() => {
+              setRecoveryBlocked(true);
+              setRecoveryVisible(true);
+            }}
+            onLoad={(detail, nextOptions) => {
+              if (
+                !command.reload(detail.draft, {
+                  id: detail.articleId,
+                  version: detail.version,
+                  updatedAt: detail.updatedAt,
+                })
+              )
+                return false;
+              setCatalog((current) => ({
+                options: nextOptions,
+                sectionId: detail.draft.sectionId,
+                revision: current.revision + 1,
+              }));
+              setEditorFailure(null);
+              setSelectionErrors({});
+              setRecoveryBlocked(false);
+              setRecoveryVisible(true);
+              return true;
+            }}
+          />
+        )}
       <fieldset
         disabled={!ready || (!article && command.phase === "saved")}
         className={styles.fields}
@@ -214,13 +263,14 @@ export function DraftForm({
         />
         <DraftContributorFields
           value={command.draft.contributors}
-          options={options.contributors}
+          options={catalog.options.contributors}
           error={errors.contributors}
           onChange={(contributors) =>
             update((current) => ({ ...current, contributors }))
           }
         />
         <DraftEditor
+          key={catalog.revision}
           value={command.draft.content}
           disabled={!ready || (!article && command.phase === "saved")}
           onError={reportEditorFailure}
@@ -239,11 +289,12 @@ export function DraftForm({
             command.phase === "saving" ||
             command.phase === "saved" ||
             command.phase === "conflict" ||
+            (!command.pending && recoveryBlocked) ||
             (!command.pending &&
               (Boolean(editorFailure) ||
                 categories.loading ||
                 categories.error ||
-                !options.sections.length))
+                !catalog.options.sections.length))
           }
         >
           {command.phase === "uncertain"
@@ -256,7 +307,9 @@ export function DraftForm({
         </Button>
       </div>
       <p>
-        <a href="/dashboard">Back to My articles</a>
+        <GuardedDashboardLink href="/dashboard">
+          Back to My articles
+        </GuardedDashboardLink>
       </p>
     </form>
   );
