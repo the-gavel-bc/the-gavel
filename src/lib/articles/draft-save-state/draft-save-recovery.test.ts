@@ -17,14 +17,6 @@ const command = {
   expectedVersion: 1,
 };
 const pending = { kind: "save" as const, command };
-const success = {
-  ok: true as const,
-  articleId: article.id,
-  version: 2,
-  updatedAt: article.updatedAt,
-  replayed: false,
-  changed: true,
-};
 function submitted() {
   return reduceDraftSave(createDraftSaveState(baseDraft, article), {
     type: "submit",
@@ -89,4 +81,84 @@ it("snapshots input instead of retaining caller aliases", () => {
   });
   draft.title = "Mutated caller";
   expect(state.pending?.command.draft.title).toBe("Snapshot");
+});
+it("does not create a second resource or accept a save for another resource/version", () => {
+  const state = createDraftSaveState(baseDraft, article);
+  expect(
+    reduceDraftSave(state, {
+      type: "submit",
+      pending: {
+        kind: "create",
+        command: { requestId: command.requestId, draft: baseDraft },
+      },
+    }),
+  ).toBe(state);
+  expect(
+    reduceDraftSave(state, {
+      type: "submit",
+      pending: { ...pending, command: { ...command, expectedVersion: 99 } },
+    }),
+  ).toBe(state);
+});
+it("treats an inconsistent successful resource/version as uncertainty rather than hanging", () => {
+  const state = submitted();
+  for (const result of [
+    {
+      ok: true as const,
+      articleId: "other",
+      version: 2,
+      updatedAt: article.updatedAt,
+      replayed: false,
+      changed: true,
+    },
+    {
+      ok: true as const,
+      articleId: article.id,
+      version: 0,
+      updatedAt: article.updatedAt,
+      replayed: false,
+      changed: true,
+    },
+  ]) {
+    const next = reduceDraftSave(state, {
+      type: "resolve",
+      requestId: command.requestId,
+      result,
+    });
+    expect(next.phase).toBe("uncertain");
+    expect(next.pending).toEqual(pending);
+    expect(next.article?.version).toBe(1);
+  }
+});
+it("UUID case and database body-key order do not produce false dirty state", () => {
+  const id = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+  const body = {
+    format: "gavel-draft" as const,
+    version: 1 as const,
+    document: {
+      type: "doc" as const,
+      content: [
+        {
+          type: "paragraph" as const,
+          content: [{ type: "text" as const, text: "Stored" }],
+        },
+      ],
+    },
+  };
+  const state = createDraftSaveState(
+    { ...baseDraft, sectionId: id, content: body },
+    article,
+  );
+  const current = {
+    ...baseDraft,
+    sectionId: id.toUpperCase(),
+    content: {
+      document: body.document,
+      version: body.version,
+      format: body.format,
+    },
+  };
+  expect(
+    isDraftSaveDirty(reduceDraftSave(state, { type: "edit", input: current })),
+  ).toBe(false);
 });

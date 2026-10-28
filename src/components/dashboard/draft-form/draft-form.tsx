@@ -63,12 +63,13 @@ export function DraftForm({
 }) {
   const command = useDraftCommand(initialDraft, article);
   const [editorFailure, setEditorFailure] = useState<DraftFailure | null>(null);
+  const { editorInvalid } = command;
   const reportEditorFailure = useCallback(
     (failure: DraftFailure) => {
       setEditorFailure(failure);
-      command.editorInvalid();
+      editorInvalid();
     },
-    [command.editorInvalid],
+    [editorInvalid],
   );
   const [catalog, setCatalog] = useState({
     options,

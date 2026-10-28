@@ -76,6 +76,15 @@ export function reduceDraftSave(
     case "submit": {
       if (state.phase === "saving" || state.phase === "conflict") return state;
       if (state.pending && state.pending !== event.pending) return state;
+      if (
+        !state.pending &&
+        ((event.pending.kind === "create" && state.article) ||
+          (event.pending.kind === "save" &&
+            (!state.article ||
+              event.pending.command.articleId !== state.article.id ||
+              event.pending.command.expectedVersion !== state.article.version)))
+      )
+        return state;
       return {
         ...state,
         pending: state.pending ?? structuredClone(event.pending),
@@ -108,9 +117,15 @@ export function reduceDraftSave(
       }
       if (
         pending.kind === "save" &&
-        result.articleId !== pending.command.articleId
+        (result.articleId !== pending.command.articleId ||
+          result.version < pending.command.expectedVersion)
       )
-        return state;
+        return {
+          ...state,
+          phase: "uncertain",
+          uncertain: true,
+          lastResult: { ok: false, code: "unavailable" },
+        };
       const acknowledged = pending.command.draft;
       const acknowledgedKey = draftInputKey(acknowledged);
       const newer = state.nativeInvalid || state.currentKey !== acknowledgedKey;

@@ -3,6 +3,7 @@ import type { DraftInput } from "../draft-contract/draft-contract";
 export function draftInputKey(input: DraftInput): string {
   const sorted = {
     ...input,
+    sectionId: input.sectionId.toLowerCase(),
     categoryIds: input.categoryIds.map((id) => id.toLowerCase()).sort(),
     tagIds: input.tagIds.map((id) => id.toLowerCase()).sort(),
     contributors: input.contributors
