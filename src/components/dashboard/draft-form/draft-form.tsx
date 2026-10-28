@@ -37,7 +37,7 @@ const messages: Record<DraftErrorCode, string> = {
   invalid_input: "Review the highlighted fields and active selections.",
   slug_conflict: "That slug is already in use. Choose another slug.",
   unavailable:
-    "We could not confirm the save. Retry the same request before editing or leaving this page.",
+    "We could not confirm the save. Retry the original save to confirm it. Newer edits stay in this tab.",
   forbidden:
     "Your access does not currently allow saving. Your input is still here.",
   not_found: "This draft is no longer available. Your input is still here.",
@@ -61,8 +61,11 @@ export function DraftForm({
   const command = useDraftCommand(initialDraft, article);
   const [editorFailure, setEditorFailure] = useState<DraftFailure | null>(null);
   const reportEditorFailure = useCallback(
-    (failure: DraftFailure) => setEditorFailure(failure),
-    [],
+    (failure: DraftFailure) => {
+      setEditorFailure(failure);
+      command.editorInvalid();
+    },
+    [command.editorInvalid],
   );
   const categories = useDraftCategories(
     command.draft.sectionId,
@@ -81,10 +84,16 @@ export function DraftForm({
   const router = useRouter();
   const summary = useRef<HTMLDivElement>(null);
   const ready = useSyncExternalStore(subscribeReady, clientReady, serverReady);
+  const hasSelectionErrors = Object.keys(selectionErrors).length > 0;
   useEffect(() => {
-    if (command.failure || Object.keys(selectionErrors).length)
+    if (
+      (command.failure || hasSelectionErrors) &&
+      !document.activeElement?.matches(
+        'input,textarea,select,[contenteditable="true"]',
+      )
+    )
       summary.current?.focus();
-  }, [command.failure, selectionErrors]);
+  }, [command.failure, hasSelectionErrors]);
   useEffect(() => {
     if (!editorFailure) return;
     // Invalid native input may differ from the last valid canonical body tracked by the controller.
@@ -97,8 +106,12 @@ export function DraftForm({
   }, [editorFailure]);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!ready || !options.sections.length || editorFailure) return;
-    if (command.phase !== "uncertain") {
+    if (
+      !ready ||
+      (!command.pending && (!options.sections.length || editorFailure))
+    )
+      return;
+    if (!command.pending) {
       const invalid = {
         ...draftMetadataErrors(command.draft),
         ...draftSelectionErrors(command.draft, currentOptions),
@@ -112,7 +125,7 @@ export function DraftForm({
       }
     }
     const saved = await command.submit();
-    if (saved && !article) {
+    if (saved && !article && !command.hasUncommitted()) {
       router.push(`/dashboard/articles/${saved.id}`);
       router.refresh();
     }
@@ -124,7 +137,7 @@ export function DraftForm({
         ? "Save not confirmed."
         : command.phase === "saved"
           ? "Draft saved."
-          : command.phase === "error"
+          : command.phase === "error" || command.phase === "conflict"
             ? "Draft not saved."
             : command.dirty
               ? "Unsaved changes."
@@ -172,9 +185,7 @@ export function DraftForm({
         </div>
       )}
       <fieldset
-        disabled={
-          !ready || command.locked || (!article && command.phase === "saved")
-        }
+        disabled={!ready || (!article && command.phase === "saved")}
         className={styles.fields}
       >
         <legend>Draft details</legend>
@@ -211,13 +222,11 @@ export function DraftForm({
         />
         <DraftEditor
           value={command.draft.content}
-          disabled={
-            !ready || command.locked || (!article && command.phase === "saved")
-          }
+          disabled={!ready || (!article && command.phase === "saved")}
           onError={reportEditorFailure}
           onChange={(content) => {
             setEditorFailure(null);
-            update((current) => ({ ...current, content }));
+            command.update((current) => ({ ...current, content }), true);
           }}
         />
       </fieldset>
@@ -229,17 +238,19 @@ export function DraftForm({
             !ready ||
             command.phase === "saving" ||
             command.phase === "saved" ||
-            Boolean(editorFailure) ||
-            (command.phase !== "uncertain" &&
-              (categories.loading || categories.error)) ||
-            !options.sections.length
+            command.phase === "conflict" ||
+            (!command.pending &&
+              (Boolean(editorFailure) ||
+                categories.loading ||
+                categories.error ||
+                !options.sections.length))
           }
         >
           {command.phase === "uncertain"
-            ? "Retry same request"
+            ? "Retry original save"
             : command.phase === "saving"
               ? "Saving…"
-              : article
+              : command.article
                 ? "Save draft"
                 : "Create draft"}
         </Button>
