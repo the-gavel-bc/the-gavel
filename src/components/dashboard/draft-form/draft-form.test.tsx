@@ -127,3 +127,69 @@ it("blocks submission after the editor rejects a paste instead of saving the old
   window.dispatchEvent(leaving);
   expect(leaving.defaultPrevented).toBe(true);
 });
+it("requires deliberate removal of unavailable selections and submits selected credits/tags", async () => {
+  mocks.create.mockResolvedValue({ ok: false, code: "slug_conflict" });
+  render(
+    <DraftForm
+      initialDraft={{
+        ...baseDraft,
+        categoryIds: ["00000000-0000-0000-0000-000000000099"],
+      }}
+      options={{
+        ...options,
+        tags: [{ id: baseDraft.sectionId, name: "Topic" }],
+        contributors: [
+          { id: baseDraft.sectionId, displayName: "Guest", slug: "guest" },
+        ],
+      }}
+    />,
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Create draft" }));
+  expect(screen.getByRole("alert")).toHaveTextContent(/remove or replace/i);
+  expect(mocks.create).not.toHaveBeenCalled();
+  await userEvent.click(screen.getByLabelText(/Unavailable category/));
+  await userEvent.click(screen.getByLabelText("Topic"));
+  await userEvent.click(
+    screen.getByRole("button", { name: "Add contributor" }),
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Create draft" }));
+  await waitFor(() =>
+    expect(screen.getByRole("alert")).toHaveTextContent(/slug/i),
+  );
+  expect(screen.getByLabelText("Topic")).toBeChecked();
+  expect(mocks.create.mock.calls[0][0].draft).toMatchObject({
+    categoryIds: [],
+    tagIds: [baseDraft.sectionId],
+    contributors: [
+      { profileId: baseDraft.sectionId, role: "writer", displayOrder: 0 },
+    ],
+  });
+});
+it("leaves unavailable-selection repair usable when there are no active sections", async () => {
+  render(
+    <DraftForm
+      initialDraft={{
+        ...baseDraft,
+        categoryIds: ["00000000-0000-0000-0000-000000000099"],
+      }}
+      options={{ ...options, sections: [] }}
+      article={{
+        id: baseDraft.sectionId,
+        version: 1,
+        updatedAt: "2026-10-23T12:00:00Z",
+      }}
+    />,
+  );
+  expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
+  expect(screen.getByLabelText(/Title/)).toBeEnabled();
+  const unavailable = screen.getByLabelText(/Unavailable category/);
+  expect(unavailable).toBeEnabled();
+  await userEvent.click(unavailable);
+  expect(
+    screen.queryByLabelText(/Unavailable category/),
+  ).not.toBeInTheDocument();
+  await userEvent.type(screen.getByLabelText(/Title/), " retained");
+  expect(screen.getByLabelText(/Title/)).toHaveValue(
+    `${baseDraft.title} retained`,
+  );
+});

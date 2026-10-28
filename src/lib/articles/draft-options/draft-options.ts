@@ -52,20 +52,7 @@ export async function loadDraftOptions(
           .order("id")
           .range(start, end),
       ),
-      sectionId
-        ? readAll((start, end) =>
-            client
-              .from("categories")
-              .select("id,name,section_id,sections!inner(active)")
-              .eq("active", true)
-              .eq("section_id", sectionId)
-              .eq("sections.active", true)
-              .order("navigation_order")
-              .order("name")
-              .order("id")
-              .range(start, end),
-          )
-        : Promise.resolve([]),
+      sectionId ? loadDraftCategories(client, sectionId) : Promise.resolve([]),
       readAll((start, end) =>
         client
           .from("tags")
@@ -86,14 +73,7 @@ export async function loadDraftOptions(
     ]);
     return {
       sections: z.array(choice).parse(results[0]),
-      categories: z
-        .array(category)
-        .parse(results[1])
-        .map((row) => ({
-          id: row.id,
-          name: row.name,
-          sectionId: row.section_id,
-        })),
+      categories: results[1],
       tags: z.array(choice).parse(results[2]),
       contributors: z
         .array(contributor)
@@ -107,4 +87,26 @@ export async function loadDraftOptions(
   } catch {
     throw new Error("Unable to load draft options.");
   }
+}
+
+export async function loadDraftCategories(
+  client: SupabaseClient<Database>,
+  sectionId: string,
+): Promise<DraftOptions["categories"]> {
+  const rows = await readAll((start, end) =>
+    client
+      .from("categories")
+      .select("id,name,section_id,sections!inner(active)")
+      .eq("active", true)
+      .eq("section_id", sectionId)
+      .eq("sections.active", true)
+      .order("navigation_order")
+      .order("name")
+      .order("id")
+      .range(start, end),
+  );
+  return z
+    .array(category)
+    .parse(rows)
+    .map((row) => ({ id: row.id, name: row.name, sectionId: row.section_id }));
 }

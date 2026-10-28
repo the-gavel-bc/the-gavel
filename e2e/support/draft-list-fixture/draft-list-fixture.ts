@@ -3,14 +3,20 @@ import { localSupabase } from "../local-supabase/local-supabase";
 
 export function draftListFixture(
   project: string,
-  suite: "list" | "create" | "edit" = "list",
+  suite: "list" | "create" | "edit" | "select" = "list",
 ) {
   if (project !== "desktop" && project !== "mobile")
     throw new Error("Unknown local browser project.");
   const base =
     (project === "desktop" ? 860 : 880) +
-    (suite === "edit" ? 80 : suite === "create" ? 40 : 0);
-  const prefix = `${suite === "edit" ? "task8" : suite === "create" ? "task7" : "task6"}-${project}`;
+    (suite === "select"
+      ? 120
+      : suite === "edit"
+        ? 80
+        : suite === "create"
+          ? 40
+          : 0);
+  const prefix = `${suite === "select" ? "task9" : suite === "edit" ? "task8" : suite === "create" ? "task7" : "task6"}-${project}`;
   const uuid = (n: number) =>
     `00000000-0000-0000-0000-${String(n).padStart(12, "0")}`;
   const id = (n: number) =>
@@ -23,8 +29,9 @@ export function draftListFixture(
   };
   const userIds = Object.values(users).map(uuid);
   const quoted = (ids: string[]) => ids.map((id) => `'${id}'`).join(",");
-  const label = `Task ${suite === "edit" ? 8 : suite === "create" ? 7 : 6} ${project}`;
+  const label = `Task ${suite === "select" ? 9 : suite === "edit" ? 8 : suite === "create" ? 7 : 6} ${project}`;
   let installed = false;
+  let selectionsInstalled = false;
   function sql(statement: string) {
     localSupabase();
     return execFileSync(
@@ -86,6 +93,46 @@ export function draftListFixture(
           ('${id(23)}','${uuid(users.admin)}','${id(99)}','${label} admin own','${prefix}-admin');
       `);
       installed = true;
+    },
+    setupSelections() {
+      if (!installed || suite !== "select")
+        throw new Error("Not a selection fixture.");
+      sql(`do $$ begin
+        if exists(select 1 from public.sections where id='${id(98)}')
+          or exists(select 1 from public.categories where id in ('${id(97)}','${id(96)}'))
+          or exists(select 1 from public.tags where id='${id(95)}')
+          or exists(select 1 from public.profiles where id='${id(94)}')
+        then raise exception 'Reserved selection fixture IDs already exist'; end if;
+      end $$;
+      insert into public.sections(id,name,slug) values('${id(98)}','Synthetic ${project} select alternate','${prefix}-alternate');
+        insert into public.categories(id,section_id,name,slug) values('${id(97)}','${id(99)}','Synthetic ${project} category','${prefix}-category'),('${id(96)}','${id(98)}','Synthetic ${project} alternate category','${prefix}-alternate-category');
+        insert into public.tags(id,name,slug) values('${id(95)}','Synthetic ${project} topic','${prefix}-topic');
+        insert into public.profiles(id,display_name,slug) values('${id(94)}','Synthetic ${project} guest','${prefix}-guest');`);
+      selectionsInstalled = true;
+    },
+    setCategoryActive(active: boolean) {
+      if (!installed || suite !== "select")
+        throw new Error("Not a selection fixture.");
+      sql(
+        `update public.categories set active=${active ? "true" : "false"} where id='${id(97)}';`,
+      );
+    },
+    selections() {
+      if (!installed || suite !== "select")
+        throw new Error("Not a selection fixture.");
+      return JSON.parse(
+        sql(`select jsonb_build_object(
+        'categories',(select coalesce(jsonb_agg(category_id order by category_id),'[]') from public.article_categories where article_id='${id(21)}'),
+        'tags',(select coalesce(jsonb_agg(tag_id order by tag_id),'[]') from public.article_tags where article_id='${id(21)}'),
+        'credits',(select coalesce(jsonb_agg(jsonb_build_object('profileId',profile_id,'role',contribution_role,'displayOrder',display_order) order by profile_id,contribution_role),'[]') from public.article_contributors where article_id='${id(21)}'));`),
+      );
+    },
+    creditOther() {
+      if (!installed || suite !== "select")
+        throw new Error("Not a selection fixture.");
+      sql(
+        `insert into public.article_contributors(article_id,profile_id,contribution_role) values('${id(21)}','${uuid(users.other)}','writer');`,
+      );
     },
     failRead() {
       if (!installed) throw new Error("Fixture is not installed.");
@@ -152,12 +199,24 @@ export function draftListFixture(
         delete from private.draft_write_limits where actor_user_id in (${quoted(userIds)});
         delete from public.audit_events where actor_user_id in (${quoted(userIds)});
         delete from public.article_revisions where actor_user_id in (${quoted(userIds)});
+        delete from public.article_categories where article_id in (select id from public.articles where owner_profile_id in (${quoted(userIds)}));
+        delete from public.article_tags where article_id in (select id from public.articles where owner_profile_id in (${quoted(userIds)}));
+        delete from public.article_contributors where article_id in (select id from public.articles where owner_profile_id in (${quoted(userIds)}));
         delete from public.articles where owner_profile_id in (${quoted(userIds)});
+        ${
+          selectionsInstalled
+            ? `delete from public.categories where id in ('${id(97)}','${id(96)}');
+        delete from public.tags where id='${id(95)}';
+        delete from public.sections where id='${id(98)}';
+        delete from public.profiles where id='${id(94)}';`
+            : ""
+        }
         delete from public.sections where id='${id(99)}';
         delete from public.memberships where user_id in (${quoted(userIds)});
         delete from public.profiles where id in (${quoted(userIds)});
         delete from auth.users where id in (${quoted(userIds)});`);
       installed = false;
+      selectionsInstalled = false;
     },
   };
 }

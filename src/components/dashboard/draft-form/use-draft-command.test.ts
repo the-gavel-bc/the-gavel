@@ -176,3 +176,25 @@ it("submits the latest input even before React renders the update", async () => 
     "Latest native edit",
   );
 });
+it("acknowledges canonical association ordering without a false unsaved warning", async () => {
+  actions.save.mockResolvedValue(success);
+  const { result } = renderHook(() =>
+    useDraftCommand(
+      {
+        ...baseDraft,
+        contributors: [
+          { profileId: baseDraft.sectionId, role: "writer", displayOrder: 0 },
+          { profileId: baseDraft.sectionId, role: "editor", displayOrder: 0 },
+        ],
+      },
+      { id: baseDraft.sectionId, version: 1, updatedAt: success.updatedAt },
+    ),
+  );
+  await act(async () => {
+    await result.current.submit();
+  });
+  expect(result.current.dirty).toBe(false);
+  const after = new Event("beforeunload", { cancelable: true });
+  window.dispatchEvent(after);
+  expect(after.defaultPrevented).toBe(false);
+});

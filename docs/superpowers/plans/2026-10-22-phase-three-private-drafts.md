@@ -10,7 +10,7 @@
 
 **Spec:** [Accepted private-draft contract](../specs/2026-10-22-private-draft-workflow-design.md), approved by the owner on 2026-10-22. Existing [Phase 2 contract](../specs/2026-10-21-content-foundation-design.md), [API](../../api-contracts.md), [data](../../data-model.md), [security](../../security-and-permissions.md), [style](../../coding-style.md), and [testing](../../testing.md) remain authoritative for their existing boundaries.
 
-**Status:** Tasks 0 and 1 complete as documentation/baseline work. Tasks 2–8 validation, controlled draft writes, private queries, listing/create and constrained body editing are complete. Tasks 9–11 are not implemented. The owner requested native planning/execution followed by task-completion notifications and review checkpoints; preserve that approach. This plan refines the accepted work packages without approving any extra product scope.
+**Status:** Tasks 0 and 1 complete as documentation/baseline work. Tasks 2–9 validation, controlled draft writes, private queries, listing/create, constrained body editing and association selection are complete. Tasks 10–11 are not implemented. The owner requested native planning/execution followed by task-completion notifications and review checkpoints; preserve that approach. This plan refines the accepted work packages without approving any extra product scope.
 
 ## Global constraints
 
@@ -182,9 +182,11 @@ Remove Task 8's temporary unavailable-selection route gate only when deliberate 
 
 **Interfaces:** Controlled fields consume the corresponding DraftInput arrays and DraftOptions; changes emit the complete bounded selection value to the form, never a new tag/profile request.
 
-- [ ] RED tests for active permitted IDs, 32/64/32 caps, explicit removal/reselection on section change, unavailable existing IDs, duplicate rejection, multiple contributor roles/order ties and guest profiles. Real credited B still cannot mutate A. Failed saves retain selections and return safe field feedback.
-- [ ] Implement existing-ID selectors and deliberate same-section category confirmation; do not silently remove and save categories. Admins follow the same active-selection rule; no expanded catalog grants or management UI. Derive authority only in the existing action/RPC path.
-- [ ] GREEN component/unit, SQL association/mutation regressions and desktop/mobile selector/save round trips. Commit `feat: select draft taxonomy and contributor credits`.
+- [x] RED tests for active permitted IDs, 32/64/32 caps, explicit removal/reselection on section change, unavailable existing IDs, duplicate rejection, multiple contributor roles/order ties and guest profiles. Real credited B still cannot mutate A. Failed saves retain selections and return safe field feedback.
+- [x] Implement existing-ID selectors and deliberate same-section category confirmation; do not silently remove and save categories. Admins follow the same active-selection rule; no expanded catalog grants or management UI. Derive authority only in the existing action/RPC path.
+- [x] GREEN component/unit, SQL association/mutation regressions and desktop/mobile selector/save round trips. Commit `feat: select draft taxonomy and contributor credits`.
+
+Task 9 completion: [verification and screenshots](../../testing.md#phase-3-task-9-draft-association-selection). The [approved subplan](2026-10-27-task-nine-draft-selections.md) records native execution boundaries. Existing-ID selectors, deliberate unavailable-reference repair and stale category-read protection are implemented without schema, grant or dependency changes. Owner checkpoint before planning Task 10.
 
 ### Task 10: complete save/conflict/navigation interaction
 

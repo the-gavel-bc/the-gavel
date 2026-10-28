@@ -33,7 +33,13 @@ test("creates a private draft and opens it for editing", async ({
     page.getByRole("textbox", { name: "Article body" }),
   ).toBeVisible();
   await page.getByLabel(/Section/).focus();
-  for (let step = 0; step < 20; step++) {
+  // Catalog-backed fields add a variable number of native keyboard stops.
+  const stops = await page
+    .locator(
+      'form :is(input, textarea, select, button, a[href], [contenteditable="true"])',
+    )
+    .count();
+  for (let step = 0; step <= stops; step++) {
     await page.keyboard.press("Tab");
     if (
       await page

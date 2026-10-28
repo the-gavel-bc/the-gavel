@@ -90,6 +90,9 @@ export function useDraftCommand(
         version: result.version,
         updatedAt: result.updatedAt,
       };
+      // Inputs stay locked during saving: acknowledge the canonical submitted value too.
+      currentDraft.current = command.draft;
+      setDraft(command.draft);
       setBaseline(JSON.stringify(command.draft));
       pending.current = null;
       uncertain.current = false;
