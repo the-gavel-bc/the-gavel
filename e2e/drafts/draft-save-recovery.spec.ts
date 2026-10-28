@@ -87,17 +87,21 @@ test("lost save retries exactly through access loss while retaining newer invali
       page.getByRole("button", { name: "Retry original save" }),
     ).toBeVisible();
     await title.fill("Newest retained title");
+    // Native schema permits these paragraphs, but the canonical 5,000-node bound rejects them.
     await body.evaluate((element) => {
-      const data = new DataTransfer();
-      data.setData("text/html", "<img src=https://example.org/tracker>");
+      element.innerHTML =
+        "<p>New invalid native text</p>" + "<p>x</p>".repeat(2500);
       element.dispatchEvent(
-        new ClipboardEvent("paste", {
+        new InputEvent("input", {
           bubbles: true,
-          cancelable: true,
-          clipboardData: data,
+          inputType: "insertText",
+          data: "x",
         }),
       );
     });
+    await expect(
+      page.getByRole("alert").filter({ hasText: "exceeds its limits" }),
+    ).toBeVisible();
     fixture.setAuthorAccess(false);
     await page.getByRole("button", { name: "Retry original save" }).click();
     await expect(
