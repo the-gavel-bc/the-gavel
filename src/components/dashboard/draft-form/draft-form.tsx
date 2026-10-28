@@ -76,6 +76,9 @@ export function DraftForm({
     sectionId: initialDraft.sectionId,
     revision: 0,
   });
+  useEffect(() => {
+    if (catalog.revision > 0) document.getElementById("draft-title")?.focus();
+  }, [catalog.revision]);
   const [recoveryVisible, setRecoveryVisible] = useState(false);
   const [recoveryBlocked, setRecoveryBlocked] = useState(false);
   const categories = useDraftCategories(

@@ -77,6 +77,7 @@ test("independent owner and admin tabs review conflicts and deliberately adopt a
     await expect(admin.getByLabel("Title (required)")).toHaveValue(
       "Owner saved version",
     );
+    await expect(admin.getByLabel("Title (required)")).toBeFocused();
     await expect(
       admin.getByRole("textbox", { name: "Article body" }),
     ).toHaveText("Owner saved body.");
@@ -93,6 +94,7 @@ test("independent owner and admin tabs review conflicts and deliberately adopt a
         () => document.documentElement.scrollWidth <= window.innerWidth,
       ),
     ).toBe(true);
+    await admin.evaluate(() => window.scrollTo(0, 0));
     await admin.screenshot({
       path: `docs/reviews/assets/phase-3-task10-${info.project.name}.png`,
       fullPage: true,

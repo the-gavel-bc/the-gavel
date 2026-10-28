@@ -303,6 +303,7 @@ it("preserves conflict input until confirmed reload and then uses the reviewed v
     screen.getByRole("button", { name: "Load latest saved version" }),
   );
   expect(screen.getByLabelText(/Title/)).toHaveValue("Latest saved");
+  expect(screen.getByLabelText(/Title/)).toHaveFocus();
   expect(screen.getByText(`${baseDraft.title} local`)).toBeVisible();
   await userEvent.type(screen.getByLabelText(/Title/), " reconciled");
   await userEvent.click(screen.getByRole("button", { name: "Save draft" }));
