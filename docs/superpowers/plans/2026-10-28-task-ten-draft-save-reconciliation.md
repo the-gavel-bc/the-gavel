@@ -10,7 +10,7 @@
 
 **Spec:** [Accepted private-draft contract](../specs/2026-10-22-private-draft-workflow-design.md#list-and-save-interaction); [parent Task 10](2026-10-22-phase-three-private-drafts.md#task-10-complete-saveconflictnavigation-interaction).
 
-**Baseline/status:** Planning only, based on `main` at `3de2b3b` after merged PR #24. Task 9 head `64afe7d` passed hosted foundation CI. Worktree `/private/tmp/the-gavel-task10`, branch `feat/draft-save-reconciliation`. No Task 10 code, dependency installation or fresh test run yet.
+**Baseline/status:** Implemented and locally verified; owner review and hosted CI remain outstanding. Based on `main` at `3de2b3b` after merged PR #24. Task 9 head `64afe7d` passed hosted foundation CI. Worktree `/private/tmp/the-gavel-task10`, branch `feat/draft-save-reconciliation`. See [actual evidence](../../testing.md#phase-3-task-10-save-and-conflict-recovery). Locked dependency installation and required local gates completed.
 
 ## Global constraints
 
@@ -47,9 +47,9 @@ If a create succeeds while newer edits exist, stay in the mounted form, switch s
 
 **Interfaces:** Export `DraftSaveState`, `DraftSaveEvent`, `createDraftSaveState(input:DraftInput,article?:DraftArticle):DraftSaveState`, `reduceDraftSave(state:DraftSaveState,event:DraftSaveEvent):DraftSaveState`, and `isDraftSaveDirty(state:DraftSaveState):boolean`. Export `DraftArticle` from this owner and reuse it in the controller. State holds current/acknowledged input, committed resource, immutable pending command, phase, uncertainty and last result. Events are `edit` with input and optional native-invalid flag, `submit` with the exact checked create/save command, `resolve` with requestId/result, and explicit `reload` with checked editable detail. Caller actions create UUIDs; the reducer performs no network/random/time effects.
 
-- [ ] RED tests pin edit→submit→new edit→late success, mismatched response ID, immutable retry after edits/access errors, no-op/replayed success, double-submit rejection, changed-command UUID/version, canonical association equality, stale-tab conflict and explicit reload. Include create success retaining a resource while newer input remains dirty and an invalid native body not represented by canonical input.
-- [ ] Run `pnpm exec vitest run src/lib/articles/draft-save-state`; expect missing-module RED. Implement transitions; same command stays pending across uncertainty and subsequent errors. Definitive first failures clear only that command and preserve latest input. Native-invalid input is never marked saved merely because the last valid canonical body matches a receipt.
-- [ ] Run focused GREEN tests and commit `feat: model draft save acknowledgement and retry state` in independently testable increments.
+- [x] RED tests pin edit→submit→new edit→late success, mismatched response ID, immutable retry after edits/access errors, no-op/replayed success, double-submit rejection, changed-command UUID/version, canonical association equality, stale-tab conflict and explicit reload. Include create success retaining a resource while newer input remains dirty and an invalid native body not represented by canonical input.
+- [x] Run `pnpm exec vitest run src/lib/articles/draft-save-state`; expect missing-module RED. Implement transitions; same command stays pending across uncertainty and subsequent errors. Definitive first failures clear only that command and preserve latest input. Native-invalid input is never marked saved merely because the last valid canonical body matches a receipt.
+- [x] Run focused GREEN tests and commit `feat: model draft save acknowledgement and retry state` in independently testable increments.
 
 ## Package 2: controller and editable-in-flight form
 
@@ -57,10 +57,10 @@ If a create succeeds while newer edits exist, stay in the mounted form, switch s
 
 **Interfaces:** Preserve `useDraftCommand(initialDraft,article?)`; extend its result with committed resource, pending-command/uncertainty state and explicit reload dispatch. Keep a synchronous latest-state ref so immediate saves see the last native input before React renders. Actions remain `createDraftAction`/`saveDraftAction` with existing command shapes. The form reports editor-invalid state to the reducer without coercing invalid content into a valid payload.
 
-- [ ] RED controller/component tests prove input remains editable during a save, Save cannot start a second command, uncertainty exposes **Retry original save**, newer invalid input does not obstruct an exact valid retry, and successful acknowledgement leaves newer edits dirty. Cover invalid/slug/rate/access failures without input loss.
-- [ ] Replace duplicate local phase/baseline bookkeeping with the reducer. Snapshot one canonical command at submit, route only its matching reply to resolution, retain the same pending command through all uncertain retries and allocate a fresh UUID only for a deliberate new command after resolution.
-- [ ] Derive create/save mode from committed resource rather than only initial props. Preserve newer create input in the mounted form; save it to the acknowledged resource before automatic edit-route navigation. Keep semantic status/error announcements and avoid focusing a delayed save result away from active typing unnecessarily.
-- [ ] Run `pnpm exec vitest run src/components/dashboard/draft-form src/components/dashboard/draft-editor`; expect GREEN. Commit controller and form integration separately where needed to keep commits small.
+- [x] RED controller/component tests prove input remains editable during a save, Save cannot start a second command, uncertainty exposes **Retry original save**, newer invalid input does not obstruct an exact valid retry, and successful acknowledgement leaves newer edits dirty. Cover invalid/slug/rate/access failures without input loss.
+- [x] Replace duplicate local phase/baseline bookkeeping with the reducer. Snapshot one canonical command at submit, route only its matching reply to resolution, retain the same pending command through all uncertain retries and allocate a fresh UUID only for a deliberate new command after resolution.
+- [x] Derive create/save mode from committed resource rather than only initial props. Preserve newer create input in the mounted form; save it to the acknowledged resource before automatic edit-route navigation. Keep semantic status/error announcements and avoid focusing a delayed save result away from active typing unnecessarily.
+- [x] Run `pnpm exec vitest run src/components/dashboard/draft-form src/components/dashboard/draft-editor`; expect GREEN. Commit controller and form integration separately where needed to keep commits small.
 
 ## Package 3: conflict review and deliberate reload
 
@@ -68,10 +68,10 @@ If a create succeeds while newer edits exist, stay in the mounted form, switch s
 
 **Interfaces:** `reviewDraftAction(articleId:string):Promise<{ok:true;detail:DraftDetailResult;options:DraftOptions|null}|{ok:false;code:"invalid_input"|"forbidden"|"unavailable"}>` independently verifies access and uses existing private guarded queries. Options exist only for editable details. `DraftConflictPanel` consumes the current local input, checked latest detail/options and explicit review/load callbacks. The controller applies `reload` only after confirmation and only to the same article with no unresolved mutation. Copy/show body as safe text, never raw HTML or editor-native JSON.
 
-- [ ] RED tests cover owner/admin reads and credited non-owner denial, malformed ID, safe transport errors, unauthorized/hidden/read-only/unsupported targets, stale response IDs and local edits made while review loads. No broader lookup or service-role client.
-- [ ] Implement request-scoped latest reads; retain existing local state on failure or non-editable results. Prevent stale review responses from replacing a newer review. An editable review offers comparison and explicit load; confirmation names the draft and loss of active local changes. Do not resolve a pending unknown write through an ordinary detail read.
-- [ ] On deliberate load, adopt latest input/version/options together, clear incompatible editor error state and refresh category choices for the adopted section. Retain the prior local snapshot only as an in-memory read-only reference; no automatic reapply/merge or force-save shortcut.
-- [ ] Run focused action/panel/form tests; expect GREEN. Commit `feat: review and deliberately reload conflicting drafts` in focused action/panel/integration increments.
+- [x] RED tests cover owner/admin reads and credited non-owner denial, malformed ID, safe transport errors, unauthorized/hidden/read-only/unsupported targets, stale response IDs and local edits made while review loads. No broader lookup or service-role client.
+- [x] Implement request-scoped latest reads; retain existing local state on failure or non-editable results. Prevent stale review responses from replacing a newer review. An editable review offers comparison and explicit load; confirmation names the draft and loss of active local changes. Do not resolve a pending unknown write through an ordinary detail read.
+- [x] On deliberate load, adopt latest input/version/options together, clear incompatible editor error state and refresh category choices for the adopted section. Retain the prior local snapshot only as an in-memory read-only reference; no automatic reapply/merge or force-save shortcut.
+- [x] Run focused action/panel/form tests; expect GREEN. Commit `feat: review and deliberately reload conflicting drafts` in focused action/panel/integration increments.
 
 ## Package 4: supported navigation and sign-out protection
 
@@ -79,21 +79,21 @@ If a create succeeds while newer edits exist, stay in the mounted form, switch s
 
 **Interfaces:** `DraftNavigationProvider({children})` owns only a leave-check callback registration; `useDraftNavigationGuard(shouldWarn:boolean)` registers/cleans it up. `GuardedDashboardLink` retains Next Link props and calls the guard from `onNavigate`. `DashboardSignOutForm({action:()=>Promise<void>})` preserves the existing server action/native form behavior and checks before a JavaScript submit. Use one short native confirmation prompt for deliberate leave and one best-effort unload handler.
 
-- [ ] RED tests cover dirty/pending/uncertain/native-invalid input, clean/confirmed saves, cancel/confirm link and sign-out, new-tab modifiers, same-page error anchors and cleanup after navigation/unmount. Server authorization and no-JS sign-out remain unchanged; canceled sign-out sends no request.
-- [ ] Wrap the existing server-rendered dashboard children in the minimal client provider and replace only actual dashboard leave links/sign-out presentation. Registration contains no draft content and does not change server guards. Successful automatic create-to-edit navigation occurs only after the current input is acknowledged; it must not trigger a spurious leave prompt.
-- [ ] Run focused shell/guard/link/sign-out/form tests and strict types/build; expect GREEN. Record the Back/Forward coverage limit; do not add internal router interception.
+- [x] RED tests cover dirty/pending/uncertain/native-invalid input, clean/confirmed saves, cancel/confirm link and sign-out, new-tab modifiers, same-page error anchors and cleanup after navigation/unmount. Server authorization and no-JS sign-out remain unchanged; canceled sign-out sends no request.
+- [x] Wrap the existing server-rendered dashboard children in the minimal client provider and replace only actual dashboard leave links/sign-out presentation. Registration contains no draft content and does not change server guards. Successful automatic create-to-edit navigation occurs only after the current input is acknowledged; it must not trigger a spurious leave prompt.
+- [x] Run focused shell/guard/link/sign-out/form tests and strict types/build; expect GREEN. Record the Back/Forward coverage limit; do not add internal router interception.
 
 ## Package 5: adversarial browser proof and handoff
 
 **Files:** Create `e2e/drafts/draft-save-recovery.spec.ts`; extend existing reserved fixture helper with isolated `save` actors as needed. Update affected README/API/component/security/testing docs, ADR 0007 implementation evidence and parent Task 10 status only after verification.
 
-- [ ] Desktop/mobile journeys delay a real successful response, edit metadata/body/selections during the delay and prove the first snapshot alone was stored; newest local input remains dirty and a second explicit save persists it.
-- [ ] Drop a committed create/save response, edit local input, double-click/retry across access revocation/restoration and prove exact request-body/UUID/version reuse and single revision/audit/receipt capture. Create-with-newer-edits must not issue a duplicate create or navigate away prematurely. Reuse the existing route.fetch→abort technique with deterministic barriers, not sleeps.
-- [ ] Two independent contexts edit the same article: first saves, second conflicts, local data survives latest-version review, canceling reload retains input, explicit load adopts the current version, and a later save remains version-checked. Include owner/admin and credited-author-B denial plus unsupported/read-only/unavailable selections on recovery.
-- [ ] Verify dirty/uncertain/native-invalid app-link and sign-out cancellation, clean navigation, best-effort reload warning, keyboard focus/error/status behavior and mobile overflow. Record desktop/mobile recovery screenshots and honest browser-history limitations.
-- [ ] Run `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:db`, `pnpm db:types:check`, `pnpm supabase db lint`, `pnpm test:draft-contract`, `pnpm test:draft-editor`, `pnpm test:draft-concurrency`, and `pnpm exec playwright test` (configured production build/start). Expect exit 0 and no regression from the 431-unit/1,075-SQL/216-parity/60-browser baseline. Run unfiltered production/full high audits and `git diff --check`; record actual results.
-- [ ] Compare pre/post original-row fingerprints without resetting. Fresh whole-branch review fixes Important/Critical findings with observed RED→GREEN tests and relevant full regression gates. Retain evidence privately for Task 11; label unavailable hosted/human/manual checks honestly.
-- [ ] Commit the implemented behavior/evidence in small meaningful commits and stop for owner review. Do not merge, open a PR or begin Task 11 without the next instruction.
+- [x] Desktop/mobile journeys delay a real successful response, edit metadata/body/selections during the delay and prove the first snapshot alone was stored; newest local input remains dirty and a second explicit save persists it.
+- [x] Drop a committed create/save response, edit local input, double-click/retry across access revocation/restoration and prove exact request-body/UUID/version reuse and single revision/audit/receipt capture. Create-with-newer-edits must not issue a duplicate create or navigate away prematurely. Reuse the existing route.fetch→abort technique with deterministic barriers, not sleeps.
+- [x] Two independent contexts edit the same article: first saves, second conflicts, local data survives latest-version review, canceling reload retains input, explicit load adopts the current version, and a later save remains version-checked. Include owner/admin and credited-author-B denial plus unsupported/read-only/unavailable selections on recovery.
+- [x] Verify dirty/uncertain/native-invalid app-link and sign-out cancellation, clean navigation, best-effort reload warning, keyboard focus/error/status behavior and mobile overflow. Record desktop/mobile recovery screenshots and honest browser-history limitations.
+- [x] Run `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:db`, `pnpm db:types:check`, `pnpm supabase db lint`, `pnpm test:draft-contract`, `pnpm test:draft-editor`, `pnpm test:draft-concurrency`, and `pnpm exec playwright test` (configured production build/start). Expect exit 0 and no regression from the 431-unit/1,075-SQL/216-parity/60-browser baseline. Run unfiltered production/full high audits and `git diff --check`; record actual results.
+- [x] Compare pre/post original-row fingerprints without resetting. Fresh whole-branch review fixes Important/Critical findings with observed RED→GREEN tests and relevant full regression gates. Retain evidence privately for Task 11; label unavailable hosted/human/manual checks honestly.
+- [x] Commit the implemented behavior/evidence in small meaningful commits and stop for owner review. Do not merge, open a PR or begin Task 11 without the next instruction.
 
 ## Planning review and boundaries
 
