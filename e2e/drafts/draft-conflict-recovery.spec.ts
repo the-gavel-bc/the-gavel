@@ -177,11 +177,12 @@ test("dirty app links sign-out and reload can be canceled while clean navigation
   await page.getByRole("button", { name: "Sign out" }).click();
   expect(dialogs).toBe(3);
   expect(posts).toBe(0);
+  const newTabModifier = process.platform === "darwin" ? "Meta" : "Control";
   const [popup] = await Promise.all([
     context.waitForEvent("page"),
     page
       .getByRole("link", { name: "My articles", exact: true })
-      .click({ modifiers: ["Meta"] }),
+      .click({ modifiers: [newTabModifier] }),
   ]);
   await popup.waitForLoadState("domcontentloaded");
   await popup.close();
