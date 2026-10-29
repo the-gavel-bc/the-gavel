@@ -1,6 +1,5 @@
 "use server";
-import { unstable_rethrow } from "next/navigation";
-import { requireActiveMembership } from "@/lib/auth/access/access";
+import { getCurrentAccess } from "@/lib/auth/access/access";
 import { createServerSupabaseClient } from "@/lib/supabase/server/server";
 import { isDraftUuid } from "../draft-contract/draft-contract";
 import {
@@ -11,18 +10,18 @@ export async function getDraftCategoriesAction(
   sectionId: string,
 ): Promise<
   | { ok: true; categories: DraftOptions["categories"] }
-  | { ok: false; code: "invalid_input" | "unavailable" }
+  | { ok: false; code: "invalid_input" | "forbidden" | "unavailable" }
 > {
   if (!isDraftUuid(sectionId)) return { ok: false, code: "invalid_input" };
   try {
-    await requireActiveMembership();
+    const access = await getCurrentAccess();
+    if (access.status !== "active") return { ok: false, code: "forbidden" };
     const client = await createServerSupabaseClient();
     return {
       ok: true,
       categories: await loadDraftCategories(client, sectionId),
     };
-  } catch (error) {
-    unstable_rethrow(error);
+  } catch {
     return { ok: false, code: "unavailable" };
   }
 }

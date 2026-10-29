@@ -5,15 +5,10 @@ import {
 } from "../draft-queries/draft-query-test-client";
 const mocks = vi.hoisted(() => ({ guard: vi.fn(), client: vi.fn() }));
 vi.mock("@/lib/auth/access/access", () => ({
-  requireActiveMembership: mocks.guard,
+  getCurrentAccess: mocks.guard,
 }));
 vi.mock("@/lib/supabase/server/server", () => ({
   createServerSupabaseClient: mocks.client,
-}));
-vi.mock("next/navigation", () => ({
-  unstable_rethrow: (e: unknown) => {
-    if (e instanceof Error && e.message === "redirect") throw e;
-  },
 }));
 import { getDraftCategoriesAction } from "./draft-category-action";
 let http: ReturnType<typeof queryTestClient>;
@@ -21,6 +16,7 @@ beforeEach(() => {
   vi.resetAllMocks();
   http = queryTestClient();
   mocks.client.mockResolvedValue(http.client);
+  mocks.guard.mockResolvedValue({ status: "active" });
 });
 it("rejects malformed input without reading catalogs", async () => {
   expect(await getDraftCategoriesAction("bad")).toEqual({
@@ -29,9 +25,23 @@ it("rejects malformed input without reading catalogs", async () => {
   });
   expect(http.network).not.toHaveBeenCalled();
 });
-it("independently denies ineligible callers without reading catalogs", async () => {
-  mocks.guard.mockRejectedValue(new Error("redirect"));
-  await expect(getDraftCategoriesAction(profileId)).rejects.toThrow("redirect");
+it.each(["signedOut", "pending"])(
+  "returns safe %s denial without reading catalogs or redirecting the editor",
+  async (status) => {
+    mocks.guard.mockResolvedValue({ status });
+    expect(await getDraftCategoriesAction(profileId)).toEqual({
+      ok: false,
+      code: "forbidden",
+    });
+    expect(http.network).not.toHaveBeenCalled();
+  },
+);
+it("returns safe access failures without reading catalogs or redirecting", async () => {
+  mocks.guard.mockRejectedValue(new Error("private access detail"));
+  expect(await getDraftCategoriesAction(profileId)).toEqual({
+    ok: false,
+    code: "unavailable",
+  });
   expect(http.network).not.toHaveBeenCalled();
 });
 it("returns only active matching categories with an active parent", async () => {
