@@ -10,7 +10,7 @@
 
 **Spec:** [Accepted private-draft contract](../specs/2026-10-22-private-draft-workflow-design.md), approved by the owner on 2026-10-22. Existing [Phase 2 contract](../specs/2026-10-21-content-foundation-design.md), [API](../../api-contracts.md), [data](../../data-model.md), [security](../../security-and-permissions.md), [style](../../coding-style.md), and [testing](../../testing.md) remain authoritative for their existing boundaries.
 
-**Status:** Tasks 0 and 1 complete as documentation/baseline work. Tasks 2–9 validation, controlled draft writes, private queries, listing/create, constrained body editing and association selection are complete. Tasks 10–11 are not implemented. The owner requested native planning/execution followed by task-completion notifications and review checkpoints; preserve that approach. This plan refines the accepted work packages without approving any extra product scope.
+**Status:** Tasks 0 and 1 complete as documentation/baseline work. Tasks 2–10 validation, controlled draft writes, private queries, listing/create, constrained body editing, association selection and save/conflict/navigation recovery are complete. Task 11 integrated verification remains. The owner requested native planning/execution followed by task-completion notifications and review checkpoints; preserve that approach. This plan refines the accepted work packages without approving any extra product scope.
 
 ## Global constraints
 
@@ -194,9 +194,11 @@ Task 9 completion: [verification and screenshots](../../testing.md#phase-3-task-
 
 **Interfaces:** A saved submission records its request UUID, expected version and immutable submitted DraftInput; controller state separately retains latest edited input and last acknowledged committed version. Export `DraftSaveState`, `DraftSaveEvent` and `reduceDraftSave(state:DraftSaveState,event:DraftSaveEvent):DraftSaveState` from the owned module. State holds current/acknowledged input, committed article/version, pending immutable command and last result. Events are edit(input), submit(command), resolve(requestId,result), and reload(detail); reject mismatched response IDs and preserve edits newer than the submitted input. It does not persist private drafts in browser storage.
 
-- [ ] RED tests: edit while save is pending; late response must not mark newer edits clean. Double click/lost successful response retries the same UUID/input; a deliberate changed command uses a new UUID. A stale tab retains local data and safely reloads/reconciles; it cannot force overwrite. Tests exercise transport interruption and concurrent browser contexts, not only action mocks.
-- [ ] Finish explicit dirty/saving/saved/error/conflict states, accepted in-app and best-effort unload warnings, accessible status/error focus and recoverable reload behavior. No autosave timers, persistent backup, forced merge or crash-recovery promise.
-- [ ] GREEN state/component/full unit, real mutation concurrency and desktop/mobile adversarial journeys. Commit `feat: preserve draft edits across retries and conflicts`.
+- [x] RED tests: edit while save is pending; late response must not mark newer edits clean. Double click/lost successful response retries the same UUID/input; a deliberate changed command uses a new UUID. A stale tab retains local data and safely reloads/reconciles; it cannot force overwrite. Tests exercise transport interruption and concurrent browser contexts, not only action mocks.
+- [x] Finish explicit dirty/saving/saved/error/conflict states, accepted in-app and best-effort unload warnings, accessible status/error focus and recoverable reload behavior. No autosave timers, persistent backup, forced merge or crash-recovery promise.
+- [x] GREEN state/component/full unit, real mutation concurrency and desktop/mobile adversarial journeys. Commit `feat: preserve draft edits across retries and conflicts`.
+
+Task 10 completion: [verification and screenshots](../../testing.md#phase-3-task-10-save-and-conflict-recovery). The [approved subplan](2026-10-28-task-ten-draft-save-reconciliation.md) preserves native execution. Delayed/uncertain saves retain newest input; conflict recovery adopts a reviewed version only after confirmation; supported app links/sign-out are guarded. Same-document browser history remains an explicit limitation. Owner checkpoint before Task 11.
 
 ### Task 11: integrated verification and handoff
 

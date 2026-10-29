@@ -1,4 +1,10 @@
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import {
+  act,
+  render,
+  screen,
+  waitFor,
+  fireEvent,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
 import { baseDraft } from "@/lib/articles/draft-contract/draft-test-cases";
@@ -7,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   save: vi.fn(),
   push: vi.fn(),
   refresh: vi.fn(),
+  review: vi.fn(),
 }));
 vi.mock("@/lib/articles/draft-actions/draft-actions", () => ({
   createDraftAction: mocks.create,
@@ -14,6 +21,9 @@ vi.mock("@/lib/articles/draft-actions/draft-actions", () => ({
 }));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mocks.push, refresh: mocks.refresh }),
+}));
+vi.mock("@/lib/articles/draft-reload-action/draft-reload-action", () => ({
+  reviewDraftAction: mocks.review,
 }));
 import { DraftForm } from "./draft-form";
 const options = {
@@ -68,7 +78,7 @@ it("creates NULL optional metadata and opens the confirmed draft for editing", a
       `/dashboard/articles/${baseDraft.sectionId}`,
     ),
   );
-  expect(screen.getByRole("button", { name: "Create draft" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
   expect(screen.getByLabelText(/Title/)).toBeDisabled();
   expect(mocks.create.mock.calls[0][0].draft).toMatchObject({
     excerpt: null,
@@ -80,16 +90,16 @@ it("creates NULL optional metadata and opens the confirmed draft for editing", a
     contributors: [],
   });
 });
-it("offers exact retry and locks fields while the result is uncertain", async () => {
+it("offers the exact original retry while fields remain editable", async () => {
   mocks.create.mockResolvedValue({ ok: false, code: "unavailable" });
   render(<DraftForm initialDraft={baseDraft} options={options} />);
   await userEvent.click(screen.getByRole("button", { name: "Create draft" }));
   expect(
-    await screen.findByRole("button", { name: "Retry same request" }),
+    await screen.findByRole("button", { name: "Retry original save" }),
   ).toBeEnabled();
-  expect(screen.getByLabelText(/Title/)).toBeDisabled();
+  expect(screen.getByLabelText(/Title/)).toBeEnabled();
   await userEvent.click(
-    screen.getByRole("button", { name: "Retry same request" }),
+    screen.getByRole("button", { name: "Retry original save" }),
   );
   expect(mocks.create.mock.calls[1][0]).toEqual(mocks.create.mock.calls[0][0]);
 });
@@ -192,4 +202,114 @@ it("leaves unavailable-selection repair usable when there are no active sections
   expect(screen.getByLabelText(/Title/)).toHaveValue(
     `${baseDraft.title} retained`,
   );
+});
+
+it("retains newer create input in the mounted form until a subsequent explicit save", async () => {
+  let finish!: (value: unknown) => void;
+  mocks.create.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+  );
+  mocks.save.mockResolvedValue({
+    ok: true,
+    articleId: baseDraft.sectionId,
+    version: 2,
+    updatedAt: "2026-10-28T12:00:00Z",
+    changed: true,
+    replayed: false,
+  });
+  render(<DraftForm initialDraft={baseDraft} options={options} />);
+  await userEvent.click(screen.getByRole("button", { name: "Create draft" }));
+  expect(screen.getByLabelText(/Title/)).toBeEnabled();
+  await userEvent.type(screen.getByLabelText(/Title/), " newest");
+  await act(async () => {
+    finish({
+      ok: true,
+      articleId: baseDraft.sectionId,
+      version: 1,
+      updatedAt: "2026-10-28T12:00:00Z",
+      changed: true,
+      replayed: false,
+    });
+  });
+  expect(mocks.push).not.toHaveBeenCalled();
+  expect(screen.getByLabelText(/Title/)).toHaveValue(
+    `${baseDraft.title} newest`,
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Save draft" }));
+  await waitFor(() => expect(mocks.push).toHaveBeenCalled());
+  expect(mocks.create).toHaveBeenCalledOnce();
+  expect(mocks.save.mock.calls[0][0]).toMatchObject({
+    expectedVersion: 1,
+    draft: { title: `${baseDraft.title} newest` },
+  });
+});
+
+it("preserves conflict input until confirmed reload and then uses the reviewed version", async () => {
+  mocks.save
+    .mockResolvedValueOnce({ ok: false, code: "conflict" })
+    .mockResolvedValueOnce({
+      ok: true,
+      articleId: baseDraft.sectionId,
+      version: 3,
+      updatedAt: "2026-10-28T12:00:00Z",
+      changed: true,
+      replayed: false,
+    });
+  mocks.review.mockResolvedValue({
+    ok: true,
+    detail: {
+      kind: "editable",
+      articleId: baseDraft.sectionId,
+      version: 2,
+      updatedAt: "2026-10-28T12:00:00Z",
+      draft: { ...baseDraft, title: "Latest saved" },
+      unavailableSelections: {
+        sectionId: null,
+        categoryIds: [],
+        tagIds: [],
+        contributorIds: [],
+      },
+    },
+    options,
+  });
+  const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+  render(
+    <DraftForm
+      initialDraft={baseDraft}
+      options={options}
+      article={{
+        id: baseDraft.sectionId,
+        version: 1,
+        updatedAt: "2026-10-28T12:00:00Z",
+      }}
+    />,
+  );
+  await userEvent.type(screen.getByLabelText(/Title/), " local");
+  await userEvent.click(screen.getByRole("button", { name: "Save draft" }));
+  await userEvent.click(
+    await screen.findByRole("button", { name: "Review latest saved version" }),
+  );
+  await userEvent.click(
+    await screen.findByRole("button", { name: "Load latest saved version" }),
+  );
+  expect(screen.getByLabelText(/Title/)).toHaveValue(
+    `${baseDraft.title} local`,
+  );
+  confirm.mockReturnValue(true);
+  await userEvent.click(
+    screen.getByRole("button", { name: "Load latest saved version" }),
+  );
+  expect(screen.getByLabelText(/Title/)).toHaveValue("Latest saved");
+  expect(screen.getByLabelText(/Title/)).toHaveFocus();
+  expect(screen.getByText(`${baseDraft.title} local`)).toBeVisible();
+  await userEvent.type(screen.getByLabelText(/Title/), " reconciled");
+  await userEvent.click(screen.getByRole("button", { name: "Save draft" }));
+  expect(mocks.save.mock.calls[1][0]).toMatchObject({
+    expectedVersion: 2,
+    draft: { title: "Latest saved reconciled" },
+  });
+  confirm.mockRestore();
 });

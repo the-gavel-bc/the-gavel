@@ -5,19 +5,32 @@ export function useDraftCategories(
   sectionId: string,
   initialSectionId: string,
   initial: DraftOptions["categories"],
+  seedKey = 0,
 ) {
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState({
     sectionId,
+    seedKey,
     attempt: 0,
     categories: initial,
     error: false,
     loaded: true,
   });
   const changed = useRef(false);
-  if (state.sectionId !== sectionId || state.attempt !== attempt) {
+  const seed = useRef(seedKey);
+  if (state.seedKey !== seedKey) {
     setState({
       sectionId,
+      attempt,
+      seedKey,
+      categories: initial,
+      error: false,
+      loaded: true,
+    });
+  } else if (state.sectionId !== sectionId || state.attempt !== attempt) {
+    setState({
+      sectionId,
+      seedKey,
       attempt,
       categories: [],
       error: false,
@@ -25,6 +38,11 @@ export function useDraftCategories(
     });
   }
   useEffect(() => {
+    if (seed.current !== seedKey) {
+      seed.current = seedKey;
+      changed.current = false;
+      if (sectionId === initialSectionId) return;
+    }
     if (sectionId === initialSectionId && attempt === 0 && !changed.current)
       return;
     changed.current = true;
@@ -35,6 +53,7 @@ export function useDraftCategories(
         if (!cancelled)
           setState({
             sectionId,
+            seedKey,
             attempt,
             categories: result.ok ? result.categories : [],
             error: !result.ok,
@@ -45,6 +64,7 @@ export function useDraftCategories(
         if (!cancelled)
           setState({
             sectionId,
+            seedKey,
             attempt,
             categories: [],
             error: true,
@@ -54,7 +74,7 @@ export function useDraftCategories(
     return () => {
       cancelled = true;
     };
-  }, [sectionId, initialSectionId, attempt]);
+  }, [sectionId, initialSectionId, attempt, seedKey]);
   return {
     categories: state.categories,
     loading: !state.loaded,

@@ -24,6 +24,9 @@ import { DraftContributorFields } from "../draft-contributor-fields/draft-contri
 import { draftMetadataErrors } from "@/lib/articles/draft-contract/draft-contract";
 import { draftSelectionErrors } from "@/lib/articles/draft-selections/draft-selections";
 import { useDraftCategories } from "./use-draft-categories";
+import { DraftConflictPanel } from "../draft-conflict-panel/draft-conflict-panel";
+import { useDraftNavigationGuard } from "../draft-navigation-guard/draft-navigation-guard";
+import { GuardedDashboardLink } from "../guarded-dashboard-link/guarded-dashboard-link";
 
 const DraftEditor = dynamic(
   () =>
@@ -37,7 +40,7 @@ const messages: Record<DraftErrorCode, string> = {
   invalid_input: "Review the highlighted fields and active selections.",
   slug_conflict: "That slug is already in use. Choose another slug.",
   unavailable:
-    "We could not confirm the save. Retry the same request before editing or leaving this page.",
+    "We could not confirm the save. Retry the original save to confirm it. Newer edits stay in this tab.",
   forbidden:
     "Your access does not currently allow saving. Your input is still here.",
   not_found: "This draft is no longer available. Your input is still here.",
@@ -60,16 +63,34 @@ export function DraftForm({
 }) {
   const command = useDraftCommand(initialDraft, article);
   const [editorFailure, setEditorFailure] = useState<DraftFailure | null>(null);
+  const { editorInvalid } = command;
   const reportEditorFailure = useCallback(
-    (failure: DraftFailure) => setEditorFailure(failure),
-    [],
+    (failure: DraftFailure) => {
+      setEditorFailure(failure);
+      editorInvalid();
+    },
+    [editorInvalid],
   );
+  const [catalog, setCatalog] = useState({
+    options,
+    sectionId: initialDraft.sectionId,
+    revision: 0,
+  });
+  useEffect(() => {
+    if (catalog.revision > 0) document.getElementById("draft-title")?.focus();
+  }, [catalog.revision]);
+  const [recoveryVisible, setRecoveryVisible] = useState(false);
+  const [recoveryBlocked, setRecoveryBlocked] = useState(false);
   const categories = useDraftCategories(
     command.draft.sectionId,
-    initialDraft.sectionId,
-    options.categories,
+    catalog.sectionId,
+    catalog.options.categories,
+    catalog.revision,
   );
-  const currentOptions = { ...options, categories: categories.categories };
+  const currentOptions = {
+    ...catalog.options,
+    categories: categories.categories,
+  };
   const [selectionErrors, setSelectionErrors] = useState<
     Record<string, string>
   >({});
@@ -81,24 +102,28 @@ export function DraftForm({
   const router = useRouter();
   const summary = useRef<HTMLDivElement>(null);
   const ready = useSyncExternalStore(subscribeReady, clientReady, serverReady);
+  const hasSelectionErrors = Object.keys(selectionErrors).length > 0;
   useEffect(() => {
-    if (command.failure || Object.keys(selectionErrors).length)
+    if (
+      (command.failure || hasSelectionErrors) &&
+      !document.activeElement?.matches(
+        'input,textarea,select,[contenteditable="true"]',
+      )
+    )
       summary.current?.focus();
-  }, [command.failure, selectionErrors]);
-  useEffect(() => {
-    if (!editorFailure) return;
-    // Invalid native input may differ from the last valid canonical body tracked by the controller.
-    const warn = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = "";
-    };
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [editorFailure]);
+  }, [command.failure, hasSelectionErrors]);
+  useDraftNavigationGuard(
+    command.dirty || Boolean(command.pending) || Boolean(editorFailure),
+  );
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!ready || !options.sections.length || editorFailure) return;
-    if (command.phase !== "uncertain") {
+    if (recoveryBlocked && !command.pending) return;
+    if (
+      !ready ||
+      (!command.pending && (!catalog.options.sections.length || editorFailure))
+    )
+      return;
+    if (!command.pending) {
       const invalid = {
         ...draftMetadataErrors(command.draft),
         ...draftSelectionErrors(command.draft, currentOptions),
@@ -112,7 +137,7 @@ export function DraftForm({
       }
     }
     const saved = await command.submit();
-    if (saved && !article) {
+    if (saved && !article && !command.hasUncommitted()) {
       router.push(`/dashboard/articles/${saved.id}`);
       router.refresh();
     }
@@ -124,7 +149,7 @@ export function DraftForm({
         ? "Save not confirmed."
         : command.phase === "saved"
           ? "Draft saved."
-          : command.phase === "error"
+          : command.phase === "error" || command.phase === "conflict"
             ? "Draft not saved."
             : command.dirty
               ? "Unsaved changes."
@@ -140,7 +165,7 @@ export function DraftForm({
       <p role="status">
         {editorFailure ? "Body needs attention before saving." : status}
       </p>
-      {!options.sections.length && (
+      {!catalog.options.sections.length && (
         <p>
           No active sections are available. Ask an administrator to configure a
           section.
@@ -171,10 +196,49 @@ export function DraftForm({
           )}
         </div>
       )}
+      {command.article &&
+        (recoveryVisible ||
+          (!command.pending &&
+            [
+              "conflict",
+              "forbidden",
+              "not_found",
+              "unsupported_content",
+            ].includes(command.failure?.code ?? ""))) && (
+          <DraftConflictPanel
+            articleId={command.article.id}
+            local={command.draft}
+            options={currentOptions}
+            nativeInvalid={Boolean(editorFailure)}
+            disabled={Boolean(command.pending)}
+            onBlocked={() => {
+              setRecoveryBlocked(true);
+              setRecoveryVisible(true);
+            }}
+            onLoad={(detail, nextOptions) => {
+              if (
+                !command.reload(detail.draft, {
+                  id: detail.articleId,
+                  version: detail.version,
+                  updatedAt: detail.updatedAt,
+                })
+              )
+                return false;
+              setCatalog((current) => ({
+                options: nextOptions,
+                sectionId: detail.draft.sectionId,
+                revision: current.revision + 1,
+              }));
+              setEditorFailure(null);
+              setSelectionErrors({});
+              setRecoveryBlocked(false);
+              setRecoveryVisible(true);
+              return true;
+            }}
+          />
+        )}
       <fieldset
-        disabled={
-          !ready || command.locked || (!article && command.phase === "saved")
-        }
+        disabled={!ready || (!article && command.phase === "saved")}
         className={styles.fields}
       >
         <legend>Draft details</legend>
@@ -203,21 +267,20 @@ export function DraftForm({
         />
         <DraftContributorFields
           value={command.draft.contributors}
-          options={options.contributors}
+          options={catalog.options.contributors}
           error={errors.contributors}
           onChange={(contributors) =>
             update((current) => ({ ...current, contributors }))
           }
         />
         <DraftEditor
+          key={catalog.revision}
           value={command.draft.content}
-          disabled={
-            !ready || command.locked || (!article && command.phase === "saved")
-          }
+          disabled={!ready || (!article && command.phase === "saved")}
           onError={reportEditorFailure}
           onChange={(content) => {
             setEditorFailure(null);
-            update((current) => ({ ...current, content }));
+            command.update((current) => ({ ...current, content }), true);
           }}
         />
       </fieldset>
@@ -229,23 +292,28 @@ export function DraftForm({
             !ready ||
             command.phase === "saving" ||
             command.phase === "saved" ||
-            Boolean(editorFailure) ||
-            (command.phase !== "uncertain" &&
-              (categories.loading || categories.error)) ||
-            !options.sections.length
+            command.phase === "conflict" ||
+            (!command.pending && recoveryBlocked) ||
+            (!command.pending &&
+              (Boolean(editorFailure) ||
+                categories.loading ||
+                categories.error ||
+                !catalog.options.sections.length))
           }
         >
           {command.phase === "uncertain"
-            ? "Retry same request"
+            ? "Retry original save"
             : command.phase === "saving"
               ? "Saving…"
-              : article
+              : command.article
                 ? "Save draft"
                 : "Create draft"}
         </Button>
       </div>
       <p>
-        <a href="/dashboard">Back to My articles</a>
+        <GuardedDashboardLink href="/dashboard">
+          Back to My articles
+        </GuardedDashboardLink>
       </p>
     </form>
   );

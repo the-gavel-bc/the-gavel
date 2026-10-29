@@ -2,7 +2,8 @@ import type { ReactNode } from "react";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell/dashboard-shell";
 import { requireActiveMembership } from "@/lib/auth/access/access";
 import { signOut } from "@/lib/auth/actions/actions";
-import { Button } from "@/components/ui/button/button";
+import { DashboardSignOutForm } from "@/components/dashboard/dashboard-sign-out-form/dashboard-sign-out-form";
+import { DraftNavigationProvider } from "@/components/dashboard/draft-navigation-guard/draft-navigation-guard";
 export default async function DashboardLayout({
   children,
 }: {
@@ -10,14 +11,14 @@ export default async function DashboardLayout({
 }) {
   const access = await requireActiveMembership();
   return (
-    <DashboardShell
-      displayName={access.displayName}
-      isAdmin={access.role === "administrator"}
-    >
-      {children}
-      <form action={signOut}>
-        <Button type="submit">Sign out</Button>
-      </form>
-    </DashboardShell>
+    <DraftNavigationProvider>
+      <DashboardShell
+        displayName={access.displayName}
+        isAdmin={access.role === "administrator"}
+      >
+        {children}
+        <DashboardSignOutForm action={signOut} />
+      </DashboardShell>
+    </DraftNavigationProvider>
   );
 }

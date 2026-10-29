@@ -26,7 +26,7 @@ it("retries uncertainty with the exact submitted UUID/payload and retains input"
   await act(async () => {
     await result.current.submit();
   });
-  expect(result.current.locked).toBe(true);
+  expect(result.current.locked).toBe(false);
   expect(result.current.phase).toBe("uncertain");
   act(() =>
     result.current.update({
@@ -34,7 +34,7 @@ it("retries uncertainty with the exact submitted UUID/payload and retains input"
       title: "Changed during uncertainty",
     }),
   );
-  expect(result.current.draft.title).toBe(baseDraft.title);
+  expect(result.current.draft.title).toBe("Changed during uncertainty");
   await act(async () => {
     expect(await result.current.submit()).toMatchObject({
       id: success.articleId,
@@ -44,7 +44,8 @@ it("retries uncertainty with the exact submitted UUID/payload and retains input"
   expect(actions.create.mock.calls[1][0]).toEqual(
     actions.create.mock.calls[0][0],
   );
-  expect(result.current.phase).toBe("saved");
+  expect(result.current.phase).toBe("idle");
+  expect(result.current.dirty).toBe(true);
 });
 it("uses a fresh UUID after a definitive rejection and preserves edited input", async () => {
   actions.create.mockResolvedValue({ ok: false, code: "slug_conflict" });
@@ -62,7 +63,7 @@ it("uses a fresh UUID after a definitive rejection and preserves edited input", 
   );
   expect(result.current.draft.slug).toBe("different-slug");
 });
-it("blocks duplicate in-flight submits and input changes", async () => {
+it("blocks duplicate in-flight submits while preserving new input", async () => {
   let finish!: (value: typeof success) => void;
   actions.create.mockReturnValue(
     new Promise((resolve) => {
@@ -78,7 +79,7 @@ it("blocks duplicate in-flight submits and input changes", async () => {
     expect(await result.current.submit()).toBeNull();
   });
   act(() => result.current.update({ ...baseDraft, title: "New input" }));
-  expect(result.current.draft.title).toBe(baseDraft.title);
+  expect(result.current.draft.title).toBe("New input");
   expect(actions.create).toHaveBeenCalledOnce();
   await act(async () => {
     finish(success);
@@ -134,7 +135,7 @@ it("keeps an earlier uncertain command when later access denial cannot resolve i
     await result.current.submit();
   });
   expect(result.current.phase).toBe("uncertain");
-  expect(result.current.locked).toBe(true);
+  expect(result.current.locked).toBe(false);
   await act(async () => {
     expect(await result.current.submit()).toMatchObject({
       id: success.articleId,
@@ -145,21 +146,6 @@ it("keeps an earlier uncertain command when later access denial cannot resolve i
     Array(3).fill(actions.create.mock.calls[0][0]),
   );
 });
-it("warns on unload for dirty or uncertain input and clears after confirmation", async () => {
-  actions.create.mockResolvedValue(success);
-  const { result } = renderHook(() => useDraftCommand(baseDraft));
-  act(() => result.current.update({ ...baseDraft, title: "Unsaved title" }));
-  const before = new Event("beforeunload", { cancelable: true });
-  window.dispatchEvent(before);
-  expect(before.defaultPrevented).toBe(true);
-  await act(async () => {
-    await result.current.submit();
-  });
-  const after = new Event("beforeunload", { cancelable: true });
-  window.dispatchEvent(after);
-  expect(after.defaultPrevented).toBe(false);
-});
-
 it("submits the latest input even before React renders the update", async () => {
   actions.create.mockResolvedValue(success);
   const { result } = renderHook(() => useDraftCommand(baseDraft));
@@ -194,7 +180,43 @@ it("acknowledges canonical association ordering without a false unsaved warning"
     await result.current.submit();
   });
   expect(result.current.dirty).toBe(false);
-  const after = new Event("beforeunload", { cancelable: true });
-  window.dispatchEvent(after);
-  expect(after.defaultPrevented).toBe(false);
+});
+
+it("preserves newer input through a delayed success and saves it with the acknowledged version", async () => {
+  let finish!: (value: typeof success) => void;
+  actions.save
+    .mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    )
+    .mockResolvedValue({ ...success, version: 3 });
+  const { result } = renderHook(() =>
+    useDraftCommand(baseDraft, {
+      id: success.articleId,
+      version: 1,
+      updatedAt: success.updatedAt,
+    }),
+  );
+  let saving!: Promise<unknown>;
+  act(() => {
+    result.current.update({ ...baseDraft, title: "First snapshot" });
+    saving = result.current.submit();
+  });
+  act(() => result.current.update({ ...baseDraft, title: "Newest text" }));
+  await act(async () => {
+    finish({ ...success, version: 2 });
+    await saving;
+  });
+  expect(result.current.draft.title).toBe("Newest text");
+  expect(result.current.dirty).toBe(true);
+  await act(async () => {
+    await result.current.submit();
+  });
+  expect(actions.save.mock.calls[1][0]).toMatchObject({
+    expectedVersion: 2,
+    draft: { title: "Newest text" },
+  });
+  expect(result.current.dirty).toBe(false);
 });

@@ -1,5 +1,5 @@
 import styles from "./dashboard-shell.module.css";
-import Link from "next/link";
+import { GuardedDashboardLink as Link } from "../guarded-dashboard-link/guarded-dashboard-link";
 import type { PropsWithChildren } from "react";
 import { SkipLink } from "@/components/site/skip-link/skip-link";
 
