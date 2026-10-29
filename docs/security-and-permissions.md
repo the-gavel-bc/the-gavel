@@ -210,7 +210,7 @@ The former CI advisory exception is retired after upstream withdrawal; productio
 
 Task 9 selects only existing eligible catalog IDs and never grants contributor edit authority. The category-read action independently guards active membership, validates its section UUID and restricts active categories/parents even for administrators. Hidden labels are not fetched for unavailable references. New selections pass client usability checks and the existing strict action/RPC validators; references deactivated after loading still fail at the authoritative mutation boundary with input retained. Direct writes, ownership, authentication, schema and grants remain unchanged.
 
-Section changes retain categories until deliberate removal/replacement. Stale category responses cannot replace current choices, failed reads expose retry, and pending/uncertain writes retain their original retry payload/version while Task 10 permits newer local input. No new private draft persistence or logging is added. Human security/screen-reader review remains outstanding.
+Section changes retain categories until deliberate removal/replacement. Stale category responses cannot replace current choices, failed reads expose retry, and pending/uncertain writes retain their original retry payload/version while Task 10 permits newer local input. The category read action checks current access without redirecting; denial/unavailability returns safe feedback and does not discard mounted editor input. No new private draft persistence or logging is added. Human security/screen-reader review remains outstanding.
 
 ## Implemented Task 10 recovery and leave checks
 
