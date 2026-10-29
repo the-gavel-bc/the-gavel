@@ -130,7 +130,7 @@ Task 8 implements `toEditorDocument(DraftDocument|null)` and `fromEditorDocument
 
 ## Implemented draft category choice action
 
-`getDraftCategoriesAction(sectionId: string)` independently requires active membership, validates the section UUID and uses the existing cookie-scoped no-store client. It returns `{ok:true,categories}` with the existing `DraftOptions["categories"]` shape, restricted to active categories in that section with an active parent, or safe `{ok:false,code:"invalid_input"|"unavailable"}` feedback. Framework access redirects propagate. Reads paginate past the Data API row cap. It grants no write authority; existing create/save RPCs recheck all reference selections at commit.
+`getDraftCategoriesAction(sectionId: string)` independently checks current access without redirecting, validates the section UUID and uses the existing cookie-scoped no-store client. It returns `{ok:true,categories}` with the existing `DraftOptions["categories"]` shape, restricted to active categories in that section with an active parent, or safe `{ok:false,code:"invalid_input"|"forbidden"|"unavailable"}` feedback. A denied or unavailable access check does not read catalogs or navigate away from unsaved editor input. Reads paginate past the Data API row cap. It grants no write authority; existing create/save RPCs recheck all reference selections at commit.
 
 ## Implemented private draft recovery read
 
