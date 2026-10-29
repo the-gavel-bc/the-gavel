@@ -192,3 +192,64 @@ test("create success keeps newer edits on the mounted form and saves the same ar
     await barrier.dispose();
   }
 });
+for (const access of ["inactive", "signedOut"] as const)
+  test(`category reads preserve unsaved input after ${access} access loss`, async ({
+    context,
+    page,
+  }, info) => {
+    await setLocalSession(context, fixture.users.author);
+    const number = access === "inactive" ? 11 : 10;
+    const path = `/dashboard/articles/${fixture.id(number)}`;
+    await page.goto(path);
+    const title = page.getByLabel("Title (required)"),
+      body = page.getByRole("textbox", { name: "Article body" });
+    await title.fill("Retain category access edits");
+    await body.fill("Retain valid body text.");
+    if (access === "inactive") {
+      await body.evaluate((element) => {
+        element.innerHTML =
+          "<p>Retain invalid native text</p>" + "<p>x</p>".repeat(2500);
+        element.dispatchEvent(
+          new InputEvent("input", {
+            bubbles: true,
+            inputType: "insertText",
+            data: "x",
+          }),
+        );
+      });
+      await expect(
+        page.getByRole("alert").filter({ hasText: "exceeds its limits" }),
+      ).toBeVisible();
+    }
+    const before = fixture.article(number);
+    if (access === "inactive") fixture.setAuthorAccess(false);
+    else await context.clearCookies();
+    try {
+      await page.getByLabel("Section (required)").selectOption(fixture.id(98));
+      await expect(
+        page
+          .getByRole("alert")
+          .filter({ hasText: "Unable to load categories" }),
+      ).toBeVisible();
+      await expect(page).toHaveURL(new RegExp(`${fixture.id(number)}$`));
+      await expect(title).toHaveValue("Retain category access edits");
+      if (access === "inactive") {
+        await expect(body.locator("p")).toHaveCount(2501);
+        await expect(body.locator("p").first()).toHaveText(
+          "Retain invalid native text",
+        );
+      } else await expect(body).toHaveText("Retain valid body text.");
+      expect(fixture.article(number)).toEqual(before);
+      if (access === "inactive") fixture.setAuthorAccess(true);
+      else await setLocalSession(context, fixture.users.author);
+      await page.getByRole("button", { name: "Retry categories" }).click();
+      await expect(
+        page.getByLabel(`Synthetic ${info.project.name} alternate category`, {
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(title).toHaveValue("Retain category access edits");
+    } finally {
+      if (access === "inactive") fixture.setAuthorAccess(true);
+    }
+  });
