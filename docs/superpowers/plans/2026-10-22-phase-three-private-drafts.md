@@ -205,9 +205,9 @@ Task 10 completion: [verification and screenshots](../../testing.md#phase-3-task
 **Files:** Existing relevant docs/tests/types only; store private upgrade/hosted evidence under this plan's ignored workspace. New migrations or unrelated cleanup require a demonstrated defect and focused fix, not polish.
 
 - [x] Before reset verify the pre-Task-2 populated baseline is preserved across all Phase 3 migrations and existing denials remain green; save evidence privately. Reproduce in a separate local environment if evidence is missing. Then clean-reset proof with empty content seeds and synthetic transaction/browser fixtures.
-- [ ] Run focused SQL, all SQL, parity and independent-session concurrency suites; database lint/types drift; repository format/lint/types/unit/build; all desktop/mobile browser tests; unfiltered production/full dependency audits; secret scan and exact-head hosted CI. Record actual counts/failures; source-matching recent gates can be reused only when unchanged.
+- [x] Run focused SQL, all SQL, parity and independent-session concurrency suites; database lint/types drift; repository format/lint/types/unit/build; all desktop/mobile browser tests; unfiltered production/full dependency audits; secret scan and exact-head hosted CI. Record actual counts/failures; source-matching recent gates can be reused only when unchanged.
 - [x] Fresh whole-slice security/code review checks every review-focus path plus permissions/format/schema compatibility. Fix critical/important defects with observed RED/GREEN tests and a full relevant regression suite. Record optional deferred improvements and separately outstanding human/manual accessibility/session/hosted/recovery checks honestly.
-- [ ] Document installed dependencies, implemented write/read boundaries, safe unsupported-content behavior, retry/quota/version/history semantics and deferred media/public/lifecycle/client decisions. Commit focused verification artifacts and stop for owner review before the next product slice.
+- [x] Document installed dependencies, implemented write/read boundaries, safe unsupported-content behavior, retry/quota/version/history semantics and deferred media/public/lifecycle/client decisions. Commit focused verification artifacts and stop for owner review before the next product slice.
 
 ## Dependency and pre-flight checks
 
