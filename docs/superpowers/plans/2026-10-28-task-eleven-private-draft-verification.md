@@ -12,7 +12,7 @@
 
 **Plan approval baseline:** Task 10 was complete locally at `04fc19d`, with no PR or hosted run. GitHub main was `3de2b3b` (Task 9/PR #24). This branch is `docs/private-draft-workflow-verification` in `/private/tmp/the-gavel-task11`, based on Task 10. The historical pre-Phase-3 schema is available at `bb86c0e`.
 
-**Execution status:** Local gates, preservation and clean-install evidence, and fresh review are complete. The remaining final action is to push this branch and confirm the existing hosted workflow on its exact final SHA; the result is linked from the Task 11 owner handoff.
+**Execution status:** Local gates, preservation and clean-install evidence, and fresh review are complete. The exact-head hosted workflow passed on verification commit `dfacc04` ([run 40794333210](https://github.com/dylandrozario/the-gavel/actions/runs/40794333210)). After Task 10 PR #25 merged to `main`, the owner requested a separate Task 11 PR against `main`; that PR will run the full workflow on its own head.
 
 ## Global constraints
 
@@ -83,10 +83,12 @@ Tasks 9/10 retained additional 14-table public/private/auth.identities fingerpri
 **Files:** Update README, `docs/testing.md`, affected API/data/security/component/ADR notes and parent plan; create a concise `docs/reviews/phase-3-private-drafts.md` review/evidence map. Do not duplicate the authoritative payload/schema contract.
 
 - [x] Document actual installed editor packages, implemented read/write boundaries, unsupported-content preservation, exact retry/quota/no-op/version/history semantics, navigation limitations, rollback approach and unresolved media/public/lifecycle/client/human/provider decisions. Clearly separate original identity upgrade preservation from the additional populated-content reproduction.
-- [x] Commit all final tracked artifacts in focused commits. This branch contains the unmerged Task 10 implementation as its base; do not pretend Task 10 is already on main or silently rebase it away.
-- [x] Publish this verification branch to the existing GitHub repository and trigger the existing `ci.yml` via `gh workflow run --ref docs/private-draft-workflow-verification`. This push/dispatch is part of the approved verification scope; no production deployment, PR creation or merge is included. The workflow already supports dispatch, requires no production secrets and runs frozen install, full local/fresh DB/app/browser gates, history secret scan and unfiltered audits.
-- [x] Observe the completed run and assert its head SHA equals the final pushed/locally verified commit and conclusion is success. Keep the run URL/SHA/result in private evidence and the completion response; avoid a self-referential documentation commit after that check. A subsequent tracked change requires the new final SHA's hosted gate to run again.
+- [x] Commit all final tracked artifacts in focused commits. This branch was based on Task 10 at `04fc19d`; Task 10 later merged to `main` as PR #25. The GitHub comparison against current `main` contains only Task 11 changes.
+- [x] Publish this verification branch to the existing GitHub repository and trigger the existing `ci.yml` via `gh workflow run --ref docs/private-draft-workflow-verification`. This push/dispatch is part of the approved verification scope; no production deployment or merge is included. The workflow already supports dispatch, requires no production secrets and runs frozen install, full local/fresh DB/app/browser gates, history secret scan and unfiltered audits.
+- [x] Observe the completed run and assert its head SHA equals verification commit `dfacc04` and conclusion is success. Keep the run URL/SHA/result in this plan and the completion response. A subsequent tracked change requires the new head's hosted gate to run again.
 - [x] Stop at owner handoff with concrete pass/fail/unavailable results and links. Automated Phase 3 verification can be called complete only after required local and exact-head hosted gates pass; independent human/manual/provider work remains separately outstanding. Do not begin another product slice.
+
+**Owner follow-up (2026-10-29):** After PR #25 merged, the owner requested a separate pull request for this completed Task 11 branch against `main`. PR creation does not expand product scope or authorize merging or deployment; the pull-request workflow reruns the full gates on its head.
 
 ## Acceptance and stop condition
 

@@ -1,6 +1,6 @@
 # Phase 3 private drafts: integrated verification
 
-Status: local verification and fresh code/security review complete. The verification branch also includes the unmerged Task 10 implementation. The exact-head hosted workflow result and run URL are reported in the Task 11 owner handoff.
+Status: local verification and fresh code/security review complete. Task 10 PR #25 has since merged to `main`; this branch's comparison against current `main` contains only Task 11 changes. The verification commit's [exact-head hosted workflow](https://github.com/dylandrozario/the-gavel/actions/runs/40794333210) passed; the Task 11 pull request reruns the full workflow on its own head.
 
 ## Data preservation and installation
 
@@ -16,27 +16,27 @@ Fresh whole-slice review covered the accepted contract and Tasks 2–10, includi
 
 The action now uses `getCurrentAccess()` and returns safe `forbidden`/`unavailable` results without redirecting or reading catalogs on denial. The API/security docs describe this behavior. Six focused unit tests and four desktop/mobile access-loss cases pass; the browser cases retain both valid and native-invalid editor input. No Critical findings or other blocking findings were reported. The fix changes no schema, grants, access model, or write authority.
 
-The first exact-head hosted run passed through build and then exposed a separate existing test portability issue: its new-tab assertion always used macOS `Meta`, so Linux Chromium never opened the expected popup. The test now selects `Meta` on macOS and `Control` elsewhere. The focused desktop/mobile case passes locally (2/2), and the complete local browser suite passes again (78 cases). The replacement hosted run must cover this updated test commit.
+The first exact-head hosted run passed through build and then exposed a separate existing test portability issue: its new-tab assertion always used macOS `Meta`, so Linux Chromium never opened the expected popup. The test now selects `Meta` on macOS and `Control` elsewhere. The focused desktop/mobile case passes locally (2/2), and the complete local browser suite passes again (78 cases). The replacement hosted run passed on verification commit `dfacc04` ([run 40794333210](https://github.com/dylandrozario/the-gavel/actions/runs/40794333210)).
 
 ## Local gates
 
 All commands were run on Node 22.20.0 / pnpm 11.25.0 against the current branch source. The complete desktop/mobile suite includes the configured production build/start.
 
-| Gate                                           | Result                                                     |
-| ---------------------------------------------- | ---------------------------------------------------------- |
-| Frozen dependency install                      | Passed; lockfile unchanged                                 |
-| Format, lint, strict TypeScript                | Passed                                                     |
-| Unit/component suite                           | 463 tests passed                                           |
-| SQL suite on original project                  | 1,075 assertions passed                                    |
-| SQL suite on clean isolated install            | 1,075 assertions passed                                    |
-| TypeScript/PostgreSQL draft-contract parity    | 216 tests passed                                           |
-| Real editor/canonical/PostgreSQL parity        | 8 tests passed                                             |
-| Independent-session concurrency                | 25 tests passed across 7 files                             |
-| Desktop/mobile browser suite                   | 78 cases passed; production build/start passed             |
-| Database type drift                            | Matched on original and isolated schemas                   |
-| Schema lint                                    | No errors on isolated clean schema                         |
-| Production and full dependency audits          | No known vulnerabilities                                   |
-| Gitleaks history scan and exact-head hosted CI | Run on final branch head; result linked from owner handoff |
+| Gate                                           | Result                                                                 |
+| ---------------------------------------------- | ---------------------------------------------------------------------- |
+| Frozen dependency install                      | Passed; lockfile unchanged                                             |
+| Format, lint, strict TypeScript                | Passed                                                                 |
+| Unit/component suite                           | 463 tests passed                                                       |
+| SQL suite on original project                  | 1,075 assertions passed                                                |
+| SQL suite on clean isolated install            | 1,075 assertions passed                                                |
+| TypeScript/PostgreSQL draft-contract parity    | 216 tests passed                                                       |
+| Real editor/canonical/PostgreSQL parity        | 8 tests passed                                                         |
+| Independent-session concurrency                | 25 tests passed across 7 files                                         |
+| Desktop/mobile browser suite                   | 78 cases passed; production build/start passed                         |
+| Database type drift                            | Matched on original and isolated schemas                               |
+| Schema lint                                    | No errors on isolated clean schema                                     |
+| Production and full dependency audits          | No known vulnerabilities                                               |
+| Gitleaks history scan and exact-head hosted CI | Passed on verification commit `dfacc04`; Task 11 PR reruns on its head |
 
 Earlier desktop/mobile selector and recovery captures remain linked from [testing evidence](../testing.md). Current selector screenshots were refreshed by the full Playwright run and visually inspected. Automated keyboard/focus/navigation checks pass; this does not establish manual screen-reader or human security certification.
 

@@ -271,7 +271,7 @@ The navigation provider holds only a leave-check callback. App-link/sign-out can
 
 Inspect the [desktop recovery](reviews/assets/phase-3-task10-desktop.png) and [mobile recovery](reviews/assets/phase-3-task10-mobile.png). Images were visually inspected; capture scrolls to the top to avoid an off-viewport fixed SkipLink artifact. The browser suites use separate collision-checked save/recovery actor/catalog namespaces. Original public/private/auth.identities fingerprints match across all 14 tables after browser/concurrency cleanup; only established synthetic auth.users test metadata is excluded. No reset, schema/grant/migration or dependency change occurred. Private gate logs/fingerprints remain in this task's ignored workspace for Task 11.
 
-Hosted CI, human screen-reader/security review and the whole-slice Task 11 upgrade/clean-install/handoff evidence remain outstanding. This is local Task 10 completion, not completion of Phase 3 or the publishing MVP.
+At Task 10 completion, hosted CI and Task 11 whole-slice verification remained outstanding. PR #25 later merged to `main` with passing hosted CI; Task 11 verification is recorded below. Human screen-reader/security review and real hosted Google session coverage remain launch work.
 
 ## Phase 3 Task 11: integrated verification
 
@@ -281,6 +281,6 @@ The disposable upgrade fixture carried three articles, taxonomy links, guest/mul
 
 Fresh whole-slice review found one Important category-read redirect defect. A signed-out or revoked session could trigger a server-action redirect and unmount a dirty editor. The action now checks access without redirecting and returns safe denial/unavailable results. Focused RED→GREEN unit and desktop/mobile tests cover signed-out and inactive access, valid text and invalid native editor input. See the [Task 11 review evidence map](reviews/phase-3-private-drafts.md) for gate counts, proof limits and outstanding human/provider work.
 
-The first hosted run also found that an existing new-tab browser assertion used the macOS modifier unconditionally. It now chooses the platform modifier; the focused desktop/mobile case and complete local browser suite pass after the fix. Hosted CI is rerun on the updated final commit.
+The first hosted run also found that an existing new-tab browser assertion used the macOS modifier unconditionally. It now chooses the platform modifier; the focused desktop/mobile case and complete local browser suite pass after the fix. The replacement exact-head hosted run passed on verification commit `dfacc04` ([run 40794333210](https://github.com/dylandrozario/the-gavel/actions/runs/40794333210)); the Task 11 pull request reruns the workflow on its head.
 
 Local gates on the final application source pass: 463 unit/component tests, 1,075 SQL assertions on both the preserved and clean isolated projects, 216 contract-parity cases, eight real editor/database parity cases, 25 independent-session concurrency cases, and 78 desktop/mobile browser cases. Format, lint, strict TypeScript, database types, schema lint, unfiltered production/full audits and the production build/start also pass. The exact-head hosted workflow result and run URL are included in the Task 11 owner handoff. Human screen-reader/security review and real hosted Google session coverage remain separate launch work.
