@@ -16,6 +16,8 @@ Fresh whole-slice review covered the accepted contract and Tasks 2–10, includi
 
 The action now uses `getCurrentAccess()` and returns safe `forbidden`/`unavailable` results without redirecting or reading catalogs on denial. The API/security docs describe this behavior. Six focused unit tests and four desktop/mobile access-loss cases pass; the browser cases retain both valid and native-invalid editor input. No Critical findings or other blocking findings were reported. The fix changes no schema, grants, access model, or write authority.
 
+The first exact-head hosted run passed through build and then exposed a separate existing test portability issue: its new-tab assertion always used macOS `Meta`, so Linux Chromium never opened the expected popup. The test now selects `Meta` on macOS and `Control` elsewhere. The focused desktop/mobile case passes locally (2/2), and the complete local browser suite passes again (78 cases). The replacement hosted run must cover this updated test commit.
+
 ## Local gates
 
 All commands were run on Node 22.20.0 / pnpm 11.25.0 against the current branch source. The complete desktop/mobile suite includes the configured production build/start.
