@@ -10,9 +10,8 @@ test.beforeAll(({}, info) => {
   fixture.setup();
 });
 test.afterAll(() => fixture?.cleanup());
-async function fill(page: import("@playwright/test").Page, slug: string) {
-  await page.getByLabel(/Title/).fill(`${fixture.label} created draft`);
-  await page.getByLabel(/Slug/).fill(slug);
+async function fill(page: import("@playwright/test").Page, title: string) {
+  await page.getByLabel(/Title/).fill(title);
   await page.getByLabel(/Section/).selectOption(fixture.id(99));
 }
 test("creates a private draft and opens it for editing", async ({
@@ -27,8 +26,9 @@ test("creates a private draft and opens it for editing", async ({
   await expect(
     page.getByRole("alert").filter({ hasText: "Review the highlighted" }),
   ).toBeFocused();
-  const slug = `task7-${info.project.name}-created`;
-  await fill(page, slug);
+  const slug = `task-7-${info.project.name}-created-draft`;
+  await fill(page, `${fixture.label} created draft`);
+  await expect(page.getByLabel(/Slug/)).toHaveCount(0);
   await expect(
     page.getByRole("textbox", { name: "Article body" }),
   ).toBeVisible();
@@ -107,23 +107,21 @@ test("rejects malformed action encoding and forged ownership without creating ro
   expect(await forged.text()).toContain("invalid_input");
   expect(fixture.createdCount()).toBe(before);
 });
-test("keeps a global slug collision visible without renaming or losing input", async ({
+test("assigns a distinct generated slug to a repeated title", async ({
   context,
   page,
 }, info) => {
   await setLocalSession(context, fixture.users.empty);
   await page.goto("/dashboard/articles/new");
-  await fill(page, `task7-${info.project.name}-other`);
+  await fill(page, `${fixture.label} created draft`);
   await page.getByRole("button", { name: "Create draft" }).click();
-  await expect(
-    page.getByRole("alert").filter({ hasText: "already in use" }),
-  ).toContainText("already in use");
-  await expect(page.getByLabel(/Slug/)).toHaveValue(
-    `task7-${info.project.name}-other`,
-  );
-  await expect(page.getByLabel(/Title/)).toHaveValue(
-    `${fixture.label} created draft`,
-  );
+  await expect(page).toHaveURL(/\/dashboard\/articles\/[0-9a-f-]+$/);
+  expect(
+    fixture.created(`task-7-${info.project.name}-created-draft-2`),
+  ).toMatchObject({
+    status: "draft",
+    revisions: 1,
+  });
 });
 test("lost action response retries the same command and creates one history set", async ({
   context,
@@ -131,8 +129,8 @@ test("lost action response retries the same command and creates one history set"
 }, info) => {
   await setLocalSession(context, fixture.users.empty);
   await page.goto("/dashboard/articles/new");
-  const slug = `task7-${info.project.name}-retried`;
-  await fill(page, slug);
+  const slug = `task-7-${info.project.name}-retried-draft`;
+  await fill(page, `${fixture.label} retried draft`);
   await page.getByLabel(/Excerpt/).fill("A synthetic summary.");
   await page.getByLabel(/SEO keyphrase/).fill("Synthetic phrase");
   await page.getByLabel(/Meta description/).fill("Synthetic description.");

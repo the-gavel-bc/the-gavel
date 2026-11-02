@@ -11,7 +11,6 @@ export const GUEST = "10000000-0000-0000-0000-000000000752";
 export const DRAFT: DraftInput = {
   schemaVersion: 1,
   title: "Synthetic Race Draft",
-  slug: "synthetic-race-draft",
   sectionId: SECTION,
   excerpt: null,
   content: null,

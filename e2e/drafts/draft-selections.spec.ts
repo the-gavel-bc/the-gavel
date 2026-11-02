@@ -16,9 +16,6 @@ test("creates and reopens categories tags and multiple guest credits", async ({
   await setLocalSession(context, fixture.users.empty);
   await page.goto("/dashboard/articles/new");
   await page.getByLabel("Title (required)").fill("Synthetic selection draft");
-  await page
-    .getByLabel("Slug (required)")
-    .fill(`task9-${info.project.name}-created`);
   await page.getByLabel("Section (required)").selectOption(fixture.id(99));
   const category = page.getByLabel(`Synthetic ${info.project.name} category`, {
     exact: true,

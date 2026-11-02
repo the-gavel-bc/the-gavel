@@ -60,7 +60,6 @@ const result = z.discriminatedUnion("ok", [
       .partialRecord(
         z.enum([
           "title",
-          "slug",
           "sectionId",
           "excerpt",
           "content",

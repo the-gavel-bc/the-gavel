@@ -7,12 +7,10 @@ it("shares field feedback with the authoritative metadata rules", () => {
     draftMetadataErrors({
       ...baseDraft,
       title: "",
-      slug: "Upper Case",
       sectionId: "",
     }),
   ).toMatchObject({
     title: expect.any(String),
-    slug: expect.any(String),
     sectionId: expect.any(String),
   });
 });

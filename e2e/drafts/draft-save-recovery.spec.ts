@@ -148,12 +148,10 @@ test("lost save retries exactly through access loss while retaining newer invali
 test("create success keeps newer edits on the mounted form and saves the same article", async ({
   context,
   page,
-}, info) => {
+}) => {
   await setLocalSession(context, fixture.users.empty);
   await page.goto("/dashboard/articles/new");
-  const slug = `task10-${info.project.name}-pending-create`;
   await page.getByLabel("Title (required)").fill("Create snapshot");
-  await page.getByLabel("Slug (required)").fill(slug);
   await page.getByLabel("Section (required)").selectOption(fixture.id(99));
   await expect(
     page.getByRole("textbox", { name: "Article body" }),
@@ -182,7 +180,7 @@ test("create success keeps newer edits on the mounted form and saves the same ar
       draft: { title: "Newer than create snapshot" },
     });
     expect(fixture.createdCount()).toBe(1);
-    expect(fixture.created(slug)).toMatchObject({
+    expect(fixture.created("newer-than-create-snapshot")).toMatchObject({
       version: 2,
       revisions: 2,
       audits: 2,

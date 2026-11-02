@@ -9,12 +9,6 @@ const fields = [
     required: true,
   },
   {
-    key: "slug",
-    label: "Slug (required)",
-    hint: "Up to 180 lowercase letters, numbers and single hyphens. Duplicate slugs are not renamed.",
-    required: true,
-  },
-  {
     key: "excerpt",
     label: "Excerpt (optional)",
     hint: "Up to 600 characters.",

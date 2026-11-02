@@ -256,7 +256,6 @@ test("accepts a near-limit canonical body through the real action transport", as
   const draft = {
     schemaVersion: 1,
     title: current.title,
-    slug: current.slug,
     sectionId: current.section_id,
     excerpt: current.excerpt,
     content,

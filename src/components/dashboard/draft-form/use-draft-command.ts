@@ -109,12 +109,10 @@ export function useDraftCommand(
   const failure =
     state.lastResult && !state.lastResult.ok ? state.lastResult : null;
   const fieldErrors =
-    failure?.code === "slug_conflict"
-      ? { slug: "This slug is already in use. Choose another." }
-      : (failure?.fieldErrors ??
-        (failure?.code === "invalid_input"
-          ? draftMetadataErrors(state.current)
-          : {}));
+    failure?.fieldErrors ??
+    (failure?.code === "invalid_input"
+      ? draftMetadataErrors(state.current)
+      : {});
   function reload(input: DraftInput, resource: DraftArticle) {
     const before = current.current;
     return dispatch({ type: "reload", input, article: resource }) !== before;

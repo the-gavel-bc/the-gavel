@@ -53,15 +53,15 @@ it("uses a fresh UUID after a definitive rejection and preserves edited input", 
   await act(async () => {
     await result.current.submit();
   });
-  expect(result.current.fieldErrors.slug).toContain("already in use");
-  act(() => result.current.update({ ...baseDraft, slug: "different-slug" }));
+  expect(result.current.fieldErrors).toEqual({});
+  act(() => result.current.update({ ...baseDraft, title: "Different title" }));
   await act(async () => {
     await result.current.submit();
   });
   expect(actions.create.mock.calls[1][0].requestId).not.toBe(
     actions.create.mock.calls[0][0].requestId,
   );
-  expect(result.current.draft.slug).toBe("different-slug");
+  expect(result.current.draft.title).toBe("Different title");
 });
 it("blocks duplicate in-flight submits while preserving new input", async () => {
   let finish!: (value: typeof success) => void;

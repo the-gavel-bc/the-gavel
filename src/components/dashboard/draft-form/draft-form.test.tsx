@@ -35,29 +35,28 @@ const options = {
 beforeEach(() => {
   vi.clearAllMocks();
 });
-it("requires title, section and canonical slug, focuses a safe error summary", async () => {
+it("requires title and section, then focuses a safe error summary", async () => {
   render(
     <DraftForm
-      initialDraft={{ ...baseDraft, title: "", slug: "", sectionId: "" }}
+      initialDraft={{ ...baseDraft, title: "", sectionId: "" }}
       options={options}
     />,
   );
   await userEvent.click(screen.getByRole("button", { name: "Create draft" }));
   expect(screen.getByRole("alert")).toHaveFocus();
-  for (const name of [/Title/, /Slug/, /Section/])
+  for (const name of [/Title/, /Section/])
     expect(screen.getByLabelText(name)).toHaveAttribute("aria-invalid", "true");
+  expect(screen.queryByLabelText(/Slug/)).not.toBeInTheDocument();
   expect(mocks.create).not.toHaveBeenCalled();
 });
-it("preserves input on slug collision and never silently renames it", async () => {
+it("preserves the title if address allocation fails", async () => {
   mocks.create.mockResolvedValue({ ok: false, code: "slug_conflict" });
   render(<DraftForm initialDraft={baseDraft} options={options} />);
   await userEvent.click(screen.getByRole("button", { name: "Create draft" }));
   await waitFor(() =>
-    expect(screen.getByLabelText(/Slug/)).toHaveAccessibleDescription(
-      /already in use/,
-    ),
+    expect(screen.getByRole("alert")).toHaveTextContent(/article address/i),
   );
-  expect(screen.getByLabelText(/Slug/)).toHaveValue(baseDraft.slug);
+  expect(screen.getByLabelText(/Title/)).toHaveValue(baseDraft.title);
   expect(mocks.push).not.toHaveBeenCalled();
 });
 it("creates NULL optional metadata and opens the confirmed draft for editing", async () => {
@@ -164,7 +163,7 @@ it("requires deliberate removal of unavailable selections and submits selected c
   );
   await userEvent.click(screen.getByRole("button", { name: "Create draft" }));
   await waitFor(() =>
-    expect(screen.getByRole("alert")).toHaveTextContent(/slug/i),
+    expect(screen.getByRole("alert")).toHaveTextContent(/article address/i),
   );
   expect(screen.getByLabelText("Topic")).toBeChecked();
   expect(mocks.create.mock.calls[0][0].draft).toMatchObject({
