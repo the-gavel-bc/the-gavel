@@ -101,7 +101,7 @@ Revisions require version-one bounded JSON objects. Audits permit only the seven
 
 ## Content and input safety
 
-The [accepted Phase 4 editorial contract](superpowers/specs/2026-11-01-editorial-workflow-design.md) plans checked lifecycle operations, noneditable generated slugs, and a last-eligible-administrator guard. These are future controls. Existing draft RPCs still accept a supplied slug and foundation grants still permit direct profile slug and administrator membership updates; the owning Phase 4 tasks must transition those grants and test direct-call denials.
+The [accepted Phase 4 editorial contract](superpowers/specs/2026-11-01-editorial-workflow-design.md) plans checked lifecycle operations, noneditable generated slugs, and a last-eligible-administrator guard. Phase 4 Task 2 enforces generated article slugs at the draft RPC boundary: direct calls carrying a valid old slug field can still create/save during mixed-version rollout, but the field is discarded before fingerprinting or writing; malformed values fail. Exact older receipts remain replayable. Existing published rows are unchanged. Lifecycle, profile slug, and last-administrator guards remain future controls; foundation profile slug and administrator membership grants are still direct-write exceptions for their owning tasks to close.
 
 - Validate all request bodies, query parameters, identifiers, slugs, dates, URLs, and pagination limits.
 - Store structured content or a constrained rich-text representation.
@@ -196,7 +196,7 @@ Task 6 exposes only the existing caller-owned summary query through `/dashboard`
 
 ## Implemented new-draft submission surface
 
-Task 7 uses existing verified query/action guards and controlled RPCs; client fields never supply owner, actor, status or history. Required metadata validation/feedback shares the existing validator. Global slug conflicts disclose only the accepted safe collision state. No active section means no enabled create action. Without JavaScript the form explains its dependency and stays disabled; no default GET submission of draft values is enabled.
+Task 7 uses existing verified query/action guards and controlled RPCs; client fields never supply owner, actor, status or history. Required metadata validation/feedback shares the existing validator. Phase 4 Task 2 removes the slug input and allocates collisions inside the database. No active section means no enabled create action. Without JavaScript the form explains its dependency and stays disabled; no default GET submission of draft values is enabled.
 
 Pending/uncertain commands are kept in memory only and reuse their UUID/payload/version. Task 10 allows newer edits without changing those commands. Once uncertain, a subsequent forbidden response does not prove the original write failed; the same command remains pending until confirmed success. Real browser checks cover committed-but-lost responses, access revocation/restoration, exact replay and single history capture, plus malformed action encoding/protected-field rejection. No service-role client, direct table grant, dependency, schema, publishing or upload capability changed. Human security and screen-reader review remain separate requirements.
 

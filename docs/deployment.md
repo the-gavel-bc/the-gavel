@@ -58,6 +58,8 @@ Monitor application errors, function failures, authentication anomalies, permiss
 
 Application releases use Vercel rollback/promotion capabilities. Database changes require migration-specific rollback or forward-fix procedures that preserve data. Never roll application code back across an incompatible destructive migration without a tested compatibility plan.
 
+For Phase 4 Task 2, the four generated-article-slug migrations are one release unit. On a site with an older app already serving editorial writes, pause draft create/save traffic and wait for in-flight requests to finish **before** applying `20261102000000`; keep writes paused until `20261102000300` is applied and the local-equivalent RPC smoke checks pass. The intermediate migration states are not compatible with the older app. This repository has no hosted release configured yet, so the first deployment has no existing editorial traffic. After the full chain, the database ignores a valid slug field from an older running app and always derives the stored article slug from title; the new app omits the field. Rolling the app back to the older version remains writable against the completed database chain. Do not contract the old RPC payload shape until old instances and pending retries have drained and a separate compatibility review approves it. Existing article rows and slugs are not rewritten.
+
 ## Ownership
 
 Production domain, DNS, GitHub, Vercel, Supabase, Google OAuth, billing, recovery channels, and escalation contacts must be assigned to durable school/faculty-controlled accounts before launch.

@@ -106,7 +106,7 @@ Create links target the implemented `/dashboard/articles/new` form. Draft edit l
 
 ## Implemented new-draft form
 
-Task 7 implements `/dashboard/articles/new` with an independent membership guard and the checked options query. It starts with empty title/slug/section, NULL optional metadata/body and empty associations. With no active sections, it explains the missing catalog and disables creation rather than inventing taxonomy.
+Task 7 implements `/dashboard/articles/new` with an independent membership guard and the checked options query. It starts with empty title/section, NULL optional metadata/body and empty associations. Phase 4 Task 2 removes the manual slug field; the database generates a slug from the title. With no active sections, it explains the missing catalog and disables creation rather than inventing taxonomy.
 
 `DraftForm` owns submission/status/error focus and navigation; `DraftMetadataFields` owns controlled metadata and field styling; the colocated `use-draft-command` hook owns basic dirty/saving/error/retry state. Shared metadata feedback comes from the existing draft validator. The optional article/version prop is now consumed by the Task 8 edit route; the same form/controller serves both modes.
 

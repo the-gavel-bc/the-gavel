@@ -74,9 +74,11 @@ The Task 1 contract fixes operation shapes and invariants. Before each of Tasks 
 
 **Test-first and commit boundary:** RED: the existing editable slug field, forged direct-RPC slug, concurrent same-title collision, Unicode/empty normalization, exact replay, and published-slug change. GREEN: focused validator/RPC/form tests and desktop/mobile draft journeys; commit normalization/atomic collision behavior before removing the UI field.
 
-- [ ] Define and prove the accepted normalizer, fallback, suffix allocation, bounds, and migration compatibility. Preserve existing rows; do not rewrite existing published paths.
-- [ ] Remove manual article slug editing from create/edit forms and direct client command schemas. Keep titles editable; draft slugs follow title changes and published slugs stay fixed.
-- [ ] Ensure database authority, including direct RPC calls, cannot accept a caller-selected slug. Preserve safe conflict/retry behavior and existing owner/admin denials.
+- [x] Define and prove the accepted normalizer, fallback, suffix allocation, bounds, and migration compatibility. Preserve existing rows; do not rewrite existing published paths.
+- [x] Remove manual article slug editing from create/edit forms and direct client command schemas. Keep titles editable; draft slugs follow title changes and published slugs stay fixed.
+- [x] Ensure database authority, including direct RPC calls, cannot accept a caller-selected slug. Preserve safe conflict/retry behavior and existing owner/admin denials.
+
+Task 2 evidence and the required migration write-pause procedure are recorded in the [focused plan](2026-11-02-generated-editorial-slugs.md) and [testing notes](../../testing.md#phase-4-task-2-generated-article-draft-slugs). Hosted CI is pending on its task PR; profile slug controls remain assigned to later tasks.
 
 **Acceptance:** Authors edit titles without seeing a slug control; generated slugs are unique and stable under retries/concurrency, follow draft title changes, and freeze at publication. No existing published URL changes.
 
