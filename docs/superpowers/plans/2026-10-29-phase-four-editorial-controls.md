@@ -8,21 +8,21 @@
 
 **Tech Stack:** Existing Node 22, pnpm 11.25.0, Next.js/React/TypeScript, Zod, Supabase Auth/Postgres/Storage, pgTAP, Vitest, and Playwright. No new service or dependency is assumed.
 
-**Spec:** Existing approved [product requirements](../../product-requirements.md), [API contracts](../../api-contracts.md), [data model](../../data-model.md), [security controls](../../security-and-permissions.md), [design system](../../design-system.md), [testing guidance](../../testing.md), and the [Phase 3 private-draft contract](../specs/2026-10-22-private-draft-workflow-design.md) remain authoritative. Task 1 records exact Phase 4 operation contracts without replacing those sources.
+**Spec:** Existing approved [product requirements](../../product-requirements.md), [API contracts](../../api-contracts.md), [data model](../../data-model.md), [security controls](../../security-and-permissions.md), [design system](../../design-system.md), [testing guidance](../../testing.md), and the [Phase 3 private-draft contract](../specs/2026-10-22-private-draft-workflow-design.md) remain authoritative. The [proposed Task 1 design](../specs/2026-11-01-editorial-workflow-design.md) records Phase 4 operation contracts and decision gates without replacing those sources.
 
 **Plan baseline:** Based on `origin/main` at `1285933cb40ce30e62023fc94fbc739cac20e5f5`, after Task 11 / PR #26 merged. Planning branch: `docs/phase-four-editorial-controls`. Dedicated execution branch: `feat/phase-four-editorial-workflow`, created from the completed plan at `e3eb6f0` in the existing isolated linked worktree `/private/tmp/the-gavel-task11`.
 
-**Selected order:** Lifecycle first. Complete the lifecycle contract, provide the minimum secure image path required for publication readiness, then enable owner editing/publishing/archive and administrator restore before the remaining admin controls.
+**Selected order:** Lifecycle first. Complete the lifecycle contract, provide the minimum secure image path required for publication readiness, then extend the constrained editor for article media before owner editing/publishing/archive and administrator restore before the remaining admin controls.
 
-**Scope boundary:** This phase covers editorial dashboard and storage workflows. Public article pages, public search/archives, and public image rendering remain Phase 5. Scheduled publishing, comments, newsletter, legacy import, and public letter submission remain outside MVP. The image-upload slice is included because approved MVP requirements and the data model make article imagery part of publishing readiness; it does not include public reader routes.
+**Scope boundary:** This phase covers editorial dashboard and storage workflows. Public article pages, public search/archives, and public image rendering remain Phase 5. Scheduled publishing, comments, newsletter, legacy import, and public letter submission remain outside MVP. The secure media and editor slices are included because approved MVP requirements include article imagery, captions, and approved video; it does not include public reader routes.
 
 ## Global constraints
 
 - Authors act only on articles they own. Credits do not grant access or mutation authority. Administrators may manage all articles and memberships. Test positive and denied paths at the database operation and server/UI boundaries.
-- Keep direct `INSERT`, `UPDATE`, and `DELETE` table access closed for application roles, including administrators. Every new write must use a narrow checked operation; derive actor, owner, and role from trusted state.
+- Keep direct article/content writes closed for application roles, including administrators. The foundation currently permits administrator membership writes under RLS; the membership task must explicitly replace that interim path with audited checked operations before exposing management UI. Derive actor, owner, and role from trusted state.
 - Preserve optimistic version checks, retry safety, snapshots, and atomic revision/audit capture. A repeated or uncertain request must not create duplicate transitions or history.
 - Publish/archive/restore must not expose draft or archived content through anonymous APIs. Public projections and routes are outside this phase.
-- Do not edit applied migrations. Use additive forward migrations, test upgrade from the prior schema and clean installation, regenerate database types, and preserve existing rows.
+- Do not edit applied migrations. Use forward-only migrations, keep schema changes additive where possible, review permission tightening explicitly, test upgrade from the prior schema and clean installation, regenerate database types, and preserve existing rows.
 - Use the existing upload controls: JPEG, PNG, and WebP only; verify actual content, bound bytes and decoded dimensions, generate storage names, and remove unneeded metadata where practical. Media may be removed only after proving no retained article references it.
 - Use allowlisted audit actions/resources and safe metadata only. Never record article bodies, credentials, private profile links, or arbitrary request payloads.
 - Do not invent taxonomy labels, site copy, retention rules, policies, or client answers for documented TODOs. Keep gated functionality unavailable until its governing decision is recorded.
@@ -46,19 +46,19 @@
 - At the start of each implementation task, confirm `origin/main`, the Phase 4 branch head, a clean task branch based on that head, the last applied migration, available filenames, and preserved local data. Save a private baseline before the first Phase 4 migration; never reset the existing project to make a test pass.
 - Write a focused failing assertion for the missing behavior or denial before implementation. Run it and record the expected failure; implement the narrow change; rerun it to pass. Keep synthetic fixtures transaction-local. A documentation-only task uses link/consistency checks instead.
 - For database tasks, apply additive migrations against the preserved local schema, run focused pgTAP and full `pnpm test:db`, `pnpm supabase db lint`, regenerate types, and run `pnpm db:types:check`. For application tasks, run focused unit/browser checks, then the documented type, lint, format, build, and affected regression gates. Do not run concurrent SQL suites against the same project.
-- Split each task into reviewable commits of at most about 300 changed lines. A commit carries its own behavior, focused tests, generated types when applicable, and affected docs. Record exact commands/results, screenshots for changed dashboard flows, review findings, rollback notes, and an owner checkpoint before the next task. Open each task PR against `feat/phase-four-editorial-workflow` after the task is reviewable. Merge accepted task PRs into that branch in order; after Task 14 local verification, open the Phase 4 PR against current `main` and record its hosted CI in Task 14. Do not claim CI until the relevant PR head passes.
+- Split each task into reviewable commits of at most about 300 changed lines. A commit carries its own behavior, focused tests, generated types when applicable, and affected docs. Record exact commands/results, screenshots for changed dashboard flows, review findings, rollback notes, and an owner checkpoint before the next task. Open each task PR against `feat/phase-four-editorial-workflow` after the task is reviewable. Merge accepted task PRs into that branch in order; after Task 16 local verification, open the Phase 4 PR against current `main` and record its hosted CI in Task 16. Do not claim CI until the relevant PR head passes.
 
-Task 1 must refine Tasks 2–14 into exact migration/test filenames and callable signatures after its contract is accepted, as Phase 2 Task 1 and Phase 3 Task 1 did. The interface shapes below are proposed boundaries, not accepted API signatures. Do not reserve a migration timestamp or introduce a public grant before checking the live tree at the owning task.
+Task 1 must refine Tasks 2–16 into exact migration/test filenames and callable signatures after its contract is accepted, as Phase 2 Task 1 and Phase 3 Task 1 did. The interface shapes below are proposed boundaries, not accepted API signatures. Do not reserve a migration timestamp or introduce a public grant before checking the live tree at the owning task.
 
 ## Task 1 — accept the editorial workflow contract
 
-**Files:** Create `docs/superpowers/specs/2026-10-29-editorial-workflow-design.md`; record a decision in `docs/decisions/` only if implementation selects a consequential technical approach not already fixed by approved docs. Update API/data/security docs only to clarify accepted contracts, not to claim implementation.
+**Files:** Refine `docs/superpowers/specs/2026-11-01-editorial-workflow-design.md`; record a decision in `docs/decisions/` only if implementation selects a consequential technical approach not already fixed by approved docs. Update API/data/security docs only to clarify accepted contracts, not to claim implementation.
 
 - [ ] Define exact owner/admin permissions and state transitions: draft to published, published to archived, archived restore, and editing while published or archived. Recommend that ordinary published edits preserve `published_at` and current status; any alternative needs an explicit decision.
-- [ ] Specify publication readiness, including required image/alt text and metadata, using existing MVP requirements. Resolve whether published slug changes are excluded or require redirects; do not silently change public URLs.
+- [ ] Specify publication readiness, including required image/alt text and metadata, using existing MVP requirements. Apply the owner decision to generate slugs internally from article titles and contributor display names, update them before first publication, and freeze them afterward; do not silently change existing public URLs.
 - [ ] Specify concurrency, retry/idempotency, safe failures, snapshots, audit action names, timestamps, and transaction boundaries for each operation.
 - [ ] Specify upload size/dimension limits and verification/re-encoding details against the existing JPEG/PNG/WebP policy. Do not choose values by copying arbitrary defaults.
-- [ ] Define membership self-lockout/last-administrator behavior and the narrow audit event shape before implementing membership changes. Refine Tasks 2–14 to exact paths, signatures, RED/GREEN cases, commit boundaries, and rollback notes after the contract review.
+- [ ] Define membership self-lockout/last-administrator behavior and the narrow audit event shape before implementing membership changes. Refine Tasks 2–16 to exact paths, signatures, RED/GREEN cases, commit boundaries, and rollback notes after the contract review.
 - [ ] Keep permanent deletion blocked until the owner/client confirms retention and the plan explicitly reconciles restrictive revision references, preserved audit records, Auth references, and orphan-media cleanup.
 - [ ] Keep unresolved News categories, `Outside of BC` naming, site copy/URLs, tag normalization, and BC policy questions unresolved; list which later task each decision gates.
 
@@ -66,7 +66,23 @@ Task 1 must refine Tasks 2–14 into exact migration/test filenames and callable
 
 **Validation:** Check document links and consistency against the current product/API/data/security docs; `git diff --check`. No application tests apply to this documentation-only task.
 
-## Task 2 — secure article image upload and attachment
+## Task 2 — generate slugs from editorial names
+
+**Files:** Update the current draft form/metadata fields, draft action contract, server actions, canonical validation, and checked create/save migration through new forward files; add focused SQL/unit/browser tests and API/data/security/testing docs. Later profile tasks consume the same accepted normalization rule.
+
+**Interfaces:** Create and save commands accept title and article fields, with no editable slug. The authoritative database operation derives a canonical unique draft slug from title, updates it when a draft title changes, and preserves the stored slug after publication. Contributor profile operations later derive prepublication slugs from display name.
+
+**Test-first and commit boundary:** RED: the existing editable slug field, forged direct-RPC slug, concurrent same-title collision, Unicode/empty normalization, exact replay, and published-slug change. GREEN: focused validator/RPC/form tests and desktop/mobile draft journeys; commit normalization/atomic collision behavior before removing the UI field.
+
+- [ ] Define and prove the accepted normalizer, fallback, suffix allocation, bounds, and migration compatibility. Preserve existing rows; do not rewrite existing published paths.
+- [ ] Remove manual article slug editing from create/edit forms and direct client command schemas. Keep titles editable; draft slugs follow title changes and published slugs stay fixed.
+- [ ] Ensure database authority, including direct RPC calls, cannot accept a caller-selected slug. Preserve safe conflict/retry behavior and existing owner/admin denials.
+
+**Acceptance:** Authors edit titles without seeing a slug control; generated slugs are unique and stable under retries/concurrency, follow draft title changes, and freeze at publication. No existing published URL changes.
+
+**Validation:** Focused SQL/contract/form/browser tests, then full affected database, unit, type, lint, format and build gates.
+
+## Task 3 — secure article image upload and attachment
 
 **Files:** Add the `media_assets` and storage policy migration, focused pgTAP coverage, a colocated upload contract/action/query/component and tests under `src/lib/media/` and `src/components/dashboard/article-media/`; update generated types and API/data/security/testing docs.
 
@@ -84,7 +100,23 @@ Task 1 must refine Tasks 2–14 into exact migration/test filenames and callable
 
 **Validation:** Focused upload/Storage pgTAP and component tests, full `pnpm test:db`, `pnpm db:types:check`, `pnpm test`, `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, and `pnpm build`.
 
-## Task 3 — edit published articles safely
+## Task 4 — rich article media and approved video
+
+**Files:** Extend the canonical body validator and editor adapter under `src/lib/articles/draft-contract/` and `draft-document/`; add image/caption/video controls under `src/components/dashboard/draft-editor/`; add focused SQL, parity, unit, browser and documentation updates. Use Task 3's finalized media references.
+
+**Interfaces:** A versioned canonical image node references a finalized asset ID with bounded alt/caption fields. A video node is enabled only for owner-approved providers and normalized safe URLs; no raw iframe/HTML input enters storage. Task 1 fixes exact grammar and migration names.
+
+**Test-first and commit boundary:** RED: unsupported/foreign media references, malformed image/video nodes, hostile URLs, legacy document round trips, and cross-owner writes. GREEN: matching SQL/TypeScript/editor parity plus keyboard/mobile journeys; commit grammar, adapter, and controls as separate reviewable increments.
+
+- [ ] Preserve all Phase 3 stored bodies and revision snapshots unchanged; supported old documents remain editable and unknown legacy content remains safely read-only.
+- [ ] Recheck finalized asset ownership and article authority on each save. Images require alt text and bounded captions; arbitrary external image URLs, SVG, HTML and executable embeds are rejected.
+- [ ] Gate video controls until the client approves exact providers. Render approved embeds through a fixed safe component rather than pasted HTML.
+
+**Acceptance:** Owners/admins can use safe image/caption content; unauthorized or malformed references fail without dropping existing content. Video remains visibly gated until a provider allowlist is accepted.
+
+**Validation:** Focused SQL/contract/editor tests, DB/TypeScript parity, desktop/mobile browser cases, then full affected database, unit, type, lint, format and build gates.
+
+## Task 5 — edit published articles safely
 
 **Files:** Extend the versioned article-save contract and its migration/pgTAP tests; update the existing draft editor query/action/form only in owned modules; add published-edit browser cases and update API/security/testing docs.
 
@@ -94,7 +126,7 @@ Task 1 must refine Tasks 2–14 into exact migration/test filenames and callable
 
 - [ ] Extend version-checked save for published articles without accepting status, owner, publication timestamps, audit actor, or other protected fields from the client.
 - [ ] Permit owners to edit only owned articles and administrators to edit any article, per Task 1's accepted archived-edit rule. Credits confer no authority.
-- [ ] Preserve status and publication timestamp on an ordinary edit; atomically save allowed content/associations, revision, and `article.updated` audit entry.
+- [ ] Preserve status and publication timestamp on an ordinary edit; recheck publication readiness after locks for a changed published edit; atomically save allowed content/associations, revision, and `article.updated` audit entry.
 - [ ] Keep lifecycle controls separate from content save. Reject stale versions and unsupported stored body formats without overwriting newer data or dropping unknown content.
 - [ ] Do not change published slugs in this task. Archived edit behavior follows the explicit Task 1 decision; no hidden restore or publish transition.
 
@@ -102,7 +134,7 @@ Task 1 must refine Tasks 2–14 into exact migration/test filenames and callable
 
 **Validation:** Focused SQL/unit tests and desktop/mobile edit-save-reopen journeys, then the Phase 3 unit, database, type, lint, format, and build gates.
 
-## Task 4 — owner publish and archive workflow
+## Task 6 — owner publish and archive workflow
 
 **Files:** Add the narrow lifecycle migration/pgTAP tests, typed article lifecycle operation/action modules, owner dashboard status controls, and corresponding API/data/security/testing docs.
 
@@ -119,7 +151,7 @@ Task 1 must refine Tasks 2–14 into exact migration/test filenames and callable
 
 **Validation:** Direct SQL/RPC denial and concurrency/idempotency tests, focused browser flows, then full database, app, accessibility, type, lint, format, and build checks.
 
-## Task 5 — administrator article management and restore
+## Task 7 — administrator article management and restore
 
 **Files:** Add the admin article/archive routes and colocated query/action/table/detail modules under `src/app/(dashboard)/dashboard/admin/articles/` and `src/components/dashboard/admin-articles/`; add restore operation tests and update component/API/security/testing docs.
 
@@ -128,7 +160,7 @@ Task 1 must refine Tasks 2–14 into exact migration/test filenames and callable
 **Test-first and commit boundary:** RED: forged cursor/UUID/role, ordinary-author/inactive/anon denial, wrong-status restore, replay, and pagination bounds. GREEN: SQL/query/action tests and desktop/mobile admin journeys; commit restore boundary before list/detail UI.
 
 - [ ] Provide bounded, paginated lists for all articles and archived articles with explicit status, owner, and safe search/filter fields. Do not fetch or render body content in list rows.
-- [ ] Provide administrator-only detail and restore actions. Restore an archived article to the accepted target state without losing its original publication timestamp or history; use expected-version checks.
+- [ ] Provide administrator-only detail and restore actions. Restore only a publication-ready archived article to the accepted target state without losing its original publication timestamp or history; use expected-version checks.
 - [ ] Guard routes, queries, actions, and database operations independently. An author cannot reach admin data by changing a URL, cursor, UUID, or submitted role.
 - [ ] Add loading, empty, error, not-found, and permission-denied states; include mobile table alternatives and keyboard-operable controls.
 
@@ -136,7 +168,7 @@ Task 1 must refine Tasks 2–14 into exact migration/test filenames and callable
 
 **Validation:** Role/ownership denial tests at all boundaries, paginated query tests, desktop/mobile Playwright coverage, and focused/full documented gates.
 
-## Task 6 — administrator audit history
+## Task 8 — administrator audit history
 
 **Files:** Add paginated audit query/action/UI under `src/app/(dashboard)/dashboard/admin/audit/` and `src/components/dashboard/admin-audit/`; extend only the API/component/security/testing docs needed for implemented article events.
 
@@ -153,7 +185,7 @@ Task 1 must refine Tasks 2–14 into exact migration/test filenames and callable
 
 **Validation:** Database grant/RLS and query denial tests, safe rendering and pagination unit tests, accessible desktop/mobile browser checks, and focused/full documented gates.
 
-## Task 7 — administrator membership management
+## Task 9 — administrator membership management
 
 **Files:** Add narrowly scoped membership operation migration/pgTAP tests, typed admin queries/actions, and routes/components under `src/app/(dashboard)/dashboard/admin/members/`; extend the audit allowlist for only approved membership actions and update API/data/security/testing docs.
 
@@ -164,14 +196,14 @@ Task 1 must refine Tasks 2–14 into exact migration/test filenames and callable
 - [ ] List members with bounded pagination and only safe identity fields. Never expose another profile's private Auth linkage.
 - [ ] Allow eligible administrators to approve, change the accepted role, or deactivate a membership. Derive the actor from trusted identity and preserve approval/revocation timestamps.
 - [ ] Enforce the Task 1 self-lockout and last-active-administrator rule in the database transaction as well as the UI.
-- [ ] Audit each successful membership change atomically with the membership mutation; reject forged role/actor fields and duplicate/replayed effects.
+- [ ] Add the audited mutation operations before revoking the foundation's direct `authenticated` membership INSERT/UPDATE/DELETE grants and admin mutation policies in a reviewed forward migration. Audit each successful membership change atomically; reject forged role/actor fields and duplicate/replayed effects.
 - [ ] Do not create/delete Auth identities, alter Google eligibility rules, or grant source/hosting permissions.
 
 **Acceptance:** Only an active administrator can change memberships; every denial preserves prior state; successful changes leave the target's expected access and one audit event. The last administrator cannot be accidentally removed under the accepted rule.
 
 **Validation:** SQL tests for administrator, author, inactive, anonymous, self-change, last-admin, and replay cases; route/action checks; focused/full documented gates.
 
-## Task 8 — administrator contributor-profile management
+## Task 10 — administrator contributor-profile management
 
 **Files:** Add profile operation migration/tests and admin contributor routes/components under `src/app/(dashboard)/dashboard/admin/contributors/`; update API/data/security/component/testing docs and the audit allowlist for profile actions.
 
@@ -180,15 +212,15 @@ Task 1 must refine Tasks 2–14 into exact migration/test filenames and callable
 **Test-first and commit boundary:** RED: Auth-link and role injection, referenced-profile destruction, duplicate slug, cross-role denial, and credit preservation. GREEN: profile operation/query tests and admin browser flow; commit profile boundary before UI.
 
 - [ ] Support create/edit/deactivate of public contributor profiles, including non-login guest writers. Do not allow operations to modify `auth_user_id`, membership, or Auth identity.
-- [ ] Prevent destructive removal of profiles referenced by articles/credits; use the accepted deactivation behavior instead.
-- [ ] Validate display names, biographies, slugs, and active state; slug changes affecting public URLs follow the Task 1 decision and must not silently invalidate a link.
+- [ ] Prevent destructive removal of profiles referenced by articles/credits; block deactivation while published or archived articles reference the profile.
+- [ ] Validate display names, biographies, generated slugs, and active state; derive the slug from the display name until the profile owns or is credited on a published article, then freeze it. Never expose a slug edit control or accept a caller-selected slug; no existing public link is silently invalidated.
 - [ ] Audit profile changes using a bounded event contract without recording biography text or private identity data.
 
 **Acceptance:** Administrators can manage guest and member contributor profiles without granting article authority; non-admins cannot enumerate or mutate the admin catalog. Existing article credits remain referentially valid.
 
 **Validation:** SQL relationship/denial tests, safe text/slug tests, accessible admin browser flows, and focused/full documented gates.
 
-## Task 9 — administrator taxonomy management
+## Task 11 — administrator taxonomy management
 
 **Files:** Add taxonomy operation migrations/tests and admin routes/components under `src/app/(dashboard)/dashboard/admin/taxonomy/`; update API/data/security/component/testing docs and the audit allowlist for approved taxonomy actions.
 
@@ -197,7 +229,7 @@ Task 1 must refine Tasks 2–14 into exact migration/test filenames and callable
 **Test-first and commit boundary:** RED: wrong-section links, referenced rename/deletion, inactive parent effects, duplicate tags, and direct non-admin writes. GREEN: focused SQL/selector regressions plus admin UI; commit each catalog operation separately.
 
 - [ ] Manage existing sections and categories through narrow operations with valid parent relationships and their existing active states; manage tags under their current no-active-state model.
-- [ ] Keep referenced taxonomy intact; do not cascade-delete links or make existing drafts silently invalid. Existing Phase 3 save validation remains authoritative.
+- [ ] Block deactivation of sections/categories referenced by published or archived articles; do not cascade-delete links or make existing drafts silently invalid. Existing Phase 3 save validation remains authoritative.
 - [ ] Do not seed or publish unresolved News categories or rename `Outside of BC` without owner/client confirmation.
 - [ ] Tag creation/renaming stays gated until the documented Unicode/punctuation normalization contract is approved. No arbitrary label or slug normalization is invented in this task.
 - [ ] Audit changes without storing unrestricted before/after payloads.
@@ -206,23 +238,24 @@ Task 1 must refine Tasks 2–14 into exact migration/test filenames and callable
 
 **Validation:** SQL tests for relationship integrity, inactive taxonomy, stale draft selections, authorization and audit; admin keyboard/mobile flows; focused/full documented gates.
 
-## Task 10 — author public-profile editing
+## Task 12 — author public-profile editing
 
 **Files:** Add a user-scoped profile mutation contract/action/form under `src/lib/profiles/` and `src/components/dashboard/profile/`, route `/dashboard/profile`, tests, and API/security/component/testing docs.
 
-**Interfaces:** `updateOwnPublicProfile` accepts only public fields and derives the caller profile; any image reference uses Task 2’s accepted asset ownership rule.
+**Interfaces:** `updateOwnPublicProfile` accepts only public fields and derives the caller profile; any image reference uses Task 3’s accepted asset ownership rule.
 
 **Test-first and commit boundary:** RED: cross-profile, inactive, Auth-link/role injection, unsafe biography, and foreign image reference. GREEN: operation/action/form tests and mobile keyboard flow; commit mutation boundary before profile UI.
 
 - [ ] Let each active member edit only their own approved public biography and display fields. Read and validate public profile data without exposing Auth linkage.
-- [ ] Reuse Task 2 for an optional profile image only if its accepted media contract supports this reference safely; otherwise keep image selection disabled until a separate approved slice.
+- [ ] Derive the public-profile slug from the display name while no published article owns or credits the profile; freeze it afterward. Do not accept a caller-selected slug, including through direct database calls.
+- [ ] Reuse Task 3 for an optional profile image only if its accepted media contract supports this reference safely; otherwise keep image selection disabled until a separate approved slice.
 - [ ] Keep public profile routes/rendering for Phase 5. Do not let profile edits change membership, role, or article ownership.
 
 **Acceptance:** A user can edit only their own safe public profile; administrators do not gain arbitrary identity-link changes; non-members and cross-profile requests are denied.
 
 **Validation:** Owner/role denial tests, text safety and image reference tests if enabled, accessible browser flow, and focused/full documented gates.
 
-## Task 11 — administrator homepage curation
+## Task 13 — administrator homepage curation
 
 **Files:** Add `homepage_selections` migration/tests, admin query/action/form under `src/app/(dashboard)/dashboard/admin/homepage/`, and update API/data/security/component/testing docs.
 
@@ -239,7 +272,7 @@ Task 1 must refine Tasks 2–14 into exact migration/test filenames and callable
 
 **Validation:** SQL eligibility/role tests, ordering/fallback unit tests, accessible admin browser checks, and focused/full documented gates.
 
-## Task 12 — administrator site information
+## Task 14 — administrator site information
 
 **Files:** Add an allowlisted `site_settings` model/migration/tests, admin query/action/form under `src/app/(dashboard)/dashboard/admin/site/`, and update API/data/security/component/testing docs.
 
@@ -256,7 +289,7 @@ Task 1 must refine Tasks 2–14 into exact migration/test filenames and callable
 
 **Validation:** SQL allowlist/role tests, input validation tests, accessible admin browser checks, and focused/full documented gates.
 
-## Task 13 — permanent deletion (decision-gated)
+## Task 15 — permanent deletion (decision-gated)
 
 **Files:** None until the retention and reference-semantics decision is recorded. If approved, use a separately reviewed migration/operation, direct-denial tests, explicit-confirmation UI, media-reference checks, and docs.
 
@@ -270,7 +303,7 @@ Task 1 must refine Tasks 2–14 into exact migration/test filenames and callable
 
 **Acceptance:** The task is complete only when the approved policy is implemented and verified; otherwise its unresolved status is documented without weakening data retention safeguards.
 
-## Task 14 — integrated Phase 4 verification and handoff
+## Task 16 — integrated Phase 4 verification and handoff
 
 **Files:** Update README/docs indexes as appropriate, API/data/security/component/testing/deployment docs, the parent Phase 4 plan, and a concise Phase 4 review/evidence map. Do not add features during verification.
 
@@ -278,16 +311,16 @@ Task 1 must refine Tasks 2–14 into exact migration/test filenames and callable
 
 **Test-first and commit boundary:** Run the smallest focused rechecks for any discovered defect before the full source-matching gates; commit only demonstrated fixes and evidence. Stop after the required proof passes or report a precise unavailable gate.
 
-- [ ] Verify additive upgrade preservation from the Task 11 baseline and a clean install; keep existing database projects and data intact. Test real owner/admin/non-owner/credited/inactive/anonymous denials for every new operation.
+- [ ] Verify additive upgrade preservation from the completed Phase 3 Task 11 / PR #26 baseline and a clean install; keep existing database projects and data intact. Test real owner/admin/non-owner/credited/inactive/anonymous denials for every new operation.
 - [ ] Run focused and full database tests, migrations/lint, generated type drift, unit/component tests, strict types, lint, formatting, production build, desktop/mobile browser journeys, unfiltered dependency/security scans, and exact-head hosted CI. Run only commands actually configured in the repository.
 - [ ] Obtain a fresh whole-slice security/code review of every new migration, grant, storage policy, operation, route, and unresolved gate. Resolve Critical/Important findings with observed failing and passing regression checks.
 - [ ] Verify accessibility behavior for dashboard forms/lists and upload interactions. Record automated evidence separately from any outstanding human screen-reader/security review, hosted OAuth/provider setup, and recovery exercise.
-- [ ] Report permanent deletion as outstanding if Task 13 remains gated. Do not describe the entire MVP as complete while required public routes, search, or reader media rendering remain in Phase 5.
+- [ ] Report permanent deletion as outstanding if Task 15 remains gated. Do not describe the entire MVP as complete while required public routes, search, or reader media rendering remain in Phase 5.
 
 **Acceptance:** All completed Phase 4 features have matching docs, role/ownership denial coverage, local verification, fresh review, and CI evidence tied to the final commit. Unresolved client, policy, and human-review items are listed explicitly.
 
 ## Dependency order
 
-`1 contract` → `2 image upload` → `3 published editing` → `4 owner lifecycle` → `5 admin archive/restore` → `6 article audit page` → `7 membership` → `8 contributors` → `9 taxonomy` → `10 own profile` → `11 homepage curation` → `12 site settings` → `13 deletion gate` → `14 integrated verification`.
+`1 contract` → `2 generated slugs` → `3 image upload` → `4 rich media` → `5 published editing` → `6 owner lifecycle` → `7 admin archive/restore` → `8 article audit page` → `9 membership` → `10 contributors` → `11 taxonomy` → `12 own profile` → `13 homepage curation` → `14 site settings` → `15 deletion gate` → `16 integrated verification`.
 
-Tasks 7–12 add their narrow audit actions/resources with their own mutations. Task 6's first version covers article history only. Public routes, search, archive pages, and media rendering are a separate Phase 5 plan.
+Tasks 9–14 add their narrow audit actions/resources with their own mutations. Task 8's first version covers article history only. Public routes, search, archive pages, and media rendering are a separate Phase 5 plan.
