@@ -114,7 +114,7 @@ Taxonomy, private articles, category/tag/contributor links, and protected histor
 
 ### media_assets
 
-Tracks owner/uploader, object path, media type, byte size, dimensions, checksum if used, alt text, creation time, and lifecycle state. Access remains subject to Storage and database policies.
+Phase 4 Task 3 adds private upload reservations in `20261102010000_private_article_media.sql` and trusted finalization in `20261102010100_media_finalization.sql`. A reservation belongs to one article and uploader, has a generated opaque WebP object key, and has a pending/finalized/deleting state. Finalized rows record output bytes, dimensions, SHA-256, and time. The private `article-media` bucket has a 10 MiB WebP limit. No pre-existing article, revision, or profile row is rewritten. The application upload route, main-image link, and cleanup flow remain in progress for this task.
 
 ### homepage_selections
 

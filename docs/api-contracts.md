@@ -55,6 +55,8 @@ The [accepted Phase 4 editorial contract](superpowers/specs/2026-11-01-editorial
 - Update own public profile.
 - Request and finalize valid image uploads.
 
+Phase 4 Task 3 has implemented the first database boundary: `request_article_image_upload(article_id,request_id)` reserves a stable asset ID for an owned draft or active administrator; a service-role-only finalization RPC checks a trusted private Storage object and actor eligibility. The upload route and draft main-image attachment are still in progress. The browser never receives the service key.
+
 ## Planned administrator operations
 
 - List and manage all articles.

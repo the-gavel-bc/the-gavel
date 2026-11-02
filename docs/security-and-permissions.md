@@ -113,6 +113,8 @@ The [accepted Phase 4 editorial contract](superpowers/specs/2026-11-01-editorial
 
 ## Upload controls
 
+Phase 4 Task 3's first additive migrations reserve article media through a checked owner/administrator RPC. Authenticated callers cannot directly insert, update, or delete media rows or finalize them; the finalization RPC is service-role-only and independently checks the claimed actor, article, validated metadata, and trusted Storage object. The private bucket exposes finalized reads only to eligible article owners/administrators through Storage RLS. The server-only image intake and cleanup operations are still being built.
+
 - MVP image types: JPEG, PNG, and WebP.
 - Do not accept SVG, HTML, archives, executables, or arbitrary attachments.
 - Limit file size and decoded dimensions.

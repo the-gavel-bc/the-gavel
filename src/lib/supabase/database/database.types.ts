@@ -315,6 +315,60 @@ export type Database = {
           },
         ];
       };
+      media_assets: {
+        Row: {
+          article_id: string;
+          byte_size: number | null;
+          created_at: string;
+          finalized_at: string | null;
+          height: number | null;
+          id: string;
+          object_key: string;
+          request_id: string;
+          sha256: string | null;
+          status: string;
+          uploader_user_id: string;
+          width: number | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          article_id: string;
+          byte_size?: number | null;
+          created_at?: string;
+          finalized_at?: string | null;
+          height?: number | null;
+          id: string;
+          object_key: string;
+          request_id: string;
+          sha256?: string | null;
+          status?: string;
+          uploader_user_id: string;
+          width?: number | null;
+        };
+        Update: {
+          article_id?: string;
+          byte_size?: number | null;
+          created_at?: string;
+          finalized_at?: string | null;
+          height?: number | null;
+          id?: string;
+          object_key?: string;
+          request_id?: string;
+          sha256?: string | null;
+          status?: string;
+          uploader_user_id?: string;
+          width?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "media_assets_article_id_fkey";
+            columns: ["article_id"];
+            isOneToOne: false;
+            referencedRelation: "articles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       memberships: {
         Row: {
           active: boolean;
@@ -448,6 +502,21 @@ export type Database = {
           display_name: string;
           id: string;
         }[];
+      };
+      finalize_article_image_upload: {
+        Args: {
+          p_actor_user_id: string;
+          p_asset_id: string;
+          p_byte_size: number;
+          p_height: number;
+          p_sha256: string;
+          p_width: number;
+        };
+        Returns: Json;
+      };
+      request_article_image_upload: {
+        Args: { p_article_id: string; p_request_id: string };
+        Returns: Json;
       };
       save_article_draft: {
         Args: {
