@@ -25,8 +25,8 @@ select is(public.create_article_draft('80000000-0000-0000-0000-000000000061',pg_
 update private.draft_write_limits set attempt_count=30;
 select is(public.create_article_draft('80000000-0000-0000-0000-000000000061',pg_temp.draft_input())->>'replayed','true','successful replay is free even at exhausted quota');
 update private.draft_write_limits set attempt_count=0;
-select is(public.create_article_draft(gen_random_uuid(),pg_temp.draft_input())->>'code','slug_conflict','global slug conflict is safe');
-select is((select count(*)::integer from public.article_revisions),1,'slug conflict leaves original history only');
+select is(public.create_article_draft(gen_random_uuid(),pg_temp.draft_input())->>'ok','true','duplicate title receives generated suffix');
+select is((select count(*)::integer from public.article_revisions),2,'second generated slug creates its own history');
 select is(public.create_article_draft('80000000-0000-0000-0000-000000000061','{}')->>'code','request_conflict','malformed completed-ID reuse cannot become a new command');
 update private.draft_write_receipts set operation='save',expected_version=1;
 select is(public.create_article_draft('80000000-0000-0000-0000-000000000061',pg_temp.draft_input())->>'code','request_conflict','operation mismatch rejected');
