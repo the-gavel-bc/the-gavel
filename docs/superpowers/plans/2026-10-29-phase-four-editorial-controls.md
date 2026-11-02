@@ -10,7 +10,7 @@
 
 **Spec:** Existing approved [product requirements](../../product-requirements.md), [API contracts](../../api-contracts.md), [data model](../../data-model.md), [security controls](../../security-and-permissions.md), [design system](../../design-system.md), [testing guidance](../../testing.md), and the [Phase 3 private-draft contract](../specs/2026-10-22-private-draft-workflow-design.md) remain authoritative. Task 1 records exact Phase 4 operation contracts without replacing those sources.
 
-**Plan baseline:** Based on `origin/main` at `1285933cb40ce30e62023fc94fbc739cac20e5f5`, after Task 11 / PR #26 merged. Planning branch: `docs/phase-four-editorial-controls`, in the existing isolated linked worktree `/private/tmp/the-gavel-task11`.
+**Plan baseline:** Based on `origin/main` at `1285933cb40ce30e62023fc94fbc739cac20e5f5`, after Task 11 / PR #26 merged. Planning branch: `docs/phase-four-editorial-controls`. Dedicated execution branch: `feat/phase-four-editorial-workflow`, created from the completed plan at `e3eb6f0` in the existing isolated linked worktree `/private/tmp/the-gavel-task11`.
 
 **Selected order:** Lifecycle first. Complete the lifecycle contract, provide the minimum secure image path required for publication readiness, then enable owner editing/publishing/archive and administrator restore before the remaining admin controls.
 
@@ -43,10 +43,10 @@
 
 ## Shared execution rules
 
-- At the start of each implementation task, confirm `origin/main`, a clean isolated task branch, the last applied migration, available filenames, and preserved local data. Save a private baseline before the first Phase 4 migration; never reset the existing project to make a test pass.
+- At the start of each implementation task, confirm `origin/main`, the Phase 4 branch head, a clean task branch based on that head, the last applied migration, available filenames, and preserved local data. Save a private baseline before the first Phase 4 migration; never reset the existing project to make a test pass.
 - Write a focused failing assertion for the missing behavior or denial before implementation. Run it and record the expected failure; implement the narrow change; rerun it to pass. Keep synthetic fixtures transaction-local. A documentation-only task uses link/consistency checks instead.
 - For database tasks, apply additive migrations against the preserved local schema, run focused pgTAP and full `pnpm test:db`, `pnpm supabase db lint`, regenerate types, and run `pnpm db:types:check`. For application tasks, run focused unit/browser checks, then the documented type, lint, format, build, and affected regression gates. Do not run concurrent SQL suites against the same project.
-- Split each task into reviewable commits of at most about 300 changed lines. A commit carries its own behavior, focused tests, generated types when applicable, and affected docs. Record exact commands/results, screenshots for changed dashboard flows, review findings, rollback notes, and an owner checkpoint before the next task. Open a task PR against current `main` after the task is reviewable; do not claim CI until that PR's head passes.
+- Split each task into reviewable commits of at most about 300 changed lines. A commit carries its own behavior, focused tests, generated types when applicable, and affected docs. Record exact commands/results, screenshots for changed dashboard flows, review findings, rollback notes, and an owner checkpoint before the next task. Open each task PR against `feat/phase-four-editorial-workflow` after the task is reviewable. Merge accepted task PRs into that branch in order; after Task 14 local verification, open the Phase 4 PR against current `main` and record its hosted CI in Task 14. Do not claim CI until the relevant PR head passes.
 
 Task 1 must refine Tasks 2–14 into exact migration/test filenames and callable signatures after its contract is accepted, as Phase 2 Task 1 and Phase 3 Task 1 did. The interface shapes below are proposed boundaries, not accepted API signatures. Do not reserve a migration timestamp or introduce a public grant before checking the live tree at the owning task.
 
