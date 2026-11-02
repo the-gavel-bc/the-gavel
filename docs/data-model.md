@@ -74,6 +74,8 @@ No real publication taxonomy is seeded. Fixtures are synthetic and transaction-l
 
 An article requires an owner profile, primary section, trimmed nonblank title, and unique canonical slug. The [accepted content contract](superpowers/specs/2026-10-21-content-foundation-design.md#accepted-storage-constraints) defines the text bounds. Owner and section references restrict deletion and identity changes. UUIDs and timestamps are supplied automatically, and updates reuse the existing updated-at trigger.
 
+The [accepted Phase 4 editorial contract](superpowers/specs/2026-11-01-editorial-workflow-design.md) plans generated article and contributor slugs, fixed after first publication, and a publication-readiness invariant. Existing stored slugs are preserved. The current draft form/RPC and profile grants still permit caller-supplied slugs; Phase 4 implementation must close those paths through forward migrations before this behavior is described as enforced.
+
 New rows default to `draft`; excerpt, JSONB body, SEO keyphrase, and meta description may be SQL NULL. Present optional text must be trimmed and nonblank. Body storage permits only JSON objects of at most 1,048,576 serialized UTF-8 bytes. This does not validate editor nodes or safe rendering. No editor or renderer is implemented.
 
 Draft rows require both lifecycle timestamps NULL; published rows require publication only; archived rows require publication and archive timestamps. These constraints describe stored states, not authorized transitions or publication readiness. Required publication content/media checks belong to the future publishing operation. Media columns are absent until the media contract exists; the eventual main-image requirement is unchanged.

@@ -8,7 +8,7 @@
 
 **Tech Stack:** Existing Node 22, pnpm 11.25.0, Next.js/React/TypeScript, Zod, Supabase Auth/Postgres/Storage, pgTAP, Vitest, and Playwright. No new service or dependency is assumed.
 
-**Spec:** Existing approved [product requirements](../../product-requirements.md), [API contracts](../../api-contracts.md), [data model](../../data-model.md), [security controls](../../security-and-permissions.md), [design system](../../design-system.md), [testing guidance](../../testing.md), and the [Phase 3 private-draft contract](../specs/2026-10-22-private-draft-workflow-design.md) remain authoritative. The [proposed Task 1 design](../specs/2026-11-01-editorial-workflow-design.md) records Phase 4 operation contracts and decision gates without replacing those sources.
+**Spec:** Existing approved [product requirements](../../product-requirements.md), [API contracts](../../api-contracts.md), [data model](../../data-model.md), [security controls](../../security-and-permissions.md), [design system](../../design-system.md), [testing guidance](../../testing.md), and the [Phase 3 private-draft contract](../specs/2026-10-22-private-draft-workflow-design.md) remain authoritative. The [accepted Task 1 design](../specs/2026-11-01-editorial-workflow-design.md) records Phase 4 operation contracts and decision gates without claiming implementation.
 
 **Plan baseline:** Based on `origin/main` at `1285933cb40ce30e62023fc94fbc739cac20e5f5`, after Task 11 / PR #26 merged. Planning branch: `docs/phase-four-editorial-controls`. Dedicated execution branch: `feat/phase-four-editorial-workflow`, created from the completed plan at `e3eb6f0` in the existing isolated linked worktree `/private/tmp/the-gavel-task11`.
 
@@ -48,21 +48,21 @@
 - For database tasks, apply additive migrations against the preserved local schema, run focused pgTAP and full `pnpm test:db`, `pnpm supabase db lint`, regenerate types, and run `pnpm db:types:check`. For application tasks, run focused unit/browser checks, then the documented type, lint, format, build, and affected regression gates. Do not run concurrent SQL suites against the same project.
 - Split each task into reviewable commits of at most about 300 changed lines. A commit carries its own behavior, focused tests, generated types when applicable, and affected docs. Record exact commands/results, screenshots for changed dashboard flows, review findings, rollback notes, and an owner checkpoint before the next task. Open each task PR against `feat/phase-four-editorial-workflow` after the task is reviewable. Merge accepted task PRs into that branch in order; after Task 16 local verification, open the Phase 4 PR against current `main` and record its hosted CI in Task 16. Do not claim CI until the relevant PR head passes.
 
-Task 1 must refine Tasks 2–16 into exact migration/test filenames and callable signatures after its contract is accepted, as Phase 2 Task 1 and Phase 3 Task 1 did. The interface shapes below are proposed boundaries, not accepted API signatures. Do not reserve a migration timestamp or introduce a public grant before checking the live tree at the owning task.
+The Task 1 contract fixes operation shapes and invariants. Before each of Tasks 2–16, its focused subplan must reserve exact migration/test filenames and callable signatures against the live tree, as the Phase 2 and Phase 3 plans did. Do not reserve a migration timestamp or introduce a public grant before checking the live tree at the owning task.
 
-## Task 1 — accept the editorial workflow contract
+## Task 1 — accept the editorial workflow contract: complete
 
 **Files:** Refine `docs/superpowers/specs/2026-11-01-editorial-workflow-design.md`; record a decision in `docs/decisions/` only if implementation selects a consequential technical approach not already fixed by approved docs. Update API/data/security docs only to clarify accepted contracts, not to claim implementation.
 
-- [ ] Define exact owner/admin permissions and state transitions: draft to published, published to archived, archived restore, and editing while published or archived. Recommend that ordinary published edits preserve `published_at` and current status; any alternative needs an explicit decision.
-- [ ] Specify publication readiness, including required image/alt text and metadata, using existing MVP requirements. Apply the owner decision to generate slugs internally from article titles and contributor display names, update them before first publication, and freeze them afterward; do not silently change existing public URLs.
-- [ ] Specify concurrency, retry/idempotency, safe failures, snapshots, audit action names, timestamps, and transaction boundaries for each operation.
-- [ ] Specify upload size/dimension limits and verification/re-encoding details against the existing JPEG/PNG/WebP policy. Do not choose values by copying arbitrary defaults.
-- [ ] Define membership self-lockout/last-administrator behavior and the narrow audit event shape before implementing membership changes. Refine Tasks 2–16 to exact paths, signatures, RED/GREEN cases, commit boundaries, and rollback notes after the contract review.
-- [ ] Keep permanent deletion blocked until the owner/client confirms retention and the plan explicitly reconciles restrictive revision references, preserved audit records, Auth references, and orphan-media cleanup.
-- [ ] Keep unresolved News categories, `Outside of BC` naming, site copy/URLs, tag normalization, and BC policy questions unresolved; list which later task each decision gates.
+- [x] Define owner/admin permissions and state transitions: draft to published, published to archived, administrator restore, published editing that preserves `published_at`, and archived read-only until restore.
+- [x] Specify publication readiness, including required image/alt text and metadata, using existing MVP requirements. Record generated, noneditable slugs that follow titles/display names until first publication and freeze afterward.
+- [x] Specify concurrency, retry/idempotency, safe failures, snapshots, audit action names, timestamps, and transaction boundaries for article operations.
+- [x] Specify bounded JPEG/PNG/WebP upload intake, dimension checks, byte verification and re-encoding obligations.
+- [x] Define last-administrator behavior and the narrow audit event shape. Assign exact file/signature reservations, RED/GREEN cases and rollback review to each focused subplan before implementation.
+- [x] Keep permanent deletion blocked until the owner/client confirms retention and its focused plan reconciles restrictive revision references, preserved audit records, Auth references, and orphan-media cleanup.
+- [x] Keep unresolved News categories, `Outside of BC` naming, site copy/URLs, tag normalization, and BC policy questions unresolved; list which later task each decision gates.
 
-**Acceptance:** The owner reviews the concrete lifecycle/upload/admin contracts and the listed decision gates before code or migrations begin. No open question is silently translated into a new requirement.
+**Acceptance:** The owner reviewed the concrete lifecycle/upload/admin proposal and directed work to continue on 2026-11-01. The linked contract keeps remaining client decisions gated. No Phase 4 code or migration is claimed by this task.
 
 **Validation:** Check document links and consistency against the current product/API/data/security docs; `git diff --check`. No application tests apply to this documentation-only task.
 

@@ -101,6 +101,8 @@ Revisions require version-one bounded JSON objects. Audits permit only the seven
 
 ## Content and input safety
 
+The [accepted Phase 4 editorial contract](superpowers/specs/2026-11-01-editorial-workflow-design.md) plans checked lifecycle operations, noneditable generated slugs, and a last-eligible-administrator guard. These are future controls. Existing draft RPCs still accept a supplied slug and foundation grants still permit direct profile slug and administrator membership updates; the owning Phase 4 tasks must transition those grants and test direct-call denials.
+
 - Validate all request bodies, query parameters, identifiers, slugs, dates, URLs, and pagination limits.
 - Store structured content or a constrained rich-text representation.
 - Sanitize rich content on the trusted server boundary.

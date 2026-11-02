@@ -48,6 +48,8 @@ Anonymous operations return published, non-archived data only.
 
 ## Planned authenticated operations
 
+The [accepted Phase 4 editorial contract](superpowers/specs/2026-11-01-editorial-workflow-design.md) fixes planned lifecycle authorization, receipts, generated slug behavior, and publication readiness. These operations are not yet implemented. Current Phase 3 draft commands and RPCs still accept a manually supplied slug; Phase 4 Task 2 must remove that field at both the form/action and database boundaries before claiming the generated-slug contract.
+
 - Publish now.
 - Archive owned article.
 - Update own public profile.
