@@ -12,7 +12,7 @@ export type MediaRequestResult =
   | {
       ok: true;
       assetId: string;
-      status: "pending" | "finalized";
+      status: "pending" | "uploading" | "finalized";
       replayed: boolean;
     }
   | {
@@ -31,7 +31,7 @@ const responseSchema = z.discriminatedUnion("ok", [
   z.strictObject({
     ok: z.literal(true),
     assetId: z.custom<string>(isDraftUuid),
-    status: z.enum(["pending", "finalized"]),
+    status: z.enum(["pending", "uploading", "finalized"]),
     replayed: z.boolean(),
   }),
   z.strictObject({

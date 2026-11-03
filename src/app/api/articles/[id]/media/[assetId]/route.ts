@@ -46,7 +46,7 @@ export async function POST(
       return reply(404, { ok: false, code: "not_found" });
     if (asset.status === "finalized")
       return reply(200, { ok: true, assetId, replayed: true });
-    if (asset.status !== "pending")
+    if (asset.status !== "pending" && asset.status !== "uploading")
       return reply(409, { ok: false, code: "conflict" });
 
     const file = await readMediaFile(request);
@@ -56,6 +56,14 @@ export async function POST(
       return reply(processed.code === "too_large" ? 413 : 400, processed);
 
     const trusted = createTrustedMediaClient();
+    const { data: claim, error: claimError } = await trusted.rpc(
+      "begin_article_image_upload",
+      { p_actor_user_id: access.userId, p_asset_id: assetId },
+    );
+    if (claimError) return reply(503, { ok: false, code: "unavailable" });
+    const claimed = finalizedReceipt.safeParse(claim);
+    if (!claimed.success || claimed.data.assetId !== assetId)
+      return reply(409, { ok: false, code: "conflict" });
     const bucket = trusted.storage.from("article-media");
     const { error: uploadError } = await bucket.upload(
       asset.object_key,

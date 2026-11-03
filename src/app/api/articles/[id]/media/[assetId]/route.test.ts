@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   upload: vi.fn(),
   download: vi.fn(),
   finalize: vi.fn(),
+  claim: vi.fn(),
   userClient: vi.fn(),
   trustedClient: vi.fn(),
 }));
@@ -67,11 +68,18 @@ beforeEach(() => {
     data: { ok: true, assetId, replayed: false },
     error: null,
   });
+  mocks.claim.mockResolvedValue({
+    data: { ok: true, assetId, replayed: false },
+    error: null,
+  });
   mocks.trustedClient.mockReturnValue({
     storage: {
       from: () => ({ upload: mocks.upload, download: mocks.download }),
     },
-    rpc: mocks.finalize,
+    rpc: (name: string, args: unknown) =>
+      name === "begin_article_image_upload"
+        ? mocks.claim(name, args)
+        : mocks.finalize(name, args),
   });
 });
 
@@ -99,6 +107,16 @@ it("does not upload an asset belonging to another article", async () => {
   expect(mocks.trustedClient).not.toHaveBeenCalled();
 });
 
+it("does not upload when cleanup wins before the trusted claim", async () => {
+  mocks.claim.mockResolvedValue({
+    data: { ok: false, code: "conflict" },
+    error: null,
+  });
+  const response = await POST(await uploadRequest(), routeParams);
+  expect(response.status).toBe(409);
+  expect(mocks.upload).not.toHaveBeenCalled();
+});
+
 it("uploads only decoded WebP and finalizes the owned reservation", async () => {
   const response = await POST(await uploadRequest(), routeParams);
   expect(response.status).toBe(200);
@@ -108,6 +126,9 @@ it("uploads only decoded WebP and finalizes the owned reservation", async () => 
   expect((await sharp(bytes).metadata()).format).toBe("webp");
   expect(options).toMatchObject({ contentType: "image/webp", upsert: false });
   expect(mocks.finalize).toHaveBeenCalledOnce();
+  expect(mocks.claim.mock.invocationCallOrder[0]).toBeLessThan(
+    mocks.upload.mock.invocationCallOrder[0],
+  );
 });
 
 it("rejects mismatched declared MIME before opening trusted Storage", async () => {
