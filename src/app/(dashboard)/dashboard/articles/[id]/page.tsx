@@ -7,6 +7,7 @@ import {
 } from "@/lib/articles/draft-queries/draft-queries";
 import { isDraftUuid } from "@/lib/articles/draft-contract/draft-contract";
 import { DraftForm } from "@/components/dashboard/draft-form/draft-form";
+import { getArticleMainImage } from "@/lib/media/media-queries/media-queries";
 export default async function EditDraftPage({
   params,
 }: {
@@ -52,8 +53,10 @@ export default async function EditDraftPage({
       </>
     );
   let options;
+  let mainImage;
   try {
     options = await getDraftOptions(detail.draft.sectionId);
+    mainImage = await getArticleMainImage(detail.articleId);
   } catch (error) {
     unstable_rethrow(error);
     return recovery;
@@ -66,6 +69,7 @@ export default async function EditDraftPage({
         key={detail.articleId}
         initialDraft={detail.draft}
         options={options}
+        initialImage={mainImage}
         article={{
           id: detail.articleId,
           version: detail.version,

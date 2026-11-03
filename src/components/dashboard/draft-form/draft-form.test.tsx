@@ -25,6 +25,9 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/lib/articles/draft-reload-action/draft-reload-action", () => ({
   reviewDraftAction: mocks.review,
 }));
+vi.mock("../article-media/article-media", () => ({
+  ArticleMedia: () => <section aria-label="Main image" />,
+}));
 import { DraftForm } from "./draft-form";
 const options = {
   sections: [{ id: baseDraft.sectionId, name: "Synthetic section" }],
