@@ -4,7 +4,7 @@
 
 **Goal:** Let an authorized editor upload a validated private raster image and attach it as a draft's main image without exposing untrusted files or weakening draft history.
 
-**Architecture:** A checked request RPC reserves an opaque asset ID for one article. A same-origin server route receives at most 10 MiB, decodes JPEG/PNG/WebP, bounds dimensions and pixels, re-encodes to WebP, places only validated bytes in a private Storage bucket, and asks a user-scoped finalize RPC to mark the asset usable. The existing versioned draft save carries the main-image asset ID, alt text, and credit; the database validates that reference and captures it with the article snapshot. A checked remove flow marks an unreferenced asset unavailable before object cleanup.
+**Architecture:** A checked request RPC reserves an opaque asset ID for one article. A same-origin server route receives at most 10 MiB, decodes JPEG/PNG/WebP, bounds dimensions and pixels, re-encodes to WebP, places only validated bytes in a private Storage bucket, and asks a service-role-only finalize RPC to mark the asset usable after user-scoped checks. A narrow versioned main-image RPC links the asset, alt text, and credit and captures article history. A checked remove flow marks an unreferenced asset unavailable before object cleanup.
 
 **Tech Stack:** Supabase PostgreSQL, RLS, private Storage, Next.js route handlers/server actions, Sharp, TypeScript, Vitest, pgTAP, Playwright.
 
@@ -17,6 +17,7 @@
 - The bucket stays private. No user-supplied filename becomes a Storage path. Direct application writes to trusted media records and objects remain denied.
 - Authors manage assets only on their own drafts; an eligible active administrator may manage any draft. Credits do not grant ownership. Existing articles, revisions, and object paths are not rewritten.
 - Owner decision (2026-11-02): the Next.js server may use a Supabase service-role key solely for validated private Storage writes and cleanup. Keep it out of browser bundles, logs, and client responses; each request still passes user-scoped authorization and database checks.
+- Ruling: use a narrow main-image mutation rather than extending the Phase 3 draft payload; this preserves exact old request fingerprints and receipt replay across a mixed-version rollout. It costs one versioned RPC and a form coordination step.
 
 ## Review Focus
 
@@ -50,12 +51,12 @@
 
 ### Task C: Versioned draft main-image attachment
 
-**Files:** Forward migration, `src/lib/articles/draft-contract/`, draft action/query adapters, `src/components/dashboard/article-media/`, draft form/detail and focused tests.
+**Files:** Forward migration, `src/lib/media/media-actions/`, draft detail query adapter, `src/components/dashboard/article-media/`, draft form/detail and focused tests.
 
-**Interfaces:** Optional `mainImage` in `DraftInput` is null or `{assetId,altText,credit}`. Draft save updates a relational main-image link only for a finalized asset belonging to that article. Snapshot/history includes the link, preserving the existing version/receipt semantics.
+**Interfaces:** `public.set_article_main_image(p_article_id uuid,p_expected_version integer,p_request_id uuid,p_asset_id uuid,p_alt_text text,p_credit text) -> jsonb` creates/replaces a relational main-image link only for a finalized asset belonging to that article; a null asset removes the link. Snapshot/history includes the link. Exact retry uses a separate private receipt record and does not change the Phase 3 draft request hash.
 
 - [ ] Write SQL/contract RED for missing, pending, foreign, removed, and retained asset references; no-op and stale-version saves; alt/credit bounds; owner/admin and credited non-owner paths.
-- [ ] Add the relational reference and strict application/database validation; extend snapshot and checked draft save without rewriting older rows or revisions.
+- [ ] Add the relational reference and strict application/database validation; extend snapshot capture without changing existing draft RPC payloads, rows, or revisions.
 - [ ] Add an accessible upload/attach/remove control with status, progress, retry and field errors, integrated into the existing draft form. Validate keyboard and mobile behavior.
 - [ ] Run focused SQL, contract, component and browser GREEN; commit database attachment then UI as separate reviewable changes.
 

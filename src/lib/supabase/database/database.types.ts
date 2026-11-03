@@ -105,6 +105,43 @@ export type Database = {
           },
         ];
       };
+      article_main_images: {
+        Row: {
+          alt_text: string;
+          article_id: string;
+          asset_id: string;
+          credit: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          alt_text: string;
+          article_id: string;
+          asset_id: string;
+          credit: string;
+        };
+        Update: {
+          alt_text?: string;
+          article_id?: string;
+          asset_id?: string;
+          credit?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "article_main_images_article_id_fkey";
+            columns: ["article_id"];
+            isOneToOne: true;
+            referencedRelation: "articles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "article_main_images_asset_id_article_id_fkey";
+            columns: ["asset_id", "article_id"];
+            isOneToOne: false;
+            referencedRelation: "media_assets";
+            referencedColumns: ["id", "article_id"];
+          },
+        ];
+      };
       article_revisions: {
         Row: {
           actor_user_id: string;
@@ -522,6 +559,17 @@ export type Database = {
         Args: {
           p_article_id: string;
           p_draft: Json;
+          p_expected_version: number;
+          p_request_id: string;
+        };
+        Returns: Json;
+      };
+      set_article_main_image: {
+        Args: {
+          p_alt_text: string;
+          p_article_id: string;
+          p_asset_id: string;
+          p_credit: string;
           p_expected_version: number;
           p_request_id: string;
         };
