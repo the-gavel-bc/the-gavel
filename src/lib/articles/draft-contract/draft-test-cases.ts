@@ -89,7 +89,6 @@ export function boundaryCases(): ContractCase[] {
       );
   for (const [field, cap] of [
     ["title", 240],
-    ["slug", 180],
     ["excerpt", 600],
     ["seoKeyphrase", 160],
     ["metaDescription", 320],

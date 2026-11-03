@@ -155,7 +155,6 @@ export async function getDraftDetail(
     const checked = checkDraftInput({
       schemaVersion: 1,
       title: data.title,
-      slug: data.slug,
       sectionId: data.section_id,
       excerpt: data.excerpt,
       content: data.content,

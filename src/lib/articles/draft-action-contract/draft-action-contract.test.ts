@@ -19,6 +19,7 @@ it.each([
   { ...create, status: "published" },
   { ...create, requestId: "invalid" },
   { ...create, draft: { ...baseDraft, ownerProfileId: articleId } },
+  { ...create, draft: { ...baseDraft, slug: "chosen-path" } },
 ])("rejects forged create commands", (value) => {
   expect(parseCreateCommand(value)).toEqual({
     ok: false,

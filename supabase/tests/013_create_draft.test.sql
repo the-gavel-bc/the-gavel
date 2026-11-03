@@ -24,12 +24,12 @@ select is((select result_updated_at::text from private.draft_write_receipts),(se
 select is(public.create_article_draft('80000000-0000-0000-0000-000000000051',pg_temp.draft_input('{"title":"Changed"}'))->>'code','request_conflict','changed reuse of completed request ID rejected');
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000003',true);
 set local role authenticated;
-insert into results values('other',public.create_article_draft('80000000-0000-0000-0000-000000000051',pg_temp.draft_input('{"slug":"synthetic-b"}')));
+insert into results values('other',public.create_article_draft('80000000-0000-0000-0000-000000000051',pg_temp.draft_input('{"title":"Synthetic B"}')));
 reset role;
 select is((select result->'ok' from results where label='other'),'true'::jsonb,'request ID is scoped to actor');
 select is((select owner_profile_id from public.articles where slug='synthetic-b'),'10000000-0000-0000-0000-000000000003'::uuid,'second author cannot choose first author ownership');
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);
-select is(public.create_article_draft('80000000-0000-0000-0000-000000000054',pg_temp.draft_input('{"slug":"synthetic-admin"}'))->>'ok','true','administrator can create');
+select is(public.create_article_draft('80000000-0000-0000-0000-000000000054',pg_temp.draft_input('{"title":"Synthetic Admin"}'))->>'ok','true','administrator can create');
 select is((select owner_profile_id from public.articles where slug='synthetic-admin'),'10000000-0000-0000-0000-000000000004'::uuid,'administrator create is still self-owned');
 set local role anon;
 select throws_ok($$select public.create_article_draft('80000000-0000-0000-0000-000000000055','{}')$$,'42501',null,'anonymous execution denied');

@@ -7,9 +7,9 @@ select is(public.save_article_draft((select id from target),v,gen_random_uuid(),
 select is(public.save_article_draft((select id from target),1,null,pg_temp.draft_input())->>'code','invalid_input','NULL request rejected');
 select is(public.save_article_draft((select id from target),1,gen_random_uuid(),null)->>'code','invalid_input','NULL draft rejected');
 select is(public.save_article_draft((select id from target),1,'80000000-0000-0000-0000-000000000101',pg_temp.draft_input())->>'code','request_conflict','create receipt cannot be reused as save');
-select is(public.create_article_draft(gen_random_uuid(),pg_temp.draft_input('{"slug":"synthetic-other"}'))->>'ok','true','second reserved slug fixture created');
-select is(public.save_article_draft((select id from target),1,gen_random_uuid(),pg_temp.draft_input('{"slug":"synthetic-other"}'))->>'code','slug_conflict','duplicate slug save rolls back safely');
-select is((select edit_version from public.articles where id=(select id from target)),1,'slug conflict preserves version');
+select is(public.create_article_draft(gen_random_uuid(),pg_temp.draft_input('{"title":"Synthetic Other"}'))->>'ok','true','second generated slug fixture created');
+select is(public.save_article_draft((select id from target),1,gen_random_uuid(),pg_temp.draft_input('{"slug":99}'))->>'code','invalid_input','malformed legacy slug is rejected');
+select is((select edit_version from public.articles where id=(select id from target)),1,'malformed slug preserves version');
 select is(public.save_article_draft((select id from target),1,'80000000-0000-0000-0000-000000000102',pg_temp.draft_input('{"title":"Saved Once"}'))->>'version','2','valid save fixture committed');
 update public.articles set owner_profile_id='10000000-0000-0000-0000-000000000003' where id=(select id from target);
 select is(public.save_article_draft((select id from target),1,'80000000-0000-0000-0000-000000000102',pg_temp.draft_input('{"title":"Saved Once"}'))->>'code','not_found','old save replay rechecks current ownership');

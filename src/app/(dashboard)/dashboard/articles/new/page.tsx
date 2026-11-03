@@ -24,7 +24,6 @@ export default async function NewDraftPage() {
   const initialDraft: DraftInput = {
     schemaVersion: 1,
     title: "",
-    slug: "",
     sectionId: "",
     excerpt: null,
     content: null,

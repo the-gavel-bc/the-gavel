@@ -13,6 +13,12 @@ import {
 } from "./draft-test-cases";
 
 describe("draft contract", () => {
+  it("rejects a caller-selected slug in a draft payload", () => {
+    expect(checkDraftInput({ ...baseDraft, slug: "chosen-path" })).toEqual({
+      ok: false,
+      code: "invalid_input",
+    });
+  });
   for (const c of [...literalCases, ...boundaryCases()])
     it(c.name, () => {
       if (c.target === "link") {

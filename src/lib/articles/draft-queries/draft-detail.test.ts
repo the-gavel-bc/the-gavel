@@ -20,7 +20,7 @@ let http: ReturnType<typeof queryTestClient>;
 const row = {
   id: articleId,
   title: baseDraft.title,
-  slug: baseDraft.slug,
+  slug: "synthetic-draft",
   status: "draft",
   section_id: baseDraft.sectionId,
   edit_version: 2,

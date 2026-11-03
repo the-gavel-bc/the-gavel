@@ -34,7 +34,6 @@ export function DraftSnapshot({
       <dl>
         {[
           ["Title", input.title],
-          ["Slug", input.slug],
           ["Section", name(input.sectionId, options.sections)],
           ["Excerpt", input.excerpt],
           ["SEO keyphrase", input.seoKeyphrase],

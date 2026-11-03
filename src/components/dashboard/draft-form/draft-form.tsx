@@ -38,7 +38,7 @@ const clientReady = () => true;
 const serverReady = () => false;
 const messages: Record<DraftErrorCode, string> = {
   invalid_input: "Review the highlighted fields and active selections.",
-  slug_conflict: "That slug is already in use. Choose another slug.",
+  slug_conflict: "We could not assign an article address. Retry your save.",
   unavailable:
     "We could not confirm the save. Retry the original save to confirm it. Newer edits stay in this tab.",
   forbidden:

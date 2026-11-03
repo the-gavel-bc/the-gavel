@@ -48,6 +48,8 @@ Anonymous operations return published, non-archived data only.
 
 ## Planned authenticated operations
 
+The [accepted Phase 4 editorial contract](superpowers/specs/2026-11-01-editorial-workflow-design.md) fixes planned lifecycle authorization, receipts, generated slug behavior, and publication readiness. Lifecycle operations are not yet implemented. Phase 4 Task 2 removes article slug from strict new draft commands; the database derives it from title under a transaction lock. During mixed-version rollout, the database accepts a valid old slug field but ignores its value. Contributor slug operations remain planned.
+
 - Publish now.
 - Archive owned article.
 - Update own public profile.
@@ -116,7 +118,7 @@ Task 5 implements the following interfaces in `src/lib/articles/`. The [accepted
 
 ## Implemented draft form adapter
 
-Task 7 adds `draftMetadataErrors` beside `checkDraftInput`, sharing the same metadata constraints for form feedback. The strict full-payload validator and database functions remain authoritative. The new form maps exactly empty optional metadata to NULL, never silently trims/renames a slug, and initially used NULL body/empty associations; Tasks 8–9 add body and association input through the same full-payload contract. It submits the existing `CreateDraftCommand`; no transport or database interface changed. Its optional article/version prop uses the existing save command for later route reuse.
+Task 7 adds `draftMetadataErrors` beside `checkDraftInput`, sharing the same metadata constraints for form feedback. The strict full-payload validator and database functions remain authoritative. The form maps exactly empty optional metadata to NULL; Tasks 8–9 added body and association input through the same full-payload contract. Phase 4 Task 2 removes editable article slugs and rejects a supplied `slug` in new application commands. The RPC signatures and result envelope remain unchanged; direct RPC calls with a valid old slug field ignore that value, and exact old slug-bearing receipts may replay. Its optional article/version prop uses the existing save command for the edit route.
 
 Basic UI command state retains the submitted payload/request UUID until a success is confirmed. A later authorization or other failure cannot resolve an earlier unknown result, so those retries remain locked to the original command. A first definitive failure allows correction/new UUID. Confirmed creation opens the private edit route only when current input is acknowledged; if newer edits exist, the mounted form adopts the created resource and exposes Save draft for those edits. Task 10 implements editable-in-flight/conflict reconciliation; see [current form boundaries](component-hierarchy.md#implemented-new-draft-form).
 

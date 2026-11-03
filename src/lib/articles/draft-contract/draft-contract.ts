@@ -30,7 +30,6 @@ export type DraftContributor = {
 export type DraftInput = {
   schemaVersion: 1;
   title: string;
-  slug: string;
   sectionId: string;
   excerpt: string | null;
   content: DraftDocument | null;
@@ -117,13 +116,6 @@ export function draftMetadataErrors(
   if (!scalar(value.title, 240))
     errors.title =
       "Enter a title of 1–240 characters without leading or trailing whitespace.";
-  if (
-    typeof value.slug !== "string" ||
-    value.slug.length > 180 ||
-    !/^[a-z0-9]+(-[a-z0-9]+)*$/u.test(value.slug)
-  )
-    errors.slug =
-      "Use 1–180 lowercase letters, numbers and single hyphens for the slug.";
   if (!isDraftUuid(value.sectionId)) errors.sectionId = "Select a section.";
   for (const [field, max] of [
     ["excerpt", 600],
@@ -141,12 +133,7 @@ function hasValidDraftMetadata(
 ): value is JsonObject &
   Pick<
     DraftInput,
-    | "title"
-    | "slug"
-    | "sectionId"
-    | "excerpt"
-    | "seoKeyphrase"
-    | "metaDescription"
+    "title" | "sectionId" | "excerpt" | "seoKeyphrase" | "metaDescription"
   > {
   return Object.keys(draftMetadataErrors(value)).length === 0;
 }
@@ -289,7 +276,6 @@ export function checkDraftInput(value: unknown): DraftCheckResult {
     !keys(value, [
       "schemaVersion",
       "title",
-      "slug",
       "sectionId",
       "excerpt",
       "content",
@@ -362,7 +348,6 @@ export function checkDraftInput(value: unknown): DraftCheckResult {
     value: {
       schemaVersion: 1,
       title: value.title as string,
-      slug: value.slug,
       sectionId: value.sectionId.toLowerCase(),
       excerpt: value.excerpt as string | null,
       content: value.content,
