@@ -101,6 +101,56 @@ it("rejects invalid image bytes and cleans the unused reservation", async () => 
   expect(screen.getByLabelText("Image file")).toBeEnabled();
 });
 
+it("keeps a failed cleanup reachable for retry", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(Response.json({ ok: false }, { status: 400 })),
+  );
+  mocks.removeUnused
+    .mockResolvedValueOnce({ ok: false, code: "unavailable" })
+    .mockResolvedValueOnce({ ok: true, assetId });
+  const user = userEvent.setup();
+  render(
+    <ArticleMedia
+      article={article}
+      initialImage={null}
+      disabled={false}
+      onCommit={vi.fn()}
+    />,
+  );
+  await user.upload(
+    screen.getByLabelText("Image file"),
+    new File(["bad"], "bad.png", { type: "image/png" }),
+  );
+  await user.click(screen.getByRole("button", { name: "Upload image" }));
+  expect(
+    await screen.findByRole("button", { name: "Retry cleanup" }),
+  ).toBeVisible();
+  expect(screen.getByLabelText("Image file")).toBeDisabled();
+  await user.click(screen.getByRole("button", { name: "Retry cleanup" }));
+  expect(await screen.findByText("Unused upload removed.")).toBeVisible();
+  expect(mocks.removeUnused).toHaveBeenCalledTimes(2);
+});
+
+it("offers reload after a version conflict instead of a stale retry", async () => {
+  mocks.setImage.mockResolvedValue({ ok: false, code: "conflict" });
+  const user = userEvent.setup();
+  render(
+    <ArticleMedia
+      article={article}
+      initialImage={{ assetId, altText: "Current", credit: "The Gavel" }}
+      disabled={false}
+      onCommit={vi.fn()}
+    />,
+  );
+  await user.click(screen.getByRole("button", { name: "Remove image" }));
+  expect(
+    await screen.findByRole("button", { name: "Reload draft" }),
+  ).toBeVisible();
+  expect(screen.getByRole("button", { name: "Remove image" })).toBeDisabled();
+  expect(screen.getByRole("alert")).toHaveTextContent("Reload to review");
+});
+
 it("uploads a file, requires alt and credit, then attaches the finalized asset", async () => {
   const onCommit = vi.fn();
   const user = userEvent.setup();

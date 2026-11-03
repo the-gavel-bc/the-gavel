@@ -37,6 +37,8 @@ export function ArticleMedia({
   const fileInput = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [assetId, setAssetId] = useState<string | null>(null);
+  const [cleanupAssetId, setCleanupAssetId] = useState<string | null>(null);
+  const [conflict, setConflict] = useState(false);
   const [uploadRequestId, setUploadRequestId] = useState<string | null>(null);
   const [pendingWrite, setPendingWrite] = useState<PendingWrite | null>(null);
   const [altText, setAltText] = useState(initialImage?.altText ?? "");
@@ -44,11 +46,13 @@ export function ArticleMedia({
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
-  const locked = disabled || busy;
+  const locked = disabled || busy || conflict || Boolean(cleanupAssetId);
   const metadataChanged = image
     ? altText !== image.altText || credit !== image.credit
     : Boolean(altText || credit);
-  const dirty = Boolean(file || assetId || pendingWrite || metadataChanged);
+  const dirty = Boolean(
+    file || assetId || cleanupAssetId || pendingWrite || metadataChanged,
+  );
   useEffect(() => onDirtyChange?.(dirty), [dirty, onDirtyChange]);
 
   async function upload() {
@@ -76,14 +80,20 @@ export function ArticleMedia({
       );
       const result: unknown = await response.json();
       if (response.status >= 400 && response.status < 500) {
-        await removeUnusedArticleImage(reservation.assetId);
-        setUploadRequestId(null);
-        setFile(null);
-        if (fileInput.current) fileInput.current.value = "";
+        setCleanupAssetId(reservation.assetId);
+        const removed = await removeUnusedArticleImage(reservation.assetId);
+        if (removed.ok) {
+          setCleanupAssetId(null);
+          setUploadRequestId(null);
+          setFile(null);
+          if (fileInput.current) fileInput.current.value = "";
+        }
         setError(
-          response.status === 400 || response.status === 413
-            ? "Choose a valid JPEG, PNG or WebP image within the size and dimension limits."
-            : "This upload cannot continue. Choose a new file or refresh your access.",
+          removed.ok
+            ? response.status === 400 || response.status === 413
+              ? "Choose a valid JPEG, PNG or WebP image within the size and dimension limits."
+              : "This upload cannot continue. Choose a new file or refresh your access."
+            : "Upload rejected. Cleanup failed; retry cleanup before choosing another file.",
         );
         return;
       }
@@ -131,7 +141,12 @@ export function ArticleMedia({
         ...command,
       });
       if (!result.ok) {
-        setError(`Image change was not saved (${result.code}). Retry.`);
+        if (result.code === "conflict") {
+          setConflict(true);
+          setError(
+            "This draft changed elsewhere. Reload to review its current version.",
+          );
+        } else setError(`Image change was not saved (${result.code}). Retry.`);
         if (result.code !== "unavailable") setPendingWrite(null);
         return;
       }
@@ -172,17 +187,20 @@ export function ArticleMedia({
   }
 
   async function discardUpload() {
-    if (!assetId || locked) return;
+    const target = cleanupAssetId ?? assetId;
+    if (!target || disabled || busy || conflict) return;
     setBusy(true);
     setError("");
     setStatus("Discarding unused upload…");
     try {
-      const result = await removeUnusedArticleImage(assetId);
+      const result = await removeUnusedArticleImage(target);
       if (!result.ok) {
         setError(`Unused upload could not be removed (${result.code}). Retry.`);
         return;
       }
       setAssetId(null);
+      setCleanupAssetId(null);
+      setUploadRequestId(null);
       setFile(null);
       if (fileInput.current) fileInput.current.value = "";
       if (!image) {
@@ -224,7 +242,8 @@ export function ArticleMedia({
             locked ||
             Boolean(pendingWrite) ||
             Boolean(assetId) ||
-            Boolean(uploadRequestId)
+            Boolean(uploadRequestId) ||
+            Boolean(cleanupAssetId)
           }
           onChange={(event) => {
             setFile(event.target.files?.[0] ?? null);
@@ -273,6 +292,24 @@ export function ArticleMedia({
             onClick={() => void discardUpload()}
           >
             Discard unused upload
+          </Button>
+        )}
+        {cleanupAssetId && (
+          <Button
+            type="button"
+            disabled={disabled || busy}
+            onClick={() => void discardUpload()}
+          >
+            Retry cleanup
+          </Button>
+        )}
+        {conflict && (
+          <Button
+            type="button"
+            disabled={busy}
+            onClick={() => window.location.reload()}
+          >
+            Reload draft
           </Button>
         )}
         {image && (
