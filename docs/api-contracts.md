@@ -55,7 +55,7 @@ The [accepted Phase 4 editorial contract](superpowers/specs/2026-11-01-editorial
 - Update own public profile.
 - Request and finalize valid image uploads.
 
-Phase 4 Task 3 has implemented the first database boundary: `request_article_image_upload(article_id,request_id)` reserves a stable asset ID for an owned draft or active administrator; a service-role-only finalization RPC checks a trusted private Storage object and actor eligibility. The upload route and draft main-image attachment are still in progress. The browser never receives the service key.
+Phase 4 Task 3 implements `request_article_image_upload(article_id,request_id)` for a stable owned-draft reservation and a checked server action that exposes only its safe receipt. `POST /api/articles/[id]/media/[assetId]` accepts one bounded multipart file, verifies the active actor and reserved article through the user-scoped client, decodes/re-encodes it to WebP, uploads it with a server-only service key, and calls the service-role-only finalization RPC. An exact finalized retry returns the confirmed asset ID; a matching Storage object can resume an uncertain upload. The route does not return object paths or secret values. Draft main-image attachment and removal remain in progress. The browser never receives the service key.
 
 ## Planned administrator operations
 
