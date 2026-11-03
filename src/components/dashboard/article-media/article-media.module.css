@@ -1,0 +1,20 @@
+.section {
+  display: grid;
+  gap: 0.75rem;
+  padding-block: 1.5rem;
+  border-block: 1px solid var(--border);
+}
+.fields {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 32rem;
+}
+.fields input {
+  width: 100%;
+  min-height: 2.75rem;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
