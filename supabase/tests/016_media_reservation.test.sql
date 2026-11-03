@@ -112,5 +112,36 @@ select is((select result->>'replayed' from media_results where label='finalized_
 select is((select status from public.media_assets
   where id=(select (result->>'assetId')::uuid from media_results where label='owner')),'finalized',
   'finalization stores verified metadata state');
+select is((select public from storage.buckets where id='article-media'),false,
+  'article image bucket is private');
+insert into storage.objects(bucket_id,name,metadata)
+select 'article-media',object_key,'{"mimetype":"image/webp","size":1234}'::jsonb
+  from public.media_assets where id=(select (result->>'assetId')::uuid from media_results where label='new');
+create temp table media_paths as
+select r.label,a.object_key from media_results r join public.media_assets a
+  on a.id=(r.result->>'assetId')::uuid where r.label in ('owner','new');
+grant select on media_paths to authenticated;
+select set_config('storage.operation','object.get_authenticated',true);
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',true);
+set local role authenticated;
+select is((select count(*)::integer from storage.objects where bucket_id='article-media'
+  and name=(select object_key from media_paths where label='owner')),1,
+  'owner can download a finalized private object');
+select is((select count(*)::integer from storage.objects where bucket_id='article-media'
+  and name=(select object_key from media_paths where label='new')),0,
+  'pending object stays hidden from its owner');
+reset role;
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000003',true);
+set local role authenticated;
+select is((select count(*)::integer from storage.objects where bucket_id='article-media'
+  and name=(select object_key from media_paths where label='owner')),0,
+  'other author cannot download a finalized private object');
+reset role;
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);
+set local role authenticated;
+select is((select count(*)::integer from storage.objects where bucket_id='article-media'
+  and name=(select object_key from media_paths where label='owner')),1,
+  'active administrator can download a private object');
+reset role;
 select * from finish();
 rollback;
