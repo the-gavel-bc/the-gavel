@@ -35,9 +35,9 @@
 
 **Interfaces:** `public.request_article_image_upload(p_article_id uuid,p_request_id uuid) -> jsonb` returns a stable opaque asset ID for an authorized draft. `public.finalize_article_image_upload(p_actor_user_id uuid,p_asset_id uuid,p_sha256 text,p_byte_size integer,p_width integer,p_height integer) -> jsonb` is callable only with the server's service role after validation and checks the claimed actor, article and trusted object before changing pending to finalized. `public.media_assets` stores article/uploader/opaque key, state, validated output metadata, and request identity. Only a private trusted bucket is created.
 
-- [ ] Write pgTAP RED for owner/admin reservation, exact retry, other-owner and inactive/anonymous denial, direct table/Storage mutation denial, and finalization without a trusted object.
-- [ ] Implement additive schema, narrow grants/RLS, checked request/finalize RPCs, and private bucket policy. Keep existing stored data unchanged.
-- [ ] Run focused pgTAP GREEN, full database suite, schema lint and generated-type drift. Commit the independently reviewable schema boundary.
+- [x] Write pgTAP RED for owner/admin reservation, exact retry, other-owner and inactive/anonymous denial, direct table/Storage mutation denial, and finalization without a trusted object.
+- [x] Implement additive schema, narrow grants/RLS, checked request/finalize RPCs, and private bucket policy. Keep existing stored data unchanged.
+- [x] Run focused pgTAP GREEN, full database suite, schema lint and generated-type drift. Commit the independently reviewable schema boundary.
 
 ### Task B: Bounded server intake and safe cleanup
 
@@ -45,9 +45,9 @@
 
 **Interfaces:** `processArticleImage(bytes: Uint8Array, declaredType: string) -> Promise<{bytes: Uint8Array; contentType: 'image/webp'; width: number; height: number; sha256: string}>`. The route accepts a reserved asset and a multipart `file`, then writes only processed bytes. A remove operation first marks an unreferenced asset unavailable, deletes its object, then clears its record; retries are safe.
 
-- [ ] Write processor/route RED for valid synthetic inputs, corrupt and mismatched bytes, unsupported formats, all size/dimension bounds, missing/foreign assets, and failure cleanup.
-- [ ] Add Sharp explicitly, implement bounded intake, server-side authorization, private Storage promotion, finalize and retry-safe removal using the approved credential model.
-- [ ] Run focused tests, types, lint and build. Commit server media behavior and env/deployment notes.
+- [x] Write processor/route RED for valid synthetic inputs, corrupt and mismatched bytes, unsupported formats, all size/dimension bounds, missing/foreign assets, and failure cleanup.
+- [x] Add Sharp explicitly, implement bounded intake, server-side authorization, private Storage promotion, finalize and retry-safe removal using the approved credential model.
+- [x] Run focused tests, types, lint and build. Commit server media behavior and env/deployment notes.
 
 ### Task C: Versioned draft main-image attachment
 
@@ -55,13 +55,13 @@
 
 **Interfaces:** `public.set_article_main_image(p_article_id uuid,p_expected_version integer,p_request_id uuid,p_asset_id uuid,p_alt_text text,p_credit text) -> jsonb` creates/replaces a relational main-image link only for a finalized asset belonging to that article; a null asset removes the link. Snapshot/history includes the link. Exact retry uses a separate private receipt record and does not change the Phase 3 draft request hash.
 
-- [ ] Write SQL/contract RED for missing, pending, foreign, removed, and retained asset references; no-op and stale-version saves; alt/credit bounds; owner/admin and credited non-owner paths.
-- [ ] Add the relational reference and strict application/database validation; extend snapshot capture without changing existing draft RPC payloads, rows, or revisions.
-- [ ] Add an accessible upload/attach/remove control with status, progress, retry and field errors, integrated into the existing draft form. Validate keyboard and mobile behavior.
-- [ ] Run focused SQL, contract, component and browser GREEN; commit database attachment then UI as separate reviewable changes.
+- [x] Write SQL/contract RED for missing, pending, foreign, removed, and retained asset references; no-op and stale-version saves; alt/credit bounds; owner/admin and credited non-owner paths.
+- [x] Add the relational reference and strict application/database validation; extend snapshot capture without changing existing draft RPC payloads, rows, or revisions.
+- [x] Add an accessible upload/attach/remove control with status, progress, retry and field errors, integrated into the existing draft form. Validate keyboard and mobile behavior.
+- [x] Run focused SQL, contract, component and browser GREEN; commit database attachment then UI as separate reviewable changes.
 
 ### Task D: Integrated verification and review
 
-- [ ] Run documented database, generated-type, unit, contract, concurrency, browser, type, lint, format, production build and dependency-audit gates on Node 22.
+- [x] Run documented database, generated-type, unit, contract, concurrency, browser, type, lint, format, production build and dependency-audit gates on Node 22.
 - [ ] Verify an incremental local upgrade preserves existing rows; inspect private Storage visibility and cleanup/retention races. Capture desktop/mobile screenshots and review the security-sensitive diff.
 - [ ] Push this task branch, open a focused PR stacked on Task 2 while its PR is open, and record exact-head hosted CI. Retarget in order after earlier task PRs merge.

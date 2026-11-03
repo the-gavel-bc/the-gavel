@@ -1,5 +1,11 @@
 # API contracts
 
+## Implemented private draft main image
+
+`request_article_image_upload(articleId,requestId)` reserves an opaque media asset for an authorized draft owner or active administrator. `POST /api/articles/[id]/media/[assetId]` accepts one bounded multipart `file`, validates and re-encodes JPEG/PNG/WebP to private WebP, then uses the server-only service role to finalize the checked reservation. `set_article_main_image(articleId,expectedVersion,requestId,assetId,altText,credit)` attaches a finalized same-article asset or unlinks with null asset/metadata. It returns the existing draft write result envelope, creates history on a change, and replays exact requests. These interfaces leave the Phase 3 draft payload and receipts unchanged.
+
+`removeUnusedArticleImage(assetId)` first calls the user-scoped `mark_article_image_for_removal` RPC, then uses the server-only credential to remove the private object and call `complete_article_image_removal`. Current links and revision snapshots block removal. An interrupted cleanup leaves a `deleting` row for the same authorized caller to retry.
+
 Status: Foundation access/session interfaces, Phase 2 private content/history storage and Phase 3 private draft queries/actions implemented; draft association selectors are implemented; Task 10 save/conflict/navigation recovery is implemented; publishing remains planned.
 
 ## Style and ownership

@@ -116,6 +116,8 @@ Taxonomy, private articles, category/tag/contributor links, and protected histor
 
 Phase 4 Task 3 adds private upload reservations in `20261102010000_private_article_media.sql` and trusted finalization in `20261102010100_media_finalization.sql`. A reservation belongs to one article and uploader, has a generated opaque WebP object key, and has a pending/finalized/deleting state. Finalized rows record output bytes, dimensions, SHA-256, and time. The private `article-media` bucket has a 10 MiB WebP limit. No pre-existing article, revision, or profile row is rewritten.
 
+`20261102010200_article_main_image.sql` adds one relational `article_main_images` link per article, referencing a finalized asset from that article with required alt text and credit. A separate private receipt table preserves exact main-image mutation retries. New article revisions include `mainImage` metadata; old snapshots remain valid. `20261103010000_media_removal.sql` captures each revision's image in a private relational reference table, including a backfill of any earlier new-format snapshots. Cleanup marks unused assets unavailable, refuses any current or historical relational reference, and deletes the asset row only after its object is absent.
+
 `20261102010200_article_main_image.sql` adds one relational `article_main_images` link per article, requiring a finalized asset for that same article, bounded nonblank alt text and credit. The checked `set_article_main_image` operation changes the link, article version, revision, audit event and exact retry receipt atomically. Its snapshot extension affects only new revisions; old rows and draft request fingerprints are unchanged. The upload UI and cleanup flow remain in progress.
 
 ### homepage_selections

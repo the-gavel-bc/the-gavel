@@ -2,6 +2,8 @@
 
 Status: Foundation access/session controls and Phase 2 content/history read permissions implemented; publishing and hosted provider controls remain planned.
 
+Phase 4 private article media uses a server-only Supabase service-role key for validated WebP Storage writes and cleanup. Reservation, attachment, and removal still begin with active user-scoped checks; trusted finalization and completion independently check the claimed actor and asset state. The private bucket has no direct browser write grant. Finalized objects are readable only for an authorized article reader; pending or deleting objects are hidden. Current and historical article image references block physical deletion.
+
 ## Security objective
 
 The project replaces a previously compromised WordPress site. The new system minimizes the attack surface, avoids executable plugin/theme uploads, separates application and infrastructure permissions, and applies authorization in both server code and PostgreSQL Row Level Security.
