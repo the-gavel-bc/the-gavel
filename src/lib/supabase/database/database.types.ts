@@ -529,6 +529,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      complete_article_image_removal: {
+        Args: { p_actor_user_id: string; p_asset_id: string };
+        Returns: Json;
+      };
       create_article_draft: {
         Args: { p_draft: Json; p_request_id: string };
         Returns: Json;
@@ -549,6 +553,10 @@ export type Database = {
           p_sha256: string;
           p_width: number;
         };
+        Returns: Json;
+      };
+      mark_article_image_for_removal: {
+        Args: { p_asset_id: string };
         Returns: Json;
       };
       request_article_image_upload: {
