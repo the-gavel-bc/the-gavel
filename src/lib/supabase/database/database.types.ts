@@ -529,6 +529,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      begin_article_image_upload: {
+        Args: { p_actor_user_id: string; p_asset_id: string };
+        Returns: Json;
+      };
       complete_article_image_removal: {
         Args: { p_actor_user_id: string; p_asset_id: string };
         Returns: Json;

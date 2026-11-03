@@ -82,5 +82,20 @@ select is((select result->>'ok' from results where label='complete'),'true','tru
 select is((select result->>'replayed' from results where label='complete_retry'),'true','completion is retryable');
 select is((select count(*)::integer from public.media_assets where id='60000000-0000-0000-0000-000000000602'),0,
   'removed asset row is gone');
+insert into public.media_assets(id,article_id,uploader_user_id,request_id,object_key)
+values ('60000000-0000-0000-0000-000000000603',(select article_id from media_target),
+  '00000000-0000-0000-0000-000000000002','80000000-0000-0000-0000-000000000604','cleanup/603.webp');
+set local role service_role;
+insert into results values ('claimed',public.begin_article_image_upload(
+  '00000000-0000-0000-0000-000000000002','60000000-0000-0000-0000-000000000603'));
+reset role;
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',true);
+set local role authenticated;
+insert into results values ('uploading',public.mark_article_image_for_removal('60000000-0000-0000-0000-000000000603'));
+reset role;
+select is((select result->>'ok' from results where label='claimed'),'true',
+  'trusted route claims pending asset before Storage upload');
+select is((select result->>'code' from results where label='uploading'),'conflict',
+  'cleanup cannot race a claimed upload');
 select * from finish();
 rollback;

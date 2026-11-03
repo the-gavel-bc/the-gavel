@@ -45,6 +45,7 @@ begin
   end if;
   select * into asset from public.media_assets where id=p_asset_id for update;
   if article.status<>'draft' then return '{"ok":false,"code":"conflict"}'::jsonb; end if;
+  if asset.status='uploading' then return '{"ok":false,"code":"conflict"}'::jsonb; end if;
   if exists(select 1 from public.article_main_images where asset_id=p_asset_id)
     or exists(select 1 from private.article_revision_media_refs r
       where r.asset_id=p_asset_id) then
