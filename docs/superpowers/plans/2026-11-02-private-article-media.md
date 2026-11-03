@@ -21,6 +21,8 @@
 
 ## Review Focus
 
+Before PR: cleanup must not race an upload in progress; failed cleanup must retain its asset ID and a retry path; a version conflict must offer recovery without repeating a stale request. Cover an allowed-format animated image with decoder tests.
+
 1. A valid header with corrupt body must fail decoding before trusted upload; processor test.
 2. Oversized dimensions, excessive total pixels, animation, and a MIME mismatch must fail before trusted upload; processor tests.
 3. A credited non-owner, inactive member, anonymous caller, and ordinary author targeting another article cannot reserve, finalize, attach, read, or remove an asset; SQL and route tests.
@@ -63,5 +65,5 @@
 ### Task D: Integrated verification and review
 
 - [x] Run documented database, generated-type, unit, contract, concurrency, browser, type, lint, format, production build and dependency-audit gates on Node 22.
-- [ ] Verify an incremental local upgrade preserves existing rows; inspect private Storage visibility and cleanup/retention races. Capture desktop/mobile screenshots and review the security-sensitive diff.
+- [x] Verify an incremental local upgrade preserves existing rows; inspect private Storage visibility and cleanup/retention races. Capture desktop/mobile screenshots and review the security-sensitive diff.
 - [ ] Push this task branch, open a focused PR stacked on Task 2 while its PR is open, and record exact-head hosted CI. Retarget in order after earlier task PRs merge.

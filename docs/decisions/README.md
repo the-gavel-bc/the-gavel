@@ -20,3 +20,5 @@ Copy [template.md](template.md) to `0001-descriptive-title.md`, increasing the n
 - [0007: Use a constrained editor and atomic private draft mutations](0007-private-draft-editor-and-mutations.md) — Accepted; validators and draft create/save implemented; editor pending
 
 - [0008: Use checked editorial lifecycle operations](0008-checked-editorial-lifecycle.md) — Accepted for Phase 4 planning; implementation pending
+
+- [0009: Promote validated private images on the server](0009-private-image-promotion-and-retention.md) — Accepted for Phase 4 Task 3
