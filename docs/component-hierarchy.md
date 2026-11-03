@@ -1,6 +1,8 @@
 # Component hierarchy
 
-Status: Foundation shell, access routes and private My Articles listing, create form and constrained draft edit route implemented; publication and other dashboard feature routes below remain planned.
+Status: Foundation shell, access routes and private My Articles listing, create form, constrained draft edit route and private draft main-image control implemented; publication and other dashboard feature routes below remain planned.
+
+The existing draft edit page loads the current private main-image link server-side. `ArticleMedia` in `DraftForm` reserves and uploads a JPEG/PNG/WebP image, collects alt text and credit, then saves the link through a separate versioned mutation. It can update image metadata, unlink the current image, or discard an upload that was never attached. Unsaved draft fields disable image changes; unsaved image input participates in the navigation guard. The current linked image is described as text until the private preview and public rendering work lands.
 
 ## Implemented foundation routes
 

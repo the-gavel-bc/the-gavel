@@ -27,6 +27,8 @@ import { useDraftCategories } from "./use-draft-categories";
 import { DraftConflictPanel } from "../draft-conflict-panel/draft-conflict-panel";
 import { useDraftNavigationGuard } from "../draft-navigation-guard/draft-navigation-guard";
 import { GuardedDashboardLink } from "../guarded-dashboard-link/guarded-dashboard-link";
+import { ArticleMedia } from "../article-media/article-media";
+import type { MainImage } from "@/lib/media/media-queries/media-queries";
 
 const DraftEditor = dynamic(
   () =>
@@ -56,13 +58,16 @@ export function DraftForm({
   initialDraft,
   options,
   article,
+  initialImage,
 }: {
   initialDraft: DraftInput;
   options: DraftOptions;
   article?: DraftArticle;
+  initialImage?: MainImage | null;
 }) {
   const command = useDraftCommand(initialDraft, article);
   const [editorFailure, setEditorFailure] = useState<DraftFailure | null>(null);
+  const [mediaDirty, setMediaDirty] = useState(false);
   const { editorInvalid } = command;
   const reportEditorFailure = useCallback(
     (failure: DraftFailure) => {
@@ -113,7 +118,10 @@ export function DraftForm({
       summary.current?.focus();
   }, [command.failure, hasSelectionErrors]);
   useDraftNavigationGuard(
-    command.dirty || Boolean(command.pending) || Boolean(editorFailure),
+    command.dirty ||
+      Boolean(command.pending) ||
+      Boolean(editorFailure) ||
+      mediaDirty,
   );
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -284,6 +292,26 @@ export function DraftForm({
           }}
         />
       </fieldset>
+      {command.article && (
+        <ArticleMedia
+          article={command.article}
+          initialImage={initialImage ?? null}
+          disabled={
+            command.dirty ||
+            Boolean(command.pending) ||
+            command.phase === "saving" ||
+            command.phase === "conflict"
+          }
+          onCommit={(result) => {
+            command.reload(command.draft, {
+              id: result.articleId,
+              version: result.version,
+              updatedAt: result.updatedAt,
+            });
+          }}
+          onDirtyChange={setMediaDirty}
+        />
+      )}
       <p>Your draft stays private.</p>
       <div>
         <Button

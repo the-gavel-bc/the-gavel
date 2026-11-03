@@ -44,6 +44,7 @@ Open `http://localhost:3000`. The application validates these variables at their
 - `NEXT_PUBLIC_SUPABASE_URL`: environment-specific Supabase URL.
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: browser-safe key protected by RLS.
 - `SITE_URL`: server-only canonical application origin.
+- `SUPABASE_SERVICE_ROLE_KEY`: server-only local key from `pnpm supabase status`, used only for Phase 4 private media validation and cleanup. Never expose it to the browser.
 
 The committed values in `.env.example` are localhost examples, not credentials. Keep real values in `.env.local` or the deployment platform; never place secrets in documentation or Git. Local Supabase requires a running Docker-compatible runtime:
 

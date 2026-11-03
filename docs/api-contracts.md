@@ -1,5 +1,11 @@
 # API contracts
 
+## Implemented private draft main image
+
+`request_article_image_upload(articleId,requestId)` reserves an opaque media asset for an authorized draft owner or active administrator. `POST /api/articles/[id]/media/[assetId]` accepts one bounded multipart `file`, validates and re-encodes JPEG/PNG/WebP to private WebP, then uses the server-only service role to finalize the checked reservation. `set_article_main_image(articleId,expectedVersion,requestId,assetId,altText,credit)` attaches a finalized same-article asset or unlinks with null asset/metadata. It returns the existing draft write result envelope, creates history on a change, and replays exact requests. These interfaces leave the Phase 3 draft payload and receipts unchanged.
+
+`removeUnusedArticleImage(assetId)` first calls the user-scoped `mark_article_image_for_removal` RPC, then uses the server-only credential to remove the private object and call `complete_article_image_removal`. Current links and revision snapshots block removal. An interrupted cleanup leaves a `deleting` row for the same authorized caller to retry.
+
 Status: Foundation access/session interfaces, Phase 2 private content/history storage and Phase 3 private draft queries/actions implemented; draft association selectors are implemented; Task 10 save/conflict/navigation recovery is implemented; publishing remains planned.
 
 ## Style and ownership
@@ -54,6 +60,8 @@ The [accepted Phase 4 editorial contract](superpowers/specs/2026-11-01-editorial
 - Archive owned article.
 - Update own public profile.
 - Request and finalize valid image uploads.
+
+Phase 4 Task 3 implements `request_article_image_upload(article_id,request_id)` for a stable owned-draft reservation and a checked server action that exposes only its safe receipt. `POST /api/articles/[id]/media/[assetId]` accepts one bounded multipart file, verifies the active actor and reserved article through the user-scoped client, decodes/re-encodes it to WebP, uploads it with a server-only service key, and calls the service-role-only finalization RPC. An exact finalized retry returns the confirmed asset ID; a matching Storage object can resume an uncertain upload. The route does not return object paths or secret values. `set_article_main_image(article_id,expected_version,request_id,asset_id,alt_text,credit)` is a checked versioned RPC; null asset/text/credit removes the link. It captures a revision/audit event only on a change and preserves exact retries. The dashboard attachment action and cleanup remain in progress. The browser never receives the service key.
 
 ## Planned administrator operations
 

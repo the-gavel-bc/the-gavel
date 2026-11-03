@@ -2,6 +2,8 @@
 
 Status: Foundation access/session controls and Phase 2 content/history read permissions implemented; publishing and hosted provider controls remain planned.
 
+Phase 4 private article media uses a server-only Supabase service-role key for validated WebP Storage writes and cleanup. Reservation, attachment, and removal still begin with active user-scoped checks; trusted finalization and completion independently check the claimed actor and asset state. The private bucket has no direct browser write grant. Finalized objects are readable only for an authorized article reader; pending, uploading, or deleting objects are hidden. Current and historical article image references block physical deletion.
+
 ## Security objective
 
 The project replaces a previously compromised WordPress site. The new system minimizes the attack surface, avoids executable plugin/theme uploads, separates application and infrastructure permissions, and applies authorization in both server code and PostgreSQL Row Level Security.
@@ -112,6 +114,8 @@ The [accepted Phase 4 editorial contract](superpowers/specs/2026-11-01-editorial
 - Validate redirect targets and allow only intended local or approved external destinations.
 
 ## Upload controls
+
+Phase 4 Task 3's additive migrations reserve article media through a checked owner/administrator RPC. Authenticated callers cannot directly insert, update, or delete media rows or finalize them; the finalization RPC is service-role-only and independently checks the claimed actor, article, validated metadata, and trusted Storage object. The private bucket exposes finalized reads only to eligible article owners/administrators through Storage RLS. The server-only image processor bounds multipart and decoded JPEG/PNG/WebP inputs, re-encodes to metadata-stripped WebP, and records a SHA-256 digest. Sharp is an explicit dependency because actual decoding and re-encoding are required. The upload route verifies the active actor and reserved article before opening the privileged Storage client and never returns the service key or object path. Uncertain finalization leaves the object in the private bucket for safe retry. A separate checked main-image RPC requires a finalized asset on the same article, validates alt/credit, and blocks direct link writes; a restrictive foreign key prevents deletion while attached. Dashboard attachment and cleanup are still being built.
 
 - MVP image types: JPEG, PNG, and WebP.
 - Do not accept SVG, HTML, archives, executables, or arbitrary attachments.

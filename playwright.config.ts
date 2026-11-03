@@ -30,6 +30,7 @@ export default defineConfig({
     env: {
       NEXT_PUBLIC_SUPABASE_URL: local.API_URL,
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: local.PUBLISHABLE_KEY,
+      SUPABASE_SERVICE_ROLE_KEY: local.SERVICE_ROLE_KEY,
       SITE_URL: "http://127.0.0.1:3100",
     },
   },

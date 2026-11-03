@@ -31,7 +31,19 @@
 
 ## Project-specific preferences
 
+- Use the Caveman skill for all conversation responses in this repo until the user asks to stop. For persisted artifacts, use plain prose as the skill directs.
 - Communication style: concise progress updates, evidence-backed conclusions, and explicit unresolved decisions.
 - Coding conventions: see docs/coding-style.md.
 - Changes requiring discussion first: authentication/authorization model, public URL changes, content lifecycle changes, destructive migrations, new external services, and additions to MVP scope.
 - Definition of done beyond the rules above: test role and ownership denials, update affected documentation, verify accessibility/security implications, and report commands actually run.
+
+## Execution workflow preferences
+
+- Before implementation, identify design-level risks and acceptance criteria in the focused task plan. Include race safety, retry behavior, and conflict recovery where relevant so these are solved before code review.
+- Split broad work into small, independently reviewable tasks. Review each completed slice once before opening its PR; avoid building a large feature before the first review.
+- Batch product questions before implementation when their answers affect behavior, architecture, or contracts.
+- Keep task documentation lean: maintain one focused plan with decisions and verification notes. Update other authoritative docs only when a lasting contract, schema, or project-wide rule changes; link to the task plan instead of duplicating implementation detail. Add an ADR only for a durable architectural choice.
+- Skip screenshots by default. Capture them when investigating a UI issue or when a PR reviewer needs visual evidence.
+- Keep a short `STATUS.md` for active multi-session work with the current phase, branch, stack position, and approved decisions. Start a resumed session by reading that file when present.
+- Run fast checks such as types, lint, and unit tests during implementation. Run heavier checks such as database, concurrency, and browser suites once before the PR; after a fix, rerun only the checks that cover the changed behavior.
+- When model choice is available, use a lower-cost model for mechanical edits, formatting, and routine test scaffolding; reserve stronger models for design and code review.

@@ -5,6 +5,13 @@ const mocks = vi.hoisted(() => ({
   guard: vi.fn(),
   detail: vi.fn(),
   options: vi.fn(),
+  mainImage: vi.fn(),
+}));
+vi.mock("@/lib/media/media-queries/media-queries", () => ({
+  getArticleMainImage: mocks.mainImage,
+}));
+vi.mock("@/components/dashboard/article-media/article-media", () => ({
+  ArticleMedia: () => <section aria-label="Main image" />,
 }));
 vi.mock("@/lib/auth/access/access", () => ({
   requireActiveMembership: mocks.guard,
@@ -27,6 +34,7 @@ const id = baseDraft.sectionId,
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.guard.mockResolvedValue({ status: "active" });
+  mocks.mainImage.mockResolvedValue(null);
   mocks.options.mockResolvedValue({
     sections: [{ id, name: "Synthetic" }],
     categories: [],

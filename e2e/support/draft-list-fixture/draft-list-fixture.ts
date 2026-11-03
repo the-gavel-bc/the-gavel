@@ -3,24 +3,33 @@ import { localSupabase } from "../local-supabase/local-supabase";
 
 export function draftListFixture(
   project: string,
-  suite: "list" | "create" | "edit" | "select" | "save" | "recover" = "list",
+  suite:
+    | "list"
+    | "create"
+    | "edit"
+    | "select"
+    | "save"
+    | "recover"
+    | "media" = "list",
 ) {
   if (project !== "desktop" && project !== "mobile")
     throw new Error("Unknown local browser project.");
   const base =
     (project === "desktop" ? 860 : 880) +
-    (suite === "recover"
-      ? 200
-      : suite === "save"
-        ? 160
-        : suite === "select"
-          ? 120
-          : suite === "edit"
-            ? 80
-            : suite === "create"
-              ? 40
-              : 0);
-  const prefix = `${suite === "save" || suite === "recover" ? `task10-${suite}` : suite === "select" ? "task9" : suite === "edit" ? "task8" : suite === "create" ? "task7" : "task6"}-${project}`;
+    (suite === "media"
+      ? 240
+      : suite === "recover"
+        ? 200
+        : suite === "save"
+          ? 160
+          : suite === "select"
+            ? 120
+            : suite === "edit"
+              ? 80
+              : suite === "create"
+                ? 40
+                : 0);
+  const prefix = `${suite === "media" ? "phase4-task3" : suite === "save" || suite === "recover" ? `task10-${suite}` : suite === "select" ? "task9" : suite === "edit" ? "task8" : suite === "create" ? "task7" : "task6"}-${project}`;
   const uuid = (n: number) =>
     `00000000-0000-0000-0000-${String(n).padStart(12, "0")}`;
   const id = (n: number) =>
@@ -33,7 +42,7 @@ export function draftListFixture(
   };
   const userIds = Object.values(users).map(uuid);
   const quoted = (ids: string[]) => ids.map((id) => `'${id}'`).join(",");
-  const label = `Task ${suite === "save" || suite === "recover" ? 10 : suite === "select" ? 9 : suite === "edit" ? 8 : suite === "create" ? 7 : 6} ${project}`;
+  const label = `Task ${suite === "media" ? "4.3" : suite === "save" || suite === "recover" ? 10 : suite === "select" ? 9 : suite === "edit" ? 8 : suite === "create" ? 7 : 6} ${project}`;
   let installed = false;
   let selectionsInstalled = false;
   function sql(statement: string) {
@@ -234,7 +243,23 @@ export function draftListFixture(
     },
     cleanup() {
       if (!installed) return;
-      sql(`delete from private.draft_write_receipts where actor_user_id in (${quoted(userIds)});
+      sql(`${
+        suite === "media"
+          ? `
+        -- Test-only synthetic cleanup; production removes objects via Storage API.
+        select set_config('storage.allow_delete_query','true',true);
+        delete from storage.objects where bucket_id='article-media' and name in
+          (select object_key from public.media_assets where uploader_user_id in (${quoted(userIds)}));
+        delete from public.article_main_images where article_id in
+          (select id from public.articles where owner_profile_id in (${quoted(userIds)}));
+        delete from private.media_write_receipts where actor_user_id in (${quoted(userIds)});
+        delete from private.article_revision_media_refs where article_id in
+          (select id from public.articles where owner_profile_id in (${quoted(userIds)}));
+        delete from public.media_assets where uploader_user_id in (${quoted(userIds)});
+      `
+          : ""
+      }
+        delete from private.draft_write_receipts where actor_user_id in (${quoted(userIds)});
         delete from private.draft_write_limits where actor_user_id in (${quoted(userIds)});
         delete from public.audit_events where actor_user_id in (${quoted(userIds)});
         delete from public.article_revisions where actor_user_id in (${quoted(userIds)});

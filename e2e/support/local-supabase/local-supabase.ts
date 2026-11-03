@@ -15,7 +15,8 @@ export function localSupabase() {
   if (
     status.API_URL !== "http://127.0.0.1:54321" ||
     !status.JWT_SECRET ||
-    !status.PUBLISHABLE_KEY
+    !status.PUBLISHABLE_KEY ||
+    !status.SERVICE_ROLE_KEY
   )
     throw new Error(
       "Browser tests require the isolated local Supabase project.",
