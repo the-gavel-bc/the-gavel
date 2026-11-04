@@ -2,7 +2,7 @@
 import sharp from "sharp";
 import { beforeEach, expect, it, vi } from "vitest";
 import { processArticleImage } from "@/lib/media/image-intake/image-intake";
-import { POST } from "./route";
+import { GET, POST } from "./route";
 
 const articleId = "50000000-0000-0000-0000-000000000401";
 const assetId = "60000000-0000-0000-0000-000000000401";
@@ -81,6 +81,92 @@ beforeEach(() => {
         ? mocks.claim(name, args)
         : mocks.finalize(name, args),
   });
+});
+
+it("serves only finalized same-article WebP through the user-scoped client", async () => {
+  const bytes = new Uint8Array([1, 2, 3]);
+  mocks.asset.mockResolvedValue({
+    data: {
+      id: assetId,
+      article_id: articleId,
+      object_key: "private/image.webp",
+      status: "finalized",
+    },
+    error: null,
+  });
+  mocks.download.mockResolvedValue({
+    data: new Blob([bytes], { type: "image/webp" }),
+    error: null,
+  });
+  mocks.userClient.mockResolvedValue({
+    from: () => ({
+      select: () => ({ eq: () => ({ maybeSingle: mocks.asset }) }),
+    }),
+    storage: { from: () => ({ download: mocks.download }) },
+  });
+  const response = await GET(
+    new Request("http://localhost/private"),
+    routeParams,
+  );
+  expect(response.status).toBe(200);
+  expect(response.headers.get("Content-Type")).toBe("image/webp");
+  expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+  expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
+  expect(new Uint8Array(await response.arrayBuffer())).toEqual(bytes);
+  expect(mocks.trustedClient).not.toHaveBeenCalled();
+});
+
+it("hides pending and foreign assets from private preview", async () => {
+  for (const data of [
+    {
+      id: assetId,
+      article_id: articleId,
+      object_key: "private/a.webp",
+      status: "pending",
+    },
+    {
+      id: assetId,
+      article_id: "50000000-0000-0000-0000-000000000402",
+      object_key: "private/a.webp",
+      status: "finalized",
+    },
+  ]) {
+    mocks.asset.mockResolvedValue({ data, error: null });
+    const response = await GET(
+      new Request("http://localhost/private"),
+      routeParams,
+    );
+    expect(response.status).toBe(404);
+  }
+  expect(mocks.download).not.toHaveBeenCalled();
+});
+
+it("reports an unavailable private preview without using the trusted client", async () => {
+  mocks.asset.mockResolvedValue({
+    data: {
+      id: assetId,
+      article_id: articleId,
+      object_key: "private/image.webp",
+      status: "finalized",
+    },
+    error: null,
+  });
+  mocks.download.mockResolvedValue({
+    data: null,
+    error: new Error("storage unavailable"),
+  });
+  mocks.userClient.mockResolvedValue({
+    from: () => ({
+      select: () => ({ eq: () => ({ maybeSingle: mocks.asset }) }),
+    }),
+    storage: { from: () => ({ download: mocks.download }) },
+  });
+  const response = await GET(
+    new Request("http://localhost/private"),
+    routeParams,
+  );
+  expect(response.status).toBe(503);
+  expect(mocks.trustedClient).not.toHaveBeenCalled();
 });
 
 it("denies unauthenticated upload before reading or creating trusted client", async () => {

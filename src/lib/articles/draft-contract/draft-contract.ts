@@ -9,6 +9,10 @@ export type DraftInline =
 export type DraftParagraph = { type: "paragraph"; content?: DraftInline[] };
 export type DraftBlock =
   | DraftParagraph
+  | {
+      type: "image";
+      attrs: { assetId: string; alt: string; caption: string | null };
+    }
   | { type: "heading"; attrs: { level: 2 | 3 }; content?: DraftInline[] }
   | { type: "blockquote"; content: DraftBlock[] }
   | { type: "bulletList"; content: DraftListItem[] }
@@ -19,7 +23,7 @@ export type DraftListItem = {
 };
 export type DraftDocument = {
   format: "gavel-draft";
-  version: 1;
+  version: 1 | 2;
   document: { type: "doc"; content: DraftBlock[] };
 };
 export type DraftContributor = {
@@ -149,7 +153,7 @@ export function isValidDraftDocument(
     !isObject(value) ||
     !keys(value, ["format", "version", "document"]) ||
     value.format !== "gavel-draft" ||
-    value.version !== 1
+    (value.version !== 1 && value.version !== 2)
   )
     return false;
   const stack: {
@@ -158,6 +162,7 @@ export function isValidDraftDocument(
     depth: number;
   }[] = [{ node: value.document, kind: "root", depth: 1 }];
   let nodes = 0;
+  const imageIds = new Set<string>();
   while (stack.length) {
     const { node, kind, depth } = stack.pop()!;
     if (++nodes > 5000 || depth > 16 || !isObject(node)) return false;
@@ -172,6 +177,7 @@ export function isValidDraftDocument(
           "blockquote",
           "bulletList",
           "orderedList",
+          ...(value.version === 2 ? ["image"] : []),
         ].includes(String(type))) ||
       (kind === "item" && type !== "listItem") ||
       (kind === "inline" && type !== "text" && type !== "hardBreak")
@@ -179,6 +185,20 @@ export function isValidDraftDocument(
       return false;
     if (type === "hardBreak") {
       if (!keys(node, ["type"])) return false;
+      continue;
+    }
+    if (type === "image") {
+      if (
+        !keys(node, ["type", "attrs"]) ||
+        !isObject(node.attrs) ||
+        !keys(node.attrs, ["assetId", "alt", "caption"]) ||
+        !isDraftUuid(node.attrs.assetId) ||
+        !scalar(node.attrs.alt, 240) ||
+        !(node.attrs.caption === null || scalar(node.attrs.caption, 500)) ||
+        imageIds.has(node.attrs.assetId)
+      )
+        return false;
+      imageIds.add(node.attrs.assetId);
       continue;
     }
     if (type === "text") {
@@ -328,7 +348,8 @@ export function checkDraftInput(value: unknown): DraftCheckResult {
   if (
     value.content !== null &&
     isObject(value.content) &&
-    (value.content.format !== "gavel-draft" || value.content.version !== 1)
+    (value.content.format !== "gavel-draft" ||
+      (value.content.version !== 1 && value.content.version !== 2))
   )
     return { ok: false, code: "unsupported_content" };
   if (!isValidDraftDocument(value.content)) return invalid;

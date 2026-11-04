@@ -28,6 +28,12 @@ vi.mock("@/lib/articles/draft-reload-action/draft-reload-action", () => ({
 vi.mock("../article-media/article-media", () => ({
   ArticleMedia: () => <section aria-label="Main image" />,
 }));
+vi.mock("@/lib/media/media-actions/media-actions", () => ({
+  requestArticleImageUpload: vi.fn(),
+}));
+vi.mock("@/lib/media/media-removal/media-removal", () => ({
+  removeUnusedArticleImage: vi.fn(),
+}));
 import { DraftForm } from "./draft-form";
 const options = {
   sections: [{ id: baseDraft.sectionId, name: "Synthetic section" }],

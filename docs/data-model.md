@@ -120,6 +120,8 @@ Phase 4 Task 3 adds private upload reservations in `20261102010000_private_artic
 
 `20261102010200_article_main_image.sql` adds one relational `article_main_images` link per article, requiring a finalized asset for that same article, bounded nonblank alt text and credit. The checked `set_article_main_image` operation changes the link, article version, revision, audit event and exact retry receipt atomically. Its snapshot extension affects only new revisions; old rows and draft request fingerprints are unchanged. The upload UI and cleanup flow remain in progress.
 
+Phase 4 Task 4 adds `article_body_images(article_id,asset_id)` and allows multiple retained media references per revision. Version 2 bodies contain only image asset IDs and bounded alt/caption text; version 1 bodies and old snapshots remain unchanged. Draft save locks finalized same-article assets and updates the body-reference set atomically with content and history. Current or historical references block cleanup. The migrations are forward-only; `20261103020300` and `20261103020400` correct an image-validator predicate before Task 4 is released.
+
 ### homepage_selections
 
 Stores active lead, ordered Featured News, and ordered Read This selections. Referenced articles must be published; rendering falls back to eligible recent content when selections are missing.

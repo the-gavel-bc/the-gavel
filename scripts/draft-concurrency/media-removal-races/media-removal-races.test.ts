@@ -2,7 +2,8 @@ import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import type { DraftWriteResult } from "../../../src/lib/articles/draft-contract/draft-contract";
 import { ACTOR, beginAsActor } from "../draft-fixtures/draft-fixtures";
-import { withSaveFixtures } from "../save-fixtures/save-fixtures";
+import { DRAFT } from "../draft-fixtures/draft-fixtures";
+import { saveCommand, withSaveFixtures } from "../save-fixtures/save-fixtures";
 import { waitForLock } from "../database-session/database-session";
 
 async function reserveFinalizedAsset(
@@ -24,6 +25,25 @@ function attach(articleId: string, assetId: string) {
 
 function remove(assetId: string) {
   return `public.mark_article_image_for_removal('${assetId}')`;
+}
+
+function saveBody(articleId: string, assetId: string) {
+  return saveCommand(articleId, 1, randomUUID(), {
+    ...DRAFT,
+    content: {
+      format: "gavel-draft",
+      version: 2,
+      document: {
+        type: "doc",
+        content: [
+          {
+            type: "image",
+            attrs: { assetId, alt: "Synthetic red image", caption: null },
+          },
+        ],
+      },
+    },
+  });
 }
 
 describe("main image attachment versus cleanup", () => {
@@ -73,6 +93,53 @@ describe("main image attachment versus cleanup", () => {
       expect(
         await observer.json<number>(
           `(select count(*) from public.article_main_images where asset_id='${assetId}')`,
+        ),
+      ).toBe(0);
+    });
+  });
+});
+
+describe("body image save versus cleanup", () => {
+  it("a committed body save retains the asset before removal can mark it", async () => {
+    await withSaveFixtures(async ({ observer, a, b, articleId }) => {
+      const assetId = await reserveFinalizedAsset(observer, articleId);
+      await beginAsActor(a);
+      expect(
+        (await a.json<DraftWriteResult>(saveBody(articleId, assetId))).ok,
+      ).toBe(true);
+      await beginAsActor(b);
+      const pending = b.json(remove(assetId));
+      await waitForLock(observer, b);
+      await a.execute("commit;");
+      expect(await pending).toEqual({ ok: false, code: "conflict" });
+      await b.execute("commit;");
+      expect(
+        await observer.json<number>(
+          `(select count(*) from public.article_body_images where asset_id='${assetId}')`,
+        ),
+      ).toBe(1);
+      expect(
+        await observer.json<number>(
+          `(select count(*) from private.article_revision_media_refs where asset_id='${assetId}')`,
+        ),
+      ).toBe(1);
+    });
+  });
+
+  it("a removal mark prevents a delayed body save", async () => {
+    await withSaveFixtures(async ({ observer, a, b, articleId }) => {
+      const assetId = await reserveFinalizedAsset(observer, articleId);
+      await beginAsActor(a);
+      expect(await a.json(remove(assetId))).toMatchObject({ ok: true });
+      await beginAsActor(b);
+      const pending = b.json<DraftWriteResult>(saveBody(articleId, assetId));
+      await waitForLock(observer, b);
+      await a.execute("commit;");
+      expect(await pending).toEqual({ ok: false, code: "invalid_input" });
+      await b.execute("commit;");
+      expect(
+        await observer.json<number>(
+          `(select count(*) from public.article_body_images where asset_id='${assetId}')`,
         ),
       ).toBe(0);
     });

@@ -80,10 +80,18 @@ export function fromEditorDocument(value: unknown): DraftDocumentResult {
   if (bytes === null || bytes > 2 * 1024 * 1024)
     return { ok: false, code: "invalid_input" };
   try {
+    const document = translate(value, false);
+    const stack: JSONContent[] = [document];
+    let hasImage = false;
+    while (stack.length) {
+      const node = stack.pop()!;
+      if (node.type === "image") hasImage = true;
+      if (node.content) stack.push(...node.content);
+    }
     const envelope: unknown = {
       format: "gavel-draft",
-      version: 1,
-      document: translate(value, false),
+      version: hasImage ? 2 : 1,
+      document,
     };
     return isValidDraftDocument(envelope) && envelope !== null
       ? { ok: true, document: envelope }

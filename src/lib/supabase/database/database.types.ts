@@ -34,6 +34,37 @@ export type Database = {
   };
   public: {
     Tables: {
+      article_body_images: {
+        Row: {
+          article_id: string;
+          asset_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          article_id: string;
+          asset_id: string;
+        };
+        Update: {
+          article_id?: string;
+          asset_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "article_body_images_article_id_fkey";
+            columns: ["article_id"];
+            isOneToOne: false;
+            referencedRelation: "articles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "article_body_images_asset_id_article_id_fkey";
+            columns: ["asset_id", "article_id"];
+            isOneToOne: false;
+            referencedRelation: "media_assets";
+            referencedColumns: ["id", "article_id"];
+          },
+        ];
+      };
       article_categories: {
         Row: {
           article_id: string;

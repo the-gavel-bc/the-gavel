@@ -19,6 +19,48 @@ function reply(status: number, body: Record<string, unknown>) {
   });
 }
 
+export async function GET(
+  _request: Request,
+  context: { params: Promise<{ id: string; assetId: string }> },
+) {
+  try {
+    const { id: articleId, assetId } = await context.params;
+    if (!isDraftUuid(articleId) || !isDraftUuid(assetId))
+      return reply(404, { ok: false, code: "not_found" });
+    const access = await getCurrentAccess();
+    if (access.status !== "active")
+      return reply(404, { ok: false, code: "not_found" });
+    const client = await createServerSupabaseClient();
+    const { data: asset, error } = await client
+      .from("media_assets")
+      .select("article_id,object_key,status")
+      .eq("id", assetId)
+      .maybeSingle();
+    if (error) return reply(503, { ok: false, code: "unavailable" });
+    if (
+      !asset ||
+      asset.article_id !== articleId ||
+      asset.status !== "finalized"
+    )
+      return reply(404, { ok: false, code: "not_found" });
+    const { data, error: downloadError } = await client.storage
+      .from("article-media")
+      .download(asset.object_key);
+    if (downloadError || !data)
+      return reply(503, { ok: false, code: "unavailable" });
+    return new Response(data, {
+      status: 200,
+      headers: {
+        "Content-Type": "image/webp",
+        "Cache-Control": "private, no-store",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
+  } catch {
+    return reply(503, { ok: false, code: "unavailable" });
+  }
+}
+
 export async function POST(
   request: Request,
   context: { params: Promise<{ id: string; assetId: string }> },

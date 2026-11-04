@@ -13,6 +13,7 @@ import {
 } from "@/lib/articles/draft-contract/draft-contract";
 import styles from "./draft-editor.module.css";
 import { insertDraftText } from "./draft-paste";
+import { DraftBodyImageControl } from "./draft-body-image-control";
 // Compare already-validated JSON independent of PostgreSQL's object key ordering.
 const key = (value: unknown) =>
   JSON.stringify(value, (_, item: unknown) =>
@@ -27,15 +28,19 @@ export function DraftEditor({
   onChange,
   onError,
   disabled,
+  articleId,
+  onMediaDirtyChange,
 }: {
   value: DraftDocument | null;
   onChange: (value: DraftDocument) => void;
   onError: (failure: DraftFailure) => void;
   disabled: boolean;
+  articleId?: string;
+  onMediaDirtyChange?: (dirty: boolean) => void;
 }) {
   const emitted = useRef(new WeakSet<DraftDocument>());
   const source = useMemo(() => toEditorDocument(value), [value]);
-  const [extensions] = useState(createDraftExtensions);
+  const [extensions] = useState(() => createDraftExtensions(articleId));
   const [failure, setFailure] = useState<DraftFailure | null>(null);
   const reject = useCallback(
     (error: DraftFailure) => {
@@ -154,6 +159,15 @@ export function DraftEditor({
       {source.ok && (
         <>
           <DraftToolbar editor={editor} disabled={disabled} onError={reject} />
+          {articleId && (
+            <DraftBodyImageControl
+              articleId={articleId}
+              editor={editor}
+              disabled={disabled}
+              onError={reject}
+              onDirtyChange={onMediaDirtyChange}
+            />
+          )}
           {editor ? (
             <EditorContent editor={editor} className={styles.content} />
           ) : (

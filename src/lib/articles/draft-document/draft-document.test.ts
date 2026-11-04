@@ -1,5 +1,6 @@
 import { expect, it } from "vitest";
 import { toEditorDocument, fromEditorDocument } from "./draft-document";
+import type { DraftDocument } from "../draft-contract/draft-contract";
 const document = {
   type: "doc",
   content: [
@@ -25,6 +26,33 @@ it("loads NULL as an editable empty paragraph without emitting a stored body", (
   expect(toEditorDocument(null)).toEqual({
     ok: true,
     document: { type: "doc", content: [{ type: "paragraph" }] },
+  });
+});
+it("round-trips a version 2 image block without a source URL", () => {
+  const image = {
+    type: "image",
+    attrs: {
+      assetId: "60000000-0000-0000-0000-000000000701",
+      alt: "A photo",
+      caption: "On campus",
+    },
+  };
+  const canonical: DraftDocument = {
+    format: "gavel-draft",
+    version: 2,
+    document: {
+      type: "doc",
+      content: [
+        { type: "paragraph" },
+        image as DraftDocument["document"]["content"][number],
+      ],
+    },
+  };
+  const editor = toEditorDocument(canonical);
+  expect(editor).toEqual({ ok: true, document: canonical.document });
+  expect(editor.ok && fromEditorDocument(editor.document)).toEqual({
+    ok: true,
+    document: canonical,
   });
 });
 it("maps only verified native defaults and leaves its input untouched", () => {
@@ -145,7 +173,7 @@ it.each([
   },
 );
 it("rejects unknown stored versions and mutable cyclic imports", () => {
-  expect(toEditorDocument({ ...body, version: 2 } as never)).toEqual({
+  expect(toEditorDocument({ ...body, version: 3 } as never)).toEqual({
     ok: false,
     code: "unsupported_content",
   });

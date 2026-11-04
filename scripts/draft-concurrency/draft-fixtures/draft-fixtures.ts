@@ -76,6 +76,7 @@ export async function withDraftFixtures(
       delete from public.audit_events where actor_user_id='${ACTOR}';
       delete from public.article_main_images where article_id in(select id from public.articles where owner_profile_id='${PROFILE}');
       delete from private.article_revision_media_refs where article_id in(select id from public.articles where owner_profile_id='${PROFILE}');
+      delete from public.article_body_images where article_id in(select id from public.articles where owner_profile_id='${PROFILE}');
       delete from public.media_assets where uploader_user_id='${ACTOR}';
       delete from public.article_revisions where actor_user_id='${ACTOR}';
       delete from public.article_categories where article_id in(select id from public.articles where owner_profile_id='${PROFILE}');

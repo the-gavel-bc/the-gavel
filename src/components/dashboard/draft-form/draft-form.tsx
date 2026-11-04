@@ -29,6 +29,7 @@ import { useDraftNavigationGuard } from "../draft-navigation-guard/draft-navigat
 import { GuardedDashboardLink } from "../guarded-dashboard-link/guarded-dashboard-link";
 import { ArticleMedia } from "../article-media/article-media";
 import type { MainImage } from "@/lib/media/media-queries/media-queries";
+import { DraftReadOnlyBody } from "../draft-editor/draft-read-only-body";
 
 const DraftEditor = dynamic(
   () =>
@@ -68,6 +69,7 @@ export function DraftForm({
   const command = useDraftCommand(initialDraft, article);
   const [editorFailure, setEditorFailure] = useState<DraftFailure | null>(null);
   const [mediaDirty, setMediaDirty] = useState(false);
+  const [bodyMediaDirty, setBodyMediaDirty] = useState(false);
   const { editorInvalid } = command;
   const reportEditorFailure = useCallback(
     (failure: DraftFailure) => {
@@ -121,7 +123,8 @@ export function DraftForm({
     command.dirty ||
       Boolean(command.pending) ||
       Boolean(editorFailure) ||
-      mediaDirty,
+      mediaDirty ||
+      bodyMediaDirty,
   );
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -169,6 +172,10 @@ export function DraftForm({
           Enable JavaScript to create or save a draft. Nothing will be submitted
           without it.
         </p>
+        <DraftReadOnlyBody
+          content={initialDraft.content}
+          articleId={article?.id}
+        />
       </noscript>
       <p role="status">
         {editorFailure ? "Body needs attention before saving." : status}
@@ -282,8 +289,10 @@ export function DraftForm({
           }
         />
         <DraftEditor
-          key={catalog.revision}
+          key={`${catalog.revision}:${command.article?.id ?? "new"}`}
           value={command.draft.content}
+          articleId={command.article?.id}
+          onMediaDirtyChange={setBodyMediaDirty}
           disabled={!ready || (!article && command.phase === "saved")}
           onError={reportEditorFailure}
           onChange={(content) => {
