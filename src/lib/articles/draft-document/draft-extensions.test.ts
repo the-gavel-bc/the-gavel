@@ -13,6 +13,7 @@ it("enables exactly the accepted schema nodes and marks", () => {
       "doc",
       "hardBreak",
       "heading",
+      "image",
       "listItem",
       "orderedList",
       "paragraph",
@@ -23,6 +24,27 @@ it("enables exactly the accepted schema nodes and marks", () => {
       "italic",
       "link",
     ]);
+  } finally {
+    editor.destroy();
+  }
+});
+it("keeps image IDs and text in the editor without accepting a source URL", () => {
+  const editor = new Editor({
+    extensions: createDraftExtensions("50000000-0000-0000-0000-000000000701"),
+  });
+  try {
+    editor.commands.insertContent({
+      type: "image",
+      attrs: {
+        assetId: "60000000-0000-0000-0000-000000000701",
+        alt: "A photo",
+        caption: "On campus",
+      },
+    });
+    const result = fromEditorDocument(editor.getJSON());
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.document.version).toBe(2);
+    expect(JSON.stringify(editor.getJSON())).not.toContain("src");
   } finally {
     editor.destroy();
   }

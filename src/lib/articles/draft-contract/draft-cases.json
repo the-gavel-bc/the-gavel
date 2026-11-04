@@ -171,7 +171,7 @@
       "target": "content",
       "value": {
         "format": "gavel-draft",
-        "version": 2,
+        "version": 3,
         "document": {}
       },
       "want": "unsupported_content"
