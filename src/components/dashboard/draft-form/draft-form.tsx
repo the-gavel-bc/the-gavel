@@ -68,6 +68,7 @@ export function DraftForm({
   const command = useDraftCommand(initialDraft, article);
   const [editorFailure, setEditorFailure] = useState<DraftFailure | null>(null);
   const [mediaDirty, setMediaDirty] = useState(false);
+  const [bodyMediaDirty, setBodyMediaDirty] = useState(false);
   const { editorInvalid } = command;
   const reportEditorFailure = useCallback(
     (failure: DraftFailure) => {
@@ -121,7 +122,8 @@ export function DraftForm({
     command.dirty ||
       Boolean(command.pending) ||
       Boolean(editorFailure) ||
-      mediaDirty,
+      mediaDirty ||
+      bodyMediaDirty,
   );
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -282,8 +284,10 @@ export function DraftForm({
           }
         />
         <DraftEditor
-          key={catalog.revision}
+          key={`${catalog.revision}:${command.article?.id ?? "new"}`}
           value={command.draft.content}
+          articleId={command.article?.id}
+          onMediaDirtyChange={setBodyMediaDirty}
           disabled={!ready || (!article && command.phase === "saved")}
           onError={reportEditorFailure}
           onChange={(content) => {

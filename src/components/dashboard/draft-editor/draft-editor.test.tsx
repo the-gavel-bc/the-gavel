@@ -3,6 +3,12 @@ import type { Editor } from "@tiptap/core";
 import type { DraftDocument } from "@/lib/articles/draft-contract/draft-contract";
 import { act } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
+vi.mock("@/lib/media/media-actions/media-actions", () => ({
+  requestArticleImageUpload: vi.fn(),
+}));
+vi.mock("@/lib/media/media-removal/media-removal", () => ({
+  removeUnusedArticleImage: vi.fn(),
+}));
 const live = vi.hoisted(() => ({ editor: null as Editor | null }));
 vi.mock("@tiptap/react", async (load) => {
   const actual = await load<typeof import("@tiptap/react")>();
