@@ -17,7 +17,7 @@ test("owner uploads, describes, attaches and unlinks a private main image", asyn
 }, info) => {
   await setLocalSession(context, fixture.users.author);
   await page.goto(`/dashboard/articles/${fixture.id(21)}`);
-  await page.getByLabel("Image file").setInputFiles({
+  await page.getByLabel("Image file", { exact: true }).setInputFiles({
     name: "invalid.png",
     mimeType: "image/png",
     buffer: Buffer.from("not a PNG"),
@@ -31,14 +31,16 @@ test("owner uploads, describes, attaches and unlinks a private main image", asyn
   })
     .png()
     .toBuffer();
-  await page.getByLabel("Image file").setInputFiles({
+  await page.getByLabel("Image file", { exact: true }).setInputFiles({
     name: "synthetic.png",
     mimeType: "image/png",
     buffer: png,
   });
   await page.getByRole("button", { name: "Upload image" }).click();
   await expect(page.getByText("Image ready to attach.")).toBeVisible();
-  await page.getByLabel("Alt text").fill("Red newsroom graphic");
+  await page
+    .getByLabel("Alt text", { exact: true })
+    .fill("Red newsroom graphic");
   await page.getByLabel("Image credit").fill("The Gavel");
   await page.getByRole("button", { name: "Attach image" }).click();
   await expect(page.getByText("Image attached.")).toBeVisible();
