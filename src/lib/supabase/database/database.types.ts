@@ -607,6 +607,15 @@ export type Database = {
         };
         Returns: Json;
       };
+      save_published_article: {
+        Args: {
+          p_article_id: string;
+          p_draft: Json;
+          p_expected_version: number;
+          p_request_id: string;
+        };
+        Returns: Json;
+      };
       set_article_main_image: {
         Args: {
           p_alt_text: string;
