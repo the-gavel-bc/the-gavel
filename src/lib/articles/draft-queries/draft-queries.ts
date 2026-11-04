@@ -106,6 +106,7 @@ export async function getMyArticlesPage(input: {
 export type DraftDetailResult =
   | {
       kind: "editable";
+      status: "draft" | "published";
       articleId: string;
       version: number;
       updatedAt: string;
@@ -117,7 +118,7 @@ export type DraftDetailResult =
         contributorIds: string[];
       };
     }
-  | { kind: "readOnly"; status: "published" | "archived" }
+  | { kind: "readOnly"; status: "archived" }
   | { kind: "unsupportedContent" }
   | { kind: "notFound" };
 
@@ -148,7 +149,7 @@ export async function getDraftDetail(
     if (error) throw error;
     if (!data) return { kind: "notFound" };
     const summary = summaryRow.parse(data);
-    if (summary.status !== "draft")
+    if (summary.status === "archived")
       return { kind: "readOnly", status: summary.status };
     if (!isValidDraftDocument(data.content))
       return { kind: "unsupportedContent" };
@@ -175,6 +176,7 @@ export async function getDraftDetail(
       ids.filter((id) => !choices.some((choice) => choice.id === id));
     return {
       kind: "editable",
+      status: summary.status,
       articleId: summary.id,
       version: summary.edit_version,
       updatedAt: summary.updated_at,

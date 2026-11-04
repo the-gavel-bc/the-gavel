@@ -91,17 +91,39 @@ it("allows administrator detail reads through RLS without an owner filter", asyn
     ),
   ).toBe(false);
 });
-it.each(["published", "archived"])(
-  "returns %s without exposing editable content",
-  async (status) => {
-    http.respond({ ...row, status, content: { secret: "legacy body" } });
-    expect(await getDraftDetail(articleId)).toEqual({
-      kind: "readOnly",
-      status,
-    });
-    expect(http.network).toHaveBeenCalledOnce();
-  },
-);
+it("returns archived articles without exposing editable content", async () => {
+  http.respond({
+    ...row,
+    status: "archived",
+    content: { secret: "legacy body" },
+  });
+  expect(await getDraftDetail(articleId)).toEqual({
+    kind: "readOnly",
+    status: "archived",
+  });
+  expect(http.network).toHaveBeenCalledOnce();
+});
+it("returns a supported published article as editable", async () => {
+  http.respond({ ...row, status: "published" });
+  for (let i = 0; i < 4; i++) http.respond([]);
+  expect(await getDraftDetail(articleId)).toMatchObject({
+    kind: "editable",
+    status: "published",
+    articleId,
+    version: 2,
+  });
+});
+it("preserves an unsupported published body without editable controls", async () => {
+  http.respond({
+    ...row,
+    status: "published",
+    content: { secret: "legacy body" },
+  });
+  expect(await getDraftDetail(articleId)).toEqual({
+    kind: "unsupportedContent",
+  });
+  expect(http.network).toHaveBeenCalledOnce();
+});
 it("returns unsupported legacy body without exposing it", async () => {
   http.respond({ ...row, content: { secret: "legacy body" } });
   expect(await getDraftDetail(articleId)).toEqual({

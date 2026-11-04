@@ -46,9 +46,9 @@ const messages: Record<DraftErrorCode, string> = {
     "We could not confirm the save. Retry the original save to confirm it. Newer edits stay in this tab.",
   forbidden:
     "Your access does not currently allow saving. Your input is still here.",
-  not_found: "This draft is no longer available. Your input is still here.",
+  not_found: "This article is no longer available. Your input is still here.",
   conflict:
-    "This draft changed elsewhere. Your input is still here; reload to review the latest version.",
+    "This article changed elsewhere. Your input is still here; reload to review the latest version.",
   request_conflict:
     "The request could not be reused. Your input is still here.",
   rate_limited: "Too many save attempts. Wait a minute before trying again.",
@@ -60,13 +60,15 @@ export function DraftForm({
   options,
   article,
   initialImage,
+  status = "draft",
 }: {
   initialDraft: DraftInput;
   options: DraftOptions;
   article?: DraftArticle;
   initialImage?: MainImage | null;
+  status?: "draft" | "published";
 }) {
-  const command = useDraftCommand(initialDraft, article);
+  const command = useDraftCommand(initialDraft, article, status);
   const [editorFailure, setEditorFailure] = useState<DraftFailure | null>(null);
   const [mediaDirty, setMediaDirty] = useState(false);
   const [bodyMediaDirty, setBodyMediaDirty] = useState(false);
@@ -153,23 +155,31 @@ export function DraftForm({
       router.refresh();
     }
   }
-  const status =
+  const saveStatus =
     command.phase === "saving"
-      ? "Saving draft…"
+      ? status === "published"
+        ? "Saving article…"
+        : "Saving draft…"
       : command.phase === "uncertain"
         ? "Save not confirmed."
         : command.phase === "saved"
-          ? "Draft saved."
+          ? status === "published"
+            ? "Article saved."
+            : "Draft saved."
           : command.phase === "error" || command.phase === "conflict"
-            ? "Draft not saved."
+            ? status === "published"
+              ? "Article not saved."
+              : "Draft not saved."
             : command.dirty
               ? "Unsaved changes."
-              : "Ready for your draft details.";
+              : status === "published"
+                ? "Ready for article changes."
+                : "Ready for your draft details.";
   return (
     <form onSubmit={submit} noValidate className={styles.form}>
       <noscript>
         <p>
-          Enable JavaScript to create or save a draft. Nothing will be submitted
+          Enable JavaScript to save article changes. Nothing will be submitted
           without it.
         </p>
         <DraftReadOnlyBody
@@ -178,7 +188,7 @@ export function DraftForm({
         />
       </noscript>
       <p role="status">
-        {editorFailure ? "Body needs attention before saving." : status}
+        {editorFailure ? "Body needs attention before saving." : saveStatus}
       </p>
       {!catalog.options.sections.length && (
         <p>
@@ -256,7 +266,9 @@ export function DraftForm({
         disabled={!ready || (!article && command.phase === "saved")}
         className={styles.fields}
       >
-        <legend>Draft details</legend>
+        <legend>
+          {status === "published" ? "Article details" : "Draft details"}
+        </legend>
         <DraftMetadataFields
           draft={command.draft}
           options={currentOptions}
@@ -292,6 +304,7 @@ export function DraftForm({
           key={`${catalog.revision}:${command.article?.id ?? "new"}`}
           value={command.draft.content}
           articleId={command.article?.id}
+          allowImageUpload={status === "draft"}
           onMediaDirtyChange={setBodyMediaDirty}
           disabled={!ready || (!article && command.phase === "saved")}
           onError={reportEditorFailure}
@@ -301,7 +314,7 @@ export function DraftForm({
           }}
         />
       </fieldset>
-      {command.article && (
+      {command.article && status === "draft" && (
         <ArticleMedia
           article={command.article}
           initialImage={initialImage ?? null}
@@ -321,7 +334,11 @@ export function DraftForm({
           onDirtyChange={setMediaDirty}
         />
       )}
-      <p>Your draft stays private.</p>
+      <p>
+        {status === "published"
+          ? "This article remains published when you save changes."
+          : "Your draft stays private."}
+      </p>
       <div>
         <Button
           type="submit"
@@ -343,7 +360,9 @@ export function DraftForm({
             : command.phase === "saving"
               ? "Saving…"
               : command.article
-                ? "Save draft"
+                ? status === "published"
+                  ? "Save article"
+                  : "Save draft"
                 : "Create draft"}
         </Button>
       </div>

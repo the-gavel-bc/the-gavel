@@ -113,7 +113,7 @@ export function DraftConflictPanel({
       )}
       {result?.ok && result.detail.kind !== "editable" && (
         <p role="alert">
-          This draft is no longer available for editing. Your local input is
+          This article is no longer available for editing. Your local input is
           still here.
         </p>
       )}

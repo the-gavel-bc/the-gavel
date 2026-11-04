@@ -1,10 +1,15 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 import { baseDraft } from "@/lib/articles/draft-contract/draft-test-cases";
-const actions = vi.hoisted(() => ({ create: vi.fn(), save: vi.fn() }));
+const actions = vi.hoisted(() => ({
+  create: vi.fn(),
+  save: vi.fn(),
+  published: vi.fn(),
+}));
 vi.mock("@/lib/articles/draft-actions/draft-actions", () => ({
   createDraftAction: actions.create,
   saveDraftAction: actions.save,
+  savePublishedArticleAction: actions.published,
 }));
 import { useDraftCommand } from "./use-draft-command";
 const success = {
@@ -121,6 +126,32 @@ it("retains committed versions when the same form is used for edit mode", async 
     expectedVersion: 2,
   });
   expect(result.current.dirty).toBe(false);
+});
+it("routes published saves and exact retries through the published boundary", async () => {
+  actions.published
+    .mockResolvedValueOnce({ ok: false, code: "unavailable" })
+    .mockResolvedValueOnce({ ...success, version: 3, replayed: true });
+  const article = {
+    id: success.articleId,
+    version: 2,
+    updatedAt: success.updatedAt,
+  };
+  const { result } = renderHook(() =>
+    useDraftCommand(baseDraft, article, "published"),
+  );
+  act(() => result.current.update({ ...baseDraft, title: "Published update" }));
+  await act(async () => {
+    await result.current.submit();
+  });
+  expect(result.current.phase).toBe("uncertain");
+  await act(async () => {
+    await result.current.submit();
+  });
+  expect(actions.published.mock.calls[1][0]).toEqual(
+    actions.published.mock.calls[0][0],
+  );
+  expect(actions.save).not.toHaveBeenCalled();
+  expect(result.current.article?.version).toBe(3);
 });
 it("keeps an earlier uncertain command when later access denial cannot resolve it", async () => {
   actions.create

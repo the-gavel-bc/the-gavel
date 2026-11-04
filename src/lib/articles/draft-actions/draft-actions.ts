@@ -79,3 +79,28 @@ export async function saveDraftAction(
     return { ok: false, code: "unavailable" };
   }
 }
+
+export async function savePublishedArticleAction(
+  command: SaveDraftCommand,
+): Promise<DraftWriteResult> {
+  const parsed = parseSaveCommand(command);
+  if (!parsed.ok) return parsed;
+  try {
+    const access = await getCurrentAccess();
+    if (access.status !== "active") return { ok: false, code: "forbidden" };
+    const client = await createServerSupabaseClient();
+    const { data, error } = await client.rpc("save_published_article", {
+      p_article_id: parsed.value.articleId,
+      p_expected_version: parsed.value.expectedVersion,
+      p_request_id: parsed.value.requestId,
+      p_draft: parsed.value.draft,
+    });
+    if (error) return { ok: false, code: "unavailable" };
+    return refreshPrivatePaths(
+      parseDraftWriteResult(data),
+      parsed.value.requestId,
+    );
+  } catch {
+    return { ok: false, code: "unavailable" };
+  }
+}

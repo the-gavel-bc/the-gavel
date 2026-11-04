@@ -23,7 +23,7 @@ it("shows an explicit empty state with a keyboard-accessible create link", async
     "/dashboard/articles/new",
   );
 });
-it("renders titles as text and exposes edit only for draft rows", async () => {
+it("renders titles as text and links editable draft and published rows", async () => {
   const page: ArticlePage = {
     items: [
       row,
@@ -42,7 +42,10 @@ it("renders titles as text and exposes edit only for draft rows", async () => {
   expect(screen.getByText("Published")).toBeVisible();
   expect(screen.getByText("Archived")).toBeVisible();
   expect(
-    screen.queryByRole("link", { name: /Published story|Archived story/ }),
+    screen.getByRole("link", { name: "Edit article: Published story" }),
+  ).toHaveAttribute("href", "/dashboard/articles/published");
+  expect(
+    screen.queryByRole("link", { name: /Archived story/ }),
   ).not.toBeInTheDocument();
   expect(
     screen.getByRole("link", { name: "Edit draft: Campus news" }),

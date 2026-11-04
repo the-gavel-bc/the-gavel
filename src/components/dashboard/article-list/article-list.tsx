@@ -38,13 +38,13 @@ export function ArticleList({ page }: { page: ArticlePage }) {
                   </time>
                 </span>
               </p>
-              {article.status === "draft" && (
+              {article.status !== "archived" && (
                 <Link
                   href={`/dashboard/articles/${article.id}`}
                   prefetch={false}
-                  aria-label={`Edit draft: ${article.title}`}
+                  aria-label={`${article.status === "draft" ? "Edit draft" : "Edit article"}: ${article.title}`}
                 >
-                  Edit draft
+                  {article.status === "draft" ? "Edit draft" : "Edit article"}
                 </Link>
               )}
             </li>

@@ -16,7 +16,11 @@ vi.mock("@/lib/supabase/server/server", () => ({
   createServerSupabaseClient: mocks.client,
 }));
 vi.mock("next/cache", () => ({ revalidatePath: mocks.revalidate }));
-import { createDraftAction, saveDraftAction } from "./draft-actions";
+import {
+  createDraftAction,
+  saveDraftAction,
+  savePublishedArticleAction,
+} from "./draft-actions";
 let http: ReturnType<typeof queryTestClient>;
 const receipt = {
   ok: true,
@@ -45,6 +49,17 @@ for (const [name, action, command, args] of [
   [
     "save_article_draft",
     saveDraftAction,
+    save,
+    {
+      p_article_id: articleId,
+      p_expected_version: 2,
+      p_request_id: articleId,
+      p_draft: baseDraft,
+    },
+  ],
+  [
+    "save_published_article",
+    savePublishedArticleAction,
     save,
     {
       p_article_id: articleId,

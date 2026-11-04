@@ -3,6 +3,7 @@ import { useCallback, useRef, useState } from "react";
 import {
   createDraftAction,
   saveDraftAction,
+  savePublishedArticleAction,
 } from "@/lib/articles/draft-actions/draft-actions";
 import {
   checkDraftInput,
@@ -21,6 +22,7 @@ export type { DraftArticle };
 export function useDraftCommand(
   initialDraft: DraftInput,
   article?: DraftArticle,
+  status: "draft" | "published" = "draft",
 ) {
   const [state, setState] = useState(() =>
     createDraftSaveState(initialDraft, article),
@@ -94,7 +96,9 @@ export function useDraftCommand(
     try {
       result =
         pending.kind === "save"
-          ? await saveDraftAction(pending.command)
+          ? status === "published"
+            ? await savePublishedArticleAction(pending.command)
+            : await saveDraftAction(pending.command)
           : await createDraftAction(pending.command);
     } catch {
       result = { ok: false, code: "unavailable" };
