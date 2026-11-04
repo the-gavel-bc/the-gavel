@@ -22,13 +22,11 @@ test("owner inserts and reopens an accessible private body image", async ({
   })
     .png()
     .toBuffer();
-  await page
-    .getByLabel("Body image file")
-    .setInputFiles({
-      name: "synthetic.png",
-      mimeType: "image/png",
-      buffer: png,
-    });
+  await page.getByLabel("Body image file").setInputFiles({
+    name: "synthetic.png",
+    mimeType: "image/png",
+    buffer: png,
+  });
   await page.getByRole("button", { name: "Upload body image" }).click();
   await expect(page.getByText("Image ready to insert.")).toBeVisible();
   await page.getByLabel("Body image alt text").fill("Red newsroom graphic");
@@ -46,4 +44,26 @@ test("owner inserts and reopens an accessible private body image", async ({
     /\/api\/articles\/[^/]+\/media\/[^/]+/,
   );
   await expect(page.getByText("On campus")).toBeVisible();
+});
+
+test("authorized reader sees saved body text and image without JavaScript", async ({
+  browser,
+}) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  try {
+    await setLocalSession(context, fixture.users.author);
+    const page = await context.newPage();
+    await page.goto(`/dashboard/articles/${fixture.id(21)}`);
+    await expect(
+      page.getByRole("region", { name: "Read-only article body" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("img", { name: "Red newsroom graphic" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("region", { name: "Read-only article body" }),
+    ).toContainText("On campus");
+  } finally {
+    await context.close();
+  }
 });

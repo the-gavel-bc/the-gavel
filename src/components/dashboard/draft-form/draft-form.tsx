@@ -29,6 +29,7 @@ import { useDraftNavigationGuard } from "../draft-navigation-guard/draft-navigat
 import { GuardedDashboardLink } from "../guarded-dashboard-link/guarded-dashboard-link";
 import { ArticleMedia } from "../article-media/article-media";
 import type { MainImage } from "@/lib/media/media-queries/media-queries";
+import { DraftReadOnlyBody } from "../draft-editor/draft-read-only-body";
 
 const DraftEditor = dynamic(
   () =>
@@ -171,6 +172,10 @@ export function DraftForm({
           Enable JavaScript to create or save a draft. Nothing will be submitted
           without it.
         </p>
+        <DraftReadOnlyBody
+          content={initialDraft.content}
+          articleId={article?.id}
+        />
       </noscript>
       <p role="status">
         {editorFailure ? "Body needs attention before saving." : status}
