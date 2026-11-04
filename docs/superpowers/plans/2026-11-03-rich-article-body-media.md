@@ -36,10 +36,10 @@
 
 **Interfaces:** `DraftDocument` accepts the existing version 1 grammar and a version 2 image block `{type:"image",attrs:{assetId:string,alt:string,caption:string|null}}`. `private.is_valid_draft_document(jsonb)` mirrors TypeScript shape and byte/node/depth limits. `public.save_article_draft(uuid,integer,uuid,jsonb)` keeps its existing call signature and result; successful saves atomically reconcile `article_body_images(article_id,asset_id)` with the new body's unique image IDs. The existing `private.article_revision_media_refs` key supports multiple assets per revision after migration.
 
-- [ ] Write failing TypeScript/SQL parity tests for version 1 preservation; valid image nodes; malformed attrs, hostile URLs/HTML, empty/oversized alt/caption, duplicate IDs, and the existing document limits.
-- [ ] Write failing pgTAP for owner/admin success and credited non-owner, inactive, anonymous, pending, deleting, missing, and other-article denials. Cover stale version, retry, rollback, and save/removal races.
-- [ ] Add the additive validator, relational reference table, narrow grants/RLS, and save-time authority and asset checks. Lock media rows before reconciliation; capture the new reference state in the same revision transaction. Do not rewrite old rows or applied migrations.
-- [ ] Run focused parity/pgTAP, full database suite, schema lint, and generated-type drift once the SQL slice is complete. Commit the grammar and database boundary together in small cohesive commits if the diff exceeds review size.
+- [x] Write failing TypeScript/SQL parity tests for version 1 preservation; valid image nodes; malformed attrs, hostile URLs/HTML, empty/oversized alt/caption, duplicate IDs, and the existing document limits.
+- [x] Cover owner/admin success and credited non-owner, inactive, anonymous, pending, deleting, missing, and other-article denials. Cover stale version, retry, rollback, and save/removal races with pgTAP and focused concurrency tests.
+- [x] Add the additive validator, relational reference table, narrow grants/RLS, and save-time authority and asset checks. Lock media rows before reconciliation; capture the new reference state in the same revision transaction. Do not rewrite old rows or applied migrations.
+- [x] Run focused parity/pgTAP, full database suite, schema lint, and generated-type drift once the SQL slice is complete. Commit the grammar and database boundary in reviewable increments.
 
 ### Task B: Editor controls and private preview
 
@@ -47,15 +47,16 @@
 
 **Interfaces:** The editor adapter round-trips version 1 and 2 without losing unknown content. Image insertion accepts only a finalized asset ID for the article, alt text, and caption. The upload picker reuses Task 3's reservation and POST route. `GET /api/articles/[id]/media/[assetId]` supplies the checked private preview; the body stores no URL.
 
-- [ ] Write failing adapter and component tests for insert/edit/remove, version 1 round trips, unknown-content read-only behavior, failed private previews, duplicate images, and blocked HTML/file paste or drops.
-- [ ] Add a fixed Tiptap image node and keyboard-accessible image/caption controls. Reuse Task 3's upload protocol and retry behavior; add the checked private GET route with denied-read tests. Include explicit alt validation, safe image loading/error text, and a no-JavaScript read-only fallback.
-- [ ] Ensure editor version conflicts preserve input and offer the existing reload/reapply path. Keep the video control disabled with a clear pending-provider label.
-- [ ] Run focused unit/component checks continuously, then one desktop/mobile browser pass for image insert, save/reopen, keyboard operation, denied preview, and conflict recovery. Run typecheck, lint, format, and build before review. Commit the adapter and UI in separate reviewable increments.
+- [x] Cover insert/edit/remove, version 1 round trips, unknown-content read-only behavior, failed private previews, duplicate images, and blocked HTML/file paste or drops with focused tests.
+- [x] Add a fixed Tiptap image node and keyboard-accessible image/caption controls. Reuse Task 3's upload protocol and retry behavior; add the checked private GET route with denied-read tests. Include explicit alt validation, safe image loading/error text, and a no-JavaScript read-only fallback.
+- [x] Preserve the existing editor version-conflict reload/reapply path. Keep video unavailable with a clear pending-provider label.
+- [x] Run focused unit/component checks, desktop/mobile browser cases for insert, save/reopen, keyboard, denied preview, and no-JavaScript reading, plus typecheck, lint, format, and build. Commit adapter and UI separately.
 
 ### Task C: Integration and review
 
-- [ ] Update only affected API, data, security, and testing documentation with implemented behavior and the unresolved video decision. Do not add a separate verification report or screenshots unless a UI defect needs one.
-- [ ] Review the final diff once for asset retention, authorization, old-document preservation, accessibility, and unsafe content. Obtain the required second maintainer review for rich content and migrations.
+- [x] Update affected API, data, security, and component documentation with implemented behavior and the unresolved video decision. No separate verification report or screenshots were added.
+- [x] Complete one final code review for asset retention, authorization, old-document preservation, accessibility, and unsafe content; address the no-JavaScript finding.
+- [ ] Obtain the required second maintainer review for rich content and migrations.
 - [ ] Open a focused PR from the Task 4 implementation branch after Task 3 merges. Report checks actually run; the owner will monitor hosted CI.
 
 **Acceptance:** An authorized owner/admin can save and reopen body images with required alt text and bounded captions. Invalid or foreign media and unsupported content cannot be saved or displayed as trusted media. Existing version 1 documents and snapshots remain intact. Video remains unavailable pending provider approval.
