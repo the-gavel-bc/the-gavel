@@ -86,15 +86,28 @@ beforeEach(() => {
 it("serves only finalized same-article WebP through the user-scoped client", async () => {
   const bytes = new Uint8Array([1, 2, 3]);
   mocks.asset.mockResolvedValue({
-    data: { id: assetId, article_id: articleId, object_key: "private/image.webp", status: "finalized" },
+    data: {
+      id: assetId,
+      article_id: articleId,
+      object_key: "private/image.webp",
+      status: "finalized",
+    },
     error: null,
   });
-  mocks.download.mockResolvedValue({ data: new Blob([bytes], { type: "image/webp" }), error: null });
+  mocks.download.mockResolvedValue({
+    data: new Blob([bytes], { type: "image/webp" }),
+    error: null,
+  });
   mocks.userClient.mockResolvedValue({
-    from: () => ({ select: () => ({ eq: () => ({ maybeSingle: mocks.asset }) }) }),
+    from: () => ({
+      select: () => ({ eq: () => ({ maybeSingle: mocks.asset }) }),
+    }),
     storage: { from: () => ({ download: mocks.download }) },
   });
-  const response = await GET(new Request("http://localhost/private"), routeParams);
+  const response = await GET(
+    new Request("http://localhost/private"),
+    routeParams,
+  );
   expect(response.status).toBe(200);
   expect(response.headers.get("Content-Type")).toBe("image/webp");
   expect(response.headers.get("Cache-Control")).toBe("private, no-store");
@@ -105,11 +118,24 @@ it("serves only finalized same-article WebP through the user-scoped client", asy
 
 it("hides pending and foreign assets from private preview", async () => {
   for (const data of [
-    { id: assetId, article_id: articleId, object_key: "private/a.webp", status: "pending" },
-    { id: assetId, article_id: "50000000-0000-0000-0000-000000000402", object_key: "private/a.webp", status: "finalized" },
+    {
+      id: assetId,
+      article_id: articleId,
+      object_key: "private/a.webp",
+      status: "pending",
+    },
+    {
+      id: assetId,
+      article_id: "50000000-0000-0000-0000-000000000402",
+      object_key: "private/a.webp",
+      status: "finalized",
+    },
   ]) {
     mocks.asset.mockResolvedValue({ data, error: null });
-    const response = await GET(new Request("http://localhost/private"), routeParams);
+    const response = await GET(
+      new Request("http://localhost/private"),
+      routeParams,
+    );
     expect(response.status).toBe(404);
   }
   expect(mocks.download).not.toHaveBeenCalled();

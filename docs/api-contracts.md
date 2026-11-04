@@ -6,6 +6,10 @@
 
 `removeUnusedArticleImage(assetId)` first calls the user-scoped `mark_article_image_for_removal` RPC, then uses the server-only credential to remove the private object and call `complete_article_image_removal`. Current links and revision snapshots block removal. An interrupted cleanup leaves a `deleting` row for the same authorized caller to retry.
 
+## Task 4 private body images
+
+The existing `save_article_draft(articleId,expectedVersion,requestId,draft)` accepts canonical `gavel-draft` version 2 bodies with image blocks containing only `assetId`, required alt text (1–240 characters), and optional caption (1–500 characters). Version 1 bodies remain valid. Database save checks each asset is finalized for that article and reconciles body references in the same transaction as content, revision, audit, and retry receipt. Draft creation does not accept version 2 bodies because assets require an existing article. `GET /api/articles/[id]/media/[assetId]` serves a finalized same-article WebP only through the active caller's RLS-scoped client, with private no-store and nosniff headers. Video embeds remain unavailable pending a provider allowlist.
+
 Status: Foundation access/session interfaces, Phase 2 private content/history storage and Phase 3 private draft queries/actions implemented; draft association selectors are implemented; Task 10 save/conflict/navigation recovery is implemented; publishing remains planned.
 
 ## Style and ownership

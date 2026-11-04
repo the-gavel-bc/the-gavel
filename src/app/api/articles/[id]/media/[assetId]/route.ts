@@ -37,7 +37,11 @@ export async function GET(
       .eq("id", assetId)
       .maybeSingle();
     if (error) return reply(503, { ok: false, code: "unavailable" });
-    if (!asset || asset.article_id !== articleId || asset.status !== "finalized")
+    if (
+      !asset ||
+      asset.article_id !== articleId ||
+      asset.status !== "finalized"
+    )
       return reply(404, { ok: false, code: "not_found" });
     const { data, error: downloadError } = await client.storage
       .from("article-media")

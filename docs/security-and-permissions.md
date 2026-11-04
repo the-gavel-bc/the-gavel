@@ -206,6 +206,8 @@ Pending/uncertain commands are kept in memory only and reuse their UUID/payload/
 
 ## Implemented constrained private body editor
 
+Phase 4 Task 4 extends this editor with version 2 image nodes. The stored body accepts only a finalized same-article asset ID and bounded plain-text alt/caption fields; it does not accept a source URL or executable embed. A relational current-reference table and retained revision references protect media from cleanup. The private preview route requires active access and RLS-scoped media read, returns WebP with no-store/nosniff headers, and does not use the privileged media client. Video remains gated until the owner approves providers.
+
 Task 8 enables only the reviewed node/mark schema, validates stored canonical input before engine loading, verifies fixed native defaults and rejects meaningful unsupported attributes. Editor output still passes the existing strict action and authoritative database validators; no auth model, RLS/grant, lifecycle, media or public projection changes. Unsupported legacy content and read-only statuses remain preserved, including for administrators.
 
 Clipboard interception happens before Tiptap's parser. Only plain text is accepted; line/node allocation is bounded before model construction, and the prospective whole document validates before dispatch. HTML/files/other rich formats and drops are explicitly rejected. Links reuse the accepted URL validator, have application-fixed target/rel, disable automatic linking/click navigation and fetch no previews. Body errors block saves, expose accessible associations and preserve best-effort native unload warnings, including native edits not present in the controller's last valid body.
