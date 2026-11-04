@@ -119,6 +119,20 @@ export function DraftBodyImageControl({
     }
   }
 
+  async function discard() {
+    const target = cleanupId ?? assetId;
+    if (!target || locked) return;
+    setBusy(true);
+    setError("");
+    try {
+      await cleanup(target);
+    } catch {
+      setError("Image cleanup could not be confirmed. Retry cleanup.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function insert() {
     if (!editor || !assetId || locked) return;
     const text = alt.trim();
@@ -247,11 +261,7 @@ export function DraftBodyImageControl({
         </>
       )}
       {(assetId || cleanupId) && (
-        <Button
-          type="button"
-          disabled={locked}
-          onClick={() => void cleanup(cleanupId ?? assetId!)}
-        >
+        <Button type="button" disabled={locked} onClick={() => void discard()}>
           Discard unused upload
         </Button>
       )}

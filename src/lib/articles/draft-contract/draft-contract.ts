@@ -9,7 +9,10 @@ export type DraftInline =
 export type DraftParagraph = { type: "paragraph"; content?: DraftInline[] };
 export type DraftBlock =
   | DraftParagraph
-  | { type: "image"; attrs: { assetId: string; alt: string; caption: string | null } }
+  | {
+      type: "image";
+      attrs: { assetId: string; alt: string; caption: string | null };
+    }
   | { type: "heading"; attrs: { level: 2 | 3 }; content?: DraftInline[] }
   | { type: "blockquote"; content: DraftBlock[] }
   | { type: "bulletList"; content: DraftListItem[] }
@@ -193,7 +196,8 @@ export function isValidDraftDocument(
         !scalar(node.attrs.alt, 240) ||
         !(node.attrs.caption === null || scalar(node.attrs.caption, 500)) ||
         imageIds.has(node.attrs.assetId)
-      ) return false;
+      )
+        return false;
       imageIds.add(node.attrs.assetId);
       continue;
     }
