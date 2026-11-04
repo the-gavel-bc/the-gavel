@@ -13,6 +13,21 @@ import {
 } from "./draft-test-cases";
 
 describe("draft contract", () => {
+  it("accepts only bounded canonical version 2 body images", () => {
+    const assetId = "20000000-0000-0000-0000-000000000001";
+    const image = { type: "image", attrs: { assetId, alt: "A photo", caption: null } };
+    const version2 = (blocks: unknown[]) => ({
+      format: "gavel-draft", version: 2,
+      document: { type: "doc", content: blocks },
+    });
+    expect(isValidDraftDocument(version2([image]))).toBe(true);
+    expect(checkDraftInput({ ...baseDraft, content: version2([image]) }).ok).toBe(true);
+    expect(isValidDraftDocument(version2([{ ...image, attrs: { ...image.attrs, caption: "a".repeat(501) } }]))).toBe(false);
+    expect(isValidDraftDocument(version2([{ ...image, attrs: { ...image.attrs, alt: " " } }]))).toBe(false);
+    expect(isValidDraftDocument(version2([{ ...image, attrs: { ...image.attrs, src: "https://evil.example/x" } }]))).toBe(false);
+    expect(isValidDraftDocument(version2([image, image]))).toBe(false);
+    expect(isValidDraftDocument({ ...version2([image]), version: 1 })).toBe(false);
+  });
   it("rejects a caller-selected slug in a draft payload", () => {
     expect(checkDraftInput({ ...baseDraft, slug: "chosen-path" })).toEqual({
       ok: false,
