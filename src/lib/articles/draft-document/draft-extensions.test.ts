@@ -45,6 +45,14 @@ it("keeps image IDs and text in the editor without accepting a source URL", () =
     expect(result.ok).toBe(true);
     if (result.ok) expect(result.document.version).toBe(2);
     expect(JSON.stringify(editor.getJSON())).not.toContain("src");
+    const image = editor.view.dom.querySelector("img");
+    expect(image?.getAttribute("src")).toBe(
+      "/api/articles/50000000-0000-0000-0000-000000000701/media/60000000-0000-0000-0000-000000000701",
+    );
+    image?.dispatchEvent(new Event("error"));
+    expect(editor.view.dom.querySelector("figcaption")?.textContent).toBe(
+      "Private image preview unavailable.",
+    );
   } finally {
     editor.destroy();
   }

@@ -117,5 +117,14 @@ select is((select count(*)::integer from public.article_body_images where articl
   0,'current relational reference is removed with body');
 select is(public.mark_article_image_for_removal('60000000-0000-0000-0000-000000000701')->>'code',
   'conflict','historical body image cannot be removed');
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);
+set local role authenticated;
+insert into body_results select 'admin_restore',public.save_article_draft(article_id,3,
+  '80000000-0000-0000-0000-000000000716',pg_temp.draft_input(jsonb_build_object(
+    'content',pg_temp.body_image('60000000-0000-0000-0000-000000000701')))) from body_target;
+reset role;
+select is((select result->>'ok' from body_results where label='admin_restore'),'true','administrator may edit another article body');
+select is((select count(*)::integer from public.article_body_images where article_id=(select article_id from body_target)),
+  1,'administrator save restores current relational reference');
 select * from finish();
 rollback;

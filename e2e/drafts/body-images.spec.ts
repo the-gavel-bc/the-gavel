@@ -30,8 +30,14 @@ test("owner inserts and reopens an accessible private body image", async ({
   await page.getByRole("button", { name: "Upload body image" }).click();
   await expect(page.getByText("Image ready to insert.")).toBeVisible();
   await page.getByLabel("Body image alt text").fill("Red newsroom graphic");
-  await page.getByLabel("Body image caption").fill("On campus");
-  await page.getByRole("button", { name: "Insert body image" }).click();
+  await page.keyboard.press("Tab");
+  await expect(page.getByLabel("Body image caption")).toBeFocused();
+  await page.keyboard.type("On campus");
+  await page.keyboard.press("Tab");
+  await expect(
+    page.getByRole("button", { name: "Insert body image" }),
+  ).toBeFocused();
+  await page.keyboard.press("Enter");
   await page.getByRole("button", { name: "Save draft" }).click();
   await expect(
     page.getByRole("status").filter({ hasText: "Draft saved" }),
@@ -44,6 +50,27 @@ test("owner inserts and reopens an accessible private body image", async ({
     /\/api\/articles\/[^/]+\/media\/[^/]+/,
   );
   await expect(page.getByText("On campus")).toBeVisible();
+});
+
+test("another author cannot read a private body image", async ({ browser }) => {
+  const blocks = fixture.article(21).article.content.document.content as {
+    type: string;
+    attrs?: { assetId?: string };
+  }[];
+  const assetId = blocks.find((block) => block.type === "image")?.attrs
+    ?.assetId;
+  expect(assetId).toBeTruthy();
+  const context = await browser.newContext();
+  try {
+    await setLocalSession(context, fixture.users.other);
+    const page = await context.newPage();
+    const response = await page.goto(
+      `/api/articles/${fixture.id(21)}/media/${assetId}`,
+    );
+    expect(response?.status()).toBe(404);
+  } finally {
+    await context.close();
+  }
 });
 
 test("authorized reader sees saved body text and image without JavaScript", async ({

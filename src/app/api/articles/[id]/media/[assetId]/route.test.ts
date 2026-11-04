@@ -141,6 +141,34 @@ it("hides pending and foreign assets from private preview", async () => {
   expect(mocks.download).not.toHaveBeenCalled();
 });
 
+it("reports an unavailable private preview without using the trusted client", async () => {
+  mocks.asset.mockResolvedValue({
+    data: {
+      id: assetId,
+      article_id: articleId,
+      object_key: "private/image.webp",
+      status: "finalized",
+    },
+    error: null,
+  });
+  mocks.download.mockResolvedValue({
+    data: null,
+    error: new Error("storage unavailable"),
+  });
+  mocks.userClient.mockResolvedValue({
+    from: () => ({
+      select: () => ({ eq: () => ({ maybeSingle: mocks.asset }) }),
+    }),
+    storage: { from: () => ({ download: mocks.download }) },
+  });
+  const response = await GET(
+    new Request("http://localhost/private"),
+    routeParams,
+  );
+  expect(response.status).toBe(503);
+  expect(mocks.trustedClient).not.toHaveBeenCalled();
+});
+
 it("denies unauthenticated upload before reading or creating trusted client", async () => {
   mocks.access.mockResolvedValue({ status: "signedOut" });
   const response = await POST(await uploadRequest(), routeParams);
