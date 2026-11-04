@@ -57,6 +57,6 @@
 - [x] Update affected API, data, security, and component documentation with implemented behavior and the unresolved video decision. No separate verification report or screenshots were added.
 - [x] Complete one final code review for asset retention, authorization, old-document preservation, accessibility, and unsafe content; address the no-JavaScript finding.
 - [ ] Obtain the required second maintainer review for rich content and migrations.
-- [ ] Open a focused PR from the Task 4 implementation branch after Task 3 merges. Report checks actually run; the owner will monitor hosted CI.
+- [x] Open focused [PR #31](https://github.com/dylandrozario/the-gavel/pull/31) from the Task 4 implementation branch after Task 3 merged. Report checks actually run; the owner will monitor hosted CI.
 
 **Acceptance:** An authorized owner/admin can save and reopen body images with required alt text and bounded captions. Invalid or foreign media and unsupported content cannot be saved or displayed as trusted media. Existing version 1 documents and snapshots remain intact. Video remains unavailable pending provider approval.
