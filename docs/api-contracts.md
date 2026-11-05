@@ -10,7 +10,7 @@
 
 The existing `save_article_draft(articleId,expectedVersion,requestId,draft)` accepts canonical `gavel-draft` version 2 bodies with image blocks containing only `assetId`, required alt text (1–240 characters), and optional caption (1–500 characters). Version 1 bodies remain valid. Database save checks each asset is finalized for that article and reconciles body references in the same transaction as content, revision, audit, and retry receipt. Draft creation does not accept version 2 bodies because assets require an existing article. `GET /api/articles/[id]/media/[assetId]` serves a finalized same-article WebP only through the active caller's RLS-scoped client, with private no-store and nosniff headers. Video embeds remain unavailable pending a provider allowlist.
 
-Status: Foundation access/session interfaces, Phase 2 private content/history storage and Phase 3 private draft queries/actions implemented; draft association selectors are implemented; Task 10 save/conflict/navigation recovery is implemented; publishing remains planned.
+Status: Foundation access/session interfaces, Phase 2 private content/history storage, Phase 3 private draft queries/actions, and Phase 4 article lifecycle and administrator list/detail commands implemented. Public article reads remain planned.
 
 ## Style and ownership
 
@@ -43,7 +43,7 @@ Authoritative request schemas will live beside the implemented server operations
 
 Taxonomy SELECT access, private article SELECT access, and category/tag/contributor association SELECT access are enforced by database grants/RLS; see the [data model](data-model.md#implemented-article-storage) and [security controls](security-and-permissions.md#implemented-private-article-controls). `private.can_read_article(check_article_id uuid) -> boolean` is an internal policy predicate for the authenticated caller, not a public mutation or arbitrary-user lookup RPC. It returns false for missing or unreadable article IDs. It does not accept an identity argument or expose private profile links.
 
-All article associations and revisions follow article read authority; credits and revision actor IDs confer no additional access. Audit reads require an eligible active administrator. Article/category links enforce same-section membership through composite references. No application section-change, tag-entry, credit-management, or link-mutation interface is exposed. Private application article-fetch wrappers are implemented below; editor UI, public projections and restore interfaces remain planned. The narrow draft-create RPC and its atomic history capture are documented below. Generated database Insert/Update types describe the row shape; they do not grant write permission. All direct new-table application writes remain denied, including administrator writes.
+All article associations and revisions follow article read authority; credits and revision actor IDs confer no additional access. Audit reads require an eligible active administrator. Article/category links enforce same-section membership through composite references. No application section-change, tag-entry, credit-management, or link-mutation interface is exposed. Private application article-fetch wrappers, editor UI, and restore are documented below; public projections remain planned. The narrow draft-create RPC and its atomic history capture are documented below. Generated database Insert/Update types describe the row shape; they do not grant write permission. All direct new-table application writes remain denied, including administrator writes.
 
 ## Planned public operations
 
@@ -58,10 +58,8 @@ Anonymous operations return published, non-archived data only.
 
 ## Planned authenticated operations
 
-The [accepted Phase 4 editorial contract](superpowers/specs/2026-11-01-editorial-workflow-design.md) fixes planned lifecycle authorization, receipts, generated slug behavior, and publication readiness. Lifecycle operations are not yet implemented. Phase 4 Task 2 removes article slug from strict new draft commands; the database derives it from title under a transaction lock. During mixed-version rollout, the database accepts a valid old slug field but ignores its value. Contributor slug operations remain planned.
+The [accepted Phase 4 editorial contract](superpowers/specs/2026-11-01-editorial-workflow-design.md) fixes lifecycle authorization, receipts, generated slug behavior, and publication readiness. Phase 4 Task 2 removes article slug from strict new draft commands; the database derives it from title under a transaction lock. During mixed-version rollout, the database accepts a valid old slug field but ignores its value. Contributor slug operations remain planned.
 
-- Publish now.
-- Archive owned article.
 - Update own public profile.
 - Request and finalize valid image uploads.
 
@@ -69,8 +67,6 @@ Phase 4 Task 3 implements `request_article_image_upload(article_id,request_id)` 
 
 ## Planned administrator operations
 
-- List and manage all articles.
-- Restore archived article.
 - Permanently delete archived article with explicit confirmation.
 - Approve, change, or deactivate membership.
 - Manage contributor profiles.
@@ -119,12 +115,22 @@ Internationalized hostnames, including all case-insensitive `xn--` labels, are d
 
 `public.save_published_article(uuid,integer,uuid,jsonb)` accepts the same strict `SaveDraftCommand` article fields and `DraftWriteResult` envelope through `savePublishedArticleAction`. It derives actor and owner authority, requires current published status and expected version, and rejects unknown client fields including status, slug, owner and timestamps. A changed edit rechecks a supported nonempty body, active references, finalized body images, and a finalized main image with alt text and credit after locks. It changes only editable fields and associations, retains the slug/status/original publication time, and atomically writes body-image references, one revision, one `article.updated` event and the receipt. Exact retries and no-ops retain the draft boundary's semantics; archived and stale saves return `conflict`, unsupported stored bodies return `unsupported_content`, and missing/cross-owner IDs share `not_found`. Private upload, main-image mutation, publication and restore remain separate operations.
 
+## Implemented owner article lifecycle
+
+`publish_article(article_id,expected_version,request_id)` and `archive_article(article_id,expected_version,request_id)` accept only the strict three-field `ArticleLifecycleCommand` through separate server actions. Active owners or administrators may call them; credits grant no authority. Publish requires a draft with a supported nonblank body, active references, finalized body media and a finalized main image with alt text and credit. Archive requires published status but does not recheck readiness, so invalid old content can leave circulation. Both require the current version, preserve slug/owner, increment once, capture a complete revision and an allowlisted audit event, and store an exact replay receipt atomically. A successful response contains `articleId`, `status`, `version`, `updatedAt`, `changed`, and `replayed`; failures use the bounded draft error codes. Exact retries return their original receipt after later changes. No public read grant is implied.
+
+## Implemented administrator article management
+
+`getAdminArticlesPage({status?,search?,cursor?,pageSize?})` and `getAdminArticleDetail(articleId)` independently require active administrator access. The page defaults to 20 and accepts at most 50 rows, ordered by update time and ID descending. Status is `all | draft | published | archived`; title search is trimmed, at most 80 characters, and restricted to literal letters, numbers, spaces, apostrophes and hyphens. A strict cursor binds status and search. The queries select only safe title/status/owner-display-name/section-name/version/date fields, never article body or private identity links. Missing detail returns null; malformed input and read failures produce bounded errors.
+
+`restore_article(article_id,expected_version,request_id)` uses the existing strict lifecycle command and result through `restoreArticleAction`. Only an active administrator may restore a currently archived, publication-ready article. It clears `archived_at` while retaining slug, owner and original `published_at`; version, complete revision, `article.restored` audit and exact receipt commit together. Lost-response retries keep the original command. Invalid archived content remains archived. No public read or direct table write is granted.
+
 ## Implemented private draft server boundary
 
 Task 5 implements the following interfaces in `src/lib/articles/`. The [accepted contract](superpowers/specs/2026-10-22-private-draft-workflow-design.md) remains authoritative for payload limits and write semantics. Routes/forms consuming these interfaces remain Tasks 6–10.
 
 - `draft-queries/draft-queries.ts`: `getMyArticlesPage({cursor?,pageSize?}) -> ArticlePage` defaults to 20, accepts 1–50, and always filters the verified caller's profile, including administrators. Items contain only id/title/slug/status/sectionId/version/updatedAt. `nextCursor` is null or an opaque strict version-one UTC timestamp/UUID cursor ordered by `(updated_at DESC,id DESC)`, preserving database microseconds. The cursor supplies continuation, never authority.
-- `getDraftDetail(articleId) -> DraftDetailResult`: one embedded read loads the article and associations under RLS. Authors also receive an explicit owner filter; administrators retain their existing detail authority. The discriminant `kind` is `editable`, `readOnly`, `unsupportedContent` or `notFound`. Editable draft and published results contain a validated `DraftInput`, status, articleId/version/updatedAt and unavailable selection IDs. Archived results contain status only; unsupported results contain no stored body. Missing and RLS-hidden records share `notFound`.
+- `getDraftDetail(articleId) -> DraftDetailResult`: one embedded read loads the article and associations under RLS. Authors also receive an explicit owner filter; administrators retain their existing detail authority. The discriminant `kind` is `editable`, `readOnly`, `unsupportedContent` or `notFound`. Editable draft and published results contain a validated `DraftInput`, status, articleId/version/updatedAt and unavailable selection IDs. Archived results contain status only; unsupported results contain status, ID and version for a published archive control but no stored body. Missing and RLS-hidden records share `notFound`.
 - `getDraftOptions(sectionId?) -> DraftOptions`: active sections, categories under the selected active parent, existing tags and active contributor profiles. Explicit active filters apply even to administrators. Catalogs use stable ordered 500-row pages below the API row cap. No section means no category choices. Existing unavailable selection IDs remain in detail results for deliberate removal; the form provides generic labels without wider grants.
 - Queries run at request time with the existing active-membership guard and cookie-scoped publishable-key client. The server client explicitly forces `cache: "no-store"`. Malformed inputs and read failures throw bounded safe errors; membership redirects propagate unchanged.
 - `draft-actions/draft-actions.ts`: `createDraftAction(CreateDraftCommand)` and `saveDraftAction(SaveDraftCommand)` return `DraftWriteResult`. Strict envelopes reject unknown/protected fields before auth/RPC. Each accepted attempt uses verified current access and one user-scoped RPC with the caller's original request UUID. Missing/ineligible access returns `forbidden`; access/transport uncertainty or malformed responses return `unavailable`. No new UUID or automatic application retry is generated. Only checked result fields are returned, preserving replay/no-op metadata.

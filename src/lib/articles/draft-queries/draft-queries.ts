@@ -119,7 +119,12 @@ export type DraftDetailResult =
       };
     }
   | { kind: "readOnly"; status: "archived" }
-  | { kind: "unsupportedContent" }
+  | {
+      kind: "unsupportedContent";
+      status: "draft" | "published";
+      articleId: string;
+      version: number;
+    }
   | { kind: "notFound" };
 
 export async function getDraftOptions(
@@ -152,7 +157,12 @@ export async function getDraftDetail(
     if (summary.status === "archived")
       return { kind: "readOnly", status: summary.status };
     if (!isValidDraftDocument(data.content))
-      return { kind: "unsupportedContent" };
+      return {
+        kind: "unsupportedContent",
+        status: summary.status,
+        articleId: summary.id,
+        version: summary.edit_version,
+      };
     const checked = checkDraftInput({
       schemaVersion: 1,
       title: data.title,

@@ -92,11 +92,29 @@ it("keeps archived records read-only", async () => {
   ).not.toBeInTheDocument();
 });
 it("preserves unsupported stored content without loading editing controls", async () => {
-  mocks.detail.mockResolvedValue({ kind: "unsupportedContent" });
+  mocks.detail.mockResolvedValue({
+    kind: "unsupportedContent",
+    status: "draft",
+    articleId: id,
+    version: 4,
+  });
   render(await Page(params));
   expect(screen.getByRole("alert")).toHaveTextContent("preserved");
   expect(
     screen.queryByRole("button", { name: "Save draft" }),
+  ).not.toBeInTheDocument();
+});
+it("allows an unsupported published article to be archived without exposing its body", async () => {
+  mocks.detail.mockResolvedValue({
+    kind: "unsupportedContent",
+    status: "published",
+    articleId: id,
+    version: 4,
+  });
+  render(await Page(params));
+  expect(screen.getByRole("button", { name: "Archive article" })).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Save article" }),
   ).not.toBeInTheDocument();
 });
 it("guards direct access and masks missing or invalid IDs", async () => {

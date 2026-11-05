@@ -121,6 +121,9 @@ it("preserves an unsupported published body without editable controls", async ()
   });
   expect(await getDraftDetail(articleId)).toEqual({
     kind: "unsupportedContent",
+    status: "published",
+    articleId,
+    version: 2,
   });
   expect(http.network).toHaveBeenCalledOnce();
 });
@@ -128,6 +131,9 @@ it("returns unsupported legacy body without exposing it", async () => {
   http.respond({ ...row, content: { secret: "legacy body" } });
   expect(await getDraftDetail(articleId)).toEqual({
     kind: "unsupportedContent",
+    status: "draft",
+    articleId,
+    version: 2,
   });
   expect(http.network).toHaveBeenCalledOnce();
 });
