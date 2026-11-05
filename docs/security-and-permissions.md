@@ -1,6 +1,6 @@
 # Security and permissions
 
-Status: Foundation access/session controls and Phase 2 content/history read permissions implemented; publishing and hosted provider controls remain planned.
+Status: Foundation access/session controls, Phase 2 content/history read permissions, and checked Phase 4 publish/archive transitions implemented; public article reads and hosted provider controls remain planned.
 
 Phase 4 private article media uses a server-only Supabase service-role key for validated WebP Storage writes and cleanup. Reservation, attachment, and removal still begin with active user-scoped checks; trusted finalization and completion independently check the claimed actor and asset state. The private bucket has no direct browser write grant. Finalized objects are readable only for an authorized article reader; pending, uploading, or deleting objects are hidden. Current and historical article image references block physical deletion.
 
@@ -103,7 +103,7 @@ Revisions require version-one bounded JSON objects. Audits permit only the seven
 
 ## Content and input safety
 
-The [accepted Phase 4 editorial contract](superpowers/specs/2026-11-01-editorial-workflow-design.md) plans checked lifecycle operations, noneditable generated slugs, and a last-eligible-administrator guard. Phase 4 Task 2 enforces generated article slugs at the draft RPC boundary: direct calls carrying a valid old slug field can still create/save during mixed-version rollout, but the field is discarded before fingerprinting or writing; malformed values fail. Exact older receipts remain replayable. Existing published rows are unchanged. Lifecycle, profile slug, and last-administrator guards remain future controls; foundation profile slug and administrator membership grants are still direct-write exceptions for their owning tasks to close.
+The [accepted Phase 4 editorial contract](superpowers/specs/2026-11-01-editorial-workflow-design.md) defines checked lifecycle operations, noneditable generated slugs, and a last-eligible-administrator guard. Phase 4 Task 2 enforces generated article slugs at the draft RPC boundary: direct calls carrying a valid old slug field can still create/save during mixed-version rollout, but the field is discarded before fingerprinting or writing; malformed values fail. Exact older receipts remain replayable. Existing published rows are unchanged. Profile slug and last-administrator guards remain future controls; foundation profile slug and administrator membership grants are still direct-write exceptions for their owning tasks to close.
 
 - Validate all request bodies, query parameters, identifiers, slugs, dates, URLs, and pagination limits.
 - Store structured content or a constrained rich-text representation.
@@ -190,7 +190,11 @@ References are locked and validated before no-op/change decisions, so inactive s
 
 ## Implemented Phase 4 published editing
 
-Task 5 adds a separate authenticated `save_published_article` RPC; the draft RPC still rejects published rows. The trusted database boundary checks eligible active identity, owner or administrator authority, published status, expected version, supported stored body and publication readiness. Direct article/history writes remain closed. Credits alone grant no authority. Changed edits cannot alter slug, owner, status or publication time; they commit article fields, associations, body-image references, revision, audit and receipt together. Archived rows remain read-only. The dashboard hides draft-only image mutation controls on published articles; uploads and main-image changes still require their separate draft-scoped operations. Public reading and lifecycle transitions remain unavailable. Human security review remains required.
+Task 5 adds a separate authenticated `save_published_article` RPC; the draft RPC still rejects published rows. The trusted database boundary checks eligible active identity, owner or administrator authority, published status, expected version, supported stored body and publication readiness. Direct article/history writes remain closed. Credits alone grant no authority. Changed edits cannot alter slug, owner, status or publication time; they commit article fields, associations, body-image references, revision, audit and receipt together. Archived rows remain read-only. The dashboard hides draft-only image mutation controls on published articles; uploads and main-image changes still require their separate draft-scoped operations. Public reading remains unavailable. Human security review remains required.
+
+## Implemented Phase 4 owner article lifecycle
+
+Task 6 adds separate authenticated publish/archive RPCs with active owner or administrator checks, strict version/status checks, actor and article locks, exact receipts, and atomic revision/audit capture. Publish reuses locked readiness checks; archive can remove invalid old published content from circulation. Direct status writes and anonymous execution remain closed. The dashboard checks for unsaved local work before invoking the RPC; the database independently rejects stale or unauthorized requests. No public article read, restore, deletion, or scheduling grant is added.
 
 ## Implemented private server draft boundary
 

@@ -1,9 +1,8 @@
 # Current work
 
-- Phase: 4, Task 5 published article editing. Task 4 / PR #31 is merged.
-- Branch: `feat/published-article-editing`, based on `origin/main` after PR #31.
-- Implemented here: separate checked published-save RPC and readiness predicate; status-aware editor and dashboard link; archived and unsupported content remain read-only.
-- Verified locally: 1,234 pgTAP assertions, 521 unit tests, 214 draft parity cases, eight editor parity cases, 30 concurrency regressions, four desktop/mobile published-edit cases, typecheck, lint, format, schema lint, generated types, and production build via Playwright.
-- PR: [#32](https://github.com/dylandrozario/the-gavel/pull/32), open against `main`. Final read-only diff review found no Critical or Important issues.
-- Pending: hosted CI (owner monitors) and second maintainer review. Video remains unavailable pending provider approval.
-- Next: merge Task 5 after its required checks and review; wait for the owner checkpoint before Task 6.
+- Phase: 4, Task 6 owner article lifecycle. Task 5 / PR #32 is open.
+- Branch: `feat/owner-article-lifecycle`, stacked on `feat/published-article-editing` while #32 is open.
+- Implemented here: checked publish/archive RPCs, atomic revision/audit/receipt transitions, dashboard confirmation and recovery controls, and legacy published archive access.
+- Verified locally: 1,277 pgTAP assertions; 529 unit cases; 214 draft parity cases; 31 concurrency cases; six desktop/mobile lifecycle browser cases; TypeScript, lint, format, schema lint, generated types, and production build via Playwright.
+- PR: pending creation against `feat/published-article-editing`.
+- Pending: hosted CI (owner monitors) and human review. Public article reads, restore, administrator management, and provider setup remain future tasks.
