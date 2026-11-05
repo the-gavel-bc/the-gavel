@@ -20,9 +20,12 @@ test("owner and administrator save published changes without changing publicatio
   const path = `/dashboard/articles/${fixture.id(20)}`;
   const before = fixture.article(20).article;
   await page.goto("/dashboard");
-  await page
-    .getByRole("link", { name: `Edit article: ${fixture.label} own 20` })
-    .click();
+  const editLink = page.getByRole("link", {
+    name: `Edit article: ${fixture.label} own 20`,
+  });
+  await editLink.focus();
+  await expect(editLink).toBeFocused();
+  await editLink.press("Enter");
   await expect(
     page.getByRole("heading", { name: "Edit published article" }),
   ).toBeVisible();
