@@ -40,6 +40,6 @@
 ## Slice C: Contract and final verification
 
 - [x] Update API/security/testing documentation only for implemented Task 5 behavior. Keep future lifecycle controls clearly proposed.
-- [ ] Run affected unit, SQL, contract, type, lint, format, build, and browser checks. Review the completed diff once, address findings, and open the Task 5 PR.
+- [x] Run affected unit, SQL, contract, type, lint, format, build, and browser checks. Review the completed diff once, address findings, and open [Task 5 PR #32](https://github.com/dylandrozario/the-gavel/pull/32).
 
 **Acceptance:** Authorized edits persist with correct version/revision/audit and unchanged slug/status/publication time. Unsafe, unready, unauthorized, stale, archived, and unsupported edits fail safely. Draft journeys continue to work. Human maintainer review and hosted CI remain external checkpoints.
