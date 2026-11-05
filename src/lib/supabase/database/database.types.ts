@@ -560,6 +560,14 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      archive_article: {
+        Args: {
+          p_article_id: string;
+          p_expected_version: number;
+          p_request_id: string;
+        };
+        Returns: Json;
+      };
       begin_article_image_upload: {
         Args: { p_actor_user_id: string; p_asset_id: string };
         Returns: Json;
@@ -592,6 +600,14 @@ export type Database = {
       };
       mark_article_image_for_removal: {
         Args: { p_asset_id: string };
+        Returns: Json;
+      };
+      publish_article: {
+        Args: {
+          p_article_id: string;
+          p_expected_version: number;
+          p_request_id: string;
+        };
         Returns: Json;
       };
       request_article_image_upload: {
