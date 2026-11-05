@@ -264,7 +264,7 @@ export function draftListFixture(
       )
         throw new Error("Not a save fixture article.");
       sql(
-        `update public.articles set status='published',published_at=now() where id='${id(number)}';`,
+        `update public.articles set status='archived',published_at=now(),archived_at=now() where id='${id(number)}';`,
       );
     },
     setCreateAccess(active: boolean) {

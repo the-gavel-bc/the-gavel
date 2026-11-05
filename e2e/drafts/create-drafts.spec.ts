@@ -190,7 +190,7 @@ test.describe("without JavaScript", () => {
     await setLocalSession(context, fixture.users.empty);
     await page.goto("/dashboard/articles/new");
     await expect(
-      page.getByText(/Enable JavaScript to create or save a draft/),
+      page.getByText(/Enable JavaScript to save article changes/),
     ).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Create draft" }),

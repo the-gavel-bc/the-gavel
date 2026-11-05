@@ -130,6 +130,9 @@ test("unsupported and read-only recovery preserve local input and disable saving
     await page
       .getByLabel("Title (required)")
       .fill(`Retained local input ${number}`);
+    await expect(
+      page.getByRole("status").filter({ hasText: "Unsaved changes" }),
+    ).toBeVisible();
     if (number === 18) fixture.legacy();
     else fixture.makeReadOnly(number);
     const before = fixture.article(number);
