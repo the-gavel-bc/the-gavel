@@ -12,16 +12,22 @@ import {
 
 async function transition(
   command: ArticleLifecycleCommand,
-  operation: "publish" | "archive",
+  operation: "publish" | "archive" | "restore",
 ): Promise<ArticleLifecycleResult> {
   const parsed = parseArticleLifecycleCommand(command);
   if (!parsed.ok) return parsed;
   try {
     const access = await getCurrentAccess();
     if (access.status !== "active") return { ok: false, code: "forbidden" };
+    if (operation === "restore" && access.role !== "administrator")
+      return { ok: false, code: "forbidden" };
     const client = await createServerSupabaseClient();
     const { data, error } = await client.rpc(
-      operation === "publish" ? "publish_article" : "archive_article",
+      operation === "publish"
+        ? "publish_article"
+        : operation === "archive"
+          ? "archive_article"
+          : "restore_article",
       {
         p_article_id: parsed.value.articleId,
         p_expected_version: parsed.value.expectedVersion,
@@ -31,7 +37,7 @@ async function transition(
     if (error) return { ok: false, code: "unavailable" };
     const result = parseArticleLifecycleResult(
       data,
-      operation === "publish" ? "published" : "archived",
+      operation === "archive" ? "archived" : "published",
       parsed.value.articleId,
     );
     if (result.ok) {
@@ -63,4 +69,10 @@ export async function archiveArticleAction(
   command: ArticleLifecycleCommand,
 ): Promise<ArticleLifecycleResult> {
   return transition(command, "archive");
+}
+
+export async function restoreArticleAction(
+  command: ArticleLifecycleCommand,
+): Promise<ArticleLifecycleResult> {
+  return transition(command, "restore");
 }

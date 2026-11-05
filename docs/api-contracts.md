@@ -10,7 +10,7 @@
 
 The existing `save_article_draft(articleId,expectedVersion,requestId,draft)` accepts canonical `gavel-draft` version 2 bodies with image blocks containing only `assetId`, required alt text (1–240 characters), and optional caption (1–500 characters). Version 1 bodies remain valid. Database save checks each asset is finalized for that article and reconciles body references in the same transaction as content, revision, audit, and retry receipt. Draft creation does not accept version 2 bodies because assets require an existing article. `GET /api/articles/[id]/media/[assetId]` serves a finalized same-article WebP only through the active caller's RLS-scoped client, with private no-store and nosniff headers. Video embeds remain unavailable pending a provider allowlist.
 
-Status: Foundation access/session interfaces, Phase 2 private content/history storage, Phase 3 private draft queries/actions, and Phase 4 owner publish/archive commands implemented. Public article reads remain planned.
+Status: Foundation access/session interfaces, Phase 2 private content/history storage, Phase 3 private draft queries/actions, and Phase 4 article lifecycle and administrator list/detail commands implemented. Public article reads remain planned.
 
 ## Style and ownership
 
@@ -43,7 +43,7 @@ Authoritative request schemas will live beside the implemented server operations
 
 Taxonomy SELECT access, private article SELECT access, and category/tag/contributor association SELECT access are enforced by database grants/RLS; see the [data model](data-model.md#implemented-article-storage) and [security controls](security-and-permissions.md#implemented-private-article-controls). `private.can_read_article(check_article_id uuid) -> boolean` is an internal policy predicate for the authenticated caller, not a public mutation or arbitrary-user lookup RPC. It returns false for missing or unreadable article IDs. It does not accept an identity argument or expose private profile links.
 
-All article associations and revisions follow article read authority; credits and revision actor IDs confer no additional access. Audit reads require an eligible active administrator. Article/category links enforce same-section membership through composite references. No application section-change, tag-entry, credit-management, or link-mutation interface is exposed. Private application article-fetch wrappers are implemented below; editor UI, public projections and restore interfaces remain planned. The narrow draft-create RPC and its atomic history capture are documented below. Generated database Insert/Update types describe the row shape; they do not grant write permission. All direct new-table application writes remain denied, including administrator writes.
+All article associations and revisions follow article read authority; credits and revision actor IDs confer no additional access. Audit reads require an eligible active administrator. Article/category links enforce same-section membership through composite references. No application section-change, tag-entry, credit-management, or link-mutation interface is exposed. Private application article-fetch wrappers, editor UI, and restore are documented below; public projections remain planned. The narrow draft-create RPC and its atomic history capture are documented below. Generated database Insert/Update types describe the row shape; they do not grant write permission. All direct new-table application writes remain denied, including administrator writes.
 
 ## Planned public operations
 
@@ -67,8 +67,6 @@ Phase 4 Task 3 implements `request_article_image_upload(article_id,request_id)` 
 
 ## Planned administrator operations
 
-- List and manage all articles.
-- Restore archived article.
 - Permanently delete archived article with explicit confirmation.
 - Approve, change, or deactivate membership.
 - Manage contributor profiles.
@@ -120,6 +118,12 @@ Internationalized hostnames, including all case-insensitive `xn--` labels, are d
 ## Implemented owner article lifecycle
 
 `publish_article(article_id,expected_version,request_id)` and `archive_article(article_id,expected_version,request_id)` accept only the strict three-field `ArticleLifecycleCommand` through separate server actions. Active owners or administrators may call them; credits grant no authority. Publish requires a draft with a supported nonblank body, active references, finalized body media and a finalized main image with alt text and credit. Archive requires published status but does not recheck readiness, so invalid old content can leave circulation. Both require the current version, preserve slug/owner, increment once, capture a complete revision and an allowlisted audit event, and store an exact replay receipt atomically. A successful response contains `articleId`, `status`, `version`, `updatedAt`, `changed`, and `replayed`; failures use the bounded draft error codes. Exact retries return their original receipt after later changes. No public read grant is implied.
+
+## Implemented administrator article management
+
+`getAdminArticlesPage({status?,search?,cursor?,pageSize?})` and `getAdminArticleDetail(articleId)` independently require active administrator access. The page defaults to 20 and accepts at most 50 rows, ordered by update time and ID descending. Status is `all | draft | published | archived`; title search is trimmed, at most 80 characters, and restricted to literal letters, numbers, spaces, apostrophes and hyphens. A strict cursor binds status and search. The queries select only safe title/status/owner-display-name/section-name/version/date fields, never article body or private identity links. Missing detail returns null; malformed input and read failures produce bounded errors.
+
+`restore_article(article_id,expected_version,request_id)` uses the existing strict lifecycle command and result through `restoreArticleAction`. Only an active administrator may restore a currently archived, publication-ready article. It clears `archived_at` while retaining slug, owner and original `published_at`; version, complete revision, `article.restored` audit and exact receipt commit together. Lost-response retries keep the original command. Invalid archived content remains archived. No public read or direct table write is granted.
 
 ## Implemented private draft server boundary
 

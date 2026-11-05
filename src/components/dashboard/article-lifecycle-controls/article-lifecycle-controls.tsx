@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button/button";
 import {
   archiveArticleAction,
   publishArticleAction,
+  restoreArticleAction,
 } from "@/lib/articles/article-lifecycle/article-lifecycle-actions";
 import type {
   ArticleLifecycleCommand,
@@ -37,7 +38,7 @@ export function ArticleLifecycleControls({
 }: {
   articleId: string;
   version: number;
-  status: "draft" | "published";
+  status: "draft" | "published" | "archived";
   disabled: boolean;
   onBusyChange?: (busy: boolean) => void;
 }) {
@@ -47,8 +48,18 @@ export function ArticleLifecycleControls({
   const [retryCommand, setRetryCommand] =
     useState<ArticleLifecycleCommand | null>(null);
   const busy = useRef(false);
-  const verb = status === "draft" ? "Publish" : "Archive";
-  const progressVerb = status === "draft" ? "Publishing" : "Archiving";
+  const verb =
+    status === "draft"
+      ? "Publish"
+      : status === "archived"
+        ? "Restore"
+        : "Archive";
+  const progressVerb =
+    status === "draft"
+      ? "Publishing"
+      : status === "archived"
+        ? "Restoring"
+        : "Archiving";
   const blocked = disabled || pending || Boolean(result?.ok);
 
   async function run() {
@@ -63,7 +74,9 @@ export function ArticleLifecycleControls({
       !window.confirm(
         status === "draft"
           ? "Publish this article now?"
-          : "Archive this article? It will leave public circulation.",
+          : status === "archived"
+            ? "Restore this article to Published?"
+            : "Archive this article? It will leave public circulation.",
       )
     )
       return;
@@ -75,7 +88,9 @@ export function ArticleLifecycleControls({
       next =
         status === "draft"
           ? await publishArticleAction(command)
-          : await archiveArticleAction(command);
+          : status === "archived"
+            ? await restoreArticleAction(command)
+            : await archiveArticleAction(command);
     } catch {
       next = { ok: false, code: "unavailable" };
     }
@@ -96,7 +111,9 @@ export function ArticleLifecycleControls({
       <p>
         {status === "draft"
           ? "Publish when the article and its images are ready."
-          : "Archive to remove this article from circulation."}
+          : status === "archived"
+            ? "Restore only when the article and its images are still ready for publication."
+            : "Archive to remove this article from circulation."}
       </p>
       <Button type="button" disabled={blocked} onClick={run}>
         {pending
@@ -112,7 +129,11 @@ export function ArticleLifecycleControls({
       {result?.ok && <p role="status">Article {result.status}. Refreshing…</p>}
       {result && !result.ok && (
         <div role="alert">
-          <p>{failureMessage[result.code]}</p>
+          <p>
+            {status === "archived" && result.code === "invalid_input"
+              ? "This archive is not ready to restore. Its body, selections, and images must be repaired through a reviewed workflow."
+              : failureMessage[result.code]}
+          </p>
           {(result.code === "conflict" ||
             result.code === "request_conflict" ||
             result.code === "not_found") && (

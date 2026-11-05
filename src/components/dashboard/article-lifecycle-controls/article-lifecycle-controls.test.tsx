@@ -5,11 +5,13 @@ import { beforeEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   publish: vi.fn(),
   archive: vi.fn(),
+  restore: vi.fn(),
   refresh: vi.fn(),
 }));
 vi.mock("@/lib/articles/article-lifecycle/article-lifecycle-actions", () => ({
   publishArticleAction: mocks.publish,
   archiveArticleAction: mocks.archive,
+  restoreArticleAction: mocks.restore,
 }));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: mocks.refresh }),
@@ -167,4 +169,39 @@ it("holds the editor busy through a confirmed transition", async () => {
   });
   await waitFor(() => expect(mocks.refresh).toHaveBeenCalledOnce());
   expect(onBusyChange).not.toHaveBeenCalledWith(false);
+});
+
+it("restores an archive with confirmation and exact uncertain retry", async () => {
+  mocks.restore
+    .mockResolvedValueOnce({ ok: false, code: "unavailable" })
+    .mockResolvedValueOnce({
+      ok: true,
+      articleId,
+      status: "published",
+      version: 5,
+      updatedAt: "2026-11-05T12:00:00Z",
+      changed: true,
+      replayed: true,
+    });
+  render(
+    <ArticleLifecycleControls
+      articleId={articleId}
+      version={4}
+      status="archived"
+      disabled={false}
+    />,
+  );
+  await userEvent.click(
+    screen.getByRole("button", { name: "Restore article" }),
+  );
+  expect(window.confirm).toHaveBeenCalledWith(
+    "Restore this article to Published?",
+  );
+  await userEvent.click(
+    await screen.findByRole("button", { name: "Retry original restore" }),
+  );
+  expect(mocks.restore.mock.calls[1][0]).toEqual(
+    mocks.restore.mock.calls[0][0],
+  );
+  await waitFor(() => expect(mocks.refresh).toHaveBeenCalledOnce());
 });
