@@ -25,21 +25,21 @@
 
 **Files:** New forward migration; focused pgTAP; generated database types.
 
-- [ ] Add failing SQL coverage for role and ownership denials, forged payloads, readiness, slug/timestamp preservation, no-op, retry, stale version, and rollback.
-- [ ] Add a private publication-readiness predicate and `public.save_published_article(uuid,integer,uuid,jsonb)`. Keep draft RPC and its receipts unchanged.
-- [ ] Verify focused pgTAP, database lint/types, then commit the boundary.
+- [x] Add failing SQL coverage for role and ownership denials, forged payloads, readiness, slug/timestamp preservation, no-op, retry, stale version, and rollback.
+- [x] Add a private publication-readiness predicate and `public.save_published_article(uuid,integer,uuid,jsonb)`. Keep draft RPC and its receipts unchanged.
+- [x] Verify focused pgTAP, database lint/types, then commit the boundary.
 
 ## Slice B: Server and editor integration
 
 **Files:** Draft command/action/query/reload modules, editor form and media controls, focused unit/component tests, published-edit browser test.
 
-- [ ] Add a strict published-save action that routes to the new RPC; retain existing draft command fingerprint and recovery behavior.
-- [ ] Return published articles as editable, archived as read-only; keep unsupported stored content read-only. Show status-aware labels and disable draft-only media controls in published mode.
-- [ ] Verify owner/admin save and reopen, stale conflict/reload, archived denial, and desktop/mobile keyboard behavior. Commit focused changes.
+- [x] Add a strict published-save action that routes to the new RPC; retain existing draft command fingerprint and recovery behavior.
+- [x] Return published articles as editable, archived as read-only; keep unsupported stored content read-only. Show status-aware labels and disable draft-only media controls in published mode.
+- [x] Verify owner/admin save and reopen, stale conflict/reload, archived denial, and desktop/mobile keyboard behavior. Commit focused changes.
 
 ## Slice C: Contract and final verification
 
-- [ ] Update API/security/testing documentation only for implemented Task 5 behavior. Keep future lifecycle controls clearly proposed.
+- [x] Update API/security/testing documentation only for implemented Task 5 behavior. Keep future lifecycle controls clearly proposed.
 - [ ] Run affected unit, SQL, contract, type, lint, format, build, and browser checks. Review the completed diff once, address findings, and open the Task 5 PR.
 
 **Acceptance:** Authorized edits persist with correct version/revision/audit and unchanged slug/status/publication time. Unsafe, unready, unauthorized, stale, archived, and unsupported edits fail safely. Draft journeys continue to work. Human maintainer review and hosted CI remain external checkpoints.
