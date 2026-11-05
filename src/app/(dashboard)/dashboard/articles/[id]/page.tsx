@@ -80,7 +80,7 @@ export default async function EditDraftPage({
           : "Edit draft"}
       </h1>
       <DraftForm
-        key={`${detail.articleId}:${detail.status}:${detail.version}`}
+        key={`${detail.articleId}:${detail.status}`}
         initialDraft={detail.draft}
         options={options}
         initialImage={mainImage}
