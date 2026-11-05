@@ -178,10 +178,12 @@ Task 2 evidence and the required migration write-pause procedure are recorded in
 
 **Test-first and commit boundary:** RED: non-admin direct read, malicious cursor/filter, unbounded page, and body/identity leakage. GREEN: focused RLS/query/render tests and keyboard/mobile pagination; commit query boundary before page UI.
 
-- [ ] Read only the current caller's authorized, paginated audit history. Display safe actor label, action, resource, and timestamp; do not expose raw metadata, article body, identity links, or SQL diagnostics.
-- [ ] Add stable human-readable labels for implemented article create/update/publish/archive/restore events. Filters are bounded and allowlisted.
-- [ ] Keep audit rows available after article archival and maintain existing actor-reference behavior.
-- [ ] Do not add non-article audit actions here; each later admin mutation task adds its own narrowly reviewed action/resource constraints and display label.
+- [x] Read only the current caller's authorized, paginated audit history. Display safe actor label, action, resource, and timestamp; do not expose raw metadata, article body, identity links, or SQL diagnostics.
+- [x] Add stable human-readable labels for implemented article create/update/publish/archive/restore events. Filters are bounded and allowlisted.
+- [x] Keep audit rows available after article archival and maintain existing actor-reference behavior.
+- [x] Do not add non-article audit actions here; each later admin mutation task adds its own narrowly reviewed action/resource constraints and display label.
+
+Task 8 implementation and local proof: [PR #36](https://github.com/dylandrozario/the-gavel/pull/36). Hosted CI and human review remain pending.
 
 **Acceptance:** Active administrators can browse recent article activity; owners, credited contributors, inactive members, and anonymous users cannot read the audit stream. Pagination/filter inputs cannot expand authority or cause unbounded reads.
 

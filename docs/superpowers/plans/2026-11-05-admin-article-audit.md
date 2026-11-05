@@ -25,6 +25,6 @@
 ## Slice C — handoff
 
 - [x] Update affected API, data, component, security, testing, README, and STATUS text to distinguish this implemented read from future administrator controls.
-- [ ] Review the final diff once; commit in small coherent slices and open a stacked PR. Relevant SQL, unit, type, lint, format, generated-type, build, and focused browser checks passed.
+- [x] Review the final diff once; commit in small coherent slices and open [PR #36](https://github.com/dylandrozario/the-gavel/pull/36) against `main`. Relevant SQL, unit, type, lint, format, generated-type, build, and focused browser checks passed.
 
 **Acceptance:** Active administrators can browse only safe article audit summaries. Authors, credited contributors, inactive members, and anonymous callers cannot obtain the stream, including through a direct RPC. A filter or cursor cannot expand authority or page size. Audit rows remain visible after article archival.
