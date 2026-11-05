@@ -12,30 +12,33 @@ export function draftListFixture(
     | "recover"
     | "media"
     | "bodyMedia"
-    | "published" = "list",
+    | "published"
+    | "lifecycle" = "list",
 ) {
   if (project !== "desktop" && project !== "mobile")
     throw new Error("Unknown local browser project.");
   const base =
     (project === "desktop" ? 860 : 880) +
-    (suite === "published"
-      ? 320
-      : suite === "bodyMedia"
-        ? 280
-        : suite === "media"
-          ? 240
-          : suite === "recover"
-            ? 200
-            : suite === "save"
-              ? 160
-              : suite === "select"
-                ? 120
-                : suite === "edit"
-                  ? 80
-                  : suite === "create"
-                    ? 40
-                    : 0);
-  const prefix = `${suite === "published" ? "phase4-task5" : suite === "bodyMedia" ? "phase4-task4" : suite === "media" ? "phase4-task3" : suite === "save" || suite === "recover" ? `task10-${suite}` : suite === "select" ? "task9" : suite === "edit" ? "task8" : suite === "create" ? "task7" : "task6"}-${project}`;
+    (suite === "lifecycle"
+      ? 360
+      : suite === "published"
+        ? 320
+        : suite === "bodyMedia"
+          ? 280
+          : suite === "media"
+            ? 240
+            : suite === "recover"
+              ? 200
+              : suite === "save"
+                ? 160
+                : suite === "select"
+                  ? 120
+                  : suite === "edit"
+                    ? 80
+                    : suite === "create"
+                      ? 40
+                      : 0);
+  const prefix = `${suite === "lifecycle" ? "phase4-task6" : suite === "published" ? "phase4-task5" : suite === "bodyMedia" ? "phase4-task4" : suite === "media" ? "phase4-task3" : suite === "save" || suite === "recover" ? `task10-${suite}` : suite === "select" ? "task9" : suite === "edit" ? "task8" : suite === "create" ? "task7" : "task6"}-${project}`;
   const uuid = (n: number) =>
     `00000000-0000-0000-0000-${String(n).padStart(12, "0")}`;
   const id = (n: number) =>
@@ -48,7 +51,7 @@ export function draftListFixture(
   };
   const userIds = Object.values(users).map(uuid);
   const quoted = (ids: string[]) => ids.map((id) => `'${id}'`).join(",");
-  const label = `Task ${suite === "published" ? "4.5" : suite === "bodyMedia" ? "4.4" : suite === "media" ? "4.3" : suite === "save" || suite === "recover" ? 10 : suite === "select" ? 9 : suite === "edit" ? 8 : suite === "create" ? 7 : 6} ${project}`;
+  const label = `Task ${suite === "lifecycle" ? "4.6" : suite === "published" ? "4.5" : suite === "bodyMedia" ? "4.4" : suite === "media" ? "4.3" : suite === "save" || suite === "recover" ? 10 : suite === "select" ? 9 : suite === "edit" ? 8 : suite === "create" ? 7 : 6} ${project}`;
   let installed = false;
   let selectionsInstalled = false;
   function sql(statement: string) {
@@ -115,17 +118,18 @@ export function draftListFixture(
       installed = true;
     },
     makePublishedReady() {
-      if (!installed || suite !== "published")
-        throw new Error("Not a published fixture.");
+      if (!installed || (suite !== "published" && suite !== "lifecycle"))
+        throw new Error("Not a publication fixture.");
+      const number = suite === "lifecycle" ? 21 : 20;
       sql(`
         update public.articles set content='{"format":"gavel-draft","version":1,"document":{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Published body."}]}]}}'::jsonb
-          where id='${id(20)}';
+          where id='${id(number)}';
         insert into public.media_assets(id,article_id,uploader_user_id,request_id,object_key,status,
           byte_size,width,height,sha256,finalized_at)
-          values('${id(91)}','${id(20)}','${uuid(users.author)}','${id(92)}',
-            '${id(20)}/${id(91)}.webp','finalized',120,12,8,repeat('a',64),now());
+          values('${id(91)}','${id(number)}','${uuid(users.author)}','${id(92)}',
+            '${id(number)}/${id(91)}.webp','finalized',120,12,8,repeat('a',64),now());
         insert into public.article_main_images(article_id,asset_id,alt_text,credit)
-          values('${id(20)}','${id(91)}','Synthetic newsroom','The Gavel');
+          values('${id(number)}','${id(91)}','Synthetic newsroom','The Gavel');
       `);
     },
     setupSelections() {
@@ -206,6 +210,13 @@ export function draftListFixture(
         `update public.articles set content='{"format":"legacy","payload":"preserve synthetic legacy"}'::jsonb where id='${id(18)}';`,
       );
     },
+    legacyPublished() {
+      if (!installed || suite !== "lifecycle")
+        throw new Error("Not a lifecycle fixture.");
+      sql(
+        `update public.articles set content='{"format":"legacy","payload":"preserve synthetic legacy"}'::jsonb where id='${id(20)}';`,
+      );
+    },
     setSectionActive(active: boolean) {
       if (!installed) throw new Error("Fixture is not installed.");
       sql(
@@ -264,7 +275,10 @@ export function draftListFixture(
     cleanup() {
       if (!installed) return;
       sql(`${
-        suite === "media" || suite === "bodyMedia" || suite === "published"
+        suite === "media" ||
+        suite === "bodyMedia" ||
+        suite === "published" ||
+        suite === "lifecycle"
           ? `
         -- Test-only synthetic cleanup; production removes objects via Storage API.
         select set_config('storage.allow_delete_query','true',true);
