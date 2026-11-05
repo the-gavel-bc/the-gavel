@@ -189,11 +189,16 @@ test("published content is editable; archived and legacy content stay read-only;
 }) => {
   await setLocalSession(context, fixture.users.author);
   const published = fixture.article(20);
-  await page.goto(`/dashboard/articles/${fixture.id(20)}`);
-  await expect(page.getByLabel("Title (required)")).toBeEnabled();
-  await expect(
-    page.getByRole("button", { name: "Save article" }),
-  ).toBeVisible();
+  const publishedPage = await context.newPage();
+  try {
+    await publishedPage.goto(`/dashboard/articles/${fixture.id(20)}`);
+    await expect(publishedPage.getByLabel("Title (required)")).toBeEnabled();
+    await expect(
+      publishedPage.getByRole("button", { name: "Save article" }),
+    ).toBeVisible();
+  } finally {
+    await publishedPage.close();
+  }
   expect(fixture.article(20)).toEqual(published);
   const archived = fixture.article(19);
   await page.goto(`/dashboard/articles/${fixture.id(19)}`);
