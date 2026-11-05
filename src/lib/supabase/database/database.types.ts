@@ -614,6 +614,14 @@ export type Database = {
         Args: { p_article_id: string; p_request_id: string };
         Returns: Json;
       };
+      restore_article: {
+        Args: {
+          p_article_id: string;
+          p_expected_version: number;
+          p_request_id: string;
+        };
+        Returns: Json;
+      };
       save_article_draft: {
         Args: {
           p_article_id: string;
