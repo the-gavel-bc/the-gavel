@@ -46,6 +46,7 @@ Newsletter signup is deferred.
 | `/dashboard/articles/[id]`      | Edit owned or administrator-accessible article | Owner/admin    |
 | `/dashboard/profile`            | Edit own public profile                        | Author/admin   |
 | `/dashboard/admin/articles`     | Manage all content and archives                | Admin          |
+| `/dashboard/admin/articles/[id]`| Review article status and restore archives     | Admin          |
 | `/dashboard/admin/members`      | Approve/deactivate members and roles           | Admin          |
 | `/dashboard/admin/contributors` | Manage credited profiles                       | Admin          |
 | `/dashboard/admin/taxonomy`     | Manage sections, categories, and tags          | Admin          |
@@ -139,3 +140,7 @@ The `draft-save-state/` reducer owns current/acknowledged input, committed ident
 `DraftConflictPanel` reviews latest authorized detail/options without replacing input. Explicit confirmation adopts an editable, non-stale version and its catalogs; current native editor errors reset only on this deliberate replacement. Focus returns to Title. Prior local metadata/selections and the last valid canonical body remain in a read-only reference panel for manual re-entry; unsupported native body edits are explicitly excluded from that reference. Failed/hidden/read-only/unsupported recovery leaves local input intact and does not offer an editable load. Plain-text body previews use React text, not HTML or raw editor JSON. No automatic merge or force-save path exists.
 
 `DraftNavigationProvider` contains only leave-check registration. `GuardedDashboardLink` uses supported Next Link navigation callbacks; `DashboardSignOutForm` checks before submitting the existing server action. Form registration owns one best-effort unload listener for dirty, pending or invalid-native input and cleans up on unmount/clean acknowledgement. New-tab modifiers and same-page error/skip anchors retain normal behavior. Same-document browser Back/Forward is not guaranteed intercepted; no persistent/crash-recovery promise is made.
+
+## Implemented administrator article management
+
+`/dashboard/admin/articles` and `/dashboard/admin/articles/[id]` independently require active administrator access. `AdminArticleList` renders bounded safe summaries as responsive list cards with native status/title filters and filter-bound pagination. The detail route shows safe metadata and links editable articles to the existing private editor. Archived details use `ArticleLifecycleControls` for administrator restore with confirmation, exact uncertain retry, conflict reload and pending feedback. Loading, empty, safe error and denied states are explicit. These routes never render the article body.
