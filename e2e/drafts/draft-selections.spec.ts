@@ -79,6 +79,9 @@ test("section changes retain categories until explicit replacement and preserve 
   await page
     .getByLabel(`Synthetic ${info.project.name} topic`, { exact: true })
     .check();
+  await expect(
+    page.getByRole("status").filter({ hasText: "Unsaved changes" }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Save draft" }).click();
   await expect(
     page.getByRole("status").filter({ hasText: "Draft saved" }),
@@ -130,6 +133,9 @@ for (const actor of ["author", "admin"] as const)
       { exact: true },
     );
     await category.check();
+    await expect(
+      page.getByRole("status").filter({ hasText: "Unsaved changes" }),
+    ).toBeVisible();
     await page.getByRole("button", { name: "Save draft" }).click();
     await expect(
       page.getByRole("status").filter({ hasText: "Draft saved" }),
