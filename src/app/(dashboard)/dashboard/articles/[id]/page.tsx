@@ -19,7 +19,7 @@ export default async function EditDraftPage({
   const recovery = (
     <>
       <h1>Article details</h1>
-      <p role="alert">Unable to load this draft. Try again.</p>
+      <p role="alert">Unable to load this article. Try again.</p>
       <Link href={`/dashboard/articles/${id}`} prefetch={false}>
         Try again
       </Link>
@@ -37,7 +37,7 @@ export default async function EditDraftPage({
     return (
       <>
         <h1>Article details</h1>
-        <p>This article is {detail.status}. Draft editing is unavailable.</p>
+        <p>This article is {detail.status}. Editing is unavailable.</p>
         <Link href="/dashboard">My articles</Link>
       </>
     );
@@ -46,7 +46,7 @@ export default async function EditDraftPage({
       <>
         <h1>Article details</h1>
         <p role="alert">
-          This draft’s body format is unsupported. Its content has been
+          This article’s body format is unsupported. Its content has been
           preserved; editing is unavailable.
         </p>
         <Link href="/dashboard">My articles</Link>
@@ -64,12 +64,17 @@ export default async function EditDraftPage({
 
   return (
     <>
-      <h1>Edit draft</h1>
+      <h1>
+        {detail.status === "published"
+          ? "Edit published article"
+          : "Edit draft"}
+      </h1>
       <DraftForm
         key={detail.articleId}
         initialDraft={detail.draft}
         options={options}
         initialImage={mainImage}
+        status={detail.status}
         article={{
           id: detail.articleId,
           version: detail.version,

@@ -29,6 +29,7 @@ export function DraftEditor({
   onError,
   disabled,
   articleId,
+  allowImageUpload = true,
   onMediaDirtyChange,
 }: {
   value: DraftDocument | null;
@@ -36,6 +37,7 @@ export function DraftEditor({
   onError: (failure: DraftFailure) => void;
   disabled: boolean;
   articleId?: string;
+  allowImageUpload?: boolean;
   onMediaDirtyChange?: (dirty: boolean) => void;
 }) {
   const emitted = useRef(new WeakSet<DraftDocument>());
@@ -159,7 +161,7 @@ export function DraftEditor({
       {source.ok && (
         <>
           <DraftToolbar editor={editor} disabled={disabled} onError={reject} />
-          {articleId && (
+          {articleId && allowImageUpload && (
             <DraftBodyImageControl
               articleId={articleId}
               editor={editor}

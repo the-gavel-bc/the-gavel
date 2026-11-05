@@ -39,6 +39,8 @@ test("late save preserves newer metadata body and associations until another exp
     await title.fill("Newer local title");
     await body.fill("Newer local body.");
     await page.getByLabel(fixture.topicName, { exact: true }).check();
+    await expect(title).toHaveValue("Newer local title");
+    await expect(body).toHaveText("Newer local body.");
     expect(fixture.article(17).article.title).toBe("First submitted snapshot");
     expect(fixture.selections(17).tags).toEqual([]);
     barrier.release();

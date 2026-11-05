@@ -102,7 +102,7 @@ RootLayout
 
 ## Implemented My Articles listing
 
-Phase 3 Task 6 connects `/dashboard?cursor=<opaque cursor>` to the checked own-list query. Layout and page retain independent membership guards. Server-owned rows show title, status and UTC update time; only drafts expose edit links. `ArticleList` owns its semantic list and CSS; `ArticlePageLink` owns client-navigation loading feedback; `ArticleListError` shares safe error presentation between server reads and the unexpected client-error boundary.
+Phase 3 Task 6 connects `/dashboard?cursor=<opaque cursor>` to the checked own-list query. Layout and page retain independent membership guards. Server-owned rows show title, status and UTC update time; Phase 4 Task 5 adds edit links for published rows while archived rows remain read-only. `ArticleList` owns its semantic list and CSS; `ArticlePageLink` owns client-navigation loading feedback; `ArticleListError` shares safe error presentation between server reads and the unexpected client-error boundary.
 
 Initial reads and bounded read/input errors render fully on the server, including without JavaScript. Native next/newest/retry links preserve that behavior; client pagination additionally announces pending work without replacing initial HTML with a streaming loading fallback. The URL owns the cursor; no editor provider or global store is introduced.
 
@@ -122,7 +122,7 @@ Full-document reload/close has a best-effort unload warning for dirty/pending wo
 
 Task 8 adds `DraftEditor`/`DraftToolbar` with owned CSS/tests and a small prospective-paste helper. `DraftForm` dynamically loads the editor with SSR disabled; Tiptap also uses `immediatelyRender:false`. Loading NULL presents an empty editing surface without converting the stored NULL or marking the form dirty. Successful creates open the edit route; confirmed edit saves retain the acknowledged version for subsequent saves.
 
-The edit route independently guards membership and uses the checked snapshot query. Missing/cross-owner IDs share not-found; published/archived and unsupported legacy bodies expose no save controls. Task 9 replaces the temporary unavailable-selection route gate with deliberate repair controls. Existing IDs remain visible with generic labels; unavailable section/category/tag/profile choices must be replaced or removed before saving.
+The edit route independently guards membership and uses the checked snapshot query. Missing/cross-owner IDs share not-found; archived and unsupported legacy bodies expose no save controls. Phase 4 Task 5 adds published edits through a distinct save action with status-aware labels; draft-only image controls stay hidden. Task 9 replaced the temporary unavailable-selection route gate with deliberate repair controls. Existing IDs remain visible with generic labels; unavailable section/category/tag/profile choices must be replaced or removed before saving.
 
 Only paragraph, H2/H3, quote, ordered/bulleted list, hard break, bold, italic and safe links are enabled. Native format translation belongs to `draft-document/`; engine types remain inside that boundary and editor/toolbar components. Only plain-text clipboard payloads are accepted. HTML, files, other rich MIME types and drops are explicitly blocked before parsing; plain text becomes a bounded model whose full prospective body validates before dispatch. Invalid native edits block saving, expose associated body errors and retain best-effort unload protection.
 

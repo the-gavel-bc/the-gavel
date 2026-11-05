@@ -123,13 +123,15 @@ test("unsupported and read-only recovery preserve local input and disable saving
   page,
 }) => {
   await setLocalSession(context, fixture.users.author);
+  page.on("dialog", (dialog) => dialog.accept());
   for (const number of [18, 12]) {
-    page.once("dialog", (dialog) => dialog.accept());
     await page.goto(`/dashboard/articles/${fixture.id(number)}`);
-    page.removeAllListeners("dialog");
     await page
       .getByLabel("Title (required)")
       .fill(`Retained local input ${number}`);
+    await expect(
+      page.getByRole("status").filter({ hasText: "Unsaved changes" }),
+    ).toBeVisible();
     if (number === 18) fixture.legacy();
     else fixture.makeReadOnly(number);
     const before = fixture.article(number);

@@ -61,17 +61,36 @@ it("loads the same form with the current version for an editable draft", async (
   expect(screen.getByLabelText(/Title/)).toHaveValue(baseDraft.title);
   expect(screen.getByRole("button", { name: "Save draft" })).toBeVisible();
 });
-it.each(["published", "archived"])(
-  "keeps %s records read-only",
-  async (status) => {
-    mocks.detail.mockResolvedValue({ kind: "readOnly", status });
-    render(await Page(params));
-    expect(screen.getByText(new RegExp(status))).toBeVisible();
-    expect(
-      screen.queryByRole("button", { name: "Save draft" }),
-    ).not.toBeInTheDocument();
-  },
-);
+it("opens a published article for editing without draft-only media controls", async () => {
+  mocks.detail.mockResolvedValue({
+    kind: "editable",
+    status: "published",
+    articleId: id,
+    version: 4,
+    updatedAt: "2026-10-23T12:00:00Z",
+    draft: baseDraft,
+    unavailableSelections: {
+      sectionId: null,
+      categoryIds: [],
+      tagIds: [],
+      contributorIds: [],
+    },
+  });
+  render(await Page(params));
+  expect(
+    screen.getByRole("heading", { name: "Edit published article" }),
+  ).toBeVisible();
+  expect(screen.getByRole("button", { name: "Save article" })).toBeVisible();
+  expect(screen.queryByLabelText("Main image")).not.toBeInTheDocument();
+});
+it("keeps archived records read-only", async () => {
+  mocks.detail.mockResolvedValue({ kind: "readOnly", status: "archived" });
+  render(await Page(params));
+  expect(screen.getByText(/archived/)).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Save draft" }),
+  ).not.toBeInTheDocument();
+});
 it("preserves unsupported stored content without loading editing controls", async () => {
   mocks.detail.mockResolvedValue({ kind: "unsupportedContent" });
   render(await Page(params));
