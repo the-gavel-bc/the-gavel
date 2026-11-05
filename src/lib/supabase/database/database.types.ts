@@ -598,6 +598,21 @@ export type Database = {
         };
         Returns: Json;
       };
+      list_article_audit_events: {
+        Args: {
+          p_action?: string;
+          p_before_at?: string;
+          p_before_id?: string;
+          p_limit?: number;
+        };
+        Returns: {
+          action: string;
+          actor_label: string;
+          created_at: string;
+          event_id: string;
+          resource_id: string;
+        }[];
+      };
       mark_article_image_for_removal: {
         Args: { p_asset_id: string };
         Returns: Json;

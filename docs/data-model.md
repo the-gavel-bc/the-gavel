@@ -106,6 +106,8 @@ Revisions require an article, snapshot version 1, and a JSON object snapshot of 
 
 Audit rows contain only actor, allowlisted action, `article` resource type, resource UUID, creation time, and optional UUID correlation ID. The [accepted contract](superpowers/specs/2026-10-21-content-foundation-design.md#revision-and-audit-storage) defines the seven content actions. There is no arbitrary metadata, body, or snapshot column. Resource IDs have no article foreign key, so records can retain identifiers independently of current article rows. Only eligible active administrators read audits.
 
+`20261105020000_article_audit_reader.sql` adds a recent-event `(created_at DESC, id DESC)` index and a bounded, read-only administrator RPC. It returns only implemented article actions with a safe actor display label, resource ID, and time. The underlying audit table, references, and retention behavior are unchanged.
+
 All application history insert/update/delete operations remain denied, including administrator operations and forged actors. These tables do not emit automatic events or provide an application mutation/capture API. They establish protected storage rather than a completed audit workflow. Restrictive references do not settle future identity-deletion or archive-retention policy; a later deletion design must reconcile those retained references before exposing deletion.
 
 ## Planned publishing entities
