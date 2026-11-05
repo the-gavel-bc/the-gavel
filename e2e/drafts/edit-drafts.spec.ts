@@ -28,6 +28,9 @@ test("owner formats saves and reopens a private body with a second versioned sav
     "href",
     "https://example.org/story",
   );
+  await expect(
+    page.getByRole("status").filter({ hasText: "Unsaved changes" }),
+  ).toBeVisible();
   page.on("request", (request) => {
     const action = request.headers()["next-action"];
     if (request.method() === "POST" && action) saveActionId = action;
@@ -180,25 +183,25 @@ test("another author cannot edit while an administrator can save the same draft"
   expect(after.article.edit_version).toBe(before.article.edit_version + 1);
   expect(after.article.content).toEqual(before.article.content);
 });
-test("published archived and legacy content stay read-only; unavailable sections are repairable", async ({
+test("published content is editable; archived and legacy content stay read-only; unavailable sections are repairable", async ({
   context,
   page,
 }) => {
   await setLocalSession(context, fixture.users.author);
-  for (const [number, status] of [
-    [20, "published"],
-    [19, "archived"],
-  ] as const) {
-    const before = fixture.article(number);
-    await page.goto(`/dashboard/articles/${fixture.id(number)}`);
-    await expect(
-      page.getByText(new RegExp(`This article is ${status}`)),
-    ).toBeVisible();
-    await expect(page.getByRole("button", { name: "Save draft" })).toHaveCount(
-      0,
-    );
-    expect(fixture.article(number)).toEqual(before);
-  }
+  const published = fixture.article(20);
+  await page.goto(`/dashboard/articles/${fixture.id(20)}`);
+  await expect(page.getByLabel("Title (required)")).toBeEnabled();
+  await expect(
+    page.getByRole("button", { name: "Save article" }),
+  ).toBeVisible();
+  expect(fixture.article(20)).toEqual(published);
+  const archived = fixture.article(19);
+  await page.goto(`/dashboard/articles/${fixture.id(19)}`);
+  await expect(
+    page.getByText("This article is archived. Editing is unavailable."),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Save draft" })).toHaveCount(0);
+  expect(fixture.article(19)).toEqual(archived);
   fixture.legacy();
   const legacy = fixture.article(18);
   await page.goto(`/dashboard/articles/${fixture.id(18)}`);
