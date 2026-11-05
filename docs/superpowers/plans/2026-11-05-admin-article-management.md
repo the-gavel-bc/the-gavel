@@ -36,6 +36,6 @@
 
 - [x] Add admin article list, status filter/title search, pagination, safe detail and archived restore control. Include confirmation, busy/error/success, exact uncertain retry and conflict reload.
 - [x] Add desktop/mobile browser journeys for admin list/detail/restore, denial, empty/filter states and keyboard action. Keep existing My Articles owner-filtered.
-- [ ] Update only affected API, component, security, testing, README and STATUS docs. Run relevant unit, SQL, type, lint, format, schema, generated-type, concurrency and browser gates once; review final diff; open stacked PR against Task 6.
+- [x] Update only affected API, component, security, testing, README and STATUS docs. Run relevant unit, SQL, type, lint, format, schema, generated-type, concurrency and browser gates once; review final diff; open stacked [PR #34](https://github.com/dylandrozario/the-gavel/pull/34) against Task 6.
 
 **Acceptance:** An active administrator can find every article and restore a ready archive once. All unauthorized, malformed, stale and unready requests fail without data or history changes. The dashboard remains accessible on desktop and mobile. Human review and hosted CI remain external checkpoints.
