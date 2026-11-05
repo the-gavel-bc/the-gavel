@@ -14,34 +14,37 @@ export function draftListFixture(
     | "bodyMedia"
     | "published"
     | "lifecycle"
-    | "admin" = "list",
+    | "admin"
+    | "audit" = "list",
 ) {
   if (project !== "desktop" && project !== "mobile")
     throw new Error("Unknown local browser project.");
   const base =
     (project === "desktop" ? 860 : 880) +
-    (suite === "admin"
-      ? 400
-      : suite === "lifecycle"
-        ? 360
-        : suite === "published"
-          ? 320
-          : suite === "bodyMedia"
-            ? 280
-            : suite === "media"
-              ? 240
-              : suite === "recover"
-                ? 200
-                : suite === "save"
-                  ? 160
-                  : suite === "select"
-                    ? 120
-                    : suite === "edit"
-                      ? 80
-                      : suite === "create"
-                        ? 40
-                        : 0);
-  const prefix = `${suite === "admin" ? "phase4-task7" : suite === "lifecycle" ? "phase4-task6" : suite === "published" ? "phase4-task5" : suite === "bodyMedia" ? "phase4-task4" : suite === "media" ? "phase4-task3" : suite === "save" || suite === "recover" ? `task10-${suite}` : suite === "select" ? "task9" : suite === "edit" ? "task8" : suite === "create" ? "task7" : "task6"}-${project}`;
+    (suite === "audit"
+      ? 440
+      : suite === "admin"
+        ? 400
+        : suite === "lifecycle"
+          ? 360
+          : suite === "published"
+            ? 320
+            : suite === "bodyMedia"
+              ? 280
+              : suite === "media"
+                ? 240
+                : suite === "recover"
+                  ? 200
+                  : suite === "save"
+                    ? 160
+                    : suite === "select"
+                      ? 120
+                      : suite === "edit"
+                        ? 80
+                        : suite === "create"
+                          ? 40
+                          : 0);
+  const prefix = `${suite === "audit" ? "phase4-task8" : suite === "admin" ? "phase4-task7" : suite === "lifecycle" ? "phase4-task6" : suite === "published" ? "phase4-task5" : suite === "bodyMedia" ? "phase4-task4" : suite === "media" ? "phase4-task3" : suite === "save" || suite === "recover" ? `task10-${suite}` : suite === "select" ? "task9" : suite === "edit" ? "task8" : suite === "create" ? "task7" : "task6"}-${project}`;
   const uuid = (n: number) =>
     `00000000-0000-0000-0000-${String(n).padStart(12, "0")}`;
   const id = (n: number) =>
@@ -54,7 +57,7 @@ export function draftListFixture(
   };
   const userIds = Object.values(users).map(uuid);
   const quoted = (ids: string[]) => ids.map((id) => `'${id}'`).join(",");
-  const label = `Task ${suite === "admin" ? "4.7" : suite === "lifecycle" ? "4.6" : suite === "published" ? "4.5" : suite === "bodyMedia" ? "4.4" : suite === "media" ? "4.3" : suite === "save" || suite === "recover" ? 10 : suite === "select" ? 9 : suite === "edit" ? 8 : suite === "create" ? 7 : 6} ${project}`;
+  const label = `Task ${suite === "audit" ? "4.8" : suite === "admin" ? "4.7" : suite === "lifecycle" ? "4.6" : suite === "published" ? "4.5" : suite === "bodyMedia" ? "4.4" : suite === "media" ? "4.3" : suite === "save" || suite === "recover" ? 10 : suite === "select" ? 9 : suite === "edit" ? 8 : suite === "create" ? 7 : 6} ${project}`;
   let installed = false;
   let selectionsInstalled = false;
   function sql(statement: string) {
@@ -149,8 +152,17 @@ export function draftListFixture(
           values('${id(19)}','${id(91)}','Synthetic newsroom','The Gavel');
       `);
     },
+    seedAudit() {
+      if (!installed || suite !== "audit")
+        throw new Error("Not an audit fixture.");
+      sql(`insert into public.audit_events(id,actor_user_id,action,resource_type,resource_id,created_at)
+        select ('86000000-0000-0000-0000-' || lpad((${base * 100}+80+n)::text,12,'0'))::uuid,
+          '${uuid(users.author)}','article.archived','article','${id(19)}',
+          now() + interval '1 year' + n * interval '1 second'
+        from generate_series(1,22) n;`);
+    },
     setAdminAccess(active: boolean) {
-      if (!installed || suite !== "admin")
+      if (!installed || (suite !== "admin" && suite !== "audit"))
         throw new Error("Not an admin fixture.");
       sql(
         `update public.memberships set active=${active ? "true" : "false"},revoked_at=${active ? "null" : "now()"} where user_id='${uuid(users.admin)}';`,
