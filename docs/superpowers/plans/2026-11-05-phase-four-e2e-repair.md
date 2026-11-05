@@ -11,7 +11,7 @@
 
 ## Acceptance and proof
 
-- [ ] Update stale copy/status assertions and prove archived access is read-only.
-- [ ] Add state synchronization in failing save/recovery/selection flows; preserve version, audit, retry and local-input checks.
-- [ ] Run focused desktop/mobile failures, then the full local E2E gate once.
-- [ ] Push minimal commits to PRs #32, #33 and #34 without rewriting shared history.
+- [x] Update stale copy/status assertions and prove archived access is read-only.
+- [x] Add state synchronization in failing save/recovery/selection flows; preserve version, audit, retry and local-input checks.
+- [x] Run focused desktop/mobile failures, then the full local E2E gate once. PR #32 passed its six original cases; PR #33 passed 16 focused cases; PR #34 passed 102 full-suite cases. Format, TypeScript and lint passed on all three repair heads.
+- [x] Push minimal commits to PRs #32, #33 and #34 without rewriting shared history. Hosted CI reruns and human review remain pending.
