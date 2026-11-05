@@ -8,6 +8,7 @@ import {
 import { isDraftUuid } from "@/lib/articles/draft-contract/draft-contract";
 import { DraftForm } from "@/components/dashboard/draft-form/draft-form";
 import { getArticleMainImage } from "@/lib/media/media-queries/media-queries";
+import { ArticleLifecycleControls } from "@/components/dashboard/article-lifecycle-controls/article-lifecycle-controls";
 export default async function EditDraftPage({
   params,
 }: {
@@ -49,6 +50,15 @@ export default async function EditDraftPage({
           This article’s body format is unsupported. Its content has been
           preserved; editing is unavailable.
         </p>
+        {detail.status === "published" && (
+          <ArticleLifecycleControls
+            key={`${detail.articleId}:${detail.version}`}
+            articleId={detail.articleId}
+            version={detail.version}
+            status="published"
+            disabled={false}
+          />
+        )}
         <Link href="/dashboard">My articles</Link>
       </>
     );
@@ -70,7 +80,7 @@ export default async function EditDraftPage({
           : "Edit draft"}
       </h1>
       <DraftForm
-        key={detail.articleId}
+        key={`${detail.articleId}:${detail.status}:${detail.version}`}
         initialDraft={detail.draft}
         options={options}
         initialImage={mainImage}

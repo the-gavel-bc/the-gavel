@@ -30,6 +30,7 @@ import { GuardedDashboardLink } from "../guarded-dashboard-link/guarded-dashboar
 import { ArticleMedia } from "../article-media/article-media";
 import type { MainImage } from "@/lib/media/media-queries/media-queries";
 import { DraftReadOnlyBody } from "../draft-editor/draft-read-only-body";
+import { ArticleLifecycleControls } from "../article-lifecycle-controls/article-lifecycle-controls";
 
 const DraftEditor = dynamic(
   () =>
@@ -72,6 +73,7 @@ export function DraftForm({
   const [editorFailure, setEditorFailure] = useState<DraftFailure | null>(null);
   const [mediaDirty, setMediaDirty] = useState(false);
   const [bodyMediaDirty, setBodyMediaDirty] = useState(false);
+  const [lifecycleBusy, setLifecycleBusy] = useState(false);
   const { editorInvalid } = command;
   const reportEditorFailure = useCallback(
     (failure: DraftFailure) => {
@@ -126,7 +128,8 @@ export function DraftForm({
       Boolean(command.pending) ||
       Boolean(editorFailure) ||
       mediaDirty ||
-      bodyMediaDirty,
+      bodyMediaDirty ||
+      lifecycleBusy,
   );
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -263,7 +266,9 @@ export function DraftForm({
           />
         )}
       <fieldset
-        disabled={!ready || (!article && command.phase === "saved")}
+        disabled={
+          !ready || lifecycleBusy || (!article && command.phase === "saved")
+        }
         className={styles.fields}
       >
         <legend>
@@ -306,7 +311,9 @@ export function DraftForm({
           articleId={command.article?.id}
           allowImageUpload={status === "draft"}
           onMediaDirtyChange={setBodyMediaDirty}
-          disabled={!ready || (!article && command.phase === "saved")}
+          disabled={
+            !ready || lifecycleBusy || (!article && command.phase === "saved")
+          }
           onError={reportEditorFailure}
           onChange={(content) => {
             setEditorFailure(null);
@@ -322,7 +329,8 @@ export function DraftForm({
             command.dirty ||
             Boolean(command.pending) ||
             command.phase === "saving" ||
-            command.phase === "conflict"
+            command.phase === "conflict" ||
+            lifecycleBusy
           }
           onCommit={(result) => {
             command.reload(command.draft, {
@@ -344,6 +352,7 @@ export function DraftForm({
           type="submit"
           disabled={
             !ready ||
+            lifecycleBusy ||
             command.phase === "saving" ||
             command.phase === "saved" ||
             command.phase === "conflict" ||
@@ -366,6 +375,26 @@ export function DraftForm({
                 : "Create draft"}
         </Button>
       </div>
+      {command.article && (
+        <ArticleLifecycleControls
+          articleId={command.article.id}
+          version={command.article.version}
+          status={status}
+          onBusyChange={setLifecycleBusy}
+          disabled={
+            !ready ||
+            command.dirty ||
+            Boolean(command.pending) ||
+            Boolean(editorFailure) ||
+            mediaDirty ||
+            bodyMediaDirty ||
+            recoveryBlocked ||
+            categories.loading ||
+            Boolean(categories.error) ||
+            Boolean(command.failure)
+          }
+        />
+      )}
       <p>
         <GuardedDashboardLink href="/dashboard">
           Back to My articles
