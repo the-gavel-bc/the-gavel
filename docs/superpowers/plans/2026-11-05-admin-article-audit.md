@@ -2,7 +2,7 @@
 
 **Goal:** Let active administrators inspect recent article activity without exposing raw audit rows or private identity links.
 
-**Basis:** Accepted [Phase 4 contract](../specs/2026-11-01-editorial-workflow-design.md) and [Task 8 boundary](2026-10-29-phase-four-editorial-controls.md). This branch stacks on PR #35 until Tasks 6–7 reach `main`.
+**Basis:** Accepted [Phase 4 contract](../specs/2026-11-01-editorial-workflow-design.md) and [Task 8 boundary](2026-10-29-phase-four-editorial-controls.md). Tasks 6–7 reached `main` through PR #35 before this task's PR.
 
 ## Decisions and scope
 
