@@ -45,6 +45,11 @@ export default async function AdminArticlesPage({
   return (
     <>
       <h1>Article management</h1>
+      <p>
+        <Link href="/dashboard/admin/audit" prefetch={false}>
+          Article activity
+        </Link>
+      </p>
       <AdminArticleList
         key={`${status}:${search}`}
         page={page}

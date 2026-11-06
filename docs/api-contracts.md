@@ -73,7 +73,6 @@ Phase 4 Task 3 implements `request_article_image_upload(article_id,request_id)` 
 - Manage sections, categories, and tags.
 - Manage homepage selections.
 - Manage allowlisted site settings.
-- Read paginated audit history.
 
 ## Validation rules
 
@@ -124,6 +123,10 @@ Internationalized hostnames, including all case-insensitive `xn--` labels, are d
 `getAdminArticlesPage({status?,search?,cursor?,pageSize?})` and `getAdminArticleDetail(articleId)` independently require active administrator access. The page defaults to 20 and accepts at most 50 rows, ordered by update time and ID descending. Status is `all | draft | published | archived`; title search is trimmed, at most 80 characters, and restricted to literal letters, numbers, spaces, apostrophes and hyphens. A strict cursor binds status and search. The queries select only safe title/status/owner-display-name/section-name/version/date fields, never article body or private identity links. Missing detail returns null; malformed input and read failures produce bounded errors.
 
 `restore_article(article_id,expected_version,request_id)` uses the existing strict lifecycle command and result through `restoreArticleAction`. Only an active administrator may restore a currently archived, publication-ready article. It clears `archived_at` while retaining slug, owner and original `published_at`; version, complete revision, `article.restored` audit and exact receipt commit together. Lost-response retries keep the original command. Invalid archived content remains archived. No public read or direct table write is granted.
+
+## Implemented administrator article audit read
+
+`listAuditEvents({action?,cursor?,pageSize?})` independently requires active administrator access and calls `list_article_audit_events(p_limit,p_action,p_before_at,p_before_id)`. The function checks administrator eligibility again, accepts only the five implemented article actions, caps its result at 51 rows for a 50-row page plus sentinel, and orders by creation time and event ID descending. The versioned cursor binds the action filter. Results contain only event ID, action, article resource ID, timestamp, and actor display name or `Former member`; raw Auth IDs, correlation IDs, revision snapshots, and article bodies are not returned. Invalid inputs and database failures produce bounded errors. Article archival does not remove audit rows.
 
 ## Implemented private draft server boundary
 
