@@ -28,6 +28,6 @@
 ## Slice C — handoff
 
 - [x] Update authoritative API/data/security/deployment contracts for the lasting grant and schema change; keep verification detail here and refresh `STATUS.md`.
-- [ ] Relevant unit, TypeScript, lint, formatting, database, concurrency, generated types, schema lint, build, and focused browser gates passed. Final diff review, commits, and Task 9 PR remain.
+- [x] Relevant unit, TypeScript, lint, formatting, database, concurrency, generated types, schema lint, build, and focused browser gates passed. Final diff review and nine cohesive commits are complete; [Task 9 PR #37](https://github.com/dylandrozario/the-gavel/pull/37) is stacked on PR #36. Hosted CI and human review remain pending.
 
 **Acceptance:** Only eligible active administrators can manage memberships. Approval creates usable access and a linked public profile for an eligible signed-in person. Every state change has one audit event; exact retries do not duplicate effects. Direct application table writes are closed. Last-admin, forged, ineligible, stale, and concurrent attempts leave prior state intact. No Auth identities are created or deleted.
