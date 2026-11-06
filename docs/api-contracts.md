@@ -65,10 +65,15 @@ The [accepted Phase 4 editorial contract](superpowers/specs/2026-11-01-editorial
 
 Phase 4 Task 3 implements `request_article_image_upload(article_id,request_id)` for a stable owned-draft reservation and a checked server action that exposes only its safe receipt. `POST /api/articles/[id]/media/[assetId]` accepts one bounded multipart file, verifies the active actor and reserved article through the user-scoped client, decodes/re-encodes it to WebP, uploads it with a server-only service key, and calls the service-role-only finalization RPC. An exact finalized retry returns the confirmed asset ID; a matching Storage object can resume an uncertain upload. The route does not return object paths or secret values. `set_article_main_image(article_id,expected_version,request_id,asset_id,alt_text,credit)` is a checked versioned RPC; null asset/text/credit removes the link. It captures a revision/audit event only on a change and preserves exact retries. The dashboard attachment action and cleanup remain in progress. The browser never receives the service key.
 
+## Implemented administrator membership operations
+
+`list_membership_candidates(p_limit,p_state,p_before_email,p_before_user_id)` returns at most 51 safe summaries of eligible signed-in identities and existing members to an active administrator. State is `all | pending | active | inactive`; the keyset cursor orders by lowercase email and user ID. Results include email, public display name, role, state, edit version, and current eligibility, without exposing the private profile/Auth link. `list_membership_audit_events(p_limit,p_before_at,p_before_id)` separately returns bounded membership action, target email, actor public label, and time summaries. Neither reader changes Task 8's article audit scope.
+
+`approve_membership(targetUserId,requestId,role,displayName,expectedVersion?)` requires an existing confirmed BC Google Auth identity. A first approval creates an active membership and linked public profile using the required display name and generated slug; reapproval restores an inactive membership and retains existing profile public fields. `change_membership_role(targetUserId,expectedVersion,requestId,role)` and `deactivate_membership(targetUserId,expectedVersion,requestId)` require an active target and matching version. All derive the actor, reject ineligible/nonadministrator callers, and enforce last-admin protection under one transaction lock. Changed operations atomically write one allowlisted audit event and immutable exact-retry receipt. A no-op records only its receipt; stale or mismatched requests fail without state changes. The server action accepts only these strict command shapes and preserves the UUID on uncertain retry. Auth identities are never created or deleted by these operations.
+
 ## Planned administrator operations
 
 - Permanently delete archived article with explicit confirmation.
-- Approve, change, or deactivate membership.
 - Manage contributor profiles.
 - Manage sections, categories, and tags.
 - Manage homepage selections.

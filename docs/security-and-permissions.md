@@ -54,7 +54,7 @@ Implemented foundation controls:
 - Anonymous readers can select only public profile columns and only active profile rows; authentication links are not granted.
 - Active members can update their own editable profile fields; active administrators may update these fields across profiles. Inactive members cannot edit profiles.
 - Authenticated users can read only their own membership unless they hold an active administrator membership.
-- Active administrators can manage membership rows through narrow RLS policies backed by a fixed-search-path security-definer predicate.
+- Active administrators manage memberships through three checked RPCs. Direct authenticated INSERT/UPDATE/DELETE grants and mutation policies were removed in Task 9. Each operation derives the actor from `auth.uid()`, verifies trusted identity and active administrator access, and records a bounded audit event atomically. The last eligible active administrator cannot be demoted or deactivated; a transaction lock serializes competing changes.
 - Normal authors and inactive members cannot insert, update, delete, or read another user's membership.
 - Synthetic pgTAP fixtures cover anonymous, inactive, Author A, Author B, and administrator paths.
 

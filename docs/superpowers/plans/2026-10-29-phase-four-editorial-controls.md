@@ -197,11 +197,11 @@ Task 8 implementation and local proof: [PR #36](https://github.com/dylandrozario
 
 **Test-first and commit boundary:** RED: author/inactive/anon/forged actor denial, last-admin race, self-lockout, replay, and approval timestamp invariants. GREEN: SQL concurrency/action tests then admin UI; commit each audited operation with its schema and docs.
 
-- [ ] List members with bounded pagination and only safe identity fields. Never expose another profile's private Auth linkage.
-- [ ] Allow eligible administrators to approve, change the accepted role, or deactivate a membership. Derive the actor from trusted identity and preserve approval/revocation timestamps.
-- [ ] Enforce the Task 1 self-lockout and last-active-administrator rule in the database transaction as well as the UI.
-- [ ] Add the audited mutation operations before revoking the foundation's direct `authenticated` membership INSERT/UPDATE/DELETE grants and admin mutation policies in a reviewed forward migration. Audit each successful membership change atomically; reject forged role/actor fields and duplicate/replayed effects.
-- [ ] Do not create/delete Auth identities, alter Google eligibility rules, or grant source/hosting permissions.
+- [x] List members with bounded pagination and only safe identity fields. Never expose another profile's private Auth linkage.
+- [x] Allow eligible administrators to approve, change the accepted role, or deactivate a membership. Derive the actor from trusted identity and preserve approval/revocation timestamps.
+- [x] Enforce the Task 1 self-lockout and last-active-administrator rule in the database transaction as well as the UI.
+- [x] Add the audited mutation operations before revoking the foundation's direct `authenticated` membership INSERT/UPDATE/DELETE grants and admin mutation policies in a reviewed forward migration. Audit each successful membership change atomically; reject forged role/actor fields and duplicate/replayed effects.
+- [x] Do not create/delete Auth identities, alter Google eligibility rules, or grant source/hosting permissions.
 
 **Acceptance:** Only an active administrator can change memberships; every denial preserves prior state; successful changes leave the target's expected access and one audit event. The last administrator cannot be accidentally removed under the accepted rule.
 
