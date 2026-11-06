@@ -442,6 +442,7 @@ export type Database = {
           active: boolean;
           approved_at: string | null;
           approved_by: string | null;
+          edit_version: number;
           revoked_at: string | null;
           role: Database["public"]["Enums"]["app_role"];
           user_id: string;
@@ -451,6 +452,7 @@ export type Database = {
           active?: boolean;
           approved_at?: string | null;
           approved_by?: string | null;
+          edit_version?: number;
           revoked_at?: string | null;
           role?: Database["public"]["Enums"]["app_role"];
           user_id: string;
@@ -459,6 +461,7 @@ export type Database = {
           active?: boolean;
           approved_at?: string | null;
           approved_by?: string | null;
+          edit_version?: number;
           revoked_at?: string | null;
           role?: Database["public"]["Enums"]["app_role"];
           user_id?: string;
@@ -560,6 +563,16 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      approve_membership: {
+        Args: {
+          p_display_name: string;
+          p_expected_version?: number;
+          p_request_id: string;
+          p_role: Database["public"]["Enums"]["app_role"];
+          p_target_user_id: string;
+        };
+        Returns: Json;
+      };
       archive_article: {
         Args: {
           p_article_id: string;
@@ -570,6 +583,15 @@ export type Database = {
       };
       begin_article_image_upload: {
         Args: { p_actor_user_id: string; p_asset_id: string };
+        Returns: Json;
+      };
+      change_membership_role: {
+        Args: {
+          p_expected_version: number;
+          p_request_id: string;
+          p_role: Database["public"]["Enums"]["app_role"];
+          p_target_user_id: string;
+        };
         Returns: Json;
       };
       complete_article_image_removal: {
@@ -586,6 +608,14 @@ export type Database = {
           display_name: string;
           id: string;
         }[];
+      };
+      deactivate_membership: {
+        Args: {
+          p_expected_version: number;
+          p_request_id: string;
+          p_target_user_id: string;
+        };
+        Returns: Json;
       };
       finalize_article_image_upload: {
         Args: {
@@ -611,6 +641,34 @@ export type Database = {
           created_at: string;
           event_id: string;
           resource_id: string;
+        }[];
+      };
+      list_membership_audit_events: {
+        Args: { p_before_at?: string; p_before_id?: string; p_limit?: number };
+        Returns: {
+          action: string;
+          actor_label: string;
+          created_at: string;
+          event_id: string;
+          resource_id: string;
+          target_email: string;
+        }[];
+      };
+      list_membership_candidates: {
+        Args: {
+          p_before_email?: string;
+          p_before_user_id?: string;
+          p_limit?: number;
+          p_state?: string;
+        };
+        Returns: {
+          display_name: string;
+          edit_version: number;
+          eligible: boolean;
+          email: string;
+          role: Database["public"]["Enums"]["app_role"];
+          state: string;
+          user_id: string;
         }[];
       };
       mark_article_image_for_removal: {
