@@ -17,7 +17,7 @@
 
 - [x] pgTAP covers grant/role/eligibility denial, pending approval, profile slug collision, direct-write cutover, role/deactivation, self/last-admin guard, exact replay, request mismatch, and retained timestamps. Three Task 9 files pass; the full 38-file suite passes (1,366 assertions).
 - [x] Forward migrations add the closed audit allowlist, receipts, bounded candidate and audit readers, and separate approve/change/deactivate RPCs. Direct membership mutation grants and policies are revoked after operations exist. Generated types match the upgraded local schema; clean rebuild remains for CI because the local preview database was preserved.
-- [x] Independent sessions prove exact duplicate approval produces one audit, stale deactivation fails, and two administrators cannot demote each other into lockout. The test starts from the single seeded eligible administrator and cleans up its synthetic second administrator.
+- [x] Independent sessions prove exact duplicate approval produces one audit, stale deactivation fails, and two administrators cannot demote each other into lockout. Each test creates and cleans up its own eligible administrator identities; it does not depend on local seed eligibility.
 
 ## Slice B — server and dashboard
 
