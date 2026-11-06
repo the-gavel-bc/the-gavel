@@ -35,7 +35,7 @@ update auth.users set email = 'synthetic-admin@bc.edu', email_confirmed_at = now
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000004', true);
 
-select is_empty($$ update public.memberships set role = 'administrator' where user_id = '00000000-0000-0000-0000-000000000003' returning 1 $$, 'non-Google administrator cannot manage memberships');
+select throws_ok($$ update public.memberships set role = 'administrator' where user_id = '00000000-0000-0000-0000-000000000003' returning 1 $$, '42501', null, 'non-Google administrator cannot manage memberships directly');
 select is_empty($$ select user_id from public.memberships where user_id = '00000000-0000-0000-0000-000000000003' $$, 'non-Google administrator cannot read another membership');
 select is_empty($$ select * from public.current_profile() $$, 'non-Google administrator receives no access profile');
 
@@ -44,7 +44,7 @@ update auth.users set email = 'synthetic-admin@bc.edu', email_confirmed_at = nul
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000004', true);
 
-select is_empty($$ update public.memberships set role = 'administrator' where user_id = '00000000-0000-0000-0000-000000000003' returning 1 $$, 'unconfirmed administrator cannot manage memberships');
+select throws_ok($$ update public.memberships set role = 'administrator' where user_id = '00000000-0000-0000-0000-000000000003' returning 1 $$, '42501', null, 'unconfirmed administrator cannot manage memberships directly');
 select is_empty($$ select user_id from public.memberships where user_id = '00000000-0000-0000-0000-000000000003' $$, 'unconfirmed administrator cannot read another membership');
 select is_empty($$ select * from public.current_profile() $$, 'unconfirmed administrator receives no access profile');
 
@@ -53,7 +53,7 @@ update auth.users set email = 'synthetic-admin@example.test', email_confirmed_at
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000004', true);
 
-select is_empty($$ update public.memberships set role = 'administrator' where user_id = '00000000-0000-0000-0000-000000000003' returning 1 $$, 'out-of-domain administrator cannot manage memberships');
+select throws_ok($$ update public.memberships set role = 'administrator' where user_id = '00000000-0000-0000-0000-000000000003' returning 1 $$, '42501', null, 'out-of-domain administrator cannot manage memberships directly');
 select is_empty($$ select user_id from public.memberships where user_id = '00000000-0000-0000-0000-000000000003' $$, 'out-of-domain administrator cannot read another membership');
 select is_empty($$ select * from public.current_profile() $$, 'out-of-domain administrator receives no access profile');
 
@@ -68,6 +68,8 @@ set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000002', true);
 select results_eq($$ update public.profiles set display_name = 'Eligible edit' where id = '10000000-0000-0000-0000-000000000002' returning 1 $$, array[1], 'eligible active author retains profile editing');
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000004', true);
-select results_eq($$ update public.memberships set role = 'administrator' where user_id = '00000000-0000-0000-0000-000000000003' returning 1 $$, array[1], 'eligible active administrator retains membership management');
+select is((public.change_membership_role('00000000-0000-0000-0000-000000000002',1,
+  '80000000-0000-0000-0000-000000000922','administrator')->>'ok'),
+  'true','eligible active administrator retains checked membership management');
 select * from finish();
 rollback;
