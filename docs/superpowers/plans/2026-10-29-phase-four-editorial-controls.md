@@ -232,11 +232,11 @@ Task 8 implementation and local proof: [PR #36](https://github.com/dylandrozario
 
 **Test-first and commit boundary:** RED: wrong-section links, referenced rename/deletion, inactive parent effects, duplicate tags, and direct non-admin writes. GREEN: focused SQL/selector regressions plus admin UI; commit each catalog operation separately.
 
-- [ ] Manage existing sections and categories through narrow operations with valid parent relationships and their existing active states; manage tags under their current no-active-state model.
-- [ ] Block deactivation of sections/categories referenced by published or archived articles; do not cascade-delete links or make existing drafts silently invalid. Existing Phase 3 save validation remains authoritative.
-- [ ] Do not seed or publish unresolved News categories or rename `Outside of BC` without owner/client confirmation.
-- [ ] Tag creation/renaming stays gated until the documented Unicode/punctuation normalization contract is approved. No arbitrary label or slug normalization is invented in this task.
-- [ ] Audit changes without storing unrestricted before/after payloads.
+- [x] Manage existing sections and categories through narrow operations with valid parent relationships and their existing active states; show tags read-only under their current no-active-state model.
+- [x] Block deactivation of sections/categories referenced by published or archived articles; do not cascade-delete links or make existing drafts silently invalid. Existing Phase 3 save validation remains authoritative.
+- [x] Do not seed or publish unresolved News categories or rename `Outside of BC` without owner/client confirmation.
+- [x] Tag creation/renaming stays gated until the documented Unicode/punctuation normalization contract is approved. No arbitrary label or slug normalization is invented in this task.
+- [x] Audit changes without storing unrestricted before/after payloads.
 
 **Acceptance:** Approved existing taxonomy can be managed without invalidating article relationships; pending client labels remain absent; unsupported tag normalization cannot create ambiguous duplicates.
 

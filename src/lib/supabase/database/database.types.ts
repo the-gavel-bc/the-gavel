@@ -345,6 +345,7 @@ export type Database = {
         Row: {
           active: boolean;
           created_at: string;
+          edit_version: number;
           id: string;
           name: string;
           navigation_order: number;
@@ -356,6 +357,7 @@ export type Database = {
         Insert: {
           active?: boolean;
           created_at?: string;
+          edit_version?: number;
           id?: string;
           name: string;
           navigation_order?: number;
@@ -366,6 +368,7 @@ export type Database = {
         Update: {
           active?: boolean;
           created_at?: string;
+          edit_version?: number;
           id?: string;
           name?: string;
           navigation_order?: number;
@@ -512,6 +515,7 @@ export type Database = {
         Row: {
           active: boolean;
           created_at: string;
+          edit_version: number;
           id: string;
           name: string;
           navigation_order: number;
@@ -522,6 +526,7 @@ export type Database = {
         Insert: {
           active?: boolean;
           created_at?: string;
+          edit_version?: number;
           id?: string;
           name: string;
           navigation_order?: number;
@@ -531,6 +536,7 @@ export type Database = {
         Update: {
           active?: boolean;
           created_at?: string;
+          edit_version?: number;
           id?: string;
           name?: string;
           navigation_order?: number;
@@ -669,6 +675,19 @@ export type Database = {
           slug_frozen: boolean;
         }[];
       };
+      list_admin_taxonomy: {
+        Args: { p_after_id?: string; p_kind: string; p_limit?: number };
+        Returns: {
+          active: boolean;
+          edit_version: number;
+          id: string;
+          name: string;
+          navigation_order: number;
+          parent_name: string;
+          referenced_live: boolean;
+          slug: string;
+        }[];
+      };
       list_article_audit_events: {
         Args: {
           p_action?: string;
@@ -771,6 +790,28 @@ export type Database = {
           p_asset_id: string;
           p_credit: string;
           p_expected_version: number;
+          p_request_id: string;
+        };
+        Returns: Json;
+      };
+      update_category_taxonomy: {
+        Args: {
+          p_active: boolean;
+          p_expected_version: number;
+          p_id: string;
+          p_name: string;
+          p_navigation_order: number;
+          p_request_id: string;
+        };
+        Returns: Json;
+      };
+      update_section_taxonomy: {
+        Args: {
+          p_active: boolean;
+          p_expected_version: number;
+          p_id: string;
+          p_name: string;
+          p_navigation_order: number;
           p_request_id: string;
         };
         Returns: Json;
