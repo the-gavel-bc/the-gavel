@@ -26,6 +26,6 @@
 ## Slice C — handoff
 
 - [x] Update lasting API/data/security/deployment contracts and `STATUS.md`; keep verification notes here.
-- [ ] Finish final diff review and commits, then open Task 10 PR stacked on integration PR #38. Database, unit, concurrency, browser/build, types, lint and formatting passed locally; clean rebuild and hosted CI remain pending.
+- [x] Final diff review and cohesive commits are complete; [Task 10 PR #39](https://github.com/dylandrozario/the-gavel/pull/39) is stacked on integration PR #38. Database, unit, concurrency, browser/build, types, lint and formatting passed locally; clean rebuild and hosted CI remain pending.
 
 **Acceptance:** Only eligible active administrators can manage contributor profiles. Neither guest nor member profile changes grant login or article authority. Generated slugs follow display names only before publication. Published/archived references block deactivation. Every changed operation has one safe audit event; exact retries have no duplicate effect. Direct caller-selected slugs are closed.
