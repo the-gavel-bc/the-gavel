@@ -74,3 +74,5 @@ For Phase 4 Task 12, apply `20261107010000` and `20261107010100` together before
 ## Ownership
 
 Production domain, DNS, GitHub, Vercel, Supabase, Google OAuth, billing, recovery channels, and escalation contacts must be assigned to durable school/faculty-controlled accounts before launch.
+
+Task 14 uses the additive `20261107030000_site_information.sql` migration. It preserves existing audit allowlist entries, including Task 13 homepage curation when present, and initializes all settings unset. Deploy migrations in order and verify clean-install CI before release. Reverting application code can leave the new tables and values intact; deleting them requires separate approval.

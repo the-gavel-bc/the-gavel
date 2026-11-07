@@ -191,3 +191,7 @@ The [accepted draft contract](superpowers/specs/2026-10-22-private-draft-workflo
 ### Administrator restore boundary
 
 `20261105010000_restore_article.sql` extends the private receipt operation check to `restore`, replaces the existing private transition helper with the administrator-only archived-to-published case, and adds the narrow authenticated restore RPC. Existing article rows and prior receipts are unchanged. Restore rechecks publication readiness, retains `published_at`, clears `archived_at`, increments `edit_version` and captures a revision, audit event and receipt atomically. Rollback requires stopping restore callers, dropping the restore wrapper, removing only restore receipts and replacing the helper and operation checks with their Task 6 definitions. Already-restored articles need a separate editorial decision; rollback must not silently archive them.
+
+### Site information
+
+Task 14 adds one permission-closed `site_information` record with an edit version and nullable mission, contact email, Instagram URL, and submission instructions. Mission and instructions are plain text of at most 5,000 characters; email is at most 254 characters and Instagram URL at most 255. Unknown values stay null. Private request receipts bind an administrator's request ID and payload to the committed result. See the [Task 14 plan](superpowers/plans/2026-11-07-admin-site-information.md).
