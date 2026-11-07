@@ -386,6 +386,52 @@ export type Database = {
           },
         ];
       };
+      homepage_curation: {
+        Row: {
+          edit_version: number;
+          id: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          edit_version?: number;
+          id?: string;
+          updated_at?: string;
+        };
+        Update: {
+          edit_version?: number;
+          id?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      homepage_selections: {
+        Row: {
+          article_id: string;
+          group_name: string;
+          position: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          article_id: string;
+          group_name: string;
+          position: number;
+        };
+        Update: {
+          article_id?: string;
+          group_name?: string;
+          position?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "homepage_selections_article_id_fkey";
+            columns: ["article_id"];
+            isOneToOne: true;
+            referencedRelation: "articles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       media_assets: {
         Row: {
           article_id: string;
@@ -684,6 +730,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      get_admin_homepage_curation: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
       get_own_public_profile: {
         Args: Record<PropertyKey, never>;
         Returns: {
@@ -818,6 +868,16 @@ export type Database = {
           p_display_name: string;
           p_expected_version: number;
           p_profile_id: string;
+          p_request_id: string;
+        };
+        Returns: Json;
+      };
+      save_homepage_selections: {
+        Args: {
+          p_expected_version: number;
+          p_featured: string[];
+          p_lead: string;
+          p_read_this: string[];
           p_request_id: string;
         };
         Returns: Json;

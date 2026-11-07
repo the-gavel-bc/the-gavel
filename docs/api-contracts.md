@@ -85,10 +85,13 @@ Phase 4 Task 3 implements `request_article_image_upload(article_id,request_id)` 
 
 `list_admin_taxonomy(kind,limit,afterId)` returns at most 51 section, category, or tag summaries to an eligible active administrator, ordered by ID. `update_section_taxonomy(id,expectedVersion,requestId,name,navigationOrder,active)` and `update_category_taxonomy(...)` update only existing records. Slugs, parent links, and article associations cannot be supplied. Changed operations atomically record one bounded audit event and an exact-retry receipt; stale versions or published/archived references return conflict. Category activation requires an active parent. The unresolved `Outside of BC` label cannot be renamed. Tags are read-only pending an approved normalization rule.
 
+## Implemented administrator homepage curation
+
+`get_admin_homepage_curation()` returns only eligible active administrators a versioned saved selection with safe article ID/title/status summaries and an effective published-only preview. It reserves all eligible curated stories first, then fills lead, Featured News, and Read This gaps in order from the newest published articles (`published_at DESC, id DESC`), without duplicates. `save_homepage_selections(expectedVersion,requestId,lead,featured,readThis)` accepts one optional lead and ordered arrays of at most four IDs each, with global uniqueness and current published status checked after article locks. A changed save atomically updates links, version, `homepage.updated` audit, and immutable exact-retry receipt; stale or reused requests fail safely. Later archival retains the saved link and excludes it from effective results. Public composition remains planned.
+
 ## Planned administrator operations
 
 - Permanently delete archived article with explicit confirmation.
-- Manage homepage selections.
 - Manage allowlisted site settings.
 
 ## Validation rules

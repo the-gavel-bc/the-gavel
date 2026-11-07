@@ -267,10 +267,12 @@ Task 8 implementation and local proof: [PR #36](https://github.com/dylandrozario
 
 **Test-first and commit boundary:** RED: draft/archived/duplicate/unknown selections, forged order, non-admin call, and post-selection archive. GREEN: SQL/order/fallback tests and curation UI; commit storage/eligibility before controls.
 
-- [ ] Manage the lead story, ordered Featured News, and Read This selections using only published, non-archived articles.
-- [ ] Validate uniqueness/order/limits and preserve safe recent-content fallbacks when selections are absent or become ineligible.
-- [ ] Audit selection changes with bounded metadata; never accept arbitrary article body or public rendering fields.
-- [ ] Keep public homepage rendering in Phase 5; this task only provides controlled curation and verification of saved selections.
+- [x] Manage the lead story, ordered Featured News, and Read This selections using only published, non-archived articles.
+- [x] Validate uniqueness/order/limits and preserve safe recent-content fallbacks when selections are absent or become ineligible.
+- [x] Audit selection changes with bounded metadata; never accept arbitrary article body or public rendering fields.
+- [x] Keep public homepage rendering in Phase 5; this task only provides controlled curation and verification of saved selections.
+
+**Implementation:** [PR #44](https://github.com/dylandrozario/the-gavel/pull/44) is open against main; CI and merge remain pending.
 
 **Acceptance:** Only administrators can set valid selections; draft/archived/unknown article IDs are rejected at the database boundary. Missing selections still have deterministic fallback data for Phase 5.
 

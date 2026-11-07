@@ -133,7 +133,7 @@ Phase 4 Task 4 adds `article_body_images(article_id,asset_id)` and allows multip
 
 ### homepage_selections
 
-Stores active lead, ordered Featured News, and ordered Read This selections. Referenced articles must be published; rendering falls back to eligible recent content when selections are missing.
+Task 13 stores a singleton `homepage_curation` version and ordered `homepage_selections` links, with one lead, up to four Featured News and four Read This stories. A selected article must be published when saved and cannot appear twice. Later archival retains the stored link; the checked administrator reader excludes ineligible selections and fills gaps from published articles ordered by publication time and ID descending, reserving eligible curated choices first. The singleton, links, and private retry receipts deny direct application access. Changed saves atomically record one bounded `homepage.updated` audit event. Public homepage rendering and its safe read projection remain Phase 5 work.
 
 ### site_settings
 

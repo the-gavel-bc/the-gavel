@@ -60,6 +60,8 @@ Task 11 implements bounded administrator taxonomy catalogs and existing section/
 
 Task 12 implements `/dashboard/profile` for the caller's own public name and biography, with generated-slug display, exact retry and explicit conflict reload. Profile image selection remains unavailable until a separate profile media contract exists.
 
+Task 13 implements `/dashboard/admin/homepage` with a published-article catalog, ordered lead/Featured News/Read This controls, a saved fallback preview, exact retry and explicit conflict reload. Public homepage composition remains Phase 5 work.
+
 ## Component tree
 
 ```text
