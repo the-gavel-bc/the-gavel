@@ -49,13 +49,14 @@ Newsletter signup is deferred.
 | `/dashboard/admin/articles/[id]` | Review article status and restore archives     | Admin          |
 | `/dashboard/admin/members`       | Approve/deactivate members and roles           | Admin          |
 | `/dashboard/admin/contributors`  | Manage credited profiles                       | Admin          |
-
-| `/dashboard/admin/taxonomy` | Manage sections, categories, and tags | Admin |
-| `/dashboard/admin/homepage` | Curate lead, Featured News, and Read This | Admin |
-| `/dashboard/admin/site` | Edit allowlisted site information | Admin |
-| `/dashboard/admin/audit` | Review audit activity | Admin |
+| `/dashboard/admin/taxonomy`      | Manage sections and categories; view tags      | Admin          |
+| `/dashboard/admin/homepage`      | Curate lead, Featured News, and Read This      | Admin          |
+| `/dashboard/admin/site`          | Edit allowlisted site information              | Admin          |
+| `/dashboard/admin/audit`         | Review audit activity                          | Admin          |
 
 Task 10 implements the administrator contributor route with bounded state filtering, guest creation, public-field edit/deactivation, generated-slug display, and referenced-profile feedback. It never accepts an Auth link or a caller-chosen slug. Public `/authors/[slug]` rendering remains Phase 5 work.
+
+Task 11 implements bounded administrator taxonomy catalogs and existing section/category controls. Tags are read-only pending normalization approval; names and navigation order can change without altering stored slugs or parent links.
 
 ## Component tree
 

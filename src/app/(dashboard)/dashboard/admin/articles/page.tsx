@@ -57,6 +57,9 @@ export default async function AdminArticlesPage({
         <Link href="/dashboard/admin/contributors" prefetch={false}>
           Contributors
         </Link>
+        <Link href="/dashboard/admin/taxonomy" prefetch={false}>
+          Taxonomy
+        </Link>
       </p>
       <AdminArticleList
         key={`${status}:${search}`}

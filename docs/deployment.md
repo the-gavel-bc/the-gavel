@@ -67,6 +67,8 @@ For Phase 4 Task 9, apply `20261106010000` through `20261106010400` in order bef
 
 For Phase 4 Task 10, apply `20261106020000` through `20261106020500` as one release unit before serving contributor controls. The chain adds profile version/freeze state, checked mutations, publication guards, and a bounded admin directory, then closes direct authenticated profile updates. Existing names, slugs, identity links, and credits are preserved; freeze backfill updates timestamps on affected profiles. An older app has no profile editor, so read/sign-in paths remain compatible. Restoring direct writes would allow caller-selected slugs and bypass audit, and requires separate security review.
 
+For Phase 4 Task 11, apply `20261106030000` through `20261106030200` before serving taxonomy controls. The additive version columns default existing sections and categories to version 1; no names, slugs, parent links, or article links are rewritten. Direct table writes remain closed. Roll back application code independently; database rollback requires a reviewed forward fix that preserves receipts and audit events.
+
 ## Ownership
 
 Production domain, DNS, GitHub, Vercel, Supabase, Google OAuth, billing, recovery channels, and escalation contacts must be assigned to durable school/faculty-controlled accounts before launch.
