@@ -77,10 +77,13 @@ Phase 4 Task 3 implements `request_article_image_upload(article_id,request_id)` 
 
 `create_guest_contributor(requestId,displayName,biography)`, `save_contributor_profile(profileId,expectedVersion,requestId,displayName,biography)`, and `deactivate_contributor_profile(profileId,expectedVersion,requestId)` accept bounded public fields only. Create always leaves `auth_user_id` null. The database derives a unique author slug from display name until first published ownership/credit, then freezes it. Deactivation fails while any published or archived article owns or credits the profile, or if it would disable the last eligible administrator. Actor, audit action, and immutable exact-retry receipt are server/database derived; changed writes atomically capture one `profile.*` event without biography text. Stale/reused requests fail safely. Direct authenticated profile writes are closed; Task 12 will add a separate checked owner edit.
 
+## Implemented administrator taxonomy operations
+
+`list_admin_taxonomy(kind,limit,afterId)` returns at most 51 section, category, or tag summaries to an eligible active administrator, ordered by ID. `update_section_taxonomy(id,expectedVersion,requestId,name,navigationOrder,active)` and `update_category_taxonomy(...)` update only existing records. Slugs, parent links, and article associations cannot be supplied. Changed operations atomically record one bounded audit event and an exact-retry receipt; stale versions or published/archived references return conflict. Category activation requires an active parent. The unresolved `Outside of BC` label cannot be renamed. Tags are read-only pending an approved normalization rule.
+
 ## Planned administrator operations
 
 - Permanently delete archived article with explicit confirmation.
-- Manage sections, categories, and tags.
 - Manage homepage selections.
 - Manage allowlisted site settings.
 
