@@ -75,6 +75,10 @@ Anonymous and ordinary authenticated readers see active sections and active cate
 
 Task 11 provides administrator-only bounded taxonomy summaries and checked existing-section/category updates. Actor identity is derived from Auth, versioned writes and exact retries record only allowlisted audit metadata, and direct table writes remain closed. Section/category locks serialize deactivation with publication validation; published and archived references block deactivation. Parent, slug, and article links cannot be supplied or changed. Tags are read-only pending normalization approval, and the unresolved `Outside of BC` label is protected. Public article reads remain future work.
 
+### Homepage curation controls
+
+Task 13 grants eligible active administrators only checked save/read RPCs. Direct anonymous and authenticated access to curation tables is denied. Saves lock and recheck selected published articles, derive the actor, serialize version/receipt updates, and atomically record bounded audit metadata. The administrator reader returns only safe ID/title/status summaries and published-only fallback results. Archival after selection leaves the stored link intact and removes the article from the effective preview. No public article or homepage read grant is added.
+
 ### Implemented private article controls
 
 `articles` has RLS and a SELECT grant only for authenticated users. Its single read policy calls `private.can_read_article(uuid)`: trusted Google identity, confirmed `bc.edu` email, and current active membership are required, followed by ownership through the profile Auth link or the existing active-administrator predicate. Supplying another article ID cannot change the caller's identity. The predicate is stable and security-definer with an empty search path, fully qualified references, and execution restricted to authenticated users; its private schema is not a public RPC surface.

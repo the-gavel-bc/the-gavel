@@ -1,8 +1,8 @@
 # Current work
 
-- Phase: 4. Tasks 1–11 are on main; Task 12 awaits review and merge.
-- Branch: `feat/own-public-profile`, [Task 12 PR #43](https://github.com/dylandrozario/the-gavel/pull/43), based directly on main after [taxonomy integration PR #42](https://github.com/dylandrozario/the-gavel/pull/42) merged and its foundation check passed.
-- Approved limits: members edit only their own public display name and biography. Slugs are generated and freeze after publication; profile images need a separate media contract.
-- Implemented here: checked own-profile read/save, version conflict recovery, exact uncertain retry, bounded audit and the `/dashboard/profile` editor.
-- Verified locally: 1,441 pgTAP assertions, 590 unit tests, 40 concurrency cases plus three focused races, four desktop/mobile browser cases, TypeScript, targeted lint/format, schema lint, generated types and production build. See [Task 12 plan](docs/superpowers/plans/2026-11-07-own-public-profile.md).
-- Pending: clean migration CI and human review for PR #43. Tag creation/renaming, profile images, public article reads and remaining administrator domains are future tasks.
+- Phase: 4. Tasks 1–12 are on main; Task 13 homepage curation is in progress.
+- Branch: `feat/homepage-curation`, based directly on main after [Task 12 PR #43](https://github.com/dylandrozario/the-gavel/pull/43) merged with a passing foundation check.
+- Approved rules: one lead, up to four Featured News and four Read This stories; published articles only, no repeats, newest eligible fallback with curated stories reserved first.
+- Implemented here: checked versioned curation, safe fallback preview, archive race protection, exact retry and administrator selection controls.
+- Verified locally: 1,478 pgTAP assertions, 600 unit tests, 43 concurrency cases, three desktop/mobile browser cases, TypeScript, targeted lint/format, schema lint, generated types and production build. See [Task 13 plan](docs/superpowers/plans/2026-11-07-homepage-curation.md).
+- Pending: final review and PR, clean migration CI and human review. Public homepage rendering remains Phase 5 work.
