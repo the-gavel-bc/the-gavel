@@ -656,6 +656,16 @@ export type Database = {
         };
         Returns: Json;
       };
+      get_own_public_profile: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          biography: string;
+          display_name: string;
+          edit_version: number;
+          slug: string;
+          slug_frozen: boolean;
+        }[];
+      };
       list_admin_contributors: {
         Args: {
           p_before_id?: string;
@@ -770,6 +780,15 @@ export type Database = {
           p_display_name: string;
           p_expected_version: number;
           p_profile_id: string;
+          p_request_id: string;
+        };
+        Returns: Json;
+      };
+      save_own_public_profile: {
+        Args: {
+          p_biography: string;
+          p_display_name: string;
+          p_expected_version: number;
           p_request_id: string;
         };
         Returns: Json;
