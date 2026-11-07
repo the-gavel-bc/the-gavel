@@ -69,23 +69,24 @@ select set_config(
   '00000000-0000-0000-0000-000000000002',
   true
 );
-select results_eq(
+select throws_ok(
   $$
     update public.profiles
     set display_name = 'Author A Updated'
     where id = '10000000-0000-0000-0000-000000000002'
     returning 1
   $$,
-  array[1],
-  'Author A may update their own profile'
+  '42501', null::text,
+  'direct profile updates require a checked operation'
 );
-select is_empty(
+select throws_ok(
   $$
     update public.profiles
     set display_name = 'Unauthorized change'
     where id = '10000000-0000-0000-0000-000000000003'
     returning 1
   $$,
+  '42501', null::text,
   'Author A cannot update Author B profile'
 );
 select throws_ok(
@@ -151,9 +152,10 @@ set local role authenticated;
 
 -- Profile editing also requires current membership approval.
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000001', true);
-select is_empty(
+select throws_ok(
   $$ update public.profiles set display_name = 'Inactive edit'
      where id = '10000000-0000-0000-0000-000000000001' returning 1 $$,
+  '42501', null::text,
   'inactive members cannot edit their profile'
 );
 select throws_ok(
