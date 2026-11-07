@@ -58,6 +58,8 @@ Task 10 implements the administrator contributor route with bounded state filter
 
 Task 11 implements bounded administrator taxonomy catalogs and existing section/category controls. Tags are read-only pending normalization approval; names and navigation order can change without altering stored slugs or parent links.
 
+Task 12 implements `/dashboard/profile` for the caller's own public name and biography, with generated-slug display, exact retry and explicit conflict reload. Profile image selection remains unavailable until a separate profile media contract exists.
+
 ## Component tree
 
 ```text

@@ -69,6 +69,8 @@ For Phase 4 Task 10, apply `20261106020000` through `20261106020500` as one rele
 
 For Phase 4 Task 11, apply `20261106030000` through `20261106030200` before serving taxonomy controls. The additive version columns default existing sections and categories to version 1; no names, slugs, parent links, or article links are rewritten. Direct table writes remain closed. Roll back application code independently; database rollback requires a reviewed forward fix that preserves receipts and audit events.
 
+For Phase 4 Task 12, apply `20261107010000` and `20261107010100` together before serving the own-profile editor. They extend the private receipt allowlist, add checked own-profile read/save RPCs, and lock identity/membership during saves without rewriting profile rows or restoring direct writes. Application rollback leaves these additive database functions in place; remove them only with a separate compatibility review after older clients and pending retries drain.
+
 ## Ownership
 
 Production domain, DNS, GitHub, Vercel, Supabase, Google OAuth, billing, recovery channels, and escalation contacts must be assigned to durable school/faculty-controlled accounts before launch.
