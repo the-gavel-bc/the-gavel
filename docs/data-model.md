@@ -57,7 +57,7 @@ The migration `supabase/migrations/20261017000000_foundation_identity.sql` is au
 
 `profile_image_id` remains planned until the media schema exists. Biographies are stored as plain text; rich biography editing is not implemented.
 
-Task 10 adds immutable profile request receipts in `private.profile_write_receipts`. Checked administrator operations create guest profiles, edit public name/biography, and deactivate profiles. Publication and published-credit triggers freeze generated slugs permanently. Existing published/archived references block deactivation; draft references remain. Direct authenticated profile updates are revoked, so Task 12 needs its own checked owner operation before enabling owner edits. Existing names, slugs, identity links, and article credits are preserved; the freeze backfill updates timestamps for affected profiles.
+Task 10 adds immutable profile request receipts in `private.profile_write_receipts`. Checked administrator operations create guest profiles, edit public name/biography, and deactivate profiles. Publication and published-credit triggers freeze generated slugs permanently. Existing published/archived references block deactivation; draft references remain. Task 12 adds an own-only checked save using the same version, slug, audit, and receipt controls. Direct authenticated profile updates remain revoked. Existing names, slugs, identity links, and article credits are preserved by the Task 10 migration; its freeze backfill updates timestamps for affected profiles.
 
 Generated application types live at `src/lib/supabase/database/database.types.ts`. Regenerate them with `pnpm db:types` while local Supabase is running and verify drift with `pnpm db:types:check`.
 

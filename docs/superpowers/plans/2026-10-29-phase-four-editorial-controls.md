@@ -250,10 +250,10 @@ Task 8 implementation and local proof: [PR #36](https://github.com/dylandrozario
 
 **Test-first and commit boundary:** RED: cross-profile, inactive, Auth-link/role injection, unsafe biography, and foreign image reference. GREEN: operation/action/form tests and mobile keyboard flow; commit mutation boundary before profile UI.
 
-- [ ] Let each active member edit only their own approved public biography and display fields. Read and validate public profile data without exposing Auth linkage.
-- [ ] Derive the public-profile slug from the display name while no published article owns or credits the profile; freeze it afterward. Do not accept a caller-selected slug, including through direct database calls.
-- [ ] Reuse Task 3 for an optional profile image only if its accepted media contract supports this reference safely; otherwise keep image selection disabled until a separate approved slice.
-- [ ] Keep public profile routes/rendering for Phase 5. Do not let profile edits change membership, role, or article ownership.
+- [x] Let each active member edit only their own approved public biography and display fields. Read and validate public profile data without exposing Auth linkage.
+- [x] Derive the public-profile slug from the display name while no published article owns or credits the profile; freeze it afterward. Do not accept a caller-selected slug, including through direct database calls.
+- [x] Reuse Task 3 for an optional profile image only if its accepted media contract supports this reference safely; otherwise keep image selection disabled until a separate approved slice.
+- [x] Keep public profile routes/rendering for Phase 5. Do not let profile edits change membership, role, or article ownership.
 
 **Acceptance:** A user can edit only their own safe public profile; administrators do not gain arbitrary identity-link changes; non-members and cross-profile requests are denied.
 
