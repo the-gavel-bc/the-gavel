@@ -65,6 +65,8 @@ For Phase 4 Task 4, apply `20261103020000` through `20261103020400` as one relea
 
 For Phase 4 Task 9, apply `20261106010000` through `20261106010400` in order before serving the membership dashboard. The operation RPC migration installs checked writes before revoking direct authenticated membership writes. Existing memberships and linked profiles are preserved. Older application versions have no membership writer, so their sign-in/read flows remain compatible. Rolling back the database to direct membership writes would remove the new audit and last-admin guarantees and requires separate security review; use a forward fix for migration defects.
 
+For Phase 4 Task 10, apply `20261106020000` through `20261106020500` as one release unit before serving contributor controls. The chain adds profile version/freeze state, checked mutations, publication guards, and a bounded admin directory, then closes direct authenticated profile updates. Existing names, slugs, identity links, and credits are preserved; freeze backfill updates timestamps on affected profiles. An older app has no profile editor, so read/sign-in paths remain compatible. Restoring direct writes would allow caller-selected slugs and bypass audit, and requires separate security review.
+
 ## Ownership
 
 Production domain, DNS, GitHub, Vercel, Supabase, Google OAuth, billing, recovery channels, and escalation contacts must be assigned to durable school/faculty-controlled accounts before launch.

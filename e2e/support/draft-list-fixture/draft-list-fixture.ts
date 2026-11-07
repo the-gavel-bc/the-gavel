@@ -16,38 +16,41 @@ export function draftListFixture(
     | "lifecycle"
     | "admin"
     | "audit"
+    | "contributors"
     | "members" = "list",
 ) {
   if (project !== "desktop" && project !== "mobile")
     throw new Error("Unknown local browser project.");
   const base =
     (project === "desktop" ? 860 : 880) +
-    (suite === "members"
-      ? 480
-      : suite === "audit"
-        ? 440
-        : suite === "admin"
-          ? 400
-          : suite === "lifecycle"
-            ? 360
-            : suite === "published"
-              ? 320
-              : suite === "bodyMedia"
-                ? 280
-                : suite === "media"
-                  ? 240
-                  : suite === "recover"
-                    ? 200
-                    : suite === "save"
-                      ? 160
-                      : suite === "select"
-                        ? 120
-                        : suite === "edit"
-                          ? 80
-                          : suite === "create"
-                            ? 40
-                            : 0);
-  const prefix = `${suite === "members" ? "phase4-task9" : suite === "audit" ? "phase4-task8" : suite === "admin" ? "phase4-task7" : suite === "lifecycle" ? "phase4-task6" : suite === "published" ? "phase4-task5" : suite === "bodyMedia" ? "phase4-task4" : suite === "media" ? "phase4-task3" : suite === "save" || suite === "recover" ? `task10-${suite}` : suite === "select" ? "task9" : suite === "edit" ? "task8" : suite === "create" ? "task7" : "task6"}-${project}`;
+    (suite === "contributors"
+      ? 520
+      : suite === "members"
+        ? 480
+        : suite === "audit"
+          ? 440
+          : suite === "admin"
+            ? 400
+            : suite === "lifecycle"
+              ? 360
+              : suite === "published"
+                ? 320
+                : suite === "bodyMedia"
+                  ? 280
+                  : suite === "media"
+                    ? 240
+                    : suite === "recover"
+                      ? 200
+                      : suite === "save"
+                        ? 160
+                        : suite === "select"
+                          ? 120
+                          : suite === "edit"
+                            ? 80
+                            : suite === "create"
+                              ? 40
+                              : 0);
+  const prefix = `${suite === "contributors" ? "phase4-task10" : suite === "members" ? "phase4-task9" : suite === "audit" ? "phase4-task8" : suite === "admin" ? "phase4-task7" : suite === "lifecycle" ? "phase4-task6" : suite === "published" ? "phase4-task5" : suite === "bodyMedia" ? "phase4-task4" : suite === "media" ? "phase4-task3" : suite === "save" || suite === "recover" ? `task10-${suite}` : suite === "select" ? "task9" : suite === "edit" ? "task8" : suite === "create" ? "task7" : "task6"}-${project}`;
   const uuid = (n: number) =>
     `00000000-0000-0000-0000-${String(n).padStart(12, "0")}`;
   const id = (n: number) =>
@@ -60,7 +63,7 @@ export function draftListFixture(
   };
   const userIds = Object.values(users).map(uuid);
   const quoted = (ids: string[]) => ids.map((id) => `'${id}'`).join(",");
-  const label = `Task ${suite === "members" ? "4.9" : suite === "audit" ? "4.8" : suite === "admin" ? "4.7" : suite === "lifecycle" ? "4.6" : suite === "published" ? "4.5" : suite === "bodyMedia" ? "4.4" : suite === "media" ? "4.3" : suite === "save" || suite === "recover" ? 10 : suite === "select" ? 9 : suite === "edit" ? 8 : suite === "create" ? 7 : 6} ${project}`;
+  const label = `Task ${suite === "contributors" ? "4.10" : suite === "members" ? "4.9" : suite === "audit" ? "4.8" : suite === "admin" ? "4.7" : suite === "lifecycle" ? "4.6" : suite === "published" ? "4.5" : suite === "bodyMedia" ? "4.4" : suite === "media" ? "4.3" : suite === "save" || suite === "recover" ? 10 : suite === "select" ? 9 : suite === "edit" ? 8 : suite === "create" ? 7 : 6} ${project}`;
   let installed = false;
   let selectionsInstalled = false;
   function sql(statement: string) {
@@ -351,6 +354,7 @@ export function draftListFixture(
           : ""
       }
         delete from private.draft_write_receipts where actor_user_id in (${quoted(userIds)});
+        delete from private.profile_write_receipts where actor_user_id in (${quoted(userIds)});
         delete from private.draft_write_limits where actor_user_id in (${quoted(userIds)});
         delete from public.audit_events where actor_user_id in (${quoted(userIds)});
         delete from public.article_revisions where actor_user_id in (${quoted(userIds)});
@@ -367,6 +371,7 @@ export function draftListFixture(
             : ""
         }
         delete from public.sections where id='${id(99)}';
+        ${suite === "contributors" ? `delete from public.profiles where auth_user_id is null and slug in ('task-ten-guest-${project}','task-ten-edited-${project}');` : ""}
         delete from public.memberships where user_id in (${quoted(userIds)});
         delete from public.profiles where id in (${quoted(userIds)});
         delete from auth.users where id in (${quoted(userIds)});`);

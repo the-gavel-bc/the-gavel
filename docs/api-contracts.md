@@ -71,10 +71,15 @@ Phase 4 Task 3 implements `request_article_image_upload(article_id,request_id)` 
 
 `approve_membership(targetUserId,requestId,role,displayName,expectedVersion?)` requires an existing confirmed BC Google Auth identity. A first approval creates an active membership and linked public profile using the required display name and generated slug; reapproval restores an inactive membership and retains existing profile public fields. `change_membership_role(targetUserId,expectedVersion,requestId,role)` and `deactivate_membership(targetUserId,expectedVersion,requestId)` require an active target and matching version. All derive the actor, reject ineligible/nonadministrator callers, and enforce last-admin protection under one transaction lock. Changed operations atomically write one allowlisted audit event and immutable exact-retry receipt. A no-op records only its receipt; stale or mismatched requests fail without state changes. The server action accepts only these strict command shapes and preserves the UUID on uncertain retry. Auth identities are never created or deleted by these operations.
 
+## Implemented administrator contributor operations
+
+`list_admin_contributors(p_limit,p_state,p_before_slug,p_before_id)` returns at most 51 safe profile summaries to an eligible active administrator, ordered by slug and ID. State is `all | active | inactive`; results expose public name, slug, plain biography, active/version/frozen status, a linked-account boolean, and a live-reference boolean. No private `auth_user_id` is returned.
+
+`create_guest_contributor(requestId,displayName,biography)`, `save_contributor_profile(profileId,expectedVersion,requestId,displayName,biography)`, and `deactivate_contributor_profile(profileId,expectedVersion,requestId)` accept bounded public fields only. Create always leaves `auth_user_id` null. The database derives a unique author slug from display name until first published ownership/credit, then freezes it. Deactivation fails while any published or archived article owns or credits the profile, or if it would disable the last eligible administrator. Actor, audit action, and immutable exact-retry receipt are server/database derived; changed writes atomically capture one `profile.*` event without biography text. Stale/reused requests fail safely. Direct authenticated profile writes are closed; Task 12 will add a separate checked owner edit.
+
 ## Planned administrator operations
 
 - Permanently delete archived article with explicit confirmation.
-- Manage contributor profiles.
 - Manage sections, categories, and tags.
 - Manage homepage selections.
 - Manage allowlisted site settings.

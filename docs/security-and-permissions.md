@@ -52,7 +52,7 @@ Implemented foundation controls:
 - `profiles` and `memberships` have RLS enabled and explicit grants.
 - Direct profile writes, administrator membership privileges, and `current_profile()` additionally require authoritative Auth data: confirmed `bc.edu` email and trusted Google provider metadata. `private.has_eligible_identity()` reads these fields through a fixed-search-path predicate; caller-editable user metadata never grants access.
 - Anonymous readers can select only public profile columns and only active profile rows; authentication links are not granted.
-- Active members can update their own editable profile fields; active administrators may update these fields across profiles. Inactive members cannot edit profiles.
+- Task 10 closes direct authenticated profile UPDATE grants and the owner/admin update policy. Administrators use checked guest-create, public-field save, and deactivation RPCs; Task 12 will add a separate owner operation. These derive actor from Auth, require eligible active administrator access, and leave identity links and memberships untouched. Publication/credit triggers serialize with profile writes and freeze slugs; published/archived references and the last eligible administrator block deactivation.
 - Authenticated users can read only their own membership unless they hold an active administrator membership.
 - Active administrators manage memberships through three checked RPCs. Direct authenticated INSERT/UPDATE/DELETE grants and mutation policies were removed in Task 9. Each operation derives the actor from `auth.uid()`, verifies trusted identity and active administrator access, and records a bounded audit event atomically. The last eligible active administrator cannot be demoted or deactivated; a transaction lock serializes competing changes.
 - Normal authors and inactive members cannot insert, update, delete, or read another user's membership.
@@ -103,7 +103,7 @@ Revisions require version-one bounded JSON objects. Audits permit only the seven
 
 ## Content and input safety
 
-The [accepted Phase 4 editorial contract](superpowers/specs/2026-11-01-editorial-workflow-design.md) defines checked lifecycle operations, noneditable generated slugs, and a last-eligible-administrator guard. Phase 4 Task 2 enforces generated article slugs at the draft RPC boundary: direct calls carrying a valid old slug field can still create/save during mixed-version rollout, but the field is discarded before fingerprinting or writing; malformed values fail. Exact older receipts remain replayable. Existing published rows are unchanged. Profile slug and last-administrator guards remain future controls; foundation profile slug and administrator membership grants are still direct-write exceptions for their owning tasks to close.
+The [accepted Phase 4 editorial contract](superpowers/specs/2026-11-01-editorial-workflow-design.md) defines checked lifecycle operations, noneditable generated slugs, and a last-eligible-administrator guard. Phase 4 Task 2 enforces generated article slugs at the draft RPC boundary: valid older slug fields are ignored, malformed values fail, and exact older receipts remain replayable. Task 9 closes direct membership writes and guards the last eligible administrator. Task 10 closes direct profile updates, derives contributor slugs from names, and freezes them after publication.
 
 - Validate all request bodies, query parameters, identifiers, slugs, dates, URLs, and pagination limits.
 - Store structured content or a constrained rich-text representation.

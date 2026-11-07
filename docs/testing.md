@@ -322,3 +322,7 @@ The additive audit-reader migration was applied to the existing local database w
 ## Phase 4 Task 9: administrator membership management
 
 The upgraded local database passed 1,366 pgTAP assertions. The full unit/component suite passed 565 tests, and two independent-session cases proved duplicate approval, stale deactivation, and competing administrator demotion behavior. Four desktop/mobile browser cases passed for approval, role change, deactivation, activity, author denial, and invalid-cursor recovery; Playwright built the production app. TypeScript, targeted lint/format, schema lint, and generated type comparison passed. The existing local project was preserved; a clean migration rebuild and hosted CI remain to be checked in the PR. The [Task 9 plan](superpowers/plans/2026-11-06-admin-memberships.md) records decisions and proof limits.
+
+## Phase 4 Task 10: administrator contributor profiles
+
+The upgraded local database passed 1,399 pgTAP assertions. The full unit suite passed 573 tests and the concurrency suite passed 35 cases; a later focused run also passed both deactivation versus publication and rename versus published credit. Four desktop/mobile browser cases passed for guest creation, edit, deactivation, author denial, and cursor recovery; Playwright built the production app. Schema lint, TypeScript, lint, formatting, and generated type comparison passed. A clean migration rebuild, hosted CI, and human review remain pending. The [Task 10 plan](superpowers/plans/2026-11-06-admin-contributor-profiles.md) records decisions and proof limits.

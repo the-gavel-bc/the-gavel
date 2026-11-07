@@ -215,10 +215,10 @@ Task 8 implementation and local proof: [PR #36](https://github.com/dylandrozario
 
 **Test-first and commit boundary:** RED: Auth-link and role injection, referenced-profile destruction, duplicate slug, cross-role denial, and credit preservation. GREEN: profile operation/query tests and admin browser flow; commit profile boundary before UI.
 
-- [ ] Support create/edit/deactivate of public contributor profiles, including non-login guest writers. Do not allow operations to modify `auth_user_id`, membership, or Auth identity.
-- [ ] Prevent destructive removal of profiles referenced by articles/credits; block deactivation while published or archived articles reference the profile.
-- [ ] Validate display names, biographies, generated slugs, and active state; derive the slug from the display name until the profile owns or is credited on a published article, then freeze it. Never expose a slug edit control or accept a caller-selected slug; no existing public link is silently invalidated.
-- [ ] Audit profile changes using a bounded event contract without recording biography text or private identity data.
+- [x] Support create/edit/deactivate of public contributor profiles, including non-login guest writers. Do not allow operations to modify `auth_user_id`, membership, or Auth identity.
+- [x] Prevent destructive removal of profiles referenced by articles/credits; block deactivation while published or archived articles reference the profile.
+- [x] Validate display names, biographies, generated slugs, and active state; derive the slug from the display name until the profile owns or is credited on a published article, then freeze it. Never expose a slug edit control or accept a caller-selected slug; no existing public link is silently invalidated.
+- [x] Audit profile changes using a bounded event contract without recording biography text or private identity data.
 
 **Acceptance:** Administrators can manage guest and member contributor profiles without granting article authority; non-admins cannot enumerate or mutate the admin catalog. Existing article credits remain referentially valid.
 
