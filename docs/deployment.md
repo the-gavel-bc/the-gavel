@@ -63,6 +63,8 @@ For Phase 4 Task 2, the four generated-article-slug migrations are one release u
 
 For Phase 4 Task 4, apply `20261103020000` through `20261103020400` as one release unit before enabling version 2 body writes. Keep draft writes paused during this chain on an existing deployment. The final validator and media-retention functions are installed by the last migration; intermediate states are not an application contract. Existing version 1 bodies, revision snapshots, and media references are preserved. The application rollback can still read version 1 bodies, but an older editor must treat version 2 content as unsupported and never overwrite it.
 
+For Phase 4 Task 9, apply `20261106010000` through `20261106010400` in order before serving the membership dashboard. The operation RPC migration installs checked writes before revoking direct authenticated membership writes. Existing memberships and linked profiles are preserved. Older application versions have no membership writer, so their sign-in/read flows remain compatible. Rolling back the database to direct membership writes would remove the new audit and last-admin guarantees and requires separate security review; use a forward fix for migration defects.
+
 ## Ownership
 
 Production domain, DNS, GitHub, Vercel, Supabase, Google OAuth, billing, recovery channels, and escalation contacts must be assigned to durable school/faculty-controlled accounts before launch.

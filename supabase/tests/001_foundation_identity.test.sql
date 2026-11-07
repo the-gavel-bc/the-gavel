@@ -96,14 +96,15 @@ select throws_ok(
   '42501', null::text,
   'normal authors cannot insert memberships'
 );
-select is_empty(
+select throws_ok(
   $$
     update public.memberships
     set role = 'administrator'
     where user_id = '00000000-0000-0000-0000-000000000002'
     returning 1
   $$,
-  'normal authors cannot change their membership'
+  '42501', null::text,
+  'normal authors cannot change their membership directly'
 );
 select results_eq(
   $$
@@ -136,21 +137,17 @@ select results_eq(
   array[4::bigint],
   'active administrators may read all memberships'
 );
-select results_eq(
-  $$
-    update public.memberships
-    set active = true,
-        approved_by = '00000000-0000-0000-0000-000000000004',
-        approved_at = now()
-    where user_id = '00000000-0000-0000-0000-000000000001'
-    returning 1
-  $$,
-  array[1],
-  'active administrators may approve a membership'
+select is(
+  (public.approve_membership('00000000-0000-0000-0000-000000000001',
+    '80000000-0000-0000-0000-000000000921','author','Inactive Member',1)->>'ok'),
+  'true',
+  'active administrators approve through the audited RPC'
 );
 
+set local role postgres;
 update public.memberships set active = false, revoked_at = now()
 where user_id = '00000000-0000-0000-0000-000000000001';
+set local role authenticated;
 
 -- Profile editing also requires current membership approval.
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000001', true);
@@ -159,14 +156,16 @@ select is_empty(
      where id = '10000000-0000-0000-0000-000000000001' returning 1 $$,
   'inactive members cannot edit their profile'
 );
-select is_empty(
+select throws_ok(
   $$ delete from public.memberships where user_id = '00000000-0000-0000-0000-000000000001' returning 1 $$,
-  'inactive members cannot delete memberships'
+  '42501', null::text,
+  'inactive members cannot delete memberships directly'
 );
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000002', true);
-select is_empty(
+select throws_ok(
   $$ delete from public.memberships where user_id = '00000000-0000-0000-0000-000000000003' returning 1 $$,
-  'authors cannot delete another membership'
+  '42501', null::text,
+  'authors cannot delete another membership directly'
 );
 select throws_ok(
   $$ select auth_user_id from public.profiles $$,

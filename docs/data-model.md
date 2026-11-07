@@ -40,13 +40,16 @@ Public contributor identity, independent from login access.
 
 ### memberships
 
-| Field                    | Type                 | Rules                                  |
-| ------------------------ | -------------------- | -------------------------------------- |
-| user_id                  | UUID                 | Primary key; reference to `auth.users` |
-| role                     | enum                 | `author` or `administrator`            |
-| active                   | boolean              | Default false until approved           |
-| approved_by              | UUID nullable        | Administrator identity                 |
-| approved_at / revoked_at | timestamptz nullable | Lifecycle timestamps                   |
+| Field                    | Type                 | Rules                                                  |
+| ------------------------ | -------------------- | ------------------------------------------------------ |
+| user_id                  | UUID                 | Primary key; reference to `auth.users`                 |
+| role                     | enum                 | `author` or `administrator`                            |
+| active                   | boolean              | Default false until approved                           |
+| edit_version             | integer              | Starts at 1; increments on role or active state change |
+| approved_by              | UUID nullable        | Administrator identity                                 |
+| approved_at / revoked_at | timestamptz nullable | Lifecycle timestamps                                   |
+
+Task 9 stores immutable membership request receipts in `private.membership_write_receipts`, keyed by actor and request UUID. Each binds the exact operation and inputs to its result. Successful changes write one `membership.*` audit event in the same transaction. Approval creates a linked public profile when none exists; the administrator supplies its display name, and the database generates a collision-safe slug. Existing profile public fields are retained on reapproval. Direct authenticated membership writes are closed.
 
 The migration `supabase/migrations/20261017000000_foundation_identity.sql` is authoritative for these two tables, their constraints, grants, indexes, helper functions, and RLS policies. `supabase/seed.sql` contains four synthetic, passwordless local identities covering inactive member, two authors, and administrator roles. It contains no production identity or content.
 

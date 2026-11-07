@@ -50,6 +50,11 @@ export default async function AdminArticlesPage({
           Article activity
         </Link>
       </p>
+      <p>
+        <Link href="/dashboard/admin/members" prefetch={false}>
+          Memberships
+        </Link>
+      </p>
       <AdminArticleList
         key={`${status}:${search}`}
         page={page}
