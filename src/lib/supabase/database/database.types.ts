@@ -475,8 +475,10 @@ export type Database = {
           biography: string | null;
           created_at: string;
           display_name: string;
+          edit_version: number;
           id: string;
           slug: string;
+          slug_frozen: boolean;
           updated_at: string;
         };
         ComputedFields: never;
@@ -486,8 +488,10 @@ export type Database = {
           biography?: string | null;
           created_at?: string;
           display_name: string;
+          edit_version?: number;
           id?: string;
           slug: string;
+          slug_frozen?: boolean;
           updated_at?: string;
         };
         Update: {
@@ -496,8 +500,10 @@ export type Database = {
           biography?: string | null;
           created_at?: string;
           display_name?: string;
+          edit_version?: number;
           id?: string;
           slug?: string;
+          slug_frozen?: boolean;
           updated_at?: string;
         };
         Relationships: [];
@@ -602,12 +608,28 @@ export type Database = {
         Args: { p_draft: Json; p_request_id: string };
         Returns: Json;
       };
+      create_guest_contributor: {
+        Args: {
+          p_biography: string;
+          p_display_name: string;
+          p_request_id: string;
+        };
+        Returns: Json;
+      };
       current_profile: {
         Args: Record<PropertyKey, never>;
         Returns: {
           display_name: string;
           id: string;
         }[];
+      };
+      deactivate_contributor_profile: {
+        Args: {
+          p_expected_version: number;
+          p_profile_id: string;
+          p_request_id: string;
+        };
+        Returns: Json;
       };
       deactivate_membership: {
         Args: {
@@ -627,6 +649,25 @@ export type Database = {
           p_width: number;
         };
         Returns: Json;
+      };
+      list_admin_contributors: {
+        Args: {
+          p_before_id?: string;
+          p_before_slug?: string;
+          p_limit?: number;
+          p_state?: string;
+        };
+        Returns: {
+          active: boolean;
+          biography: string;
+          display_name: string;
+          edit_version: number;
+          linked_account: boolean;
+          profile_id: string;
+          referenced_live: boolean;
+          slug: string;
+          slug_frozen: boolean;
+        }[];
       };
       list_article_audit_events: {
         Args: {
@@ -700,6 +741,16 @@ export type Database = {
           p_article_id: string;
           p_draft: Json;
           p_expected_version: number;
+          p_request_id: string;
+        };
+        Returns: Json;
+      };
+      save_contributor_profile: {
+        Args: {
+          p_biography: string;
+          p_display_name: string;
+          p_expected_version: number;
+          p_profile_id: string;
           p_request_id: string;
         };
         Returns: Json;
