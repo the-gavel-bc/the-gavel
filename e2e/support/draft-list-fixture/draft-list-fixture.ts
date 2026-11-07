@@ -18,42 +18,45 @@ export function draftListFixture(
     | "audit"
     | "contributors"
     | "taxonomy"
+    | "profile"
     | "members" = "list",
 ) {
   if (project !== "desktop" && project !== "mobile")
     throw new Error("Unknown local browser project.");
   const base =
     (project === "desktop" ? 860 : 880) +
-    (suite === "taxonomy"
-      ? 560
-      : suite === "contributors"
-        ? 520
-        : suite === "members"
-          ? 480
-          : suite === "audit"
-            ? 440
-            : suite === "admin"
-              ? 400
-              : suite === "lifecycle"
-                ? 360
-                : suite === "published"
-                  ? 320
-                  : suite === "bodyMedia"
-                    ? 280
-                    : suite === "media"
-                      ? 240
-                      : suite === "recover"
-                        ? 200
-                        : suite === "save"
-                          ? 160
-                          : suite === "select"
-                            ? 120
-                            : suite === "edit"
-                              ? 80
-                              : suite === "create"
-                                ? 40
-                                : 0);
-  const prefix = `${suite === "taxonomy" ? "phase4-task11" : suite === "contributors" ? "phase4-task10" : suite === "members" ? "phase4-task9" : suite === "audit" ? "phase4-task8" : suite === "admin" ? "phase4-task7" : suite === "lifecycle" ? "phase4-task6" : suite === "published" ? "phase4-task5" : suite === "bodyMedia" ? "phase4-task4" : suite === "media" ? "phase4-task3" : suite === "save" || suite === "recover" ? `task10-${suite}` : suite === "select" ? "task9" : suite === "edit" ? "task8" : suite === "create" ? "task7" : "task6"}-${project}`;
+    (suite === "profile"
+      ? 600
+      : suite === "taxonomy"
+        ? 560
+        : suite === "contributors"
+          ? 520
+          : suite === "members"
+            ? 480
+            : suite === "audit"
+              ? 440
+              : suite === "admin"
+                ? 400
+                : suite === "lifecycle"
+                  ? 360
+                  : suite === "published"
+                    ? 320
+                    : suite === "bodyMedia"
+                      ? 280
+                      : suite === "media"
+                        ? 240
+                        : suite === "recover"
+                          ? 200
+                          : suite === "save"
+                            ? 160
+                            : suite === "select"
+                              ? 120
+                              : suite === "edit"
+                                ? 80
+                                : suite === "create"
+                                  ? 40
+                                  : 0);
+  const prefix = `${suite === "profile" ? "phase4-task12" : suite === "taxonomy" ? "phase4-task11" : suite === "contributors" ? "phase4-task10" : suite === "members" ? "phase4-task9" : suite === "audit" ? "phase4-task8" : suite === "admin" ? "phase4-task7" : suite === "lifecycle" ? "phase4-task6" : suite === "published" ? "phase4-task5" : suite === "bodyMedia" ? "phase4-task4" : suite === "media" ? "phase4-task3" : suite === "save" || suite === "recover" ? `task10-${suite}` : suite === "select" ? "task9" : suite === "edit" ? "task8" : suite === "create" ? "task7" : "task6"}-${project}`;
   const uuid = (n: number) =>
     `00000000-0000-0000-0000-${String(n).padStart(12, "0")}`;
   const id = (n: number) =>
