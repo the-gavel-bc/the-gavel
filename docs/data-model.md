@@ -36,6 +36,8 @@ Public contributor identity, independent from login access.
 | slug                    | text          | Required, unique                                                         |
 | biography               | text nullable | Sanitized public biography                                               |
 | active                  | boolean       | Default true                                                             |
+| edit_version            | integer       | Starts at 1; increments on checked profile edits/deactivation            |
+| slug_frozen             | boolean       | Stays true after first published ownership or credit                     |
 | created_at / updated_at | timestamptz   | Required                                                                 |
 
 ### memberships
@@ -54,6 +56,8 @@ Task 9 stores immutable membership request receipts in `private.membership_write
 The migration `supabase/migrations/20261017000000_foundation_identity.sql` is authoritative for these two tables, their constraints, grants, indexes, helper functions, and RLS policies. `supabase/seed.sql` contains four synthetic, passwordless local identities covering inactive member, two authors, and administrator roles. It contains no production identity or content.
 
 `profile_image_id` remains planned until the media schema exists. Biographies are stored as plain text; rich biography editing is not implemented.
+
+Task 10 adds immutable profile request receipts in `private.profile_write_receipts`. Checked administrator operations create guest profiles, edit public name/biography, and deactivate profiles. Publication and published-credit triggers freeze generated slugs permanently. Existing published/archived references block deactivation; draft references remain. Direct authenticated profile updates are revoked, so Task 12 needs its own checked owner operation before enabling owner edits. Existing names, slugs, identity links, and article credits are preserved; the freeze backfill updates timestamps for affected profiles.
 
 Generated application types live at `src/lib/supabase/database/database.types.ts`. Regenerate them with `pnpm db:types` while local Supabase is running and verify drift with `pnpm db:types:check`.
 
@@ -77,7 +81,7 @@ No real publication taxonomy is seeded. Fixtures are synthetic and transaction-l
 
 An article requires an owner profile, primary section, trimmed nonblank title, and unique canonical slug. The [accepted content contract](superpowers/specs/2026-10-21-content-foundation-design.md#accepted-storage-constraints) defines the text bounds. Owner and section references restrict deletion and identity changes. UUIDs and timestamps are supplied automatically, and updates reuse the existing updated-at trigger.
 
-The [accepted Phase 4 editorial contract](superpowers/specs/2026-11-01-editorial-workflow-design.md) plans generated article and contributor slugs, fixed after first publication, and a publication-readiness invariant. Phase 4 Task 2 implements article draft slug generation on create/save without changing existing stored rows: database `unaccent`, lowercase ASCII words and hyphens, `article` fallback, 180-character bound, and the first available numeric suffix. Task 5 keeps existing published slugs fixed during content edits; publishing remains a later task. Foundation profile grants still permit direct profile slug changes until Tasks 10/12 close that path.
+The [accepted Phase 4 editorial contract](superpowers/specs/2026-11-01-editorial-workflow-design.md) requires generated article and contributor slugs fixed after first publication. Task 2 derives draft article slugs from titles with a 180-character bound and collision suffix; Task 5 keeps published article slugs fixed. Task 10 derives profile slugs from display names and freezes them on published ownership or credit. Direct authenticated profile slug changes are closed.
 
 New rows default to `draft`; excerpt, JSONB body, SEO keyphrase, and meta description may be SQL NULL. Present optional text must be trimmed and nonblank. Body storage permits only JSON objects of at most 1,048,576 serialized UTF-8 bytes. This does not validate editor nodes or safe rendering. No editor or renderer is implemented.
 

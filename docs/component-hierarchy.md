@@ -39,20 +39,23 @@ Newsletter signup is deferred.
 
 ## Full MVP dashboard route design
 
-| Route                           | Purpose                                        | Access         |
-| ------------------------------- | ---------------------------------------------- | -------------- |
-| `/dashboard`                    | Summary and My Articles                        | Active members |
-| `/dashboard/articles/new`       | Create article                                 | Author/admin   |
-| `/dashboard/articles/[id]`      | Edit owned or administrator-accessible article | Owner/admin    |
-| `/dashboard/profile`            | Edit own public profile                        | Author/admin   |
-| `/dashboard/admin/articles`     | Manage all content and archives                | Admin          |
-| `/dashboard/admin/articles/[id]`| Review article status and restore archives     | Admin          |
-| `/dashboard/admin/members`      | Approve/deactivate members and roles           | Admin          |
-| `/dashboard/admin/contributors` | Manage credited profiles                       | Admin          |
-| `/dashboard/admin/taxonomy`     | Manage sections, categories, and tags          | Admin          |
-| `/dashboard/admin/homepage`     | Curate lead, Featured News, and Read This      | Admin          |
-| `/dashboard/admin/site`         | Edit allowlisted site information              | Admin          |
-| `/dashboard/admin/audit`        | Review audit activity                          | Admin          |
+| Route                            | Purpose                                        | Access         |
+| -------------------------------- | ---------------------------------------------- | -------------- |
+| `/dashboard`                     | Summary and My Articles                        | Active members |
+| `/dashboard/articles/new`        | Create article                                 | Author/admin   |
+| `/dashboard/articles/[id]`       | Edit owned or administrator-accessible article | Owner/admin    |
+| `/dashboard/profile`             | Edit own public profile                        | Author/admin   |
+| `/dashboard/admin/articles`      | Manage all content and archives                | Admin          |
+| `/dashboard/admin/articles/[id]` | Review article status and restore archives     | Admin          |
+| `/dashboard/admin/members`       | Approve/deactivate members and roles           | Admin          |
+| `/dashboard/admin/contributors`  | Manage credited profiles                       | Admin          |
+
+| `/dashboard/admin/taxonomy` | Manage sections, categories, and tags | Admin |
+| `/dashboard/admin/homepage` | Curate lead, Featured News, and Read This | Admin |
+| `/dashboard/admin/site` | Edit allowlisted site information | Admin |
+| `/dashboard/admin/audit` | Review audit activity | Admin |
+
+Task 10 implements the administrator contributor route with bounded state filtering, guest creation, public-field edit/deactivation, generated-slug display, and referenced-profile feedback. It never accepts an Auth link or a caller-chosen slug. Public `/authors/[slug]` rendering remains Phase 5 work.
 
 ## Component tree
 
