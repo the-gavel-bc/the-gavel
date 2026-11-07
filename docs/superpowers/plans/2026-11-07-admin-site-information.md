@@ -15,6 +15,6 @@
 
 - [x] Write focused database and validation tests for field bounds, unsafe input, unknown keys, role denial, no-op, stale version, exact retries, audit rollback and data preservation; add additive storage and RPCs.
 - [x] Add strict server reader/action and accessible administrator form with pending, retry, conflict and unsaved-change states; test permission denials and recovery.
-- [ ] Complete final diff review, focused commits, and PR. Local checks passed: 1,465 database assertions, 42 concurrency tests, 597 unit tests, three focused form tests after additional coverage, three browser cases (one mobile write skipped), TypeScript, lint, formatting, schema lint, and production build. Clean-install migration CI and human review remain pending.
+- [x] Complete final diff review, focused commits, and [draft PR #45](https://github.com/dylandrozario/the-gavel/pull/45). Merge PR #44 first, update from main, and rerun affected checks. Local checks passed: 1,465 database assertions, 42 concurrency tests, 597 unit tests, three focused form tests after additional coverage, three browser cases (one mobile write skipped), TypeScript, lint, formatting, schema lint, and production build. Clean-install migration CI and human review remain pending.
 
 **Acceptance:** Only eligible active administrators may view or edit the four allowlisted fields. Invalid input never reaches storage; changed writes are atomic and auditable. No value is fabricated and no public route is added.
