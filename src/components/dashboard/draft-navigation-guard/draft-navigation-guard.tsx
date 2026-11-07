@@ -26,7 +26,7 @@ export function DraftNavigationProvider({ children }: { children: ReactNode }) {
     () =>
       !check.current?.() ||
       window.confirm(
-        "You have unsaved or unconfirmed draft changes. Leave this page? Input kept only in this tab may be lost.",
+        "You have unsaved or unconfirmed changes. Leave this page? Input kept only in this tab may be lost.",
       ),
     [],
   );

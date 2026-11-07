@@ -71,6 +71,8 @@ For Phase 4 Task 11, apply `20261106030000` through `20261106030200` before serv
 
 For Phase 4 Task 12, apply `20261107010000` and `20261107010100` together before serving the own-profile editor. They extend the private receipt allowlist, add checked own-profile read/save RPCs, and lock identity/membership during saves without rewriting profile rows or restoring direct writes. Application rollback leaves these additive database functions in place; remove them only with a separate compatibility review after older clients and pending retries drain.
 
+For Phase 4 Task 13, apply `20261107020000` through `20261107020400` as one release unit before serving homepage curation. The migrations add empty singleton selection storage, restricted read/save RPCs, a recent-publication index, audit and retry records; existing articles and history are not rewritten. Public homepage rendering is not enabled. Preserve saved selections and receipts during rollback; use a reviewed forward fix for database defects.
+
 ## Ownership
 
 Production domain, DNS, GitHub, Vercel, Supabase, Google OAuth, billing, recovery channels, and escalation contacts must be assigned to durable school/faculty-controlled accounts before launch.

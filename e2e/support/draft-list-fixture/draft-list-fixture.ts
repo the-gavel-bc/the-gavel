@@ -19,44 +19,47 @@ export function draftListFixture(
     | "contributors"
     | "taxonomy"
     | "profile"
+    | "homepage"
     | "members" = "list",
 ) {
   if (project !== "desktop" && project !== "mobile")
     throw new Error("Unknown local browser project.");
   const base =
     (project === "desktop" ? 860 : 880) +
-    (suite === "profile"
-      ? 600
-      : suite === "taxonomy"
-        ? 560
-        : suite === "contributors"
-          ? 520
-          : suite === "members"
-            ? 480
-            : suite === "audit"
-              ? 440
-              : suite === "admin"
-                ? 400
-                : suite === "lifecycle"
-                  ? 360
-                  : suite === "published"
-                    ? 320
-                    : suite === "bodyMedia"
-                      ? 280
-                      : suite === "media"
-                        ? 240
-                        : suite === "recover"
-                          ? 200
-                          : suite === "save"
-                            ? 160
-                            : suite === "select"
-                              ? 120
-                              : suite === "edit"
-                                ? 80
-                                : suite === "create"
-                                  ? 40
-                                  : 0);
-  const prefix = `${suite === "profile" ? "phase4-task12" : suite === "taxonomy" ? "phase4-task11" : suite === "contributors" ? "phase4-task10" : suite === "members" ? "phase4-task9" : suite === "audit" ? "phase4-task8" : suite === "admin" ? "phase4-task7" : suite === "lifecycle" ? "phase4-task6" : suite === "published" ? "phase4-task5" : suite === "bodyMedia" ? "phase4-task4" : suite === "media" ? "phase4-task3" : suite === "save" || suite === "recover" ? `task10-${suite}` : suite === "select" ? "task9" : suite === "edit" ? "task8" : suite === "create" ? "task7" : "task6"}-${project}`;
+    (suite === "homepage"
+      ? 640
+      : suite === "profile"
+        ? 600
+        : suite === "taxonomy"
+          ? 560
+          : suite === "contributors"
+            ? 520
+            : suite === "members"
+              ? 480
+              : suite === "audit"
+                ? 440
+                : suite === "admin"
+                  ? 400
+                  : suite === "lifecycle"
+                    ? 360
+                    : suite === "published"
+                      ? 320
+                      : suite === "bodyMedia"
+                        ? 280
+                        : suite === "media"
+                          ? 240
+                          : suite === "recover"
+                            ? 200
+                            : suite === "save"
+                              ? 160
+                              : suite === "select"
+                                ? 120
+                                : suite === "edit"
+                                  ? 80
+                                  : suite === "create"
+                                    ? 40
+                                    : 0);
+  const prefix = `${suite === "homepage" ? "phase4-task13" : suite === "profile" ? "phase4-task12" : suite === "taxonomy" ? "phase4-task11" : suite === "contributors" ? "phase4-task10" : suite === "members" ? "phase4-task9" : suite === "audit" ? "phase4-task8" : suite === "admin" ? "phase4-task7" : suite === "lifecycle" ? "phase4-task6" : suite === "published" ? "phase4-task5" : suite === "bodyMedia" ? "phase4-task4" : suite === "media" ? "phase4-task3" : suite === "save" || suite === "recover" ? `task10-${suite}` : suite === "select" ? "task9" : suite === "edit" ? "task8" : suite === "create" ? "task7" : "task6"}-${project}`;
   const uuid = (n: number) =>
     `00000000-0000-0000-0000-${String(n).padStart(12, "0")}`;
   const id = (n: number) =>
@@ -69,7 +72,7 @@ export function draftListFixture(
   };
   const userIds = Object.values(users).map(uuid);
   const quoted = (ids: string[]) => ids.map((id) => `'${id}'`).join(",");
-  const label = `Task ${suite === "contributors" ? "4.10" : suite === "members" ? "4.9" : suite === "audit" ? "4.8" : suite === "admin" ? "4.7" : suite === "lifecycle" ? "4.6" : suite === "published" ? "4.5" : suite === "bodyMedia" ? "4.4" : suite === "media" ? "4.3" : suite === "save" || suite === "recover" ? 10 : suite === "select" ? 9 : suite === "edit" ? 8 : suite === "create" ? 7 : 6} ${project}`;
+  const label = `Task ${suite === "homepage" ? "4.13" : suite === "contributors" ? "4.10" : suite === "members" ? "4.9" : suite === "audit" ? "4.8" : suite === "admin" ? "4.7" : suite === "lifecycle" ? "4.6" : suite === "published" ? "4.5" : suite === "bodyMedia" ? "4.4" : suite === "media" ? "4.3" : suite === "save" || suite === "recover" ? 10 : suite === "select" ? 9 : suite === "edit" ? 8 : suite === "create" ? 7 : 6} ${project}`;
   let installed = false;
   let selectionsInstalled = false;
   function sql(statement: string) {
@@ -181,6 +184,15 @@ export function draftListFixture(
       sql(`insert into auth.users(id,email,email_confirmed_at,raw_app_meta_data,raw_user_meta_data)
         values('${uuid(base + 5)}','aaaa-task9-${project}@bc.edu',now(),
           '{"provider":"google","providers":["google"]}'::jsonb,'{}'::jsonb);`);
+    },
+    prepareHomepage() {
+      if (!installed || suite !== "homepage" || project !== "desktop")
+        throw new Error("Not a writable homepage fixture.");
+      sql(`do $$ begin
+        if exists(select 1 from public.homepage_selections) or exists(select 1 from public.homepage_curation where edit_version<>1)
+          then raise exception 'Homepage curation is not empty; refusing to overwrite data'; end if;
+      end $$;
+      update public.articles set status='published',published_at=now() where id='${id(21)}';`);
     },
     setAdminAccess(active: boolean) {
       if (!installed || (suite !== "admin" && suite !== "audit"))
@@ -365,12 +377,26 @@ export function draftListFixture(
         delete from private.draft_write_receipts where actor_user_id in (${quoted(userIds)});
         delete from private.profile_write_receipts where actor_user_id in (${quoted(userIds)});
         delete from private.taxonomy_write_receipts where actor_user_id in (${quoted(userIds)});
+        delete from private.homepage_write_receipts where actor_user_id in (${quoted(userIds)});
         delete from private.draft_write_limits where actor_user_id in (${quoted(userIds)});
         delete from public.audit_events where actor_user_id in (${quoted(userIds)});
         delete from public.article_revisions where actor_user_id in (${quoted(userIds)});
         delete from public.article_categories where article_id in (select id from public.articles where owner_profile_id in (${quoted(userIds)}));
         delete from public.article_tags where article_id in (select id from public.articles where owner_profile_id in (${quoted(userIds)}));
         delete from public.article_contributors where article_id in (select id from public.articles where owner_profile_id in (${quoted(userIds)}));
+        ${
+          suite === "homepage"
+            ? `do $$ begin
+          if exists(select 1 from public.homepage_selections where article_id in
+            (select id from public.articles where owner_profile_id in (${quoted(userIds)}))) then
+            delete from public.homepage_selections where article_id in
+              (select id from public.articles where owner_profile_id in (${quoted(userIds)}));
+            if not exists(select 1 from public.homepage_selections) then
+              update public.homepage_curation set edit_version=1; end if;
+          end if;
+        end $$;`
+            : ""
+        }
         delete from public.articles where owner_profile_id in (${quoted(userIds)});
         ${
           selectionsInstalled

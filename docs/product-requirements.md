@@ -20,6 +20,7 @@ Success means readers can reliably discover and read articles, approved members 
 
 - Responsive homepage matching the current site's structure, logo, colors, and editorial character.
 - One administrator-selected lead story and a configurable Featured News group, with newest-article fallbacks.
+- Homepage curation uses one lead, up to four Featured News stories, and up to four Read This stories. Any published article may be selected, with no story repeated across slots. Missing or archived selections fall back to the newest published stories not already reserved or shown. The owner confirmed these rules on 2026-11-07.
 - Homepage groups for News, Features, Opinions, Culture, Sports, and Allston–Brighton.
 - Published article pages with title, owner/writer credits, publication date, main graphic and credit, rich article body, contributor credits, author biography, categories, tags, same-section related stories, search, and recent stories.
 - Section, category, tag, author, search, and Letter to the Editor archive pages with pagination.
@@ -124,6 +125,6 @@ Draft -> Published -> Archived -> Permanently deleted
 - Which newsletter provider should be integrated after the MVP?
 - What analytics service, if any, is permitted by Boston College?
 - Who will own the domain, DNS, GitHub, Vercel, Supabase, Google OAuth, and billing accounts?
-- Confirm production contact email, mission text, social URLs, and footer Read This selection rules.
+- Confirm production contact email, mission text, and social URLs.
 - What retention period, if any, is required before an archived article may be permanently deleted?
 - What Boston College privacy, branding, accessibility, records, or security policies apply?
