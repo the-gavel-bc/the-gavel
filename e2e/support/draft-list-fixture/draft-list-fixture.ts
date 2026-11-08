@@ -19,6 +19,7 @@ export function draftListFixture(
     | "contributors"
     | "taxonomy"
     | "profile"
+    | "deletion"
     | "homepage"
     | "members" = "list",
 ) {
@@ -26,40 +27,42 @@ export function draftListFixture(
     throw new Error("Unknown local browser project.");
   const base =
     (project === "desktop" ? 860 : 880) +
-    (suite === "homepage"
-      ? 640
-      : suite === "profile"
-        ? 600
-        : suite === "taxonomy"
-          ? 560
-          : suite === "contributors"
-            ? 520
-            : suite === "members"
-              ? 480
-              : suite === "audit"
-                ? 440
-                : suite === "admin"
-                  ? 400
-                  : suite === "lifecycle"
-                    ? 360
-                    : suite === "published"
-                      ? 320
-                      : suite === "bodyMedia"
-                        ? 280
-                        : suite === "media"
-                          ? 240
-                          : suite === "recover"
-                            ? 200
-                            : suite === "save"
-                              ? 160
-                              : suite === "select"
-                                ? 120
-                                : suite === "edit"
-                                  ? 80
-                                  : suite === "create"
-                                    ? 40
-                                    : 0);
-  const prefix = `${suite === "homepage" ? "phase4-task13" : suite === "profile" ? "phase4-task12" : suite === "taxonomy" ? "phase4-task11" : suite === "contributors" ? "phase4-task10" : suite === "members" ? "phase4-task9" : suite === "audit" ? "phase4-task8" : suite === "admin" ? "phase4-task7" : suite === "lifecycle" ? "phase4-task6" : suite === "published" ? "phase4-task5" : suite === "bodyMedia" ? "phase4-task4" : suite === "media" ? "phase4-task3" : suite === "save" || suite === "recover" ? `task10-${suite}` : suite === "select" ? "task9" : suite === "edit" ? "task8" : suite === "create" ? "task7" : "task6"}-${project}`;
+    (suite === "deletion"
+      ? 720
+      : suite === "homepage"
+        ? 640
+        : suite === "profile"
+          ? 600
+          : suite === "taxonomy"
+            ? 560
+            : suite === "contributors"
+              ? 520
+              : suite === "members"
+                ? 480
+                : suite === "audit"
+                  ? 440
+                  : suite === "admin"
+                    ? 400
+                    : suite === "lifecycle"
+                      ? 360
+                      : suite === "published"
+                        ? 320
+                        : suite === "bodyMedia"
+                          ? 280
+                          : suite === "media"
+                            ? 240
+                            : suite === "recover"
+                              ? 200
+                              : suite === "save"
+                                ? 160
+                                : suite === "select"
+                                  ? 120
+                                  : suite === "edit"
+                                    ? 80
+                                    : suite === "create"
+                                      ? 40
+                                      : 0);
+  const prefix = `${suite === "deletion" ? "phase4-task15" : suite === "homepage" ? "phase4-task13" : suite === "profile" ? "phase4-task12" : suite === "taxonomy" ? "phase4-task11" : suite === "contributors" ? "phase4-task10" : suite === "members" ? "phase4-task9" : suite === "audit" ? "phase4-task8" : suite === "admin" ? "phase4-task7" : suite === "lifecycle" ? "phase4-task6" : suite === "published" ? "phase4-task5" : suite === "bodyMedia" ? "phase4-task4" : suite === "media" ? "phase4-task3" : suite === "save" || suite === "recover" ? `task10-${suite}` : suite === "select" ? "task9" : suite === "edit" ? "task8" : suite === "create" ? "task7" : "task6"}-${project}`;
   const uuid = (n: number) =>
     `00000000-0000-0000-0000-${String(n).padStart(12, "0")}`;
   const id = (n: number) =>
@@ -72,7 +75,7 @@ export function draftListFixture(
   };
   const userIds = Object.values(users).map(uuid);
   const quoted = (ids: string[]) => ids.map((id) => `'${id}'`).join(",");
-  const label = `Task ${suite === "homepage" ? "4.13" : suite === "contributors" ? "4.10" : suite === "members" ? "4.9" : suite === "audit" ? "4.8" : suite === "admin" ? "4.7" : suite === "lifecycle" ? "4.6" : suite === "published" ? "4.5" : suite === "bodyMedia" ? "4.4" : suite === "media" ? "4.3" : suite === "save" || suite === "recover" ? 10 : suite === "select" ? 9 : suite === "edit" ? 8 : suite === "create" ? 7 : 6} ${project}`;
+  const label = `Task ${suite === "deletion" ? "4.15" : suite === "homepage" ? "4.13" : suite === "contributors" ? "4.10" : suite === "members" ? "4.9" : suite === "audit" ? "4.8" : suite === "admin" ? "4.7" : suite === "lifecycle" ? "4.6" : suite === "published" ? "4.5" : suite === "bodyMedia" ? "4.4" : suite === "media" ? "4.3" : suite === "save" || suite === "recover" ? 10 : suite === "select" ? 9 : suite === "edit" ? 8 : suite === "create" ? 7 : 6} ${project}`;
   let installed = false;
   let selectionsInstalled = false;
   function sql(statement: string) {
@@ -114,6 +117,7 @@ export function draftListFixture(
           if exists(select 1 from auth.users where id in (${quoted(userIds)}))
             or exists(select 1 from public.profiles where id in (${quoted(userIds)}))
             or exists(select 1 from public.sections where id='${id(99)}')
+            ${suite === "deletion" ? `or exists(select 1 from private.retired_article_slugs where slug='${prefix}-own-19')` : ""}
             or exists(select 1 from public.articles where id in (${quoted(Array.from({ length: 24 }, (_, i) => id(i + 1)))}))
           then raise exception 'Reserved draft browser fixture IDs already exist'; end if;
         end $$;
@@ -139,6 +143,12 @@ export function draftListFixture(
           ('${id(23)}','${uuid(users.admin)}','${id(99)}','${label} admin own','${prefix}-admin');
       `);
       installed = true;
+    },
+    prepareDeletionMedia() {
+      if (!installed || suite !== "deletion")
+        throw new Error("Not a deletion fixture.");
+      sql(`insert into public.media_assets(id,article_id,uploader_user_id,request_id,object_key,status)
+        values('${id(91)}','${id(19)}','${uuid(users.author)}','${id(92)}','${id(19)}/${id(91)}.webp','uploading');`);
     },
     makePublishedReady() {
       if (!installed || (suite !== "published" && suite !== "lifecycle"))
@@ -265,7 +275,10 @@ export function draftListFixture(
         values('${id(24)}','${uuid(users.author)}','${id(99)}','Synthetic unsupported timestamp','${prefix}-read-failure','infinity');`);
     },
     recoverRead() {
-      if (installed) sql(`delete from public.articles where id='${id(24)}';`);
+      if (installed)
+        sql(
+          `delete from public.articles where id='${id(24)}'; delete from private.article_id_registry where article_id='${id(24)}';`,
+        );
     },
     article(number: number) {
       if (!installed || !Number.isInteger(number) || number < 1 || number > 24)
@@ -357,7 +370,8 @@ export function draftListFixture(
         suite === "bodyMedia" ||
         suite === "published" ||
         suite === "lifecycle" ||
-        suite === "admin"
+        suite === "admin" ||
+        suite === "deletion"
           ? `
         -- Test-only synthetic cleanup; production removes objects via Storage API.
         select set_config('storage.allow_delete_query','true',true);
@@ -374,6 +388,7 @@ export function draftListFixture(
       `
           : ""
       }
+        ${suite === "deletion" ? `delete from private.media_cleanup_ledger where article_id='${id(19)}'; delete from private.media_key_registry where article_id='${id(19)}'; delete from private.retired_article_ids where article_id='${id(19)}'; delete from private.article_id_registry where article_id='${id(19)}'; delete from private.article_deletion_receipts where actor_user_id in (${quoted(userIds)}); delete from private.retired_article_slugs where slug='${prefix}-own-19';` : ""}
         delete from private.draft_write_receipts where actor_user_id in (${quoted(userIds)});
         delete from private.profile_write_receipts where actor_user_id in (${quoted(userIds)});
         delete from private.taxonomy_write_receipts where actor_user_id in (${quoted(userIds)});
@@ -397,6 +412,9 @@ export function draftListFixture(
         end $$;`
             : ""
         }
+        delete from private.media_cleanup_ledger where article_id in (select id from public.articles where owner_profile_id in (${quoted(userIds)}));
+        delete from private.media_key_registry where article_id in (select id from public.articles where owner_profile_id in (${quoted(userIds)}));
+        delete from private.article_id_registry where article_id in (select id from public.articles where owner_profile_id in (${quoted(userIds)}));
         delete from public.articles where owner_profile_id in (${quoted(userIds)});
         ${
           selectionsInstalled
