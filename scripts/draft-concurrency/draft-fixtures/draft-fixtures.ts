@@ -1,4 +1,4 @@
-import type { DraftInput } from "../../../src/lib/articles/draft-contract/draft-contract";
+import type { DraftInput } from "../../../src/shared/articles/draft-contract/draft-contract";
 import {
   DatabaseSession,
   fixtureJson,

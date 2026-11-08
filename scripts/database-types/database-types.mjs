@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { format, resolveConfig } from "prettier";
 
-const target = "src/lib/supabase/database/database.types.ts";
+const target = "src/shared/database/database.types.ts";
 const result = spawnSync(
   "pnpm",
   ["exec", "supabase", "gen", "types", "--lang", "typescript", "--local"],

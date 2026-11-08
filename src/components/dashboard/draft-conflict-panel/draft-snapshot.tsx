@@ -4,7 +4,7 @@ import type {
   DraftListItem,
   DraftInput,
   DraftDocument,
-} from "@/lib/articles/draft-contract/draft-contract";
+} from "@/shared/articles/draft-contract/draft-contract";
 import type { DraftOptions } from "@/lib/articles/draft-options/draft-options";
 import styles from "./draft-conflict-panel.module.css";
 function text(

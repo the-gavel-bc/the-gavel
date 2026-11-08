@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { httpOriginSchema, publishableKeySchema } from "../schema/schema";
+import {
+  httpOriginSchema,
+  publishableKeySchema,
+} from "../../../shared/env/schema/schema";
 
 const serverEnvSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: httpOriginSchema,

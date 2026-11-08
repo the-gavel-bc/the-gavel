@@ -3,7 +3,7 @@ import { expect, it } from "vitest";
 import type {
   DraftDocument,
   DraftWriteResult,
-} from "../../../src/lib/articles/draft-contract/draft-contract";
+} from "../../../src/shared/articles/draft-contract/draft-contract";
 import { ACTOR, DRAFT, beginAsActor } from "../draft-fixtures/draft-fixtures";
 import { fixtureJson, waitForLock } from "../database-session/database-session";
 import { beginAsAdmin, withSaveFixtures } from "../save-fixtures/save-fixtures";

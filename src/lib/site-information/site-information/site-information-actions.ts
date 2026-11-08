@@ -7,7 +7,7 @@ import {
   parseSiteInformationResult,
   type SiteInformationCommand,
   type SiteInformationResult,
-} from "./site-information-command";
+} from "../../../shared/site-information/site-information/site-information-command";
 export async function saveSiteInformationAction(
   command: SiteInformationCommand,
 ): Promise<SiteInformationResult> {

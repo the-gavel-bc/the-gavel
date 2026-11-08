@@ -7,7 +7,7 @@ import {
   parseOwnProfileResult,
   type OwnProfileCommand,
   type OwnProfileResult,
-} from "./own-profile-command";
+} from "../../../shared/profiles/own-profile/own-profile-command";
 
 export async function saveOwnProfileAction(
   command: OwnProfileCommand,

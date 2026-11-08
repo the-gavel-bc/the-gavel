@@ -10,7 +10,7 @@ import {
 import {
   type DraftDocument,
   type DraftFailure,
-} from "@/lib/articles/draft-contract/draft-contract";
+} from "@/shared/articles/draft-contract/draft-contract";
 import styles from "./draft-editor.module.css";
 import { insertDraftText } from "./draft-paste";
 import { DraftBodyImageControl } from "./draft-body-image-control";

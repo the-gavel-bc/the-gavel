@@ -4,7 +4,7 @@ import {
   isValidDraftDocument,
   type DraftDocument,
   type DraftFailure,
-} from "../draft-contract/draft-contract";
+} from "../../../shared/articles/draft-contract/draft-contract";
 export const DRAFT_LINK_ATTRIBUTES = {
   target: "_blank",
   rel: "noopener noreferrer nofollow",

@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 import { toEditorDocument, fromEditorDocument } from "./draft-document";
-import type { DraftDocument } from "../draft-contract/draft-contract";
+import type { DraftDocument } from "../../../shared/articles/draft-contract/draft-contract";
 const document = {
   type: "doc",
   content: [

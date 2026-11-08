@@ -5,7 +5,7 @@ import {
   type DraftReviewResult,
 } from "@/lib/articles/draft-reload-action/draft-reload-action";
 import type { DraftDetailResult } from "@/lib/articles/draft-queries/draft-queries";
-import type { DraftInput } from "@/lib/articles/draft-contract/draft-contract";
+import type { DraftInput } from "@/shared/articles/draft-contract/draft-contract";
 import type { DraftOptions } from "@/lib/articles/draft-options/draft-options";
 import { Button } from "@/components/ui/button/button";
 import { DraftSnapshot } from "./draft-snapshot";

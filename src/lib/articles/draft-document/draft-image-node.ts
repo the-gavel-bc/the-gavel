@@ -1,5 +1,5 @@
 import { Node } from "@tiptap/core";
-import { isDraftUuid } from "../draft-contract/draft-contract";
+import { isDraftUuid } from "../../../shared/articles/draft-contract/draft-contract";
 
 export function createDraftImageNode(articleId?: string) {
   return Node.create({

@@ -1,7 +1,7 @@
 import { connection } from "next/server";
 import { z } from "zod";
 import { requireActiveMembership } from "@/lib/auth/access/access";
-import { isDraftUuid } from "@/lib/articles/draft-cursor/draft-cursor";
+import { isDraftUuid } from "@/shared/articles/draft-cursor/draft-cursor";
 import { createServerSupabaseClient } from "@/lib/supabase/server/server";
 
 export const contributorStateSchema = z.enum(["all", "active", "inactive"]);

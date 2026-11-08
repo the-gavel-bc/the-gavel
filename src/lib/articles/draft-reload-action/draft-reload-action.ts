@@ -1,6 +1,6 @@
 "use server";
 import { getCurrentAccess } from "@/lib/auth/access/access";
-import { isDraftUuid } from "../draft-contract/draft-contract";
+import { isDraftUuid } from "../../../shared/articles/draft-contract/draft-contract";
 import {
   getDraftDetail,
   getDraftOptions,

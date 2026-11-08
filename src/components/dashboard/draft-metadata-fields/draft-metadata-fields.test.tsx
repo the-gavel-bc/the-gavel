@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 import { DraftMetadataFields } from "./draft-metadata-fields";
-import { baseDraft } from "@/lib/articles/draft-contract/draft-test-cases";
+import { baseDraft } from "@/shared/articles/draft-contract/draft-test-cases";
 const options = {
   sections: [{ id: baseDraft.sectionId, name: "Synthetic section" }],
   categories: [],

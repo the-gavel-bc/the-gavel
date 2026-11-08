@@ -1,5 +1,5 @@
 import { beforeEach, expect, it, vi } from "vitest";
-import { baseDraft } from "../draft-contract/draft-test-cases";
+import { baseDraft } from "../../../shared/articles/draft-contract/draft-test-cases";
 const mocks = vi.hoisted(() => ({
   access: vi.fn(),
   detail: vi.fn(),

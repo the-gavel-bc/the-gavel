@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
-import { baseDraft } from "@/lib/articles/draft-contract/draft-test-cases";
+import { baseDraft } from "@/shared/articles/draft-contract/draft-test-cases";
 const mocks = vi.hoisted(() => ({
   guard: vi.fn(),
   detail: vi.fn(),

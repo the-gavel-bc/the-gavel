@@ -6,7 +6,7 @@ import { saveOwnProfileAction } from "@/lib/profiles/own-profile/own-profile-act
 import type {
   OwnProfileCommand,
   OwnProfileResult,
-} from "@/lib/profiles/own-profile/own-profile-command";
+} from "@/shared/profiles/own-profile/own-profile-command";
 
 const messages = {
   invalid_input: "Check the display name and biography, then try again.",

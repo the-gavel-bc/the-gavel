@@ -9,7 +9,7 @@ import {
 import {
   decodeDraftCursor,
   encodeDraftCursor,
-} from "../draft-cursor/draft-cursor";
+} from "../../../shared/articles/draft-cursor/draft-cursor";
 const mocks = vi.hoisted(() => ({
   guard: vi.fn(),
   client: vi.fn(),

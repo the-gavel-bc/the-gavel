@@ -8,7 +8,7 @@ import {
   parseMemberResult,
   type MemberCommand,
   type MemberResult,
-} from "./member-command";
+} from "../../../shared/memberships/member-command/member-command";
 
 export async function manageMembershipAction(
   command: MemberCommand,

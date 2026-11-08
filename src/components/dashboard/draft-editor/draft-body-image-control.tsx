@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Editor } from "@tiptap/core";
 import { NodeSelection } from "@tiptap/pm/state";
 import { Button } from "@/components/ui/button/button";
-import type { DraftFailure } from "@/lib/articles/draft-contract/draft-contract";
+import type { DraftFailure } from "@/shared/articles/draft-contract/draft-contract";
 import { requestArticleImageUpload } from "@/lib/media/media-actions/media-actions";
 import { removeUnusedArticleImage } from "@/lib/media/media-removal/media-removal";
 

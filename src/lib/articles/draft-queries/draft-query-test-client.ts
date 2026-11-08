@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { vi } from "vitest";
-import type { Database } from "@/lib/supabase/database/database.types";
+import type { Database } from "@/shared/database/database.types";
 export const profileId = "00000000-0000-0000-0000-000000000001";
 export const articleId = "00000000-0000-0000-0000-000000000002";
 export const updatedAt = "2026-10-22T12:00:00.123456+00:00";

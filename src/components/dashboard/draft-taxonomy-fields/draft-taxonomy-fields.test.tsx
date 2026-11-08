@@ -2,8 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { expect, it } from "vitest";
-import { baseDraft } from "@/lib/articles/draft-contract/draft-test-cases";
-import type { DraftInput } from "@/lib/articles/draft-contract/draft-contract";
+import { baseDraft } from "@/shared/articles/draft-contract/draft-test-cases";
+import type { DraftInput } from "@/shared/articles/draft-contract/draft-contract";
 import { DraftTaxonomyFields } from "./draft-taxonomy-fields";
 const options = {
   sections: [],

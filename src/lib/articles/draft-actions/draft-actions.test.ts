@@ -5,7 +5,7 @@ import {
   queryTestClient,
   updatedAt,
 } from "../draft-queries/draft-query-test-client";
-import { baseDraft } from "../draft-contract/draft-test-cases";
+import { baseDraft } from "../../../shared/articles/draft-contract/draft-test-cases";
 const mocks = vi.hoisted(() => ({
   access: vi.fn(),
   client: vi.fn(),

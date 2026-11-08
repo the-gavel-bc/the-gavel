@@ -6,7 +6,7 @@ import {
   queryTestClient,
   updatedAt,
 } from "./draft-query-test-client";
-import { baseDraft } from "../draft-contract/draft-test-cases";
+import { baseDraft } from "../../../shared/articles/draft-contract/draft-test-cases";
 const mocks = vi.hoisted(() => ({ guard: vi.fn(), client: vi.fn() }));
 vi.mock("@/lib/auth/access/access", () => ({
   requireActiveMembership: mocks.guard,

@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { getCurrentAccess } from "@/lib/auth/access/access";
-import { isDraftUuid } from "@/lib/articles/draft-contract/draft-contract";
+import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
 import { createServerSupabaseClient } from "@/lib/supabase/server/server";
 import { createTrustedMediaClient } from "@/lib/supabase/media-admin/media-admin";
 

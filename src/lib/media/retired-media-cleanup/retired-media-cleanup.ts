@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { isDraftUuid } from "@/lib/articles/draft-cursor/draft-cursor";
+import { isDraftUuid } from "@/shared/articles/draft-cursor/draft-cursor";
 import { createTrustedMediaClient } from "@/lib/supabase/media-admin/media-admin";
 const uuid = z.custom<string>(isDraftUuid);
 const prefixes = z

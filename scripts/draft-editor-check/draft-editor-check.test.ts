@@ -9,11 +9,11 @@ import {
 import {
   draftJsonbByteLength,
   type DraftDocument,
-} from "../../src/lib/articles/draft-contract/draft-contract";
+} from "../../src/shared/articles/draft-contract/draft-contract";
 import {
   literalCases,
   body,
-} from "../../src/lib/articles/draft-contract/draft-test-cases";
+} from "../../src/shared/articles/draft-contract/draft-test-cases";
 const inputs = literalCases
   .filter((c) => c.target === "content" && c.want === "ok")
   .map((c) => ({ name: c.name, value: c.value as DraftDocument | null }));

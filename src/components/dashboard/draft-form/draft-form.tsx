@@ -15,13 +15,13 @@ import type {
   DraftInput,
   DraftErrorCode,
   DraftFailure,
-} from "@/lib/articles/draft-contract/draft-contract";
+} from "@/shared/articles/draft-contract/draft-contract";
 import type { DraftOptions } from "@/lib/articles/draft-options/draft-options";
 import { useDraftCommand, type DraftArticle } from "./use-draft-command";
 import styles from "./draft-form.module.css";
 import { DraftTaxonomyFields } from "../draft-taxonomy-fields/draft-taxonomy-fields";
 import { DraftContributorFields } from "../draft-contributor-fields/draft-contributor-fields";
-import { draftMetadataErrors } from "@/lib/articles/draft-contract/draft-contract";
+import { draftMetadataErrors } from "@/shared/articles/draft-contract/draft-contract";
 import { draftSelectionErrors } from "@/lib/articles/draft-selections/draft-selections";
 import { useDraftCategories } from "./use-draft-categories";
 import { DraftConflictPanel } from "../draft-conflict-panel/draft-conflict-panel";

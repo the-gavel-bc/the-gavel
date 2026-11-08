@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { isDraftUuid } from "@/lib/articles/draft-contract/draft-contract";
+import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
 const uuid = z.custom<string>(isDraftUuid);
 export const deletionCommandSchema = z.strictObject({
   articleId: uuid,

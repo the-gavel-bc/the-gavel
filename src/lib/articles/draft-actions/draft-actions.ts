@@ -7,12 +7,12 @@ import {
   parseCreateCommand,
   parseSaveCommand,
   parseDraftWriteResult,
-} from "../draft-action-contract/draft-action-contract";
+} from "../../../shared/articles/draft-action-contract/draft-action-contract";
 import type {
   CreateDraftCommand,
   SaveDraftCommand,
   DraftWriteResult,
-} from "../draft-contract/draft-contract";
+} from "../../../shared/articles/draft-contract/draft-contract";
 
 function refreshPrivatePaths(
   result: DraftWriteResult,

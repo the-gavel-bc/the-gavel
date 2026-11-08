@@ -1,7 +1,7 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
 import { getServerEnv } from "@/lib/env/server/server";
-import type { Database } from "../database/database.types";
+import type { Database } from "../../../shared/database/database.types";
 
 export function createTrustedMediaClient() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;

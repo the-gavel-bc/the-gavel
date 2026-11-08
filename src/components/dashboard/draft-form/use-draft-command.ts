@@ -10,7 +10,7 @@ import {
   draftMetadataErrors,
   type DraftInput,
   type DraftWriteResult,
-} from "@/lib/articles/draft-contract/draft-contract";
+} from "@/shared/articles/draft-contract/draft-contract";
 import {
   createDraftSaveState,
   reduceDraftSave,

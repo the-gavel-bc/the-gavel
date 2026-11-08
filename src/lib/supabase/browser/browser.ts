@@ -1,7 +1,7 @@
 "use client";
 import { createBrowserClient } from "@supabase/ssr";
-import { getPublicEnv } from "@/lib/env/public/public";
-import type { Database } from "../database/database.types";
+import { getPublicEnv } from "@/shared/env/public/public";
+import type { Database } from "../../../shared/database/database.types";
 
 // Foundation authentication is server-owned; browser queries remain anonymous.
 export function createBrowserSupabaseClient() {

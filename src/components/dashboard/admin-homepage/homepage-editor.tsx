@@ -12,7 +12,7 @@ import { saveHomepageAction } from "@/lib/homepage/homepage-curation/homepage-ac
 import type {
   HomepageCommand,
   HomepageResult,
-} from "@/lib/homepage/homepage-curation/homepage-command";
+} from "@/shared/homepage/homepage-curation/homepage-command";
 
 type Choices = {
   lead: HomepageArticle | null;

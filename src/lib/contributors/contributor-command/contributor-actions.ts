@@ -8,7 +8,7 @@ import {
   parseContributorResult,
   type ContributorCommand,
   type ContributorResult,
-} from "./contributor-command";
+} from "../../../shared/contributors/contributor-command/contributor-command";
 
 export async function manageContributorAction(
   command: ContributorCommand,

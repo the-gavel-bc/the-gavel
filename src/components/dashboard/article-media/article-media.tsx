@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button/button";
 import type { DraftArticle } from "@/lib/articles/draft-save-state/draft-save-state";
-import type { DraftWriteResult } from "@/lib/articles/draft-contract/draft-contract";
+import type { DraftWriteResult } from "@/shared/articles/draft-contract/draft-contract";
 import {
   requestArticleImageUpload,
   setArticleMainImage,

@@ -1,7 +1,7 @@
 // Synthetic fixtures shared by unit and local-DB parity tests; never imported by application code.
 import { readFileSync } from "node:fs";
 const fixtures = JSON.parse(
-  readFileSync("src/lib/articles/draft-contract/draft-cases.json", "utf8"),
+  readFileSync("src/shared/articles/draft-contract/draft-cases.json", "utf8"),
 ) as typeof import("./draft-cases.json");
 export type ContractCase = {
   name: string;

@@ -5,7 +5,7 @@ import {
   type DraftBlock,
   type DraftDocument,
   type DraftInline,
-} from "@/lib/articles/draft-contract/draft-contract";
+} from "@/shared/articles/draft-contract/draft-contract";
 
 function renderInline(items: DraftInline[] | undefined): ReactNode {
   return items?.map((item, index) => {

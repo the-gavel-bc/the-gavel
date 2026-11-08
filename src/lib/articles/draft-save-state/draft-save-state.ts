@@ -4,7 +4,7 @@ import type {
   SaveDraftCommand,
   DraftWriteResult,
   DraftFailure,
-} from "../draft-contract/draft-contract";
+} from "../../../shared/articles/draft-contract/draft-contract";
 import { draftInputKey } from "./draft-input-key";
 export type DraftArticle = { id: string; version: number; updatedAt: string };
 export type PendingDraftCommand =

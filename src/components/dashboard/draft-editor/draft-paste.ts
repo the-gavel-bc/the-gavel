@@ -3,7 +3,7 @@ import type { EditorView } from "@tiptap/pm/view";
 import {
   draftJsonbByteLength,
   type DraftFailure,
-} from "@/lib/articles/draft-contract/draft-contract";
+} from "@/shared/articles/draft-contract/draft-contract";
 import { fromEditorDocument } from "@/lib/articles/draft-document/draft-document";
 export function insertDraftText(
   view: EditorView,

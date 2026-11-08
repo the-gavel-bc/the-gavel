@@ -2,7 +2,10 @@ import { connection } from "next/server";
 import { z } from "zod";
 import { requireActiveMembership } from "@/lib/auth/access/access";
 import { createServerSupabaseClient } from "@/lib/supabase/server/server";
-import { isDatabaseTimestamp, isDraftUuid } from "../draft-cursor/draft-cursor";
+import {
+  isDatabaseTimestamp,
+  isDraftUuid,
+} from "../../../shared/articles/draft-cursor/draft-cursor";
 
 export const auditActionSchema = z.enum([
   "article.created",

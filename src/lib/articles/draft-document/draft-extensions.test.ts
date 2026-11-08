@@ -2,8 +2,8 @@ import { Editor } from "@tiptap/core";
 import { expect, it } from "vitest";
 import { createDraftExtensions } from "./draft-extensions";
 import { toEditorDocument, fromEditorDocument } from "./draft-document";
-import { literalCases } from "../draft-contract/draft-test-cases";
-import type { DraftDocument } from "../draft-contract/draft-contract";
+import { literalCases } from "../../../shared/articles/draft-contract/draft-test-cases";
+import type { DraftDocument } from "../../../shared/articles/draft-contract/draft-contract";
 it("enables exactly the accepted schema nodes and marks", () => {
   const editor = new Editor({ extensions: createDraftExtensions() });
   try {

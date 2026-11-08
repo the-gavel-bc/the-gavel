@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import { getCurrentAccess } from "@/lib/auth/access/access";
-import { isDraftUuid } from "@/lib/articles/draft-contract/draft-contract";
+import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
 import { readMediaFile } from "@/lib/media/image-intake/media-form";
 import { processArticleImage } from "@/lib/media/image-intake/image-intake";
 import { createTrustedMediaClient } from "@/lib/supabase/media-admin/media-admin";

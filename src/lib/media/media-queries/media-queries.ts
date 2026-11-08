@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { requireActiveMembership } from "@/lib/auth/access/access";
-import { isDraftUuid } from "@/lib/articles/draft-contract/draft-contract";
+import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
 import { createServerSupabaseClient } from "@/lib/supabase/server/server";
 
 export type MainImage = {

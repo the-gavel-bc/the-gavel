@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { isDraftUuid } from "@/lib/articles/draft-cursor/draft-cursor";
+import { isDraftUuid } from "@/shared/articles/draft-cursor/draft-cursor";
 
 const uuid = z.custom<string>(isDraftUuid);
 export const taxonomyCommandSchema = z.strictObject({

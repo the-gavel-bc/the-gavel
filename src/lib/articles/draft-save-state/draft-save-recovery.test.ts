@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { baseDraft } from "../draft-contract/draft-test-cases";
+import { baseDraft } from "../../../shared/articles/draft-contract/draft-test-cases";
 import {
   createDraftSaveState,
   reduceDraftSave,

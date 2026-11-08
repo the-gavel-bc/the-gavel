@@ -1,4 +1,4 @@
-import type { DraftInput } from "@/lib/articles/draft-contract/draft-contract";
+import type { DraftInput } from "@/shared/articles/draft-contract/draft-contract";
 import type { DraftOptions } from "@/lib/articles/draft-options/draft-options";
 import styles from "./draft-metadata-fields.module.css";
 const fields = [

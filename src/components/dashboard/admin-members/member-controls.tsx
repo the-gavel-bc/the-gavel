@@ -7,7 +7,7 @@ import { manageMembershipAction } from "@/lib/memberships/member-command/member-
 import type {
   MemberCommand,
   MemberResult,
-} from "@/lib/memberships/member-command/member-command";
+} from "@/shared/memberships/member-command/member-command";
 import styles from "./admin-members.module.css";
 
 const messages = {

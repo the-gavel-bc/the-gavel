@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound, unstable_rethrow } from "next/navigation";
 import { requireActiveMembership } from "@/lib/auth/access/access";
 import { getAdminArticleDetail } from "@/lib/articles/admin-article-queries/admin-article-queries";
-import { isDraftUuid } from "@/lib/articles/draft-contract/draft-contract";
+import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
 import { AdminArticleMeta } from "@/components/dashboard/admin-articles/admin-article-list";
 import { GuardedDashboardLink } from "@/components/dashboard/guarded-dashboard-link/guarded-dashboard-link";
 import { ArticleDeletion } from "@/components/dashboard/article-deletion/article-deletion";

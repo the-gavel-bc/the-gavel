@@ -5,7 +5,7 @@ import { toEditorDocument } from "@/lib/articles/draft-document/draft-document";
 import {
   draftJsonbByteLength,
   type DraftDocument,
-} from "@/lib/articles/draft-contract/draft-contract";
+} from "@/shared/articles/draft-contract/draft-contract";
 import { insertDraftText } from "./draft-paste";
 it("inserts plain text as text, never HTML", () => {
   const editor = new Editor({ extensions: createDraftExtensions() });

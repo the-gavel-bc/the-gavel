@@ -11,7 +11,7 @@ import {
 import type {
   ArticleLifecycleCommand,
   ArticleLifecycleResult,
-} from "@/lib/articles/article-lifecycle/article-lifecycle";
+} from "@/shared/articles/article-lifecycle/article-lifecycle";
 
 const failureMessage = {
   invalid_input:

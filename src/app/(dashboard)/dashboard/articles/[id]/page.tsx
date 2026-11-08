@@ -5,7 +5,7 @@ import {
   getDraftDetail,
   getDraftOptions,
 } from "@/lib/articles/draft-queries/draft-queries";
-import { isDraftUuid } from "@/lib/articles/draft-contract/draft-contract";
+import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
 import { DraftForm } from "@/components/dashboard/draft-form/draft-form";
 import { getArticleMainImage } from "@/lib/media/media-queries/media-queries";
 import { ArticleLifecycleControls } from "@/components/dashboard/article-lifecycle-controls/article-lifecycle-controls";

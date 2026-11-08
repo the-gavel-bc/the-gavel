@@ -1,7 +1,7 @@
 import type {
   DraftInput,
   DraftWriteResult,
-} from "../../../src/lib/articles/draft-contract/draft-contract";
+} from "../../../src/shared/articles/draft-contract/draft-contract";
 import {
   DatabaseSession,
   fixtureJson,

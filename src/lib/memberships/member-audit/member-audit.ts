@@ -5,7 +5,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server/server";
 import {
   isDatabaseTimestamp,
   isDraftUuid,
-} from "@/lib/articles/draft-cursor/draft-cursor";
+} from "@/shared/articles/draft-cursor/draft-cursor";
 
 const actionSchema = z.enum([
   "membership.approved",

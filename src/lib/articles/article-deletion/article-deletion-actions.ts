@@ -7,7 +7,7 @@ import {
   parseDeletionResult,
   type DeletionCommand,
   type DeletionResult,
-} from "./article-deletion";
+} from "../../../shared/articles/article-deletion/article-deletion";
 export async function deleteArticleAction(
   command: DeletionCommand,
 ): Promise<DeletionResult> {

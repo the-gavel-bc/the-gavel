@@ -2,7 +2,7 @@ import { connection } from "next/server";
 import { z } from "zod";
 import { requireActiveMembership } from "@/lib/auth/access/access";
 import { createServerSupabaseClient } from "@/lib/supabase/server/server";
-import { isDraftUuid } from "@/lib/articles/draft-cursor/draft-cursor";
+import { isDraftUuid } from "@/shared/articles/draft-cursor/draft-cursor";
 
 export const memberStateSchema = z.enum([
   "all",

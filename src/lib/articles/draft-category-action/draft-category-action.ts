@@ -1,7 +1,7 @@
 "use server";
 import { getCurrentAccess } from "@/lib/auth/access/access";
 import { createServerSupabaseClient } from "@/lib/supabase/server/server";
-import { isDraftUuid } from "../draft-contract/draft-contract";
+import { isDraftUuid } from "../../../shared/articles/draft-contract/draft-contract";
 import {
   loadDraftCategories,
   type DraftOptions,

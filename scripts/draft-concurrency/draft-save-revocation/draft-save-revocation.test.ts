@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import type { DraftInput } from "../../../src/lib/articles/draft-contract/draft-contract";
+import type { DraftInput } from "../../../src/shared/articles/draft-contract/draft-contract";
 import {
   ACTOR,
   PROFILE,

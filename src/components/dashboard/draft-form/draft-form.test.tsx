@@ -7,7 +7,7 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
-import { baseDraft } from "@/lib/articles/draft-contract/draft-test-cases";
+import { baseDraft } from "@/shared/articles/draft-contract/draft-test-cases";
 const mocks = vi.hoisted(() => ({
   create: vi.fn(),
   save: vi.fn(),

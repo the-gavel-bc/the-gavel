@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getServerEnv } from "@/lib/env/server/server";
-import type { Database } from "../database/database.types";
+import type { Database } from "../../../shared/database/database.types";
 
 export async function refreshSession(request: NextRequest) {
   const env = getServerEnv();

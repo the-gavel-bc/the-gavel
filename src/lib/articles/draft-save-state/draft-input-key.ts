@@ -1,4 +1,4 @@
-import type { DraftInput } from "../draft-contract/draft-contract";
+import type { DraftInput } from "../../../shared/articles/draft-contract/draft-contract";
 // Association order and JSON object-key order have no stored meaning; body arrays do.
 export function draftInputKey(input: DraftInput): string {
   const sorted = {

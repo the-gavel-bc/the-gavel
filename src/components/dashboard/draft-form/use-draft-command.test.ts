@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
-import { baseDraft } from "@/lib/articles/draft-contract/draft-test-cases";
+import { baseDraft } from "@/shared/articles/draft-contract/draft-test-cases";
 const actions = vi.hoisted(() => ({
   create: vi.fn(),
   save: vi.fn(),

@@ -7,7 +7,7 @@ import {
   parseTaxonomyResult,
   type TaxonomyCommand,
   type TaxonomyResult,
-} from "./taxonomy-command";
+} from "../../../shared/taxonomy/taxonomy-command/taxonomy-command";
 
 export async function updateTaxonomyAction(
   command: TaxonomyCommand,

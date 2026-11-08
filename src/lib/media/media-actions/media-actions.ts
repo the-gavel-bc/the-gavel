@@ -3,9 +3,9 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { getCurrentAccess } from "@/lib/auth/access/access";
-import { isDraftUuid } from "@/lib/articles/draft-contract/draft-contract";
-import { parseDraftWriteResult } from "@/lib/articles/draft-action-contract/draft-action-contract";
-import type { DraftWriteResult } from "@/lib/articles/draft-contract/draft-contract";
+import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
+import { parseDraftWriteResult } from "@/shared/articles/draft-action-contract/draft-action-contract";
+import type { DraftWriteResult } from "@/shared/articles/draft-contract/draft-contract";
 import { createServerSupabaseClient } from "@/lib/supabase/server/server";
 
 export type MediaRequestResult =

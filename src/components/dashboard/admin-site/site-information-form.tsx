@@ -7,7 +7,7 @@ import {
   siteInformationCommandSchema,
   type SiteInformationCommand,
   type SiteInformationResult,
-} from "@/lib/site-information/site-information/site-information-command";
+} from "@/shared/site-information/site-information/site-information-command";
 import type { SiteInformation } from "@/lib/site-information/site-information/site-information";
 const messages = {
   invalid_input:

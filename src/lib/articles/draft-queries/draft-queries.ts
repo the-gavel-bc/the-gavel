@@ -2,7 +2,7 @@ import {
   checkDraftInput,
   isValidDraftDocument,
   type DraftInput,
-} from "../draft-contract/draft-contract";
+} from "../../../shared/articles/draft-contract/draft-contract";
 import {
   loadDraftOptions,
   type DraftOptions,
@@ -16,7 +16,7 @@ import {
   encodeDraftCursor,
   isDatabaseTimestamp,
   isDraftUuid,
-} from "../draft-cursor/draft-cursor";
+} from "../../../shared/articles/draft-cursor/draft-cursor";
 
 export type ArticleSummary = {
   id: string;

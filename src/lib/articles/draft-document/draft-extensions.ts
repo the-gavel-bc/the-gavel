@@ -8,7 +8,7 @@ import Italic from "@tiptap/extension-italic";
 import Link from "@tiptap/extension-link";
 import HardBreak from "@tiptap/extension-hard-break";
 import { BulletList, OrderedList, ListItem } from "@tiptap/extension-list";
-import { isValidDraftLink } from "../draft-contract/draft-contract";
+import { isValidDraftLink } from "../../../shared/articles/draft-contract/draft-contract";
 import { DRAFT_LINK_ATTRIBUTES } from "./draft-document";
 import { createDraftImageNode } from "./draft-image-node";
 export function createDraftExtensions(articleId?: string) {

@@ -6,7 +6,7 @@ import { updateTaxonomyAction } from "@/lib/taxonomy/taxonomy-command/taxonomy-a
 import type {
   TaxonomyCommand,
   TaxonomyResult,
-} from "@/lib/taxonomy/taxonomy-command/taxonomy-command";
+} from "@/shared/taxonomy/taxonomy-command/taxonomy-command";
 
 const messages = {
   invalid_input: "Check the name and navigation order.",

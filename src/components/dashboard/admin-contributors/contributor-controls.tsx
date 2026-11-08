@@ -7,7 +7,7 @@ import { manageContributorAction } from "@/lib/contributors/contributor-command/
 import type {
   ContributorCommand,
   ContributorResult,
-} from "@/lib/contributors/contributor-command/contributor-command";
+} from "@/shared/contributors/contributor-command/contributor-command";
 
 const messages = {
   invalid_input: "Check the display name and biography, then try again.",

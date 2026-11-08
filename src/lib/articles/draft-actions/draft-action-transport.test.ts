@@ -4,8 +4,11 @@ import config from "../../../../next.config";
 import {
   checkDraftInput,
   draftJsonbByteLength,
-} from "../draft-contract/draft-contract";
-import { baseDraft, body } from "../draft-contract/draft-test-cases";
+} from "../../../shared/articles/draft-contract/draft-contract";
+import {
+  baseDraft,
+  body,
+} from "../../../shared/articles/draft-contract/draft-test-cases";
 import { articleId } from "../draft-queries/draft-query-test-client";
 // Use the encoder shipped by our pinned Next runtime, rather than approximating Flight with JSON.
 const require = createRequire(import.meta.url);

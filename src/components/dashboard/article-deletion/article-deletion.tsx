@@ -7,7 +7,7 @@ import { deleteArticleAction } from "@/lib/articles/article-deletion/article-del
 import type {
   DeletionCommand,
   DeletionResult,
-} from "@/lib/articles/article-deletion/article-deletion";
+} from "@/shared/articles/article-deletion/article-deletion";
 const messages = {
   invalid_input: "Confirm the deletion and try again.",
   forbidden: "Your administrator access no longer permits deletion.",

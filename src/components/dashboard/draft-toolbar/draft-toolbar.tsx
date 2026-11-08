@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button/button";
 import {
   isValidDraftLink,
   type DraftFailure,
-} from "@/lib/articles/draft-contract/draft-contract";
+} from "@/shared/articles/draft-contract/draft-contract";
 import styles from "./draft-toolbar.module.css";
 export function DraftToolbar({
   editor,

@@ -8,7 +8,7 @@ import {
   parseArticleLifecycleResult,
   type ArticleLifecycleCommand,
   type ArticleLifecycleResult,
-} from "./article-lifecycle";
+} from "../../../shared/articles/article-lifecycle/article-lifecycle";
 
 async function transition(
   command: ArticleLifecycleCommand,

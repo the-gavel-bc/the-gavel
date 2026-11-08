@@ -7,7 +7,7 @@ import {
   parseHomepageResult,
   type HomepageCommand,
   type HomepageResult,
-} from "./homepage-command";
+} from "../../../shared/homepage/homepage-curation/homepage-command";
 
 export async function saveHomepageAction(
   command: HomepageCommand,

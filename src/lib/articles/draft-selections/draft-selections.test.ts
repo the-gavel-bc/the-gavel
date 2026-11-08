@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { baseDraft } from "../draft-contract/draft-test-cases";
+import { baseDraft } from "../../../shared/articles/draft-contract/draft-test-cases";
 import { draftSelectionErrors } from "./draft-selections";
 const id = (n: number) =>
   `00000000-0000-0000-0000-${String(n).padStart(12, "0")}`;

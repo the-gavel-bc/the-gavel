@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { expect, it } from "vitest";
-import type { DraftContributor } from "@/lib/articles/draft-contract/draft-contract";
+import type { DraftContributor } from "@/shared/articles/draft-contract/draft-contract";
 import { DraftContributorFields } from "./draft-contributor-fields";
 const options = [{ id: "guest", displayName: "Guest", slug: "guest" }];
 function Form() {

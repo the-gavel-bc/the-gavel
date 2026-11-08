@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@/lib/supabase/database/database.types";
-import { isDraftUuid } from "../draft-cursor/draft-cursor";
+import type { Database } from "@/shared/database/database.types";
+import { isDraftUuid } from "../../../shared/articles/draft-cursor/draft-cursor";
 const choice = z.object({
   id: z.custom<string>(isDraftUuid),
   name: z.string(),

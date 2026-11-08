@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { expect, it } from "vitest";
-import { baseDraft } from "@/lib/articles/draft-contract/draft-test-cases";
+import { baseDraft } from "@/shared/articles/draft-contract/draft-test-cases";
 import { DraftSnapshot } from "./draft-snapshot";
 it("previews canonical content as safe text and uses generic unavailable labels", () => {
   const { container } = render(
