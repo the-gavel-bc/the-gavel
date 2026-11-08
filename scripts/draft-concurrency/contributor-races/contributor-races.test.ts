@@ -56,6 +56,7 @@ it("a deactivation racing publication cannot leave a published inactive owner", 
       delete from private.profile_write_receipts where actor_user_id='${actor}';
       delete from public.audit_events where actor_user_id='${actor}';
       delete from public.articles where id='${article}';
+      delete from private.article_id_registry where article_id='${article}';
       delete from public.sections where id='${section}';
       delete from public.memberships where user_id='${actor}';
       delete from public.profiles where id in ('${actor}','${guest}');
@@ -115,6 +116,7 @@ it("crediting a contributor waits for a concurrent rename before freezing its sl
       delete from public.audit_events where actor_user_id='${actor}';
       delete from public.article_contributors where article_id='${article}';
       delete from public.articles where id='${article}';
+      delete from private.article_id_registry where article_id='${article}';
       delete from public.sections where id='${section}';
       delete from public.memberships where user_id='${actor}';
       delete from public.profiles where id in ('${actor}','${guest}');

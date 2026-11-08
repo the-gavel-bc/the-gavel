@@ -51,6 +51,7 @@ describe("serialized draft create operations", () => {
           delete from private.draft_write_limits where actor_user_id='${otherUser}';
           delete from public.audit_events where actor_user_id='${otherUser}';
           delete from public.article_revisions where actor_user_id='${otherUser}';
+          delete from private.article_id_registry where article_id in (select id from public.articles where owner_profile_id='${otherProfile}');
           delete from public.articles where owner_profile_id='${otherProfile}';
           delete from public.memberships where user_id='${otherUser}';
           delete from public.profiles where id='${otherProfile}';
