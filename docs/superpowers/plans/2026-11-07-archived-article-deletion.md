@@ -44,3 +44,9 @@ The independent review identified permanent-upload claims without writer-livenes
 - Final local browser checks passed six desktop/mobile cases with two shared-state mobile writes skipped. Real local Storage tests exercised the readiness probe and cleanup after both known and previously untracked late uploads. Hosted cron, clean migration CI, capacity/alert setup and human security/accessibility review remain outstanding.
 
 PR #45 must merge first; update this branch from main and rerun affected checks before review and merge.
+
+## Main integration — 2026-11-08
+
+Merged main at `3c92d7c` after Task 14 landed. Preserved both documentation additions, the site-settings and deletion fixtures, and their guarded cleanup; retained generated types and the site-information navigation entry from main. No applied migration was edited.
+
+Verification: `pnpm typecheck`, `pnpm db:types:check`, fixture Prettier check, and staged diff whitespace check passed. Focused Vitest coverage for site information, deletion and cleanup passed 23 tests. Production builds and separate Playwright site-information/deletion suites passed six browser cases in total; two shared-state mobile write cases were intentionally skipped. Hosted CI is left to the owner.
