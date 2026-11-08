@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
   refresh: vi.fn(),
   push: vi.fn(),
 }));
-vi.mock("@/lib/homepage/homepage-curation/homepage-actions", () => ({
+vi.mock("@/backend/homepage/homepage-curation/homepage-actions", () => ({
   saveHomepageAction: mocks.action,
 }));
 vi.mock("next/navigation", () => ({

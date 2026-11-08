@@ -1,11 +1,11 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
-import { getCurrentAccess } from "@/lib/auth/access/access";
+import { getCurrentAccess } from "@/backend/auth/access/access";
 import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
-import { readMediaFile } from "@/lib/media/image-intake/media-form";
-import { processArticleImage } from "@/lib/media/image-intake/image-intake";
-import { createTrustedMediaClient } from "@/lib/supabase/media-admin/media-admin";
-import { createServerSupabaseClient } from "@/lib/supabase/server/server";
+import { readMediaFile } from "@/backend/media/image-intake/media-form";
+import { processArticleImage } from "@/backend/media/image-intake/image-intake";
+import { createTrustedMediaClient } from "@/backend/infrastructure/supabase/media-admin/media-admin";
+import { createServerSupabaseClient } from "@/backend/infrastructure/supabase/server/server";
 
 const finalizedReceipt = z.strictObject({
   ok: z.literal(true),

@@ -1,7 +1,7 @@
 // @vitest-environment node
 import sharp from "sharp";
 import { beforeEach, expect, it, vi } from "vitest";
-import { processArticleImage } from "@/lib/media/image-intake/image-intake";
+import { processArticleImage } from "@/backend/media/image-intake/image-intake";
 import { GET, POST } from "./route";
 
 const articleId = "50000000-0000-0000-0000-000000000401";
@@ -17,11 +17,13 @@ const mocks = vi.hoisted(() => ({
   userClient: vi.fn(),
   trustedClient: vi.fn(),
 }));
-vi.mock("@/lib/auth/access/access", () => ({ getCurrentAccess: mocks.access }));
-vi.mock("@/lib/supabase/server/server", () => ({
+vi.mock("@/backend/auth/access/access", () => ({
+  getCurrentAccess: mocks.access,
+}));
+vi.mock("@/backend/infrastructure/supabase/server/server", () => ({
   createServerSupabaseClient: mocks.userClient,
 }));
-vi.mock("@/lib/supabase/media-admin/media-admin", () => ({
+vi.mock("@/backend/infrastructure/supabase/media-admin/media-admin", () => ({
   createTrustedMediaClient: mocks.trustedClient,
 }));
 

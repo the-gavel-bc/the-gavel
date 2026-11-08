@@ -14,11 +14,11 @@ const mocks = vi.hoisted(() => ({
   setImage: vi.fn(),
   removeUnused: vi.fn(),
 }));
-vi.mock("@/lib/media/media-actions/media-actions", () => ({
+vi.mock("@/backend/media/media-actions/media-actions", () => ({
   requestArticleImageUpload: mocks.request,
   setArticleMainImage: mocks.setImage,
 }));
-vi.mock("@/lib/media/media-removal/media-removal", () => ({
+vi.mock("@/backend/media/media-removal/media-removal", () => ({
   removeUnusedArticleImage: mocks.removeUnused,
 }));
 

@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ action: vi.fn(), refresh: vi.fn() }));
-vi.mock("@/lib/profiles/own-profile/own-profile-actions", () => ({
+vi.mock("@/backend/profiles/own-profile/own-profile-actions", () => ({
   saveOwnProfileAction: mocks.action,
 }));
 vi.mock("next/navigation", () => ({

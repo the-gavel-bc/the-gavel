@@ -1,8 +1,8 @@
 "use client";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { TaxonomyItem } from "@/lib/taxonomy/admin-taxonomy/admin-taxonomy";
-import { updateTaxonomyAction } from "@/lib/taxonomy/taxonomy-command/taxonomy-actions";
+import type { TaxonomyItem } from "@/backend/taxonomy/admin-taxonomy/admin-taxonomy";
+import { updateTaxonomyAction } from "@/backend/taxonomy/taxonomy-command/taxonomy-actions";
 import type {
   TaxonomyCommand,
   TaxonomyResult,

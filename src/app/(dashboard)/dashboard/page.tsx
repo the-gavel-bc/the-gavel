@@ -2,8 +2,8 @@ import { unstable_rethrow } from "next/navigation";
 import { ArticleListError } from "@/components/dashboard/article-list-error/article-list-error";
 import { LinkButton } from "@/components/ui/link-button/link-button";
 import Link from "next/link";
-import { requireActiveMembership } from "@/lib/auth/access/access";
-import { getMyArticlesPage } from "@/lib/articles/draft-queries/draft-queries";
+import { requireActiveMembership } from "@/backend/auth/access/access";
+import { getMyArticlesPage } from "@/backend/articles/draft-queries/draft-queries";
 import { ArticleList } from "@/components/dashboard/article-list/article-list";
 export default async function DashboardPage({
   searchParams,

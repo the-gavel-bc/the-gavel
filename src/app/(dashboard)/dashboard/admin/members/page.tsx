@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
-import { requireActiveMembership } from "@/lib/auth/access/access";
+import { requireActiveMembership } from "@/backend/auth/access/access";
 import {
   listMembers,
   memberStateSchema,
-} from "@/lib/memberships/member-directory/member-directory";
+} from "@/backend/memberships/member-directory/member-directory";
 import { AdminMemberList } from "@/components/dashboard/admin-members/admin-member-list";
 
 export default async function AdminMembersPage({

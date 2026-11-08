@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { retryMediaCleanupAction } from "@/lib/media/retired-media-cleanup/cleanup-actions";
+import { retryMediaCleanupAction } from "@/backend/media/retired-media-cleanup/cleanup-actions";
 export function MediaCleanupControl() {
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState("");

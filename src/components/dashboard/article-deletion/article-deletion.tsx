@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GuardedDashboardLink } from "@/components/dashboard/guarded-dashboard-link/guarded-dashboard-link";
 import { useDraftNavigationGuard } from "@/components/dashboard/draft-navigation-guard/draft-navigation-guard";
-import { deleteArticleAction } from "@/lib/articles/article-deletion/article-deletion-actions";
+import { deleteArticleAction } from "@/backend/articles/article-deletion/article-deletion-actions";
 import type {
   DeletionCommand,
   DeletionResult,

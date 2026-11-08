@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { getDraftCategoriesAction } from "@/lib/articles/draft-category-action/draft-category-action";
-import type { DraftOptions } from "@/lib/articles/draft-options/draft-options";
+import { getDraftCategoriesAction } from "@/backend/articles/draft-category-action/draft-category-action";
+import type { DraftOptions } from "@/backend/articles/draft-options/draft-options";
 export function useDraftCategories(
   sectionId: string,
   initialSectionId: string,

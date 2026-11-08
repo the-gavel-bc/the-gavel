@@ -2,7 +2,7 @@ import type {
   DraftInput,
   DraftContributor,
 } from "@/shared/articles/draft-contract/draft-contract";
-import type { DraftOptions } from "@/lib/articles/draft-options/draft-options";
+import type { DraftOptions } from "@/backend/articles/draft-options/draft-options";
 import { Button } from "@/components/ui/button/button";
 import styles from "./draft-contributor-fields.module.css";
 export function DraftContributorFields({

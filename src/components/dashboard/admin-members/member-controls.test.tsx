@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ action: vi.fn(), refresh: vi.fn() }));
-vi.mock("@/lib/memberships/member-command/member-actions", () => ({
+vi.mock("@/backend/memberships/member-command/member-actions", () => ({
   manageMembershipAction: mocks.action,
 }));
 vi.mock("next/navigation", () => ({

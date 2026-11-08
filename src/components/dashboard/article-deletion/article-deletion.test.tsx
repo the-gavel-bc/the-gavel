@@ -8,7 +8,7 @@ const m = vi.hoisted(() => ({
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: m.push, refresh: m.refresh }),
 }));
-vi.mock("@/lib/articles/article-deletion/article-deletion-actions", () => ({
+vi.mock("@/backend/articles/article-deletion/article-deletion-actions", () => ({
   deleteArticleAction: m.save,
 }));
 import { ArticleDeletion } from "./article-deletion";

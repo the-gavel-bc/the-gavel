@@ -2,8 +2,8 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { MemberSummary } from "@/lib/memberships/member-directory/member-directory";
-import { manageMembershipAction } from "@/lib/memberships/member-command/member-actions";
+import type { MemberSummary } from "@/backend/memberships/member-directory/member-directory";
+import { manageMembershipAction } from "@/backend/memberships/member-command/member-actions";
 import type {
   MemberCommand,
   MemberResult,

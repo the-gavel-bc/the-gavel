@@ -2,7 +2,7 @@ import Link from "next/link";
 import type {
   MemberPage,
   MemberState,
-} from "@/lib/memberships/member-directory/member-directory";
+} from "@/backend/memberships/member-directory/member-directory";
 import { MemberControls } from "./member-controls";
 import styles from "./admin-members.module.css";
 

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { getServerEnv } from "@/lib/env/server/server";
-import { createServerSupabaseClient } from "@/lib/supabase/server/server";
-import { getCurrentAccess } from "@/lib/auth/access/access";
+import { getServerEnv } from "@/backend/infrastructure/env/server/server";
+import { createServerSupabaseClient } from "@/backend/infrastructure/supabase/server/server";
+import { getCurrentAccess } from "@/backend/auth/access/access";
 import { safeDashboardPath } from "@/shared/auth/redirect/redirect";
 export async function GET(request: Request) {
   const env = getServerEnv();

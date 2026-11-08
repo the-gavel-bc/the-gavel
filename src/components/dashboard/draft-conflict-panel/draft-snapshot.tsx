@@ -5,7 +5,7 @@ import type {
   DraftInput,
   DraftDocument,
 } from "@/shared/articles/draft-contract/draft-contract";
-import type { DraftOptions } from "@/lib/articles/draft-options/draft-options";
+import type { DraftOptions } from "@/backend/articles/draft-options/draft-options";
 import styles from "./draft-conflict-panel.module.css";
 function text(
   node: DraftDocument["document"] | DraftBlock | DraftInline | DraftListItem,

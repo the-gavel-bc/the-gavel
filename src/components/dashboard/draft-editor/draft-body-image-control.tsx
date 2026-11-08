@@ -4,8 +4,8 @@ import type { Editor } from "@tiptap/core";
 import { NodeSelection } from "@tiptap/pm/state";
 import { Button } from "@/components/ui/button/button";
 import type { DraftFailure } from "@/shared/articles/draft-contract/draft-contract";
-import { requestArticleImageUpload } from "@/lib/media/media-actions/media-actions";
-import { removeUnusedArticleImage } from "@/lib/media/media-removal/media-removal";
+import { requestArticleImageUpload } from "@/backend/media/media-actions/media-actions";
+import { removeUnusedArticleImage } from "@/backend/media/media-removal/media-removal";
 
 export function DraftBodyImageControl({
   articleId,

@@ -4,7 +4,7 @@ import {
   createDraftAction,
   saveDraftAction,
   savePublishedArticleAction,
-} from "@/lib/articles/draft-actions/draft-actions";
+} from "@/backend/articles/draft-actions/draft-actions";
 import {
   checkDraftInput,
   draftMetadataErrors,

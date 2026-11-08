@@ -8,7 +8,7 @@ import { baseDraft } from "../draft-contract/draft-test-cases";
 import {
   articleId,
   updatedAt,
-} from "../../../lib/articles/draft-queries/draft-query-test-client";
+} from "../../../backend/articles/draft-queries/draft-query-test-client";
 const create = { requestId: articleId, draft: baseDraft };
 it("accepts only complete commands and canonicalizes the draft", () => {
   expect(parseCreateCommand(create)).toEqual({ ok: true, value: create });

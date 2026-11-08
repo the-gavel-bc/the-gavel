@@ -1,12 +1,15 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ guard: vi.fn(), list: vi.fn() }));
-vi.mock("@/lib/auth/access/access", () => ({
+vi.mock("@/backend/auth/access/access", () => ({
   requireActiveMembership: mocks.guard,
 }));
-vi.mock("@/lib/articles/admin-article-queries/admin-article-queries", () => ({
-  getAdminArticlesPage: mocks.list,
-}));
+vi.mock(
+  "@/backend/articles/admin-article-queries/admin-article-queries",
+  () => ({
+    getAdminArticlesPage: mocks.list,
+  }),
+);
 import Page from "./page";
 beforeEach(() => {
   vi.clearAllMocks();

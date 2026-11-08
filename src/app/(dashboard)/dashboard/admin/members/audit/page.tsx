@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
-import { requireActiveMembership } from "@/lib/auth/access/access";
-import { listMemberAudit } from "@/lib/memberships/member-audit/member-audit";
+import { requireActiveMembership } from "@/backend/auth/access/access";
+import { listMemberAudit } from "@/backend/memberships/member-audit/member-audit";
 
 const labels = {
   "membership.approved": "Approved membership",

@@ -3,10 +3,10 @@ import type { Editor } from "@tiptap/core";
 import type { DraftDocument } from "@/shared/articles/draft-contract/draft-contract";
 import { act } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-vi.mock("@/lib/media/media-actions/media-actions", () => ({
+vi.mock("@/backend/media/media-actions/media-actions", () => ({
   requestArticleImageUpload: vi.fn(),
 }));
-vi.mock("@/lib/media/media-removal/media-removal", () => ({
+vi.mock("@/backend/media/media-removal/media-removal", () => ({
   removeUnusedArticleImage: vi.fn(),
 }));
 const live = vi.hoisted(() => ({ editor: null as Editor | null }));

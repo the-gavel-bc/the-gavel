@@ -1,5 +1,5 @@
 import type { DraftInput } from "../../../shared/articles/draft-contract/draft-contract";
-import type { DraftOptions } from "../draft-options/draft-options";
+import type { DraftOptions } from "../../../backend/articles/draft-options/draft-options";
 export function draftSelectionErrors(
   draft: DraftInput,
   options: DraftOptions,

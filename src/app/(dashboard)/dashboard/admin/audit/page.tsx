@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
-import { requireActiveMembership } from "@/lib/auth/access/access";
+import { requireActiveMembership } from "@/backend/auth/access/access";
 import {
   auditActionSchema,
   listAuditEvents,
-} from "@/lib/articles/admin-audit/admin-audit";
+} from "@/backend/articles/admin-audit/admin-audit";
 import { AdminAudit } from "@/components/dashboard/admin-audit/admin-audit";
 
 export default async function AdminAuditPage({

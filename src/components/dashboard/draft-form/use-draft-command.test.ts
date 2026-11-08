@@ -6,7 +6,7 @@ const actions = vi.hoisted(() => ({
   save: vi.fn(),
   published: vi.fn(),
 }));
-vi.mock("@/lib/articles/draft-actions/draft-actions", () => ({
+vi.mock("@/backend/articles/draft-actions/draft-actions", () => ({
   createDraftAction: actions.create,
   saveDraftAction: actions.save,
   savePublishedArticleAction: actions.published,

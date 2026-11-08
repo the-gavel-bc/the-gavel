@@ -5,10 +5,10 @@ import { createDraftExtensions } from "@/lib/articles/draft-document/draft-exten
 import { expect, it, vi } from "vitest";
 
 const reserve = vi.hoisted(() => vi.fn());
-vi.mock("@/lib/media/media-actions/media-actions", () => ({
+vi.mock("@/backend/media/media-actions/media-actions", () => ({
   requestArticleImageUpload: reserve,
 }));
-vi.mock("@/lib/media/media-removal/media-removal", () => ({
+vi.mock("@/backend/media/media-removal/media-removal", () => ({
   removeUnusedArticleImage: vi.fn(),
 }));
 import { DraftBodyImageControl } from "./draft-body-image-control";

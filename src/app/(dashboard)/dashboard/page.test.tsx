@@ -4,16 +4,16 @@ import DashboardLayout from "./layout";
 import DashboardPage from "./page";
 const access = vi.hoisted(() => vi.fn());
 const query = vi.hoisted(() => vi.fn());
-vi.mock("@/lib/articles/draft-queries/draft-queries", () => ({
+vi.mock("@/backend/articles/draft-queries/draft-queries", () => ({
   getMyArticlesPage: query,
 }));
 const params = (cursor?: string | string[]) => ({
   searchParams: Promise.resolve({ cursor }),
 });
-vi.mock("@/lib/auth/access/access", () => ({
+vi.mock("@/backend/auth/access/access", () => ({
   requireActiveMembership: access,
 }));
-vi.mock("@/lib/auth/actions/actions", () => ({ signOut: vi.fn() }));
+vi.mock("@/backend/auth/actions/actions", () => ({ signOut: vi.fn() }));
 beforeEach(() => {
   access.mockReset();
   query.mockReset().mockResolvedValue({ items: [], nextCursor: null });

@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-vi.mock("@/lib/memberships/member-command/member-actions", () => ({
+vi.mock("@/backend/memberships/member-command/member-actions", () => ({
   manageMembershipAction: vi.fn(),
 }));
 vi.mock("next/navigation", () => ({

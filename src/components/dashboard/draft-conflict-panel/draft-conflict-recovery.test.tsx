@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 import { baseDraft } from "@/shared/articles/draft-contract/draft-test-cases";
 const read = vi.hoisted(() => vi.fn());
-vi.mock("@/lib/articles/draft-reload-action/draft-reload-action", () => ({
+vi.mock("@/backend/articles/draft-reload-action/draft-reload-action", () => ({
   reviewDraftAction: read,
 }));
 import { DraftConflictPanel } from "./draft-conflict-panel";

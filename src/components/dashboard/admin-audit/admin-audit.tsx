@@ -2,7 +2,7 @@ import Link from "next/link";
 import type {
   AuditAction,
   AuditPage,
-} from "@/lib/articles/admin-audit/admin-audit";
+} from "@/backend/articles/admin-audit/admin-audit";
 import styles from "./admin-audit.module.css";
 
 const labels: Record<AuditAction, string> = {

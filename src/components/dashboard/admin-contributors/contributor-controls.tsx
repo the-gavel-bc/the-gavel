@@ -2,8 +2,8 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { ContributorSummary } from "@/lib/contributors/admin-contributors/admin-contributors";
-import { manageContributorAction } from "@/lib/contributors/contributor-command/contributor-actions";
+import type { ContributorSummary } from "@/backend/contributors/admin-contributors/admin-contributors";
+import { manageContributorAction } from "@/backend/contributors/contributor-command/contributor-actions";
 import type {
   ContributorCommand,
   ContributorResult,

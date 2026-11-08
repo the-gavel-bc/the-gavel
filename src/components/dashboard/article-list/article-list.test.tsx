@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it } from "vitest";
 import { ArticleList } from "./article-list";
-import type { ArticlePage } from "@/lib/articles/draft-queries/draft-queries";
+import type { ArticlePage } from "@/backend/articles/draft-queries/draft-queries";
 const row = {
   id: "00000000-0000-0000-0000-000000000002",
   title: "Campus news",

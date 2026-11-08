@@ -2,7 +2,7 @@ import Link from "next/link";
 import type {
   AdminArticlePage,
   AdminArticleSummary,
-} from "@/lib/articles/admin-article-queries/admin-article-queries";
+} from "@/backend/articles/admin-article-queries/admin-article-queries";
 import styles from "./admin-articles.module.css";
 
 const date = new Intl.DateTimeFormat("en-US", {

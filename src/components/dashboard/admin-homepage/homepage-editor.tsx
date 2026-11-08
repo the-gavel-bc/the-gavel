@@ -3,12 +3,12 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PublishedStoryCatalog } from "./published-story-catalog";
 import { useDraftNavigationGuard } from "@/components/dashboard/draft-navigation-guard/draft-navigation-guard";
-import type { AdminArticlePage } from "@/lib/articles/admin-article-queries/admin-article-queries";
+import type { AdminArticlePage } from "@/backend/articles/admin-article-queries/admin-article-queries";
 import type {
   HomepageArticle,
   HomepageCuration,
-} from "@/lib/homepage/homepage-curation/homepage-curation";
-import { saveHomepageAction } from "@/lib/homepage/homepage-curation/homepage-actions";
+} from "@/backend/homepage/homepage-curation/homepage-curation";
+import { saveHomepageAction } from "@/backend/homepage/homepage-curation/homepage-actions";
 import type {
   HomepageCommand,
   HomepageResult,

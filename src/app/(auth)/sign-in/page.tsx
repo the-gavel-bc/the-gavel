@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { PublicShell } from "@/components/site/public-shell/public-shell";
 import { Button } from "@/components/ui/button/button";
-import { getCurrentAccess } from "@/lib/auth/access/access";
-import { signInWithGoogle } from "@/lib/auth/actions/actions";
+import { getCurrentAccess } from "@/backend/auth/access/access";
+import { signInWithGoogle } from "@/backend/auth/actions/actions";
 
 export default async function SignInPage({
   searchParams,

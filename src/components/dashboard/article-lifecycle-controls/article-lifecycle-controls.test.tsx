@@ -8,11 +8,14 @@ const mocks = vi.hoisted(() => ({
   restore: vi.fn(),
   refresh: vi.fn(),
 }));
-vi.mock("@/lib/articles/article-lifecycle/article-lifecycle-actions", () => ({
-  publishArticleAction: mocks.publish,
-  archiveArticleAction: mocks.archive,
-  restoreArticleAction: mocks.restore,
-}));
+vi.mock(
+  "@/backend/articles/article-lifecycle/article-lifecycle-actions",
+  () => ({
+    publishArticleAction: mocks.publish,
+    archiveArticleAction: mocks.archive,
+    restoreArticleAction: mocks.restore,
+  }),
+);
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: mocks.refresh }),
 }));

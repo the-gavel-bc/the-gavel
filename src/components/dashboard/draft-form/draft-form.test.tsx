@@ -15,23 +15,23 @@ const mocks = vi.hoisted(() => ({
   refresh: vi.fn(),
   review: vi.fn(),
 }));
-vi.mock("@/lib/articles/draft-actions/draft-actions", () => ({
+vi.mock("@/backend/articles/draft-actions/draft-actions", () => ({
   createDraftAction: mocks.create,
   saveDraftAction: mocks.save,
 }));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mocks.push, refresh: mocks.refresh }),
 }));
-vi.mock("@/lib/articles/draft-reload-action/draft-reload-action", () => ({
+vi.mock("@/backend/articles/draft-reload-action/draft-reload-action", () => ({
   reviewDraftAction: mocks.review,
 }));
 vi.mock("../article-media/article-media", () => ({
   ArticleMedia: () => <section aria-label="Main image" />,
 }));
-vi.mock("@/lib/media/media-actions/media-actions", () => ({
+vi.mock("@/backend/media/media-actions/media-actions", () => ({
   requestArticleImageUpload: vi.fn(),
 }));
-vi.mock("@/lib/media/media-removal/media-removal", () => ({
+vi.mock("@/backend/media/media-removal/media-removal", () => ({
   removeUnusedArticleImage: vi.fn(),
 }));
 import { DraftForm } from "./draft-form";

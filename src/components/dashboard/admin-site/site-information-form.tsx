@@ -2,13 +2,13 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDraftNavigationGuard } from "@/components/dashboard/draft-navigation-guard/draft-navigation-guard";
-import { saveSiteInformationAction } from "@/lib/site-information/site-information/site-information-actions";
+import { saveSiteInformationAction } from "@/backend/site-information/site-information/site-information-actions";
 import {
   siteInformationCommandSchema,
   type SiteInformationCommand,
   type SiteInformationResult,
 } from "@/shared/site-information/site-information/site-information-command";
-import type { SiteInformation } from "@/lib/site-information/site-information/site-information";
+import type { SiteInformation } from "@/backend/site-information/site-information/site-information";
 const messages = {
   invalid_input:
     "Check the field lengths, email and Instagram URL. Plain text only.",

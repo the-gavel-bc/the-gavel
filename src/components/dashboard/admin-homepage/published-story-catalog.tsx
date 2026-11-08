@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { AdminArticlePage } from "@/lib/articles/admin-article-queries/admin-article-queries";
-import type { HomepageArticle } from "@/lib/homepage/homepage-curation/homepage-curation";
+import type { AdminArticlePage } from "@/backend/articles/admin-article-queries/admin-article-queries";
+import type { HomepageArticle } from "@/backend/homepage/homepage-curation/homepage-curation";
 
 export function PublishedStoryCatalog({
   candidates,

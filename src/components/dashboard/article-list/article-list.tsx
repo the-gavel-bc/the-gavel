@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArticlePageLink } from "../article-page-link/article-page-link";
 import { LinkButton } from "@/components/ui/link-button/link-button";
-import type { ArticlePage } from "@/lib/articles/draft-queries/draft-queries";
+import type { ArticlePage } from "@/backend/articles/draft-queries/draft-queries";
 import styles from "./article-list.module.css";
 const statuses = {
   draft: "Draft",

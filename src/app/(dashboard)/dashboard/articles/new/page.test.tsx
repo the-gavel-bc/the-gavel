@@ -1,13 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ guard: vi.fn(), options: vi.fn() }));
-vi.mock("@/lib/auth/access/access", () => ({
+vi.mock("@/backend/auth/access/access", () => ({
   requireActiveMembership: mocks.guard,
 }));
-vi.mock("@/lib/articles/draft-queries/draft-queries", () => ({
+vi.mock("@/backend/articles/draft-queries/draft-queries", () => ({
   getDraftOptions: mocks.options,
 }));
-vi.mock("@/lib/articles/draft-actions/draft-actions", () => ({
+vi.mock("@/backend/articles/draft-actions/draft-actions", () => ({
   createDraftAction: vi.fn(),
   saveDraftAction: vi.fn(),
 }));

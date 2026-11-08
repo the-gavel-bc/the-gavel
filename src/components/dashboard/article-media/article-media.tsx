@@ -7,9 +7,9 @@ import type { DraftWriteResult } from "@/shared/articles/draft-contract/draft-co
 import {
   requestArticleImageUpload,
   setArticleMainImage,
-} from "@/lib/media/media-actions/media-actions";
-import type { MainImage } from "@/lib/media/media-queries/media-queries";
-import { removeUnusedArticleImage } from "@/lib/media/media-removal/media-removal";
+} from "@/backend/media/media-actions/media-actions";
+import type { MainImage } from "@/backend/media/media-queries/media-queries";
+import { removeUnusedArticleImage } from "@/backend/media/media-removal/media-removal";
 import styles from "./article-media.module.css";
 
 type Confirmed = Extract<DraftWriteResult, { ok: true }>;

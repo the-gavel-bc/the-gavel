@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
-import { requireActiveMembership } from "@/lib/auth/access/access";
+import { requireActiveMembership } from "@/backend/auth/access/access";
 import {
   listAdminContributors,
   contributorStateSchema,
-} from "@/lib/contributors/admin-contributors/admin-contributors";
+} from "@/backend/contributors/admin-contributors/admin-contributors";
 import { ContributorControls } from "@/components/dashboard/admin-contributors/contributor-controls";
 
 export default async function AdminContributorsPage({

@@ -1,9 +1,12 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 const load = vi.hoisted(() => vi.fn());
-vi.mock("@/lib/articles/draft-category-action/draft-category-action", () => ({
-  getDraftCategoriesAction: load,
-}));
+vi.mock(
+  "@/backend/articles/draft-category-action/draft-category-action",
+  () => ({
+    getDraftCategoriesAction: load,
+  }),
+);
 import { useDraftCategories } from "./use-draft-categories";
 it("ignores stale section responses and permits retry after failure", async () => {
   const pending: ((value: unknown) => void)[] = [];

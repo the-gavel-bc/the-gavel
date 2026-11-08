@@ -5,7 +5,7 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: mocks.refresh }),
 }));
 vi.mock(
-  "@/lib/site-information/site-information/site-information-actions",
+  "@/backend/site-information/site-information/site-information-actions",
   () => ({ saveSiteInformationAction: mocks.save }),
 );
 import { SiteInformationForm } from "./site-information-form";

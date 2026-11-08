@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ action: vi.fn(), refresh: vi.fn() }));
-vi.mock("@/lib/taxonomy/taxonomy-command/taxonomy-actions", () => ({
+vi.mock("@/backend/taxonomy/taxonomy-command/taxonomy-actions", () => ({
   updateTaxonomyAction: mocks.action,
 }));
 vi.mock("next/navigation", () => ({

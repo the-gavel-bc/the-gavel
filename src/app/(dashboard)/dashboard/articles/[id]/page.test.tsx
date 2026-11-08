@@ -7,20 +7,20 @@ const mocks = vi.hoisted(() => ({
   options: vi.fn(),
   mainImage: vi.fn(),
 }));
-vi.mock("@/lib/media/media-queries/media-queries", () => ({
+vi.mock("@/backend/media/media-queries/media-queries", () => ({
   getArticleMainImage: mocks.mainImage,
 }));
 vi.mock("@/components/dashboard/article-media/article-media", () => ({
   ArticleMedia: () => <section aria-label="Main image" />,
 }));
-vi.mock("@/lib/auth/access/access", () => ({
+vi.mock("@/backend/auth/access/access", () => ({
   requireActiveMembership: mocks.guard,
 }));
-vi.mock("@/lib/articles/draft-queries/draft-queries", () => ({
+vi.mock("@/backend/articles/draft-queries/draft-queries", () => ({
   getDraftDetail: mocks.detail,
   getDraftOptions: mocks.options,
 }));
-vi.mock("@/lib/articles/draft-actions/draft-actions", () => ({
+vi.mock("@/backend/articles/draft-actions/draft-actions", () => ({
   createDraftAction: vi.fn(),
   saveDraftAction: vi.fn(),
 }));

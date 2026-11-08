@@ -16,7 +16,7 @@ import type {
   DraftErrorCode,
   DraftFailure,
 } from "@/shared/articles/draft-contract/draft-contract";
-import type { DraftOptions } from "@/lib/articles/draft-options/draft-options";
+import type { DraftOptions } from "@/backend/articles/draft-options/draft-options";
 import { useDraftCommand, type DraftArticle } from "./use-draft-command";
 import styles from "./draft-form.module.css";
 import { DraftTaxonomyFields } from "../draft-taxonomy-fields/draft-taxonomy-fields";
@@ -28,7 +28,7 @@ import { DraftConflictPanel } from "../draft-conflict-panel/draft-conflict-panel
 import { useDraftNavigationGuard } from "../draft-navigation-guard/draft-navigation-guard";
 import { GuardedDashboardLink } from "../guarded-dashboard-link/guarded-dashboard-link";
 import { ArticleMedia } from "../article-media/article-media";
-import type { MainImage } from "@/lib/media/media-queries/media-queries";
+import type { MainImage } from "@/backend/media/media-queries/media-queries";
 import { DraftReadOnlyBody } from "../draft-editor/draft-read-only-body";
 import { ArticleLifecycleControls } from "../article-lifecycle-controls/article-lifecycle-controls";
 

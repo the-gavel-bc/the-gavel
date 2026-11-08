@@ -7,7 +7,7 @@ import {
   archiveArticleAction,
   publishArticleAction,
   restoreArticleAction,
-} from "@/lib/articles/article-lifecycle/article-lifecycle-actions";
+} from "@/backend/articles/article-lifecycle/article-lifecycle-actions";
 import type {
   ArticleLifecycleCommand,
   ArticleLifecycleResult,

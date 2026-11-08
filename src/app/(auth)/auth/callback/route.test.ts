@@ -1,12 +1,14 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { GET } from "./route";
 const mocks = vi.hoisted(() => ({ exchange: vi.fn(), access: vi.fn() }));
-vi.mock("@/lib/supabase/server/server", () => ({
+vi.mock("@/backend/infrastructure/supabase/server/server", () => ({
   createServerSupabaseClient: async () => ({
     auth: { exchangeCodeForSession: mocks.exchange },
   }),
 }));
-vi.mock("@/lib/auth/access/access", () => ({ getCurrentAccess: mocks.access }));
+vi.mock("@/backend/auth/access/access", () => ({
+  getCurrentAccess: mocks.access,
+}));
 beforeEach(() => {
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://127.0.0.1:54321");
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "local-test-key");

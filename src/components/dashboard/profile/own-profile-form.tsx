@@ -1,8 +1,8 @@
 "use client";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { OwnProfile } from "@/lib/profiles/own-profile/own-profile";
-import { saveOwnProfileAction } from "@/lib/profiles/own-profile/own-profile-actions";
+import type { OwnProfile } from "@/backend/profiles/own-profile/own-profile";
+import { saveOwnProfileAction } from "@/backend/profiles/own-profile/own-profile-actions";
 import type {
   OwnProfileCommand,
   OwnProfileResult,
