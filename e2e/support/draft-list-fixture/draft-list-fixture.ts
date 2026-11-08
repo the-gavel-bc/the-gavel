@@ -371,6 +371,15 @@ export function draftListFixture(
     },
     cleanup() {
       if (!installed) return;
+      if (suite === "site")
+        sql(`do $$ begin
+          if exists(select 1 from private.site_information_receipts where actor_user_id in (${quoted(userIds)})) then
+            if exists(select 1 from public.site_information where edit_version=2 and mission='Synthetic Task 14 browser mission' and contact_email is null and instagram_url is null and submission_instructions is null) then
+              update public.site_information set mission=null,edit_version=1 where id='00000000-0000-0000-0000-000000000002';
+            else raise exception 'Site settings changed outside the browser fixture; refusing cleanup'; end if;
+          end if;
+        end $$;
+        delete from private.site_information_receipts where actor_user_id in (${quoted(userIds)});`);
       if (suite === "members")
         sql(`delete from private.membership_write_receipts where target_user_id='${uuid(base + 5)}';
           delete from public.audit_events where resource_type='membership' and resource_id='${uuid(base + 5)}';
