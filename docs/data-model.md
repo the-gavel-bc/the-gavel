@@ -195,3 +195,7 @@ The [accepted draft contract](superpowers/specs/2026-10-22-private-draft-workflo
 ### Archived deletion and media retention
 
 Task 15 retains article-ID and public-slug tombstones, opaque deletion receipts, a permanent media-key ownership registry and a permanent cleanup ledger. Deleting an archived article removes its revisions and article associations, while existing audit events, Auth identities and request receipts survive. Asset retirement records exact object keys transactionally; deleted-article prefix records permit recurring discovery of late or previously untracked uploads. Worker leases and attempt metadata are operational state, not evidence of final erasure. The deletion RPC requires a recently healthy cleanup worker. See the [Task 15 plan](superpowers/plans/2026-11-07-archived-article-deletion.md).
+
+### Site information
+
+Task 14 adds one permission-closed `site_information` record with an edit version and nullable mission, contact email, Instagram URL, and submission instructions. Mission and instructions are plain text of at most 5,000 characters; email is at most 254 characters and Instagram URL at most 255. Unknown values stay null. Private request receipts bind an administrator's request ID and payload to the committed result. See the [Task 14 plan](superpowers/plans/2026-11-07-admin-site-information.md).

@@ -20,6 +20,7 @@ export function draftListFixture(
     | "taxonomy"
     | "profile"
     | "deletion"
+    | "site"
     | "homepage"
     | "members" = "list",
 ) {
@@ -29,40 +30,42 @@ export function draftListFixture(
     (project === "desktop" ? 860 : 880) +
     (suite === "deletion"
       ? 720
-      : suite === "homepage"
-        ? 640
-        : suite === "profile"
-          ? 600
-          : suite === "taxonomy"
-            ? 560
-            : suite === "contributors"
-              ? 520
-              : suite === "members"
-                ? 480
-                : suite === "audit"
-                  ? 440
-                  : suite === "admin"
-                    ? 400
-                    : suite === "lifecycle"
-                      ? 360
-                      : suite === "published"
-                        ? 320
-                        : suite === "bodyMedia"
-                          ? 280
-                          : suite === "media"
-                            ? 240
-                            : suite === "recover"
-                              ? 200
-                              : suite === "save"
-                                ? 160
-                                : suite === "select"
-                                  ? 120
-                                  : suite === "edit"
-                                    ? 80
-                                    : suite === "create"
-                                      ? 40
-                                      : 0);
-  const prefix = `${suite === "deletion" ? "phase4-task15" : suite === "homepage" ? "phase4-task13" : suite === "profile" ? "phase4-task12" : suite === "taxonomy" ? "phase4-task11" : suite === "contributors" ? "phase4-task10" : suite === "members" ? "phase4-task9" : suite === "audit" ? "phase4-task8" : suite === "admin" ? "phase4-task7" : suite === "lifecycle" ? "phase4-task6" : suite === "published" ? "phase4-task5" : suite === "bodyMedia" ? "phase4-task4" : suite === "media" ? "phase4-task3" : suite === "save" || suite === "recover" ? `task10-${suite}` : suite === "select" ? "task9" : suite === "edit" ? "task8" : suite === "create" ? "task7" : "task6"}-${project}`;
+      : suite === "site"
+        ? 680
+        : suite === "homepage"
+          ? 640
+          : suite === "profile"
+            ? 600
+            : suite === "taxonomy"
+              ? 560
+              : suite === "contributors"
+                ? 520
+                : suite === "members"
+                  ? 480
+                  : suite === "audit"
+                    ? 440
+                    : suite === "admin"
+                      ? 400
+                      : suite === "lifecycle"
+                        ? 360
+                        : suite === "published"
+                          ? 320
+                          : suite === "bodyMedia"
+                            ? 280
+                            : suite === "media"
+                              ? 240
+                              : suite === "recover"
+                                ? 200
+                                : suite === "save"
+                                  ? 160
+                                  : suite === "select"
+                                    ? 120
+                                    : suite === "edit"
+                                      ? 80
+                                      : suite === "create"
+                                        ? 40
+                                        : 0);
+  const prefix = `${suite === "deletion" ? "phase4-task15" : suite === "site" ? "phase4-task14" : suite === "homepage" ? "phase4-task13" : suite === "profile" ? "phase4-task12" : suite === "taxonomy" ? "phase4-task11" : suite === "contributors" ? "phase4-task10" : suite === "members" ? "phase4-task9" : suite === "audit" ? "phase4-task8" : suite === "admin" ? "phase4-task7" : suite === "lifecycle" ? "phase4-task6" : suite === "published" ? "phase4-task5" : suite === "bodyMedia" ? "phase4-task4" : suite === "media" ? "phase4-task3" : suite === "save" || suite === "recover" ? `task10-${suite}` : suite === "select" ? "task9" : suite === "edit" ? "task8" : suite === "create" ? "task7" : "task6"}-${project}`;
   const uuid = (n: number) =>
     `00000000-0000-0000-0000-${String(n).padStart(12, "0")}`;
   const id = (n: number) =>
@@ -75,7 +78,7 @@ export function draftListFixture(
   };
   const userIds = Object.values(users).map(uuid);
   const quoted = (ids: string[]) => ids.map((id) => `'${id}'`).join(",");
-  const label = `Task ${suite === "deletion" ? "4.15" : suite === "homepage" ? "4.13" : suite === "contributors" ? "4.10" : suite === "members" ? "4.9" : suite === "audit" ? "4.8" : suite === "admin" ? "4.7" : suite === "lifecycle" ? "4.6" : suite === "published" ? "4.5" : suite === "bodyMedia" ? "4.4" : suite === "media" ? "4.3" : suite === "save" || suite === "recover" ? 10 : suite === "select" ? 9 : suite === "edit" ? 8 : suite === "create" ? 7 : 6} ${project}`;
+  const label = `Task ${suite === "deletion" ? "4.15" : suite === "site" ? "4.14" : suite === "homepage" ? "4.13" : suite === "contributors" ? "4.10" : suite === "members" ? "4.9" : suite === "audit" ? "4.8" : suite === "admin" ? "4.7" : suite === "lifecycle" ? "4.6" : suite === "published" ? "4.5" : suite === "bodyMedia" ? "4.4" : suite === "media" ? "4.3" : suite === "save" || suite === "recover" ? 10 : suite === "select" ? 9 : suite === "edit" ? 8 : suite === "create" ? 7 : 6} ${project}`;
   let installed = false;
   let selectionsInstalled = false;
   function sql(statement: string) {
@@ -149,6 +152,15 @@ export function draftListFixture(
         throw new Error("Not a deletion fixture.");
       sql(`insert into public.media_assets(id,article_id,uploader_user_id,request_id,object_key,status)
         values('${id(91)}','${id(19)}','${uuid(users.author)}','${id(92)}','${id(19)}/${id(91)}.webp','uploading');`);
+    },
+    ensureSiteUnset() {
+      if (!installed || suite !== "site")
+        throw new Error("Not a site fixture.");
+      sql(`do $$ begin
+        if not exists(select 1 from public.site_information where edit_version=1 and mission is null
+          and contact_email is null and instagram_url is null and submission_instructions is null)
+        then raise exception 'Site settings are not empty; refusing browser write'; end if;
+      end $$;`);
     },
     makePublishedReady() {
       if (!installed || (suite !== "published" && suite !== "lifecycle"))
