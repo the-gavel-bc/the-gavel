@@ -25,20 +25,20 @@ Status: Foundation conventions implemented; formatter and linter configuration a
 Use a named folder for each component, module, script, or browser-test suite, keeping its implementation and existing companion files together. For example:
 
 ```text
-src/components/site/public-shell/
+src/frontend/components/site/public-shell/
   public-shell.tsx
   public-shell.module.css
   public-shell.test.tsx
-src/lib/auth/access/
+src/backend/auth/access/
   access.ts
   access.test.ts
 ```
 
-Use explicit implementation imports such as `@/components/site/public-shell/public-shell`; avoid adding barrel files solely to shorten paths. Add styles, tests, types, schemas, or fixtures beside their owner when needed; do not create empty companions. Related suites can use `support/<helper>/<helper>.ts` for genuinely shared helpers.
+Use explicit implementation imports such as `@/frontend/components/site/public-shell/public-shell`; avoid adding barrel files solely to shorten paths. Add styles, tests, types, schemas, or fixtures beside their owner when needed; do not create empty companions. Related suites can use `support/<helper>/<helper>.ts` for genuinely shared helpers.
 
-Component-owned CSS lives beside the component as a CSS Module. Global tokens, resets, and focus rules remain in `src/app/globals.css`; reusable shell styles live in `src/styles/shell/shell.module.css`. Button and link-button share the button module's styles rather than duplicating them.
+Component-owned CSS lives beside the component as a CSS Module. Global tokens, resets, and focus rules remain in `src/app/globals.css`; reusable shell styles live in `src/frontend/styles/shell/shell.module.css`. Button and link-button share the button module's styles rather than duplicating them.
 
-Framework and tool conventions take precedence: Next.js route directories already colocate `page.tsx`/`route.ts` and their companions, and root `layout.tsx`, `instrumentation.ts`, `proxy.ts`, metadata, configuration, and test-runner setup stay in their required locations. Startup implementation/tests live together under `src/lib/startup/`, with a thin instrumentation entry point. Supabase migration filenames, SQL tests, seed/configuration, and generated outputs retain tool-compatible conventions; generated database types have their own `src/lib/supabase/database/` folder.
+Framework and tool conventions take precedence: Next.js route directories already colocate `page.tsx`/`route.ts` and their companions, and root `layout.tsx`, `instrumentation.ts`, `proxy.ts`, metadata, configuration, and test-runner setup stay in their required locations. Startup implementation/tests live together under `src/backend/infrastructure/startup/`, with a thin instrumentation entry point. Supabase migration filenames, SQL tests, seed/configuration, and generated outputs retain tool-compatible conventions; generated database types have their own `src/shared/database/` folder.
 
 ## Components and data
 
@@ -70,3 +70,7 @@ Use the repository's configured Prettier formatter and ESLint checks. Prefer aut
 ## Dependencies
 
 Add a dependency only when it is maintained, compatible, security-appropriate, and meaningfully reduces project risk or complexity. Pin with the lockfile, review transitive impact, and avoid packages for trivial behavior.
+
+## Ownership imports
+
+Use frontend/backend/shared ownership as defined in [architecture](architecture.md#repository-structure). Keep existing implementation and companion files together. Do not create pass-through service layers or barrels for folder symmetry. Shared contracts must remain browser-safe; Node fixture readers are test-only and cannot be imported by application code. Frontend may import backend result types with explicit `import type`, and Server Actions with their preserved `use server` directive. Ordinary server modules carry `server-only`. Unit tests map that marker to a test-only stub; production builds retain Next.js enforcement. Import restrictions apply to aliases, relative paths, re-exports and static dynamic imports.

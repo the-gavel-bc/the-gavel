@@ -31,7 +31,7 @@ Rollback: revert refactor commits in reverse order; no schema/data rollback is n
 
 ## File mapping
 
-Exact moves below include owned tests/styles/fixtures. Files not listed retain their location.
+Exact moves, including companion files; other files retain their locations.
 
 - `src/components/dashboard/admin-articles/admin-article-list.tsx` → `src/frontend/features/articles/components/admin-articles/admin-article-list.tsx`
 - `src/components/dashboard/admin-articles/admin-articles.module.css` → `src/frontend/features/articles/components/admin-articles/admin-articles.module.css`
@@ -47,8 +47,8 @@ Exact moves below include owned tests/styles/fixtures. Files not listed retain t
 - `src/components/dashboard/admin-members/admin-members.module.css` → `src/frontend/features/memberships/components/admin-members/admin-members.module.css`
 - `src/components/dashboard/admin-members/member-controls.test.tsx` → `src/frontend/features/memberships/components/admin-members/member-controls.test.tsx`
 - `src/components/dashboard/admin-members/member-controls.tsx` → `src/frontend/features/memberships/components/admin-members/member-controls.tsx`
-- `src/components/dashboard/admin-site/site-information-form.test.tsx` → `src/frontend/features/articles/components/admin-site/site-information-form.test.tsx`
-- `src/components/dashboard/admin-site/site-information-form.tsx` → `src/frontend/features/articles/components/admin-site/site-information-form.tsx`
+- `src/components/dashboard/admin-site/site-information-form.test.tsx` → `src/frontend/features/site-information/components/admin-site/site-information-form.test.tsx`
+- `src/components/dashboard/admin-site/site-information-form.tsx` → `src/frontend/features/site-information/components/admin-site/site-information-form.tsx`
 - `src/components/dashboard/admin-taxonomy/taxonomy-controls.test.tsx` → `src/frontend/features/taxonomy/components/admin-taxonomy/taxonomy-controls.test.tsx`
 - `src/components/dashboard/admin-taxonomy/taxonomy-controls.tsx` → `src/frontend/features/taxonomy/components/admin-taxonomy/taxonomy-controls.tsx`
 - `src/components/dashboard/article-deletion/article-deletion.test.tsx` → `src/frontend/features/articles/components/article-deletion/article-deletion.test.tsx`
@@ -67,7 +67,7 @@ Exact moves below include owned tests/styles/fixtures. Files not listed retain t
 - `src/components/dashboard/dashboard-shell/dashboard-shell.module.css` → `src/frontend/components/dashboard/dashboard-shell/dashboard-shell.module.css`
 - `src/components/dashboard/dashboard-shell/dashboard-shell.test.tsx` → `src/frontend/components/dashboard/dashboard-shell/dashboard-shell.test.tsx`
 - `src/components/dashboard/dashboard-shell/dashboard-shell.tsx` → `src/frontend/components/dashboard/dashboard-shell/dashboard-shell.tsx`
-- `src/components/dashboard/dashboard-sign-out-form/dashboard-sign-out-form.tsx` → `src/frontend/features/articles/components/dashboard-sign-out-form/dashboard-sign-out-form.tsx`
+- `src/components/dashboard/dashboard-sign-out-form/dashboard-sign-out-form.tsx` → `src/frontend/features/auth/components/dashboard-sign-out-form/dashboard-sign-out-form.tsx`
 - `src/components/dashboard/draft-conflict-panel/draft-conflict-panel.module.css` → `src/frontend/features/articles/components/draft-conflict-panel/draft-conflict-panel.module.css`
 - `src/components/dashboard/draft-conflict-panel/draft-conflict-panel.test.tsx` → `src/frontend/features/articles/components/draft-conflict-panel/draft-conflict-panel.test.tsx`
 - `src/components/dashboard/draft-conflict-panel/draft-conflict-panel.tsx` → `src/frontend/features/articles/components/draft-conflict-panel/draft-conflict-panel.tsx`
@@ -106,8 +106,8 @@ Exact moves below include owned tests/styles/fixtures. Files not listed retain t
 - `src/components/dashboard/draft-toolbar/draft-toolbar.tsx` → `src/frontend/features/articles/components/draft-toolbar/draft-toolbar.tsx`
 - `src/components/dashboard/guarded-dashboard-link/guarded-dashboard-link.tsx` → `src/frontend/components/dashboard/guarded-dashboard-link/guarded-dashboard-link.tsx`
 - `src/components/dashboard/media-cleanup/media-cleanup-control.tsx` → `src/frontend/features/media/components/media-cleanup/media-cleanup-control.tsx`
-- `src/components/dashboard/profile/own-profile-form.test.tsx` → `src/frontend/features/articles/components/profile/own-profile-form.test.tsx`
-- `src/components/dashboard/profile/own-profile-form.tsx` → `src/frontend/features/articles/components/profile/own-profile-form.tsx`
+- `src/components/dashboard/profile/own-profile-form.test.tsx` → `src/frontend/features/profiles/components/profile/own-profile-form.test.tsx`
+- `src/components/dashboard/profile/own-profile-form.tsx` → `src/frontend/features/profiles/components/profile/own-profile-form.tsx`
 - `src/components/site/public-shell/public-shell.module.css` → `src/frontend/components/site/public-shell/public-shell.module.css`
 - `src/components/site/public-shell/public-shell.test.tsx` → `src/frontend/components/site/public-shell/public-shell.test.tsx`
 - `src/components/site/public-shell/public-shell.tsx` → `src/frontend/components/site/public-shell/public-shell.tsx`
@@ -237,3 +237,15 @@ Exact moves below include owned tests/styles/fixtures. Files not listed retain t
 - `src/lib/taxonomy/taxonomy-command/taxonomy-command.test.ts` → `src/shared/taxonomy/taxonomy-command/taxonomy-command.test.ts`
 - `src/lib/taxonomy/taxonomy-command/taxonomy-command.ts` → `src/shared/taxonomy/taxonomy-command/taxonomy-command.ts`
 - `src/styles/shell/shell.module.css` → `src/frontend/styles/shell/shell.module.css`
+
+## Verification and review
+
+- Integrated baseline: `pnpm typecheck`; `pnpm test` — 628 tests passed.
+- After moves: TypeScript and the same 628 tests passed.
+- Guards and lint: TypeScript, lint and 639 tests passed (628 existing plus 11 boundary cases). Review found bare Node builtins bypassed the rule; `isBuiltin()` now covers both forms. The focused boundary suite passed all 13 cases after adding two regressions; lint passed again.
+- `pnpm db:types:check`: generated output matches the local database, including Tasks 14 and 15.
+- `pnpm test:db`: 1,575 assertions passed. `pnpm test:draft-contract`: 214 passed. `pnpm test:draft-editor`: 8 passed. `pnpm test:draft-concurrency`: 48 passed.
+- `pnpm format:check` passed again after final documentation updates.
+- Production build succeeded through Playwright's configured web server. Full browser run: 132 passed, 3 skipped, 1 failed. The run found a missing Task 14 cleanup block in the baseline merge; restored the original guarded cleanup and recovered only this run's synthetic site fixture. Focused `pnpm test:e2e e2e/drafts/admin-site-information.spec.ts` recheck: 3 passed, 1 shared-record write skipped. Both production builds succeeded. The full suite was not rerun after the fixture-only repair.
+- Independent review inspected the moves, boundary enforcement and documentation. Fixed its bare-builtin finding and three stale documentation paths. Human maintainer review remains separate.
+- No migration, package manifest, lockfile, RPC, authorization, or UI behavior change relative to the integrated baseline. SQL tests used the existing local project without resetting data. Hosted CI, real OAuth, hosted cron and human accessibility/security review are not claimed.

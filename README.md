@@ -74,6 +74,10 @@ Playwright is configured for desktop and mobile browser checks. Install its Chro
 
 The [Phase 3 private-draft contract](docs/superpowers/specs/2026-10-22-private-draft-workflow-design.md) is accepted, including Tiptap, explicit Save, and controlled atomic mutations. The [implementation plan](docs/superpowers/plans/2026-10-22-phase-three-private-drafts.md) defines task boundaries and review checkpoints; Tasks 2–10 validation, atomic draft create/save, checked server queries/actions, My Articles and private create/edit with a constrained body editor and association selectors and save/retry/conflict/navigation recovery are implemented. Task 11 integrates verification and handoff evidence in [testing](docs/testing.md#phase-3-task-11-integrated-verification) and the [review evidence map](docs/reviews/phase-3-private-drafts.md). See [ADR 0007](docs/decisions/0007-private-draft-editor-and-mutations.md).
 
+## Source ownership
+
+Next.js routes stay in `src/app`. Presentation lives in `src/frontend`, server operations in `src/backend`, and browser-safe contracts/generated types in `src/shared`. Supabase migrations and SQL tests remain in `supabase`. See [architecture](docs/architecture.md#repository-structure) for enforced import boundaries and the [refactor plan](docs/superpowers/plans/2026-11-08-frontend-backend-ownership.md) for the file mapping.
+
 ## Documentation index
 
 | Document                                                                                    | Purpose                                                                         |

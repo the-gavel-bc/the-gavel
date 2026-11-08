@@ -91,19 +91,21 @@ Browser
 
 ## Repository structure
 
-The implemented foundation uses:
+The application keeps one Next.js deployment with explicit source ownership:
 
-- `src/app/`: root public page, auth routes, and protected empty dashboard.
-- `src/components/`: semantic public/dashboard shells and button/link primitives; each component has a named folder with its owned styles and tests.
-- `src/lib/env/`: typed configuration access, invoked at startup by `src/lib/startup/startup.ts`.
-- `src/lib/auth/`: server access checks, OAuth/sign-out actions, and safe redirect validation.
-- `src/lib/supabase/`: typed clients, cookie refresh, and generated database types.
-- `src/proxy.ts`: verified session refresh only; membership authorization stays in server pages and RLS.
-- `supabase/`: local configuration, migrations, synthetic fixtures, and pgTAP assertions.
-- `src/styles/shell/`: shared CSS Module layout primitives; component-owned styles stay with their component.
-- `e2e/`: named browser-test suites with shared local-only helpers under `support/`.
-- `scripts/`: named script folders with owned support files.
-- `.github/workflows/ci.yml`: automated foundation gates; successful hosted execution is recorded in the [Phase 1 review](reviews/phase-1-foundation.md).
+- `src/app/`: framework routes, layouts, metadata, and HTTP entry points.
+- `src/frontend/features/<domain>/`: feature presentation, editor adapters and interaction state.
+- `src/frontend/components/`: shared UI and application shells; styles/tests remain colocated.
+- `src/frontend/lib/`: browser integrations; `src/frontend/styles/` holds shared layout styles.
+- `src/backend/<domain>/`: Server Actions, guarded queries and server orchestration.
+- `src/backend/infrastructure/`: server Supabase clients, environment and startup.
+- `src/shared/<domain>/`: browser-safe contracts and pure validation; `src/shared/database/` contains generated types.
+- `src/proxy.ts` and `src/instrumentation.ts`: framework entry points delegating to backend infrastructure.
+- `supabase/`, `e2e/`, `scripts/` and `.github/`: unchanged database, integration-test and tooling ownership.
+
+Backend modules cannot import presentation or route entry points. Shared runtime modules cannot import backend, frontend, Node APIs or server platform clients. Presentation may import explicit `use server` entry points and erased backend result types. ESLint resolves both relative and alias imports to enforce these rules; Next.js `server-only` guards protect ordinary backend modules. Presentation ownership does not imply `use client`: existing Server Components retain their rendering behavior. SQL functions and RLS remain authoritative; no Express service or additional deployment is introduced.
+
+See the [ownership refactor plan](superpowers/plans/2026-11-08-frontend-backend-ownership.md) for exact moves, test-only exceptions and verification.
 
 The foundation uses ordinary dynamic rendering for authenticated routes with private/no-store responses. Public article caching, content services, uploads, and publishing remain unimplemented.
 
