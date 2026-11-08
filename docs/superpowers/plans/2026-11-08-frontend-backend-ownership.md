@@ -249,3 +249,16 @@ Exact moves, including companion files; other files retain their locations.
 - Production build succeeded through Playwright's configured web server. Full browser run: 132 passed, 3 skipped, 1 failed. The run found a missing Task 14 cleanup block in the baseline merge; restored the original guarded cleanup and recovered only this run's synthetic site fixture. Focused `pnpm test:e2e e2e/drafts/admin-site-information.spec.ts` recheck: 3 passed, 1 shared-record write skipped. Both production builds succeeded. The full suite was not rerun after the fixture-only repair.
 - Independent review inspected the moves, boundary enforcement and documentation. Fixed its bare-builtin finding and three stale documentation paths. Human maintainer review remains separate.
 - No migration, package manifest, lockfile, RPC, authorization, or UI behavior change relative to the integrated baseline. SQL tests used the existing local project without resetting data. Hosted CI, real OAuth, hosted cron and human accessibility/security review are not claimed.
+
+## Readability follow-up
+
+The owner requested contributor-facing structure documentation and comments for code whose intent is not apparent at a glance. Complete the existing architecture, API, component, security, and coding guidance; keep architecture authoritative for folder ownership. Add short comments explaining retry snapshots, stale responses, storage cleanup leases, editor translation, and validation invariants. Do not annotate obvious assignments, modify applied SQL migrations, or change executable behavior. Verify source tokens are unchanged, run formatting/lint and the existing focused tests covering the annotated modules, and record results here.
+
+Follow-up results:
+
+- Structure guidance now includes the tree and save walkthrough in architecture, source placement in the development workflow, component locations, current API paths, security boundary guidance, comment conventions, and ownership-check instructions. Historical plans retain their original file paths; the mapping above records their destinations.
+- Comments added to 12 source files explain immutable retries, dirty editor state, stale catalog responses, retryable image cleanup, recurring sweep claims, editor defaults, query snapshots, cookie refresh, bounded JSON validation and import exceptions.
+- `node /tmp/gavel-comment-proof.cjs` parsed each annotated source file with TypeScript, removed comments, and compared syntax-token kind/text pairs against `cf1d39c`: all 12 matched. The temporary verification helper is not application code.
+- `pnpm typecheck`, `pnpm lint`, and `pnpm exec prettier --check src scripts/import-boundaries docs/testing.md` passed. `git diff --check` passed.
+- Focused `pnpm exec vitest run` passed 322 tests in 15 files: import boundaries; article save state, command/category hooks, body-image controls and document conversion; draft queries; media removal/cleanup; draft validation; and the article media route.
+- No executable, import, configuration or schema changes. Database, concurrency and browser suites were not repeated for this comment/documentation-only follow-up.

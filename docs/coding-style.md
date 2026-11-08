@@ -74,3 +74,9 @@ Add a dependency only when it is maintained, compatible, security-appropriate, a
 ## Ownership imports
 
 Use frontend/backend/shared ownership as defined in [architecture](architecture.md#repository-structure). Keep existing implementation and companion files together. Do not create pass-through service layers or barrels for folder symmetry. Shared contracts must remain browser-safe; Node fixture readers are test-only and cannot be imported by application code. Frontend may import backend result types with explicit `import type`, and Server Actions with their preserved `use server` directive. Ordinary server modules carry `server-only`. Unit tests map that marker to a test-only stub; production builds retain Next.js enforcement. Import restrictions apply to aliases, relative paths, re-exports and static dynamic imports.
+
+## Comments and intent
+
+Comment code when a reader cannot infer its reason or invariant from the local names and control flow. Explain why a retry preserves its original payload, why a lock or cancellation check exists, which state must survive a failure, or why validation rejects an otherwise plausible input. Put the explanation beside the relevant branch or state transition. Use short JSDoc only when a public helper needs an input/output contract that its types do not explain.
+
+Do not narrate obvious assignments, repeat types, or add a header to every function. Keep durable architecture and product rules in their authoritative docs; link instead of duplicating long explanations in code. Update comments when the corresponding behavior changes. Generated types are not hand-edited, and applied migrations are not rewritten for comment cleanup.

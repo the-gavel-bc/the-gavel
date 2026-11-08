@@ -62,6 +62,10 @@ Task 12 implements `/dashboard/profile` for the caller's own public name and bio
 
 Task 13 implements `/dashboard/admin/homepage` with a published-article catalog, ordered lead/Featured News/Read This controls, a saved fallback preview, exact retry and explicit conflict reload. Public homepage composition remains Phase 5 work.
 
+## Source locations
+
+Route composition remains in `src/app`. Feature-owned editor/forms/lists live in `src/frontend/features/<domain>/components/`, with article editor adapters and save-state helpers beside that domain's components. Public/dashboard shells and reusable controls live in `src/frontend/components/`. Components keep their owned styles and tests beside their implementation. These folders describe ownership; existing Server Components keep server rendering. See [architecture](architecture.md#repository-structure) for the full tree, backend/shared responsibilities, and an article-save walkthrough.
+
 ## Component tree
 
 ```text

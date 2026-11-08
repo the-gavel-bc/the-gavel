@@ -1,6 +1,6 @@
 # Architecture
 
-Status: Application, local identity database, and protected dashboard foundation implemented; publishing and hosted deployment remain planned.
+Status: Source ownership refactor, dashboard editorial workflows, and local Supabase boundaries implemented on this branch; public article rendering and hosted provider verification remain planned.
 
 ## System overview
 
@@ -93,21 +93,37 @@ Browser
 
 The application keeps one Next.js deployment with explicit source ownership:
 
-- `src/app/`: framework routes, layouts, metadata, and HTTP entry points.
-- `src/frontend/features/<domain>/`: feature presentation, editor adapters and interaction state.
-- `src/frontend/components/`: shared UI and application shells; styles/tests remain colocated.
-- `src/frontend/lib/`: browser integrations; `src/frontend/styles/` holds shared layout styles.
-- `src/backend/<domain>/`: Server Actions, guarded queries and server orchestration.
-- `src/backend/infrastructure/`: server Supabase clients, environment and startup.
-- `src/shared/<domain>/`: browser-safe contracts and pure validation; `src/shared/database/` contains generated types.
-- `src/proxy.ts` and `src/instrumentation.ts`: framework entry points delegating to backend infrastructure.
-- `supabase/`, `e2e/`, `scripts/` and `.github/`: unchanged database, integration-test and tooling ownership.
+```text
+src/
+  app/                         Next.js routes, layouts, metadata and HTTP entry points
+  frontend/
+    features/<domain>/         Feature components, hooks, editor adapters and interaction state
+    components/                Reusable UI and public/dashboard shells
+    lib/                       Browser integrations
+    styles/                    Shared presentation styles
+  backend/
+    <domain>/                  Server Actions, guarded queries and orchestration
+    infrastructure/            Server Supabase clients, server environment and startup
+  shared/
+    <domain>/                  Shared contracts, types and pure validation
+    database/                  Generated database types
+  instrumentation.ts           Startup entry point
+  proxy.ts                     Session-refresh entry point
+supabase/                      Database configuration, migrations, SQL tests and seed
+scripts/                       Verification and generation tooling
+e2e/                           Browser journeys and local synthetic fixtures
+.github/                       CI configuration
+```
 
 Backend modules cannot import presentation or route entry points. Shared runtime modules cannot import backend, frontend, Node APIs or server platform clients. Presentation may import explicit `use server` entry points and erased backend result types. ESLint resolves both relative and alias imports to enforce these rules; Next.js `server-only` guards protect ordinary backend modules. Presentation ownership does not imply `use client`: existing Server Components retain their rendering behavior. SQL functions and RLS remain authoritative; no Express service or additional deployment is introduced.
 
 See the [ownership refactor plan](superpowers/plans/2026-11-08-frontend-backend-ownership.md) for exact moves, test-only exceptions and verification.
 
-The foundation uses ordinary dynamic rendering for authenticated routes with private/no-store responses. Public article caching, content services, uploads, and publishing remain unimplemented.
+### Following an article save
+
+The route `src/app/(dashboard)/dashboard/articles/[id]/page.tsx` composes the protected editor from `src/frontend/features/articles/`. Its `components/draft-form/use-draft-command.ts` hook calls the explicit Server Action in `src/backend/articles/draft-actions/draft-actions.ts`. Both sides use the request/result contract in `src/shared/articles/draft-contract/`. The action uses the cookie-scoped client in `src/backend/infrastructure/supabase/server/` to call the existing database RPC; SQL still owns authorization, version checks, atomic history and receipts. The hook and save-state reducer preserve the original command across uncertain retries.
+
+The application uses ordinary dynamic rendering for authenticated routes with private/no-store responses. Dashboard editing, private uploads and lifecycle operations are implemented; public article rendering and caching remain Phase 5 work.
 
 ## Quality targets
 

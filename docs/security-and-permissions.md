@@ -4,6 +4,10 @@ Status: Foundation access/session controls, Phase 2 content/history read permiss
 
 Phase 4 private article media uses a server-only Supabase service-role key for validated WebP Storage writes and cleanup. Reservation, attachment, and removal still begin with active user-scoped checks; trusted finalization and completion independently check the claimed actor and asset state. The private bucket has no direct browser write grant. Finalized objects are readable only for an authorized article reader; pending, uploading, or deleting objects are hidden. Current and historical article image references block physical deletion.
 
+## Source boundaries and credentials
+
+The [repository structure](architecture.md#repository-structure) separates presentation from trusted server operations without changing authorization. Ordinary modules in `src/backend` use `server-only`; service credentials remain in the server infrastructure client. Frontend imports of backend runtime code are restricted to explicit Server Actions, while type-only result imports are erased. Shared contracts do not grant write authority. Tests use a test-only marker stub; production retains Next.js boundary enforcement. These build/lint checks supplement the independent route/action checks and database RLS/RPC authorization described below.
+
 ## Security objective
 
 The project replaces a previously compromised WordPress site. The new system minimizes the attack surface, avoids executable plugin/theme uploads, separates application and infrastructure permissions, and applies authorization in both server code and PostgreSQL Row Level Security.
