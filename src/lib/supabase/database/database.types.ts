@@ -591,6 +591,34 @@ export type Database = {
         };
         Relationships: [];
       };
+      site_information: {
+        Row: {
+          contact_email: string | null;
+          edit_version: number;
+          id: string;
+          instagram_url: string | null;
+          mission: string | null;
+          submission_instructions: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          contact_email?: string | null;
+          edit_version?: number;
+          id?: string;
+          instagram_url?: string | null;
+          mission?: string | null;
+          submission_instructions?: string | null;
+        };
+        Update: {
+          contact_email?: string | null;
+          edit_version?: number;
+          id?: string;
+          instagram_url?: string | null;
+          mission?: string | null;
+          submission_instructions?: string | null;
+        };
+        Relationships: [];
+      };
       tags: {
         Row: {
           created_at: string;
@@ -714,6 +742,16 @@ export type Database = {
           edit_version: number;
           slug: string;
           slug_frozen: boolean;
+        }[];
+      };
+      get_site_information: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          contact_email: string;
+          edit_version: number;
+          instagram_url: string;
+          mission: string;
+          submission_instructions: string;
         }[];
       };
       list_admin_contributors: {
@@ -859,6 +897,17 @@ export type Database = {
           p_draft: Json;
           p_expected_version: number;
           p_request_id: string;
+        };
+        Returns: Json;
+      };
+      save_site_information: {
+        Args: {
+          p_contact_email: string;
+          p_expected_version: number;
+          p_instagram_url: string;
+          p_mission: string;
+          p_request_id: string;
+          p_submission_instructions: string;
         };
         Returns: Json;
       };
