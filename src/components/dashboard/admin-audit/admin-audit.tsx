@@ -11,6 +11,7 @@ const labels: Record<AuditAction, string> = {
   "article.published": "Published article",
   "article.archived": "Archived article",
   "article.restored": "Restored article",
+  "article.deleted": "Deleted article",
 };
 const date = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
@@ -60,12 +61,16 @@ export function AdminAudit({
                   {date.format(new Date(event.createdAt))} UTC
                 </time>
               </p>
-              <Link
-                href={`/dashboard/admin/articles/${event.resourceId}`}
-                prefetch={false}
-              >
-                View article {event.resourceId}
-              </Link>
+              {!event.articleExists ? (
+                <p>Deleted article {event.resourceId}</p>
+              ) : (
+                <Link
+                  href={`/dashboard/admin/articles/${event.resourceId}`}
+                  prefetch={false}
+                >
+                  View article {event.resourceId}
+                </Link>
+              )}
             </li>
           ))}
         </ol>

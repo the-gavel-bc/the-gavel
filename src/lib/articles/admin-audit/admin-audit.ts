@@ -10,6 +10,7 @@ export const auditActionSchema = z.enum([
   "article.published",
   "article.archived",
   "article.restored",
+  "article.deleted",
 ]);
 export type AuditAction = z.infer<typeof auditActionSchema>;
 export type AuditEvent = {
@@ -18,6 +19,7 @@ export type AuditEvent = {
   resourceId: string;
   createdAt: string;
   actorLabel: string;
+  articleExists: boolean;
 };
 export type AuditPage = { items: AuditEvent[]; nextCursor: string | null };
 
@@ -32,6 +34,7 @@ const rowSchema = z.object({
   resource_id: z.custom<string>(isDraftUuid),
   created_at: z.custom<string>(isDatabaseTimestamp),
   actor_label: z.string().min(1).max(120),
+  article_exists: z.boolean(),
 });
 type Cursor = {
   version: 1;
@@ -107,6 +110,7 @@ export async function listAuditEvents(input: unknown): Promise<AuditPage> {
       resourceId: row.resource_id,
       createdAt: row.created_at,
       actorLabel: row.actor_label,
+      articleExists: row.article_exists,
     }));
     const last = items.at(-1);
     return {
