@@ -31,6 +31,7 @@ export function useDraftCommand(
   const dirty = isDraftSaveDirty(state);
   const dispatch = useCallback((event: DraftSaveEvent) => {
     const next = reduceDraftSave(current.current, event);
+    // Advance synchronously so another submit sees pending state before React rerenders.
     current.current = next;
     setState(next);
     return next;
@@ -57,6 +58,8 @@ export function useDraftCommand(
   async function submit(): Promise<DraftArticle | null> {
     let before = current.current;
     if (before.phase === "saving" || before.phase === "conflict") return null;
+    // Validate new input only for a new command. An uncertain retry must send its
+    // original UUID, payload and version even if the user has since edited the form.
     if (!before.pending) {
       const checked = checkDraftInput(before.current);
       if (!checked.ok || before.nativeInvalid) {

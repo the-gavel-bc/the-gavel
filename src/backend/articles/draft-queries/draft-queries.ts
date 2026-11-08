@@ -69,6 +69,7 @@ export async function getMyArticlesPage(input: {
     let query = client
       .from("articles")
       .select("id,title,slug,status,section_id,edit_version,updated_at")
+      // My Articles stays owner-filtered even for administrators; RLS alone allows more.
       .eq("owner_profile_id", access.profileId)
       .order("updated_at", { ascending: false })
       .order("id", { ascending: false })
@@ -144,6 +145,8 @@ export async function getDraftDetail(
   if (!isDraftUuid(articleId)) throw new Error("Invalid article ID.");
   const { access, client } = await reader();
   try {
+    // Embed associations in the same read so content and edit_version describe one
+    // database snapshot. Fetching each relation separately could mix concurrent saves.
     let query = client
       .from("articles")
       .select(

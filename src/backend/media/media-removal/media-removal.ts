@@ -32,6 +32,8 @@ export async function removeUnusedArticleImage(
     const access = await getCurrentAccess();
     if (access.status !== "active") return { ok: false, code: "forbidden" };
     const user = await createServerSupabaseClient();
+    // The caller-scoped RPC checks references and retires the asset before Storage
+    // deletion. Keep that state on failure so retries use the same authorized key.
     const { data: mark, error: markError } = await user.rpc(
       "mark_article_image_for_removal",
       {

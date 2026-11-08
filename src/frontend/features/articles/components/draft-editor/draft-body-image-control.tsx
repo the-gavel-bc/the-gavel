@@ -55,6 +55,7 @@ export function DraftBodyImageControl({
   }, [editor]);
 
   async function cleanup(target: string) {
+    // Retain this ID before awaiting cleanup so failure or a lost response remains retryable.
     setCleanupId(target);
     const result = await removeUnusedArticleImage(target);
     if (result.ok) {
@@ -74,6 +75,7 @@ export function DraftBodyImageControl({
     setBusy(true);
     setError("");
     setStatus("Uploading body image…");
+    // Reuse the reservation after an uncertain upload instead of allocating another asset.
     const retryId = requestId ?? crypto.randomUUID();
     setRequestId(retryId);
     try {

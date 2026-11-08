@@ -16,6 +16,8 @@ export const ownershipRule = {
         node.type === "ExpressionStatement" && node.directive === "use client",
     );
     function check(node, value, typeOnly = false) {
+      // Tests need cross-layer fixtures and Node APIs. Application imports of those
+      // helpers are rejected below, so the exception does not expose runtime entry points.
       if (typeof value !== "string" || test || fixture) return;
       const absolute = value.startsWith("@/")
         ? path.join(root, "src", value.slice(2))
@@ -51,6 +53,8 @@ export const ownershipRule = {
         reason =
           "Backend modules cannot depend on presentation or route entry points.";
       } else if ((source.startsWith("src/frontend/") || client) && !typeOnly) {
+        // Type-only imports are erased. Runtime backend imports must resolve to explicit
+        // Server Actions, which Next.js replaces with server-call references in the browser.
         if (target.startsWith("src/backend/")) {
           const file = [absolute, `${absolute}.ts`, `${absolute}.tsx`].find(
             (p) => fs.existsSync(p) && fs.statSync(p).isFile(),

@@ -20,6 +20,8 @@ export async function refreshSession(request: NextRequest) {
       cookies: {
         getAll: () => request.cookies.getAll(),
         setAll(values) {
+          // Update this request for downstream Server Components, then the response
+          // for the browser's next request; either side alone leaves stale sessions.
           values.forEach(({ name, value }) => request.cookies.set(name, value));
           response = NextResponse.next({ request });
           values.forEach(({ name, value, options }) =>

@@ -10,6 +10,8 @@ export type DraftArticle = { id: string; version: number; updatedAt: string };
 export type PendingDraftCommand =
   | { kind: "create"; command: CreateDraftCommand }
   | { kind: "save"; command: SaveDraftCommand };
+// Current input may change while a write is in flight. Acknowledged tracks the initial
+// baseline or a confirmed snapshot; pending keeps the exact command for retries.
 export type DraftSaveState = {
   current: DraftInput;
   acknowledged: DraftInput;
@@ -51,6 +53,7 @@ export function createDraftSaveState(
   };
 }
 export function isDraftSaveDirty(state: DraftSaveState): boolean {
+  // Invalid editor input is absent from the last valid snapshot but can still be lost.
   return state.nativeInvalid || state.currentKey !== state.acknowledgedKey;
 }
 export function reduceDraftSave(
@@ -75,6 +78,7 @@ export function reduceDraftSave(
         : { ...state, phase: "error", lastResult: event.failure };
     case "submit": {
       if (state.phase === "saving" || state.phase === "conflict") return state;
+      // An uncertain write must reuse its stored command, never newer form input.
       if (state.pending && state.pending !== event.pending) return state;
       if (
         !state.pending &&
@@ -102,6 +106,8 @@ export function reduceDraftSave(
         return state;
       const result = event.result;
       if (!result.ok) {
+        // A lost response may hide a commit. Later denial cannot prove it never happened,
+        // so keep the original retry handle until a successful receipt resolves it.
         const uncertain = state.uncertain || result.code === "unavailable";
         return {
           ...state,
@@ -126,6 +132,7 @@ export function reduceDraftSave(
           uncertain: true,
           lastResult: { ok: false, code: "unavailable" },
         };
+      // Confirm only the submitted snapshot; edits made during the request stay dirty.
       const acknowledged = pending.command.draft;
       const acknowledgedKey = draftInputKey(acknowledged);
       const newer = state.nativeInvalid || state.currentKey !== acknowledgedKey;
@@ -147,6 +154,7 @@ export function reduceDraftSave(
       };
     }
     case "reload":
+      // A read cannot resolve an uncertain write or roll back a known article version.
       if (
         state.pending ||
         !state.article ||

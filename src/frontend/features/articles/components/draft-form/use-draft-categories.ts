@@ -18,6 +18,8 @@ export function useDraftCategories(
   });
   const changed = useRef(false);
   const seed = useRef(seedKey);
+  // Conflict recovery supplies a fresh catalog seed; otherwise clear old section
+  // choices before rendering so they cannot appear under the new section.
   if (state.seedKey !== seedKey) {
     setState({
       sectionId,
@@ -47,6 +49,8 @@ export function useDraftCategories(
       return;
     changed.current = true;
     if (!sectionId) return;
+    // Section changes, retries and recovery seeds can outlive an earlier request.
+    // Ignore its response without changing the draft's selected category IDs.
     let cancelled = false;
     getDraftCategoriesAction(sectionId)
       .then((result) => {

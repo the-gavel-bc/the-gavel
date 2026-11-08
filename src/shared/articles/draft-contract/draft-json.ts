@@ -7,6 +7,8 @@ export function draftJsonbByteLength(
   const stack: { value: unknown; depth: number; exit?: boolean }[] = [
     { value, depth: 0 },
   ];
+  // Track only the active ancestry: cycles are invalid, but reusing an object in
+  // separate branches is valid JSON serialization. Exit markers release each ancestor.
   const active = new Set<object>();
   const encoder = new TextEncoder();
   let bytes = 0;
@@ -47,6 +49,7 @@ export function draftJsonbByteLength(
           Object.keys(current).length !== current.length
         )
           return null;
+        // JSONB text uses comma-space separators; compact JSON.stringify is smaller.
         bytes += 2 + Math.max(0, current.length - 1) * 2;
         for (const child of current)
           stack.push({ value: child, depth: item.depth + 1 });
@@ -61,6 +64,7 @@ export function draftJsonbByteLength(
         bytes += 2 + Math.max(0, keys.length - 1) * 2;
         for (const key of keys) {
           if (typeof key !== "string") return null;
+          // Reject accessors before reading values; validation must not invoke getters.
           const descriptor = Object.getOwnPropertyDescriptor(current, key)!;
           if (!descriptor.enumerable || !("value" in descriptor)) return null;
           const length = stringBytes(key);

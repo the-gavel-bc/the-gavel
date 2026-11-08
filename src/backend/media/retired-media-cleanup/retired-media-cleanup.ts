@@ -37,6 +37,8 @@ async function performSweep(
   if (separator < 1) return false;
   const folder = probe.object_key.slice(0, separator),
     filename = probe.object_key.slice(separator + 1);
+  // Verify the reserved folder is empty before the first overwrite. Once armed in
+  // the database, this probe key can be reused after an interrupted health check.
   if (!probe.armed) {
     const before = await bucket.list(folder, { limit: 1 });
     if (before.error || !before.data || before.data.length > 0) return false;
@@ -80,6 +82,8 @@ async function performSweep(
       });
       if (!listed.error && listed.data) {
         count = listed.data.length;
+        // Only canonical UUID.webp names can enter the deletion ledger. Unknown names
+        // keep the sweep unhealthy instead of granting authority to delete arbitrary paths.
         const assetIds = listed.data
           .map((item) => item.name)
           .filter(
@@ -92,6 +96,8 @@ async function performSweep(
           p_asset_ids: assetIds,
           p_claim_token: claim.claim_token,
         });
+        // A processed page may contain quarantined conflicts. Advance past it while
+        // reporting it unclean; the database retains errors across the full scan cycle.
         pageRead = !registered.error;
         success =
           pageRead &&
@@ -110,6 +116,8 @@ async function performSweep(
     });
     if (!success || finished.error || finished.data !== true) failed = true;
   }
+  // Ledger keys remain eligible after successful removal: a previously started
+  // upload can finish late and recreate the object, requiring another sweep.
   const keyResult = await client.rpc("claim_media_cleanup", { p_limit: 30 });
   if (keyResult.error) return false;
   const keyClaims = keys.parse(keyResult.data);
@@ -145,6 +153,8 @@ async function performSweep(
 export async function runRetiredMediaCleanup(): Promise<{ ok: boolean }> {
   try {
     const client = createTrustedMediaClient();
+    // The database grants one run lease and clears prior health before work starts.
+    // Only its current token can finish the run and restore deletion readiness.
     const started = await client.rpc("start_media_cleanup_run");
     if (started.error || !isDraftUuid(started.data)) return { ok: false };
     let success = false;

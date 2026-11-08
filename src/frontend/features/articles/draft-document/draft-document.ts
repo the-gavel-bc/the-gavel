@@ -15,6 +15,9 @@ export type EditorDocumentResult =
   { ok: true; document: JSONContent } | DraftFailure;
 export type DraftDocumentResult =
   { ok: true; document: DraftDocument } | DraftFailure;
+// Tiptap adds fixed attributes that the stored document omits. Native=true adds
+// those defaults; the reverse accepts only known defaults and rejects other values
+// instead of silently discarding unsupported author content.
 function translate(value: unknown, native: boolean): JSONContent {
   const copy = JSON.parse(JSON.stringify(value)) as JSONContent;
   const visit = (node: JSONContent) => {

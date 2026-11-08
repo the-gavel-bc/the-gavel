@@ -30,6 +30,7 @@ export async function GET(
     const access = await getCurrentAccess();
     if (access.status !== "active")
       return reply(404, { ok: false, code: "not_found" });
+    // Private previews use the caller's RLS-scoped client, never the service-role client.
     const client = await createServerSupabaseClient();
     const { data: asset, error } = await client
       .from("media_assets")
@@ -98,6 +99,8 @@ export async function POST(
       return reply(processed.code === "too_large" ? 413 : 400, processed);
 
     const trusted = createTrustedMediaClient();
+    // Recheck authority and asset state after image processing. Database claims do
+    // not fence Storage writes; retained cleanup keys handle uploads that finish late.
     const { data: claim, error: claimError } = await trusted.rpc(
       "begin_article_image_upload",
       { p_actor_user_id: access.userId, p_asset_id: assetId },
@@ -126,6 +129,8 @@ export async function POST(
       if (hash !== processed.sha256)
         return reply(409, { ok: false, code: "conflict" });
     }
+    // Finalization rechecks the actor and asset. Leave uncertain uploads in place
+    // for an exact retry rather than deleting bytes that may already be committed.
     const { data, error: finalizeError } = await trusted.rpc(
       "finalize_article_image_upload",
       {
