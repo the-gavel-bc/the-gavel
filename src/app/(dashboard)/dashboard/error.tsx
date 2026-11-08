@@ -1,6 +1,6 @@
 "use client";
-import { ArticleListError } from "@/components/dashboard/article-list-error/article-list-error";
-import { Button } from "@/components/ui/button/button";
+import { ArticleListError } from "@/frontend/features/articles/components/article-list-error/article-list-error";
+import { Button } from "@/frontend/components/ui/button/button";
 export default function ErrorBoundary({
   reset,
 }: {

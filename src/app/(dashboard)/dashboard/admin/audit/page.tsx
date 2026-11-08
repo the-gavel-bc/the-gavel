@@ -5,7 +5,7 @@ import {
   auditActionSchema,
   listAuditEvents,
 } from "@/backend/articles/admin-audit/admin-audit";
-import { AdminAudit } from "@/components/dashboard/admin-audit/admin-audit";
+import { AdminAudit } from "@/frontend/features/articles/components/admin-audit/admin-audit";
 
 export default async function AdminAuditPage({
   searchParams,

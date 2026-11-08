@@ -5,7 +5,7 @@ import {
   listAdminContributors,
   contributorStateSchema,
 } from "@/backend/contributors/admin-contributors/admin-contributors";
-import { ContributorControls } from "@/components/dashboard/admin-contributors/contributor-controls";
+import { ContributorControls } from "@/frontend/features/contributors/components/admin-contributors/contributor-controls";
 
 export default async function AdminContributorsPage({
   searchParams,

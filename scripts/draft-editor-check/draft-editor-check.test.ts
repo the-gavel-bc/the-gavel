@@ -1,11 +1,11 @@
 import { spawnSync } from "node:child_process";
 import { Editor } from "@tiptap/core";
 import { expect, it } from "vitest";
-import { createDraftExtensions } from "../../src/lib/articles/draft-document/draft-extensions";
+import { createDraftExtensions } from "../../src/frontend/features/articles/draft-document/draft-extensions";
 import {
   toEditorDocument,
   fromEditorDocument,
-} from "../../src/lib/articles/draft-document/draft-document";
+} from "../../src/frontend/features/articles/draft-document/draft-document";
 import {
   draftJsonbByteLength,
   type DraftDocument,

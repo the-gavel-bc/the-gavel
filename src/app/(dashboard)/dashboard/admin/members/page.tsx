@@ -5,7 +5,7 @@ import {
   listMembers,
   memberStateSchema,
 } from "@/backend/memberships/member-directory/member-directory";
-import { AdminMemberList } from "@/components/dashboard/admin-members/admin-member-list";
+import { AdminMemberList } from "@/frontend/features/memberships/components/admin-members/admin-member-list";
 
 export default async function AdminMembersPage({
   searchParams,

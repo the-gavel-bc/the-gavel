@@ -5,7 +5,7 @@ import {
   listAdminTaxonomy,
   taxonomyKindSchema,
 } from "@/backend/taxonomy/admin-taxonomy/admin-taxonomy";
-import { TaxonomyControls } from "@/components/dashboard/admin-taxonomy/taxonomy-controls";
+import { TaxonomyControls } from "@/frontend/features/taxonomy/components/admin-taxonomy/taxonomy-controls";
 
 export default async function AdminTaxonomyPage({
   searchParams,

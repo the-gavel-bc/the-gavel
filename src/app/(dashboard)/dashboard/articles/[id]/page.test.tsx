@@ -10,9 +10,12 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/backend/media/media-queries/media-queries", () => ({
   getArticleMainImage: mocks.mainImage,
 }));
-vi.mock("@/components/dashboard/article-media/article-media", () => ({
-  ArticleMedia: () => <section aria-label="Main image" />,
-}));
+vi.mock(
+  "@/frontend/features/articles/components/article-media/article-media",
+  () => ({
+    ArticleMedia: () => <section aria-label="Main image" />,
+  }),
+);
 vi.mock("@/backend/auth/access/access", () => ({
   requireActiveMembership: mocks.guard,
 }));

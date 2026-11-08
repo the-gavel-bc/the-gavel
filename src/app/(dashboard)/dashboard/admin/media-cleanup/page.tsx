@@ -2,7 +2,7 @@ import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
 import { requireActiveMembership } from "@/backend/auth/access/access";
 import { getMediaCleanupStatus } from "@/backend/media/retired-media-cleanup/cleanup-status";
-import { MediaCleanupControl } from "@/components/dashboard/media-cleanup/media-cleanup-control";
+import { MediaCleanupControl } from "@/frontend/features/media/components/media-cleanup/media-cleanup-control";
 export default async function MediaCleanupPage() {
   const access = await requireActiveMembership();
   if (access.role !== "administrator")

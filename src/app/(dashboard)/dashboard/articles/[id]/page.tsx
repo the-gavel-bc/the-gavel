@@ -6,9 +6,9 @@ import {
   getDraftOptions,
 } from "@/backend/articles/draft-queries/draft-queries";
 import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
-import { DraftForm } from "@/components/dashboard/draft-form/draft-form";
+import { DraftForm } from "@/frontend/features/articles/components/draft-form/draft-form";
 import { getArticleMainImage } from "@/backend/media/media-queries/media-queries";
-import { ArticleLifecycleControls } from "@/components/dashboard/article-lifecycle-controls/article-lifecycle-controls";
+import { ArticleLifecycleControls } from "@/frontend/features/articles/components/article-lifecycle-controls/article-lifecycle-controls";
 export default async function EditDraftPage({
   params,
 }: {

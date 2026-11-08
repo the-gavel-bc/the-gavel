@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
-import { DashboardShell } from "@/components/dashboard/dashboard-shell/dashboard-shell";
+import { DashboardShell } from "@/frontend/components/dashboard/dashboard-shell/dashboard-shell";
 import { requireActiveMembership } from "@/backend/auth/access/access";
 import { signOut } from "@/backend/auth/actions/actions";
-import { DashboardSignOutForm } from "@/components/dashboard/dashboard-sign-out-form/dashboard-sign-out-form";
-import { DraftNavigationProvider } from "@/components/dashboard/draft-navigation-guard/draft-navigation-guard";
+import { DashboardSignOutForm } from "@/frontend/features/auth/components/dashboard-sign-out-form/dashboard-sign-out-form";
+import { DraftNavigationProvider } from "@/frontend/components/dashboard/draft-navigation-guard/draft-navigation-guard";
 export default async function DashboardLayout({
   children,
 }: {

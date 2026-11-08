@@ -11,9 +11,12 @@ vi.mock("@/backend/articles/draft-actions/draft-actions", () => ({
   createDraftAction: vi.fn(),
   saveDraftAction: vi.fn(),
 }));
-vi.mock("@/components/dashboard/article-media/article-media", () => ({
-  ArticleMedia: () => <section aria-label="Main image" />,
-}));
+vi.mock(
+  "@/frontend/features/articles/components/article-media/article-media",
+  () => ({
+    ArticleMedia: () => <section aria-label="Main image" />,
+  }),
+);
 vi.mock("next/navigation", async (load) => ({
   ...(await load<typeof import("next/navigation")>()),
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
