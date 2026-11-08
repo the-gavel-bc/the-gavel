@@ -31,7 +31,7 @@ The independent review identified permanent-upload claims without writer-livenes
 - [x] Media/cleanup slice: preserve media-write receipts by removing only their restrictive article FK; keep original IDs and actor references. Resolve asset-first versus article-first finalization through a reviewed compatible lock order or fail-closed NOWAIT path. Test actual finalize/delete interleavings, existing media removal, registry collisions, deleted-prefix scans and old keys.
 - [x] Trusted cleanup slice: test queue authorization, exact key restriction, missing objects, Storage failure, ambiguous responses, references and repeat cleanup; provide a bounded administrator retry flow that works independently of the deleted article.
 - [x] Dashboard slice: require clear permanent-deletion confirmation, preserve unsaved changes, provide stale/retry recovery and clear pending cleanup state; verify desktop/mobile and role denial.
-- [ ] Update authoritative contracts, data/security/deployment docs and status. Run focused tests and then relevant database/concurrency/browser gates once before a reviewed PR; preserve local preview data and record clean-install CI and human-review limits.
+- [x] Update authoritative contracts, data/security/deployment docs and status; open [draft PR #46](https://github.com/dylandrozario/the-gavel/pull/46). Run focused tests and then relevant database/concurrency/browser gates once before a reviewed PR; preserve local preview data and record clean-install CI and human-review limits.
 
 ## External interface constraints
 
@@ -42,3 +42,5 @@ The independent review identified permanent-upload claims without writer-livenes
 - The initial full database run passed all but four prior ID-error assertions; the compatibility migration restored the existing error code, and all 285 affected assertions passed afterward. New deletion, registry, retry and claim tests also passed. Schema lint passed.
 - The full unit suite passed 620 tests; focused worker, audit and UI checks passed after follow-up changes. The full concurrency suite passed 46 cases, then four focused deletion races passed including homepage coordination.
 - Final local browser checks passed six desktop/mobile cases with two shared-state mobile writes skipped. Real local Storage tests exercised the readiness probe and cleanup after both known and previously untracked late uploads. Hosted cron, clean migration CI, capacity/alert setup and human security/accessibility review remain outstanding.
+
+PR #45 must merge first; update this branch from main and rerun affected checks before review and merge.
