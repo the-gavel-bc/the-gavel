@@ -128,3 +128,5 @@ Draft -> Published -> Archived -> Permanently deleted
 - Confirm production contact email, mission text, and social URLs.
 - What retention period, if any, is required before an archived article may be permanently deleted?
 - What Boston College privacy, branding, accessibility, records, or security policies apply?
+
+Owner decision for archived deletion: an administrator may delete immediately after archiving. Revisions are deleted with the article; audit events keep article and actor identifiers, Auth accounts remain, and unreferenced images enter permanent recurring cleanup. Deletion is unavailable when the cleanup worker is unhealthy. Public slugs and article IDs stay reserved after deletion.
