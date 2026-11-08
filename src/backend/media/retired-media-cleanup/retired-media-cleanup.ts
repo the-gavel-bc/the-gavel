@@ -1,3 +1,5 @@
+import "server-only";
+
 import { z } from "zod";
 import { isDraftUuid } from "@/shared/articles/draft-cursor/draft-cursor";
 import { createTrustedMediaClient } from "@/backend/infrastructure/supabase/media-admin/media-admin";

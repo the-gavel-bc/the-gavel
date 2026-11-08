@@ -1,3 +1,5 @@
+import "server-only";
+
 import { connection } from "next/server";
 import { z } from "zod";
 import { isDraftUuid } from "@/shared/articles/draft-cursor/draft-cursor";

@@ -1,3 +1,5 @@
+import "server-only";
+
 export async function readMediaFile(
   request: Request,
 ): Promise<

@@ -1,3 +1,5 @@
+import "server-only";
+
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/backend/infrastructure/supabase/server/server";
 

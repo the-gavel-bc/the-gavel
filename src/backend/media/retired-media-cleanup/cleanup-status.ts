@@ -1,3 +1,5 @@
+import "server-only";
+
 import { connection } from "next/server";
 import { z } from "zod";
 import { requireActiveMembership } from "@/backend/auth/access/access";

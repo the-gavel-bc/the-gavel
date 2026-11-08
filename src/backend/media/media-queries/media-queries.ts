@@ -1,3 +1,5 @@
+import "server-only";
+
 import { z } from "zod";
 import { requireActiveMembership } from "@/backend/auth/access/access";
 import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
