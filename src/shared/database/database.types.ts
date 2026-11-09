@@ -818,6 +818,7 @@ export type Database = {
           slug_frozen: boolean;
         }[];
       };
+      get_public_article: { Args: { p_slug: string }; Returns: Json };
       get_site_information: {
         Args: Record<PropertyKey, never>;
         Returns: {
