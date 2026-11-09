@@ -1,6 +1,6 @@
 # Security and permissions
 
-Status: Foundation access/session controls, Phase 2 content/history read permissions, and checked Phase 4 publish/archive transitions implemented; public article reads and hosted provider controls remain planned.
+Status: Foundation access/session controls, private content permissions, checked editorial transitions, and the public article detail projection are implemented; public media delivery and hosted provider controls remain planned.
 
 Phase 4 private article media uses a server-only Supabase service-role key for validated WebP Storage writes and cleanup. Reservation, attachment, and removal still begin with active user-scoped checks; trusted finalization and completion independently check the claimed actor and asset state. The private bucket has no direct browser write grant. Finalized objects are readable only for an authorized article reader; pending, uploading, or deleting objects are hidden. Current and historical article image references block physical deletion.
 
@@ -263,3 +263,7 @@ Task 14 closes direct application access to site settings and receipts. A user-s
 ## Phase 4 integrated authorization corrections
 
 The direct article-read and administrator predicates require the caller's linked profile to remain active as well as eligible Auth and active membership. Checked profile deactivation therefore also closes dependent article, association, media and Storage reads; hiding the dashboard alone is insufficient. Trusted media upload claiming, finalization and removal completion lock the supplied actor's Auth, membership and profile rows before resource locks, then check current eligibility and role. Locks retain that authority through commit, including after waits. The service role still cannot invoke the internal actor-lock helper directly. See the [Phase 4 evidence](reviews/phase-4-editorial-workflow.md).
+
+## Public article projection
+
+Anonymous and authenticated callers can execute the same published-only, fixed-search-path projection. Existing private table grants and RLS remain unchanged. The projection checks the canonical body and current image links before returning an allowlist; unpublished slugs share the same not-found result. Public Storage grants and image delivery remain separate work. Responses observe one statement snapshot, so archiving prevents subsequent reads but cannot recall a response already in flight.

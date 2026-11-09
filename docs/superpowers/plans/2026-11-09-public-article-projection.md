@@ -1,6 +1,6 @@
 # Phase 5 Task 2 — public article detail projection
 
-Status: implementation in progress on `feat/public-article-projection`, stacked on Task 1 PR #50 at `9665cc3`. [Reader contract](2026-11-09-phase-five-reader-contract.md) defines public fields and visibility. No reader route, public media Storage grant, list/search or cache is part of this task.
+Status: implemented on `feat/public-article-projection`, stacked on Task 1 PR #50 at `9665cc3`. [Reader contract](2026-11-09-phase-five-reader-contract.md) defines public fields and visibility. No reader route, public media Storage grant, list/search or cache is part of this task.
 
 ## Acceptance and design risks
 
@@ -16,3 +16,10 @@ Status: implementation in progress on `feat/public-article-projection`, stacked 
 2. Add one forward migration/RPC with validated bounded input and a fixed search path; leave existing tables/policies untouched. Run focused SQL and local schema/type checks.
 3. Add the checked public reader client, schemas and server adapter with focused tests for invalid payloads, thrown errors, no cookie/client-secret paths and no-store fetch. Run fast checks and the relevant SQL/contract suite.
 4. Review the slice once; verify archive/release behavior, migration upgrade/clean install on a disposable project where possible, and security/docs. Commit cohesive pieces and open a draft PR stacked on #50; owner watches CI.
+
+## Verification
+
+- The focused database test covers public/private lifecycle, role parity, direct-read denial, invalid bodies, and finalized current-image descriptors.
+- Adapter tests cover malformed data, Unicode field lengths, error handling, and the cookie-free, no-store client. A focused review identified the Unicode length mismatch and it was corrected.
+- Existing databases received the additive migration; a disposable clean database applied all migrations through Task 2 and passed the same 21 assertions. `pnpm db:types:check`, `pnpm supabase db lint --local`, `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, and `pnpm build` passed.
+- `pnpm test` passed 657 tests. An earlier concurrent run was interrupted after unrelated tests timed out; the affected tests passed afterward.

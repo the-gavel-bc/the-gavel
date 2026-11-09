@@ -1,5 +1,9 @@
 # API contracts
 
+## Public article detail projection
+
+`get_public_article(p_slug text)` returns `{kind: "notFound"}` for malformed, unknown, draft, archived, or deleted slugs. Published articles with invalid documents or unavailable required references return `{kind: "unavailable"}`; valid ones return `{kind: "ok", article}`. The allowlisted article includes its canonical document, public taxonomy and credits, and descriptors for finalized current images. It excludes storage paths and private identity, workflow, and history fields. The server adapter validates the response with a cookie-free publishable-key client and disables fetch caching. This interface does not grant public object access or implement a reader page. See the [Task 2 plan](superpowers/plans/2026-11-09-public-article-projection.md).
+
 ## Implemented private draft main image
 
 `request_article_image_upload(articleId,requestId)` reserves an opaque media asset for an authorized draft owner or active administrator. `POST /api/articles/[id]/media/[assetId]` accepts one bounded multipart `file`, validates and re-encodes JPEG/PNG/WebP to private WebP, then uses the server-only service role to finalize the checked reservation. `set_article_main_image(articleId,expectedVersion,requestId,assetId,altText,credit)` attaches a finalized same-article asset or unlinks with null asset/metadata. It returns the existing draft write result envelope, creates history on a change, and replays exact requests. These interfaces leave the Phase 3 draft payload and receipts unchanged.
@@ -10,7 +14,7 @@
 
 The existing `save_article_draft(articleId,expectedVersion,requestId,draft)` accepts canonical `gavel-draft` version 2 bodies with image blocks containing only `assetId`, required alt text (1–240 characters), and optional caption (1–500 characters). Version 1 bodies remain valid. Database save checks each asset is finalized for that article and reconciles body references in the same transaction as content, revision, audit, and retry receipt. Draft creation does not accept version 2 bodies because assets require an existing article. `GET /api/articles/[id]/media/[assetId]` serves a finalized same-article WebP only through the active caller's RLS-scoped client, with private no-store and nosniff headers. Video embeds remain unavailable pending a provider allowlist.
 
-Status: Foundation access/session interfaces, Phase 2 private content/history storage, Phase 3 private draft queries/actions, and Phase 4 article lifecycle and administrator list/detail commands implemented. Public article reads remain planned.
+Status: Foundation access/session interfaces, private draft and editorial commands, and the Phase 5 public article detail projection are implemented. Public pages and media delivery remain planned.
 
 ## Style and ownership
 
