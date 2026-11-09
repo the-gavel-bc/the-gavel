@@ -1,15 +1,21 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ guard: vi.fn(), detail: vi.fn() }));
-vi.mock("@/lib/auth/access/access", () => ({
+vi.mock("@/backend/auth/access/access", () => ({
   requireActiveMembership: mocks.guard,
 }));
-vi.mock("@/lib/articles/admin-article-queries/admin-article-queries", () => ({
-  getAdminArticleDetail: mocks.detail,
-}));
-vi.mock("@/lib/articles/article-lifecycle/article-lifecycle-actions", () => ({
-  restoreArticleAction: vi.fn(),
-}));
+vi.mock(
+  "@/backend/articles/admin-article-queries/admin-article-queries",
+  () => ({
+    getAdminArticleDetail: mocks.detail,
+  }),
+);
+vi.mock(
+  "@/backend/articles/article-lifecycle/article-lifecycle-actions",
+  () => ({
+    restoreArticleAction: vi.fn(),
+  }),
+);
 vi.mock("next/navigation", async (load) => ({
   ...(await load<typeof import("next/navigation")>()),
   useRouter: () => ({ refresh: vi.fn() }),

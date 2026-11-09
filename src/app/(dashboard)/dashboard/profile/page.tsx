@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
-import { getOwnProfile } from "@/lib/profiles/own-profile/own-profile";
-import { OwnProfileForm } from "@/components/dashboard/profile/own-profile-form";
+import { getOwnProfile } from "@/backend/profiles/own-profile/own-profile";
+import { OwnProfileForm } from "@/frontend/features/profiles/components/profile/own-profile-form";
 
 export default async function OwnProfilePage() {
   let profile;

@@ -16,7 +16,7 @@ Task 4 adds a body-image control to the private editor. It reuses the checked up
 | `/access-pending` | Denied/pending membership experience and sign-out                              |
 | `/dashboard`      | Protected owned-article listing with pagination, role-aware shell and sign-out |
 
-The header's section links and dashboard profile/administration links identify future destinations; those feature routes are not implemented. Both dashboard layout and page independently call the server membership guard. Components live in named folders under `src/components/site`, `src/components/dashboard`, and `src/components/ui`, alongside their owned CSS Modules and existing tests. See [file colocation](coding-style.md#file-colocation).
+The header's section links and dashboard profile/administration links identify future destinations; those feature routes are not implemented. Both dashboard layout and page independently call the server membership guard. Components live in named folders under `src/frontend/components/site`, `src/frontend/components/dashboard`, and `src/frontend/components/ui`, alongside their owned CSS Modules and existing tests. See [file colocation](coding-style.md#file-colocation).
 
 ## Full MVP public route design
 
@@ -61,6 +61,10 @@ Task 11 implements bounded administrator taxonomy catalogs and existing section/
 Task 12 implements `/dashboard/profile` for the caller's own public name and biography, with generated-slug display, exact retry and explicit conflict reload. Profile image selection remains unavailable until a separate profile media contract exists.
 
 Task 13 implements `/dashboard/admin/homepage` with a published-article catalog, ordered lead/Featured News/Read This controls, a saved fallback preview, exact retry and explicit conflict reload. Public homepage composition remains Phase 5 work.
+
+## Source locations
+
+Route composition remains in `src/app`. Feature-owned editor/forms/lists live in `src/frontend/features/<domain>/components/`, with article editor adapters and save-state helpers beside that domain's components. Public/dashboard shells and reusable controls live in `src/frontend/components/`. Components keep their owned styles and tests beside their implementation. These folders describe ownership; existing Server Components keep server rendering. See [architecture](architecture.md#repository-structure) for the full tree, backend/shared responsibilities, and an article-save walkthrough.
 
 ## Component tree
 

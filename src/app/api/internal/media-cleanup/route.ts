@@ -1,5 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
-import { runRetiredMediaCleanup } from "@/lib/media/retired-media-cleanup/retired-media-cleanup";
+import { runRetiredMediaCleanup } from "@/backend/media/retired-media-cleanup/retired-media-cleanup";
 export async function GET(request: Request): Promise<Response> {
   if (process.env.VERCEL_ENV !== "production")
     return new Response(null, { status: 404 });

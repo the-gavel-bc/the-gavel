@@ -16,7 +16,7 @@ Run commands with Node.js 22 and the pnpm version recorded in `package.json`.
 | Production build | `pnpm build`        | Next.js production compilation                                                                                    |
 | Database         | `pnpm test:db`      | Local Supabase identity/content/history constraints and RLS, plus draft validation/create/save (1,075 assertions) |
 
-Install the Playwright Chromium runtime once with `pnpm exec playwright install chromium`. Start local Supabase with `pnpm supabase start` using a Docker-compatible runtime. Run `pnpm supabase db reset`, `pnpm test:db`, `pnpm supabase db lint`, and `pnpm db:types:check`. Regenerate formatted types with `pnpm --silent db:types > src/lib/supabase/database/database.types.ts`. The drift check compares without overwriting the committed file.
+Install the Playwright Chromium runtime once with `pnpm exec playwright install chromium`. Start local Supabase with `pnpm supabase start` using a Docker-compatible runtime. Run `pnpm supabase db reset`, `pnpm test:db`, `pnpm supabase db lint`, and `pnpm db:types:check`. Regenerate formatted types with `pnpm --silent db:types > src/shared/database/database.types.ts`. The drift check compares without overwriting the committed file.
 
 ## Implemented foundation coverage
 
@@ -348,3 +348,9 @@ Task 15 adds coverage for role and confirmation denials, revision and audit rete
 ## Phase 4 Task 14: site information
 
 Task 14 adds database tests for administrator, author, inactive, anonymous, and ineligible paths; input bounds and unsafe links; version conflicts, exact retries, no-op saves, and audit rollback. A two-session test checks concurrent saves serialize. Local verification passed 1,465 database assertions, the 42-case concurrency suite, 597 unit tests, types, lint, schema lint, and three desktop/mobile browser cases (one mobile write skipped because the settings record is shared). Three focused form tests passed after adding conflict and unsaved-input coverage. The local database also contains Task 13 migrations; generated Task 14 types were compared after excluding those independent schema additions. Clean-install migration CI and human security/accessibility review remain outstanding.
+
+## Source ownership checks
+
+`pnpm lint` enforces the ownership rules in [architecture](architecture.md#repository-structure). The focused rule suite is `pnpm exec vitest run scripts/import-boundaries/import-boundaries.test.mjs`; it checks allowed Server Actions and erased types, and rejected relative/alias imports, dynamic imports, test-helper imports and bare/prefixed Node builtins. Unit tests resolve `server-only` to `scripts/import-boundaries/server-only-test-stub.ts` so server code can be exercised outside Next.js; production builds still enforce the real marker.
+
+For a documentation/comment-only follow-up, formatting, lint and the existing tests covering annotated modules are sufficient when a source-token comparison also confirms no executable changes. A new database reset or full browser run is unnecessary unless behavior, imports or runtime configuration changes. Refactor verification remains recorded in the [ownership plan](superpowers/plans/2026-11-08-frontend-backend-ownership.md#verification-and-review).

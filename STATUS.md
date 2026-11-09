@@ -1,9 +1,14 @@
 # Current work
 
-- Phase: 4. Tasks 1–14 are on main, including [PR #45](https://github.com/dylandrozario/the-gavel/pull/45).
-- Branch: `feat/archive-permanent-deletion`, updated with main through Task 14. Task 15 is open in [draft PR #46](https://github.com/dylandrozario/the-gavel/pull/46). Merge conflicts with Task 14 are resolved. Integration checks passed: types, generated database types, fixture formatting, 23 focused tests, and six browser cases (two shared-state mobile writes skipped).
-- Approved policy: administrators may delete immediately after archiving; revisions are deleted with the article; audit events retain article and actor IDs; Auth accounts remain. Image keys stay in a permanent ledger and are swept repeatedly to handle late uploads.
-- Implemented locally: versioned deletion, retained IDs/slugs and audits, permanent media registry and prefix scans, bounded cleanup worker, fail-closed health gate, production cron and administrator retry/status. No real article was deleted. See the [Task 15 plan](docs/superpowers/plans/2026-11-07-archived-article-deletion.md).
-- Local checks passed; clean-install CI, hosted cron verification and human security/accessibility review remain pending. Production cleanup needs a configured service key, cron secret, monitoring and an initial healthy check. Public rendering remains Phase 5.
+- Branch: `refactor/frontend-backend-ownership`, isolated at `/private/tmp/the-gavel-ownership`.
+- Baseline: Main at `44a5583` includes Task 15 PR #46. PR #47 now integrates that main commit.
+- Implemented: frontend/backend/shared ownership, import restrictions, server-only guards, updated tooling and documentation. Next.js/Supabase behavior and database migrations are unchanged.
+- Verification: 628 existing tests passed before/after moves; 639 passed with boundary tests, then all 13 boundary cases passed after review fixes. Types/lint/format/build/type drift passed; 1,575 SQL assertions, 214 contract, 8 editor and 48 concurrency tests passed.
+- Browser: full run 132 passed, 3 skipped, 1 fixture-teardown failure. Restored Task 14 cleanup omitted during integration; focused recheck 3 passed, 1 skipped. No application assertion was removed or weakened.
+- Readability follow-up: structure docs completed and intent comments added in 12 source files. Executable tokens match `cf1d39c`; types/lint/format and 322 focused tests passed. See the existing plan for evidence.
+- Main integration recheck: types, lint, 36 focused tests, production build and nine desktop/mobile browser cases passed; one shared-state mobile deletion skipped.
+- PR: [draft #47](https://github.com/dylandrozario/the-gavel/pull/47), targeting main after Task 15 merged.
+- Pending: owner-run hosted CI and human maintainer review. Phase 4 Task 16 and hosted OAuth/cron/security/accessibility gates remain separate.
+- Plan/mapping/evidence: [ownership refactor](docs/superpowers/plans/2026-11-08-frontend-backend-ownership.md).
 
-- CI startup correction: explicit registry transaction fixes reproduced SQLSTATE 25P01. Disposable CLI startup (auxiliary services excluded locally) and 1,575 clean-database assertions passed. CI now emits redacted failure diagnostics; full hosted CI remains owner-verified.
+- CI compatibility follow-up: inherited registry migration now has an explicit transaction. Fresh disposable CLI startup with auxiliary services excluded locally and all 1,575 SQL assertions passed. Full hosted CI remains owner-verified; failure logs are now redacted and visible.

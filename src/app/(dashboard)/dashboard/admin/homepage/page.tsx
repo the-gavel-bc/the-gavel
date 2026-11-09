@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
 import { z } from "zod";
-import { requireActiveMembership } from "@/lib/auth/access/access";
-import { getAdminArticlesPage } from "@/lib/articles/admin-article-queries/admin-article-queries";
-import { getAdminHomepageCuration } from "@/lib/homepage/homepage-curation/homepage-curation";
-import { HomepageEditor } from "@/components/dashboard/admin-homepage/homepage-editor";
-import { GuardedDashboardLink } from "@/components/dashboard/guarded-dashboard-link/guarded-dashboard-link";
+import { requireActiveMembership } from "@/backend/auth/access/access";
+import { getAdminArticlesPage } from "@/backend/articles/admin-article-queries/admin-article-queries";
+import { getAdminHomepageCuration } from "@/backend/homepage/homepage-curation/homepage-curation";
+import { HomepageEditor } from "@/frontend/features/homepage/components/admin-homepage/homepage-editor";
+import { GuardedDashboardLink } from "@/frontend/components/dashboard/guarded-dashboard-link/guarded-dashboard-link";
 
 const querySchema = z.strictObject({
   search: z.string().optional(),

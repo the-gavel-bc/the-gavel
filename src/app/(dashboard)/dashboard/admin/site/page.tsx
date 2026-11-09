@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
-import { requireActiveMembership } from "@/lib/auth/access/access";
-import { getSiteInformation } from "@/lib/site-information/site-information/site-information";
-import { SiteInformationForm } from "@/components/dashboard/admin-site/site-information-form";
+import { requireActiveMembership } from "@/backend/auth/access/access";
+import { getSiteInformation } from "@/backend/site-information/site-information/site-information";
+import { SiteInformationForm } from "@/frontend/features/site-information/components/admin-site/site-information-form";
 export default async function AdminSitePage() {
   const access = await requireActiveMembership();
   if (access.role !== "administrator")

@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
-import { requireActiveMembership } from "@/lib/auth/access/access";
-import { getAdminArticlesPage } from "@/lib/articles/admin-article-queries/admin-article-queries";
-import { AdminArticleList } from "@/components/dashboard/admin-articles/admin-article-list";
+import { requireActiveMembership } from "@/backend/auth/access/access";
+import { getAdminArticlesPage } from "@/backend/articles/admin-article-queries/admin-article-queries";
+import { AdminArticleList } from "@/frontend/features/articles/components/admin-articles/admin-article-list";
 
 export default async function AdminArticlesPage({
   searchParams,

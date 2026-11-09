@@ -1,6 +1,6 @@
 # Architecture
 
-Status: Application, local identity database, and protected dashboard foundation implemented; publishing and hosted deployment remain planned.
+Status: Source ownership refactor, dashboard editorial workflows, and local Supabase boundaries implemented on this branch; public article rendering and hosted provider verification remain planned.
 
 ## System overview
 
@@ -91,21 +91,39 @@ Browser
 
 ## Repository structure
 
-The implemented foundation uses:
+The application keeps one Next.js deployment with explicit source ownership:
 
-- `src/app/`: root public page, auth routes, and protected empty dashboard.
-- `src/components/`: semantic public/dashboard shells and button/link primitives; each component has a named folder with its owned styles and tests.
-- `src/lib/env/`: typed configuration access, invoked at startup by `src/lib/startup/startup.ts`.
-- `src/lib/auth/`: server access checks, OAuth/sign-out actions, and safe redirect validation.
-- `src/lib/supabase/`: typed clients, cookie refresh, and generated database types.
-- `src/proxy.ts`: verified session refresh only; membership authorization stays in server pages and RLS.
-- `supabase/`: local configuration, migrations, synthetic fixtures, and pgTAP assertions.
-- `src/styles/shell/`: shared CSS Module layout primitives; component-owned styles stay with their component.
-- `e2e/`: named browser-test suites with shared local-only helpers under `support/`.
-- `scripts/`: named script folders with owned support files.
-- `.github/workflows/ci.yml`: automated foundation gates; successful hosted execution is recorded in the [Phase 1 review](reviews/phase-1-foundation.md).
+```text
+src/
+  app/                         Next.js routes, layouts, metadata and HTTP entry points
+  frontend/
+    features/<domain>/         Feature components, hooks, editor adapters and interaction state
+    components/                Reusable UI and public/dashboard shells
+    lib/                       Browser integrations
+    styles/                    Shared presentation styles
+  backend/
+    <domain>/                  Server Actions, guarded queries and orchestration
+    infrastructure/            Server Supabase clients, server environment and startup
+  shared/
+    <domain>/                  Shared contracts, types and pure validation
+    database/                  Generated database types
+  instrumentation.ts           Startup entry point
+  proxy.ts                     Session-refresh entry point
+supabase/                      Database configuration, migrations, SQL tests and seed
+scripts/                       Verification and generation tooling
+e2e/                           Browser journeys and local synthetic fixtures
+.github/                       CI configuration
+```
 
-The foundation uses ordinary dynamic rendering for authenticated routes with private/no-store responses. Public article caching, content services, uploads, and publishing remain unimplemented.
+Backend modules cannot import presentation or route entry points. Shared runtime modules cannot import backend, frontend, Node APIs or server platform clients. Presentation may import explicit `use server` entry points and erased backend result types. ESLint resolves both relative and alias imports to enforce these rules; Next.js `server-only` guards protect ordinary backend modules. Presentation ownership does not imply `use client`: existing Server Components retain their rendering behavior. SQL functions and RLS remain authoritative; no Express service or additional deployment is introduced.
+
+See the [ownership refactor plan](superpowers/plans/2026-11-08-frontend-backend-ownership.md) for exact moves, test-only exceptions and verification.
+
+### Following an article save
+
+The route `src/app/(dashboard)/dashboard/articles/[id]/page.tsx` composes the protected editor from `src/frontend/features/articles/`. Its `components/draft-form/use-draft-command.ts` hook calls the explicit Server Action in `src/backend/articles/draft-actions/draft-actions.ts`. Both sides use the request/result contract in `src/shared/articles/draft-contract/`. The action uses the cookie-scoped client in `src/backend/infrastructure/supabase/server/` to call the existing database RPC; SQL still owns authorization, version checks, atomic history and receipts. The hook and save-state reducer preserve the original command across uncertain retries.
+
+The application uses ordinary dynamic rendering for authenticated routes with private/no-store responses. Dashboard editing, private uploads and lifecycle operations are implemented; public article rendering and caching remain Phase 5 work.
 
 ## Quality targets
 

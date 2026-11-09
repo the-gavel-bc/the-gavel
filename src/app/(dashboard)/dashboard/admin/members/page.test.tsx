@@ -1,15 +1,15 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ guard: vi.fn(), list: vi.fn() }));
-vi.mock("@/lib/auth/access/access", () => ({
+vi.mock("@/backend/auth/access/access", () => ({
   requireActiveMembership: mocks.guard,
 }));
 vi.mock(
-  "@/lib/memberships/member-directory/member-directory",
+  "@/backend/memberships/member-directory/member-directory",
   async (importOriginal) => {
     const actual =
       await importOriginal<
-        typeof import("@/lib/memberships/member-directory/member-directory")
+        typeof import("@/backend/memberships/member-directory/member-directory")
       >();
     return { ...actual, listMembers: mocks.list };
   },

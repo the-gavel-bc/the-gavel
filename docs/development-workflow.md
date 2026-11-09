@@ -13,6 +13,12 @@ Status: Approved working process.
 7. Run relevant checks and inspect the resulting user experience.
 8. Summarize changes, evidence, limitations, and remaining questions.
 
+## Placing new code
+
+Use the [repository structure](architecture.md#repository-structure) as the ownership map. Start with the feature's existing implementation and tests: presentation and interaction state belong to its frontend domain, server queries/actions to its backend domain, and contracts genuinely consumed on both sides to shared. Keep framework entry points in `src/app` and database operations in `supabase`; a new folder does not require a new service or wrapper.
+
+An interactive component calls an explicit Server Action for mutations; it cannot import ordinary backend runtime code. Use explicit `import type` for backend result types. Keep ordinary backend modules guarded with `server-only`, and run `pnpm lint` to catch ownership violations in both aliases and relative imports. Follow the [comment guidance](coding-style.md#comments-and-intent) when retries, concurrency or validation need explanation. Add focused tests beside their owner and use the existing integration suites only when the affected boundary requires them.
+
 ## Foundation verification
 
 Use the commands in [testing.md](testing.md) with Node.js 22 and the pinned pnpm version. Run local Supabase before database and browser checks. The CI workflow mirrors formatting, lint, strict types, tests, database reset/pgTAP/lint/type drift, build, browser tests, and security scans. A known finding is not automatically an accepted exception. Any exception requires explicit maintainer approval and a documented scope and removal condition. The former CI-only exception is retired in [ADR 0005](decisions/0005-temporary-ci-audit-exception.md); current production/full audits are unfiltered and high/critical findings remain blocking.

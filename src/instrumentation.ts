@@ -1,1 +1,1 @@
-export { register } from "@/lib/startup/startup";
+export { register } from "@/backend/infrastructure/startup/startup";

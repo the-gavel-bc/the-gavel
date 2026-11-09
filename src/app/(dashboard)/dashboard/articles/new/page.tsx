@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
-import { requireActiveMembership } from "@/lib/auth/access/access";
-import { getDraftOptions } from "@/lib/articles/draft-queries/draft-queries";
-import { DraftForm } from "@/components/dashboard/draft-form/draft-form";
-import type { DraftInput } from "@/lib/articles/draft-contract/draft-contract";
+import { requireActiveMembership } from "@/backend/auth/access/access";
+import { getDraftOptions } from "@/backend/articles/draft-queries/draft-queries";
+import { DraftForm } from "@/frontend/features/articles/components/draft-form/draft-form";
+import type { DraftInput } from "@/shared/articles/draft-contract/draft-contract";
 export default async function NewDraftPage() {
   await requireActiveMembership();
   let options;

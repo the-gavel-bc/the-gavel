@@ -1,16 +1,19 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ guard: vi.fn(), list: vi.fn() }));
-vi.mock("@/lib/auth/access/access", () => ({
+vi.mock("@/backend/auth/access/access", () => ({
   requireActiveMembership: mocks.guard,
 }));
-vi.mock("@/lib/articles/admin-audit/admin-audit", async (importOriginal) => {
-  const actual =
-    await importOriginal<
-      typeof import("@/lib/articles/admin-audit/admin-audit")
-    >();
-  return { ...actual, listAuditEvents: mocks.list };
-});
+vi.mock(
+  "@/backend/articles/admin-audit/admin-audit",
+  async (importOriginal) => {
+    const actual =
+      await importOriginal<
+        typeof import("@/backend/articles/admin-audit/admin-audit")
+      >();
+    return { ...actual, listAuditEvents: mocks.list };
+  },
+);
 import Page from "./page";
 
 beforeEach(() => {

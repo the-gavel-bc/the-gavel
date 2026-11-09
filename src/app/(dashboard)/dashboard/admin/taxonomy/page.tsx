@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
-import { requireActiveMembership } from "@/lib/auth/access/access";
+import { requireActiveMembership } from "@/backend/auth/access/access";
 import {
   listAdminTaxonomy,
   taxonomyKindSchema,
-} from "@/lib/taxonomy/admin-taxonomy/admin-taxonomy";
-import { TaxonomyControls } from "@/components/dashboard/admin-taxonomy/taxonomy-controls";
+} from "@/backend/taxonomy/admin-taxonomy/admin-taxonomy";
+import { TaxonomyControls } from "@/frontend/features/taxonomy/components/admin-taxonomy/taxonomy-controls";
 
 export default async function AdminTaxonomyPage({
   searchParams,

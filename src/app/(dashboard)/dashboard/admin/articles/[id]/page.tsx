@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { notFound, unstable_rethrow } from "next/navigation";
-import { requireActiveMembership } from "@/lib/auth/access/access";
-import { getAdminArticleDetail } from "@/lib/articles/admin-article-queries/admin-article-queries";
-import { isDraftUuid } from "@/lib/articles/draft-contract/draft-contract";
-import { AdminArticleMeta } from "@/components/dashboard/admin-articles/admin-article-list";
-import { GuardedDashboardLink } from "@/components/dashboard/guarded-dashboard-link/guarded-dashboard-link";
-import { ArticleDeletion } from "@/components/dashboard/article-deletion/article-deletion";
-import { ArticleLifecycleControls } from "@/components/dashboard/article-lifecycle-controls/article-lifecycle-controls";
+import { requireActiveMembership } from "@/backend/auth/access/access";
+import { getAdminArticleDetail } from "@/backend/articles/admin-article-queries/admin-article-queries";
+import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
+import { AdminArticleMeta } from "@/frontend/features/articles/components/admin-articles/admin-article-list";
+import { GuardedDashboardLink } from "@/frontend/components/dashboard/guarded-dashboard-link/guarded-dashboard-link";
+import { ArticleDeletion } from "@/frontend/features/articles/components/article-deletion/article-deletion";
+import { ArticleLifecycleControls } from "@/frontend/features/articles/components/article-lifecycle-controls/article-lifecycle-controls";
 
 export default async function AdminArticleDetailPage({
   params,

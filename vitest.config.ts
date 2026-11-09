@@ -5,6 +5,10 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
+      "server-only": new URL(
+        "./scripts/import-boundaries/server-only-test-stub.ts",
+        import.meta.url,
+      ).pathname,
       "@": new URL("./src", import.meta.url).pathname,
     },
   },

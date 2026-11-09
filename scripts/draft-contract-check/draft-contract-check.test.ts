@@ -5,12 +5,12 @@ import {
   draftJsonbByteLength,
   isValidDraftDocument,
   isValidDraftLink,
-} from "../../src/lib/articles/draft-contract/draft-contract";
+} from "../../src/shared/articles/draft-contract/draft-contract";
 import {
   baseDraft,
   boundaryCases,
   literalCases,
-} from "../../src/lib/articles/draft-contract/draft-test-cases";
+} from "../../src/shared/articles/draft-contract/draft-test-cases";
 
 // Fixed local Docker project, synthetic fixtures, no secrets/hosted DB or shell.
 // Encode fixture JSON as hex before composing SQL: body text can never become SQL syntax.

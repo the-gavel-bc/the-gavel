@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 const m = vi.hoisted(() => ({ run: vi.fn() }));
-vi.mock("@/lib/media/retired-media-cleanup/retired-media-cleanup", () => ({
+vi.mock("@/backend/media/retired-media-cleanup/retired-media-cleanup", () => ({
   runRetiredMediaCleanup: m.run,
 }));
 import { GET } from "./route";

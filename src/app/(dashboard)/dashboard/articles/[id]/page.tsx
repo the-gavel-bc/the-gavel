@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { notFound, unstable_rethrow } from "next/navigation";
-import { requireActiveMembership } from "@/lib/auth/access/access";
+import { requireActiveMembership } from "@/backend/auth/access/access";
 import {
   getDraftDetail,
   getDraftOptions,
-} from "@/lib/articles/draft-queries/draft-queries";
-import { isDraftUuid } from "@/lib/articles/draft-contract/draft-contract";
-import { DraftForm } from "@/components/dashboard/draft-form/draft-form";
-import { getArticleMainImage } from "@/lib/media/media-queries/media-queries";
-import { ArticleLifecycleControls } from "@/components/dashboard/article-lifecycle-controls/article-lifecycle-controls";
+} from "@/backend/articles/draft-queries/draft-queries";
+import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
+import { DraftForm } from "@/frontend/features/articles/components/draft-form/draft-form";
+import { getArticleMainImage } from "@/backend/media/media-queries/media-queries";
+import { ArticleLifecycleControls } from "@/frontend/features/articles/components/article-lifecycle-controls/article-lifecycle-controls";
 export default async function EditDraftPage({
   params,
 }: {

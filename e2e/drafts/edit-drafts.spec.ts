@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { draftListFixture } from "../support/draft-list-fixture/draft-list-fixture";
-import { draftJsonbByteLength } from "../../src/lib/articles/draft-contract/draft-contract";
+import { draftJsonbByteLength } from "../../src/shared/articles/draft-contract/draft-contract";
 import { setLocalSession } from "../support/local-supabase/local-supabase";
 test.describe.configure({ mode: "serial" });
 let fixture: ReturnType<typeof draftListFixture>;

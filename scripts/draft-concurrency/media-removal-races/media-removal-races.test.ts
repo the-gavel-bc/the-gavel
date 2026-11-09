@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import type { DraftWriteResult } from "../../../src/lib/articles/draft-contract/draft-contract";
+import type { DraftWriteResult } from "../../../src/shared/articles/draft-contract/draft-contract";
 import { ACTOR, beginAsActor } from "../draft-fixtures/draft-fixtures";
 import { DRAFT } from "../draft-fixtures/draft-fixtures";
 import { saveCommand, withSaveFixtures } from "../save-fixtures/save-fixtures";
