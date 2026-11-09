@@ -279,3 +279,7 @@ The owner approved a five-minute cache lifetime for published images; Task 5 imp
 ## Published-media database authorization
 
 Task 5 adds a narrow Storage GET policy for finalized assets currently referenced as main images or validated current-body images by published articles. Storage object metadata must state no-store; legacy cache headers fail closed. Anonymous metadata/list/write grants remain closed. Existing owner/admin preview authorization is retained. Upstream uploads now explicitly use no-store; Task 6 owns the approved five-minute public response cache. The owner approved a bounded service-role maintenance backfill of identical hash-verified bytes; all writers and cleanup must be quiesced, including in-flight requests. See the [Task 5 procedure](superpowers/plans/2026-11-09-published-media-authorization.md#maintenance-procedure).
+
+## Public media delivery route
+
+Task 6 uses only the anonymous publishable-key client for both the allowlisted metadata projection and Storage download. UUIDs determine a canonical key internally; callers cannot supply a URL or object key. Size, finalized SHA-256 and WebP envelope are checked before a cacheable success. Storage authorization rechecks publication when an archive races the initial projection. Successful responses may remain cached for five minutes under the approved policy; private previews and all failures remain no-store. Hosted cache behavior and maintenance migration of legacy images remain release gates.

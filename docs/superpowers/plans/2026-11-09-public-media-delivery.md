@@ -1,6 +1,6 @@
 # Phase 5 Task 6 — public image delivery
 
-Status: in progress on `feat/public-media-delivery`, stacked on Task 5 PR #54.
+Status: implemented and verified locally on `feat/public-media-delivery`, stacked on Task 5 PR #54.
 
 ## Acceptance and risks
 
@@ -16,3 +16,11 @@ Status: in progress on `feat/public-media-delivery`, stacked on Task 5 PR #54.
 2. Add a narrow metadata RPC and a server-only anonymous query; wire GET/HEAD with no persistent server cache and unchanged private previews.
 3. Run relevant SQL, unit, type, lint, schema and generated-type checks. Exercise actual app and Storage requests, including conditional requests and archive after visit.
 4. Review once, update authoritative docs/status, commit focused pieces and open a draft PR stacked on #54. Hosted cache behavior and human review remain release gates.
+
+## Verification
+
+- Ten focused query/route tests passed. SQL projection tests passed six assertions on the upgraded database. A clean stack applied the migration, then received the reviewed checksum-field addition; the full database suite passed 1,687 assertions.
+- Review identified a same-size corrupted WebP could pass envelope checks. Responses now compare downloaded bytes with the finalized SHA-256; a dedicated regression passes. The bounded buffer is intentional to avoid caching partial/corrupt streams, with a maximum 10 MiB per origin response.
+- Production build, TypeScript, lint, formatting, schema lint and generated-type drift passed. After the checksum fix, affected unit tests, targeted lint/format and the production build passed again.
+- Actual production server on port 3106 and disposable Storage: legacy-cache asset denied, verified image returned 200 with five-minute Cache-Control, HEAD returned identical success headers without bytes, a conditional GET still authorized and returned 200, archive returned 404/no-store, restore returned 200, and reference removal denied access. Headless Chromium decoded a synthetic one-pixel WebP from the route.
+- Temporary server and disposable stack were stopped; existing images and hosted data were not changed. Hosted CDN cache expiry/revalidation, legacy-image maintenance and human maintainer review remain release gates.
