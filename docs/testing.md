@@ -100,6 +100,8 @@ These are unimplemented coverage tasks, not confirmed runtime defects or claims 
 
 ## CI and security gates
 
+The Supabase startup step keeps successful output private and prints the last 80 redacted diagnostic lines on failure, preserving the original nonzero exit code. Clean-start verification must use the CLI migration runner as well as any transactional upgrade checks; an external `psql --single-transaction` wrapper can hide missing transaction boundaries in migration files.
+
 `.github/workflows/ci.yml` installs the frozen lockfile and runs the local gates, generated-type drift check, dependency audit, and Gitleaks v8.30.1 history scan. It needs no production secrets. Hosted CI passed for merged foundation commit `66f2f82`; see the [review evidence](reviews/phase-1-foundation.md#review-evidence). This verifies that commit, not future changes.
 
 The former CI exception for [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) was retired on 2026-10-23 after upstream withdrew the advisory and unfiltered production/full audits reported zero findings. CI now runs `pnpm audit --prod --audit-level=high` and `pnpm audit --audit-level=high` without any ignore. All high/critical findings remain blocking. [ADR 0005](decisions/0005-temporary-ci-audit-exception.md) retains the historical approval and retirement evidence.
@@ -338,6 +340,10 @@ The upgraded local database passed 1,441 pgTAP assertions for own-only access, r
 ## Phase 4 Task 13: homepage curation
 
 The upgraded local database passed 1,478 pgTAP assertions, including authorization, slot limits, duplicate and invalid selections, fallback ordering, stale writes, exact retry after later changes, and atomic audit rollback. The full unit suite passed 600 tests; twelve focused homepage/navigation tests passed again after the final guard change. The full concurrency suite passed 43 cases, including both selection/archive interleavings. Three desktop/mobile browser cases passed for desktop saving, catalog navigation, mobile selection and role denial; the mobile write case is skipped because both projects share one singleton. Playwright built the production app. TypeScript, targeted lint/format, schema lint and generated type comparison passed. The local project was preserved; clean migration CI and human review remain pending. See the [Task 13 plan](superpowers/plans/2026-11-07-homepage-curation.md).
+
+## Phase 4 Task 15: archived deletion
+
+Task 15 adds coverage for role and confirmation denials, revision and audit retention, retired IDs/slugs, exact retries, homepage coordination, media in all upload states, immutable key ownership, bounded cleanup claims, expired leases, scan wrapping and backlog. Worker tests cover preview/cron authorization, Storage write/delete readiness, failures, unknown names and uppercase filenames. Synthetic local browser tests exercise administrator deletion, author denial and late uploads to both known and previously untracked keys. Clean-install migration CI, hosted cron execution, monitoring setup and human security/accessibility review remain outstanding. See the [Task 15 plan](superpowers/plans/2026-11-07-archived-article-deletion.md).
 
 ## Phase 4 Task 14: site information
 

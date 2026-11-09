@@ -45,7 +45,7 @@ select results_eq($$select event_id::text from public.list_article_audit_events(
   'archived-resource audit remains visible');
 select throws_ok($$select * from public.list_article_audit_events(52)$$,'22023',null,
   'direct RPC cannot request an oversized page');
-select throws_ok($$select * from public.list_article_audit_events(20,'article.deleted')$$,
+select throws_ok($$select * from public.list_article_audit_events(20,'article.owner_changed')$$,
   '22023',null,'unimplemented action cannot be requested');
 select throws_ok($$select * from public.list_article_audit_events(
   20,null,'2026-01-03T00:00:00Z',null)$$,'22023',null,

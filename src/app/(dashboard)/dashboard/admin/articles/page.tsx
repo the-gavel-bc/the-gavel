@@ -18,7 +18,7 @@ export default async function AdminArticlesPage({
         <Link href="/dashboard">My articles</Link>
       </>
     );
-  const input = await searchParams;
+  const { deleted, ...input } = await searchParams;
   let page;
   try {
     page = await getAdminArticlesPage(input);
@@ -45,6 +45,12 @@ export default async function AdminArticlesPage({
   return (
     <>
       <h1>Article management</h1>
+      {deleted === "1" && (
+        <p role="status">
+          Article deleted. Image cleanup continues and is monitored for late
+          uploads.
+        </p>
+      )}
       <p>
         <Link href="/dashboard/admin/audit" prefetch={false}>
           Article activity
@@ -62,6 +68,9 @@ export default async function AdminArticlesPage({
         </Link>
         <Link href="/dashboard/admin/taxonomy" prefetch={false}>
           Taxonomy
+        </Link>
+        <Link href="/dashboard/admin/media-cleanup" prefetch={false}>
+          Media cleanup
         </Link>
         <Link href="/dashboard/admin/homepage" prefetch={false}>
           Homepage

@@ -28,6 +28,7 @@ const row = {
   resource_id: profileId,
   created_at: updatedAt,
   actor_label: "Editor",
+  article_exists: true,
 };
 beforeEach(() => {
   vi.clearAllMocks();
@@ -49,6 +50,7 @@ it("returns safe summaries and a filter-bound keyset cursor", async () => {
       resourceId: profileId,
       createdAt: updatedAt,
       actorLabel: "Editor",
+      articleExists: true,
     },
   ]);
   expect(page.nextCursor).toEqual(expect.any(String));
@@ -79,7 +81,7 @@ it("returns safe summaries and a filter-bound keyset cursor", async () => {
 it("rejects malformed or unbounded requests before access or database reads", async () => {
   for (const input of [
     { pageSize: 51 },
-    { action: "article.deleted" },
+    { action: "article.owner_changed" },
     { cursor: "bad" },
     { actorId: articleId },
     { pageSize: "50" },
@@ -105,7 +107,7 @@ it("blocks authors before the RPC and masks database failures", async () => {
 });
 
 it("rejects raw or unexpected database fields in displayed events", async () => {
-  http.respond([{ ...row, action: "article.deleted" }]);
+  http.respond([{ ...row, action: "article.owner_changed" }]);
   await expect(listAuditEvents({})).rejects.toThrow(
     "Unable to load article activity.",
   );

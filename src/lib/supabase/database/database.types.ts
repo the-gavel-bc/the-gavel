@@ -667,6 +667,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      arm_media_cleanup_probe: {
+        Args: { p_run_token: string };
+        Returns: boolean;
+      };
       begin_article_image_upload: {
         Args: { p_actor_user_id: string; p_asset_id: string };
         Returns: Json;
@@ -679,6 +683,21 @@ export type Database = {
           p_target_user_id: string;
         };
         Returns: Json;
+      };
+      claim_media_cleanup: {
+        Args: { p_limit: number };
+        Returns: {
+          claim_token: string;
+          object_key: string;
+        }[];
+      };
+      claim_retired_article_prefixes: {
+        Args: { p_limit: number };
+        Returns: {
+          article_id: string;
+          claim_token: string;
+          scan_offset: number;
+        }[];
       };
       complete_article_image_removal: {
         Args: { p_actor_user_id: string; p_asset_id: string };
@@ -719,6 +738,15 @@ export type Database = {
         };
         Returns: Json;
       };
+      delete_archived_article: {
+        Args: {
+          p_article_id: string;
+          p_confirm: boolean;
+          p_expected_version: number;
+          p_request_id: string;
+        };
+        Returns: Json;
+      };
       finalize_article_image_upload: {
         Args: {
           p_actor_user_id: string;
@@ -730,7 +758,53 @@ export type Database = {
         };
         Returns: Json;
       };
+      finish_media_cleanup: {
+        Args: {
+          p_claim_token: string;
+          p_object_key: string;
+          p_success: boolean;
+        };
+        Returns: boolean;
+      };
+      finish_media_cleanup_run: {
+        Args: { p_success: boolean; p_token: string };
+        Returns: boolean;
+      };
+      finish_retired_article_scan: {
+        Args: {
+          p_article_id: string;
+          p_claim_token: string;
+          p_count: number;
+          p_success: boolean;
+        };
+        Returns: boolean;
+      };
+      finish_retired_article_scan_v2: {
+        Args: {
+          p_article_id: string;
+          p_claim_token: string;
+          p_clean: boolean;
+          p_count: number;
+          p_page_read: boolean;
+        };
+        Returns: boolean;
+      };
       get_admin_homepage_curation: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
+      get_media_cleanup_backlog: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
+      get_media_cleanup_probe: {
+        Args: { p_run_token: string };
+        Returns: {
+          armed: boolean;
+          object_key: string;
+        }[];
+      };
+      get_media_cleanup_status: {
         Args: Record<PropertyKey, never>;
         Returns: Json;
       };
@@ -796,6 +870,7 @@ export type Database = {
         Returns: {
           action: string;
           actor_label: string;
+          article_exists: boolean;
           created_at: string;
           event_id: string;
           resource_id: string;
@@ -840,6 +915,26 @@ export type Database = {
           p_request_id: string;
         };
         Returns: Json;
+      };
+      record_media_cleanup_health: {
+        Args: { p_success: boolean };
+        Returns: boolean;
+      };
+      register_retired_media_key: {
+        Args: {
+          p_article_id: string;
+          p_asset_id: string;
+          p_claim_token: string;
+        };
+        Returns: boolean;
+      };
+      register_retired_media_keys: {
+        Args: {
+          p_article_id: string;
+          p_asset_ids: string[];
+          p_claim_token: string;
+        };
+        Returns: boolean;
       };
       request_article_image_upload: {
         Args: { p_article_id: string; p_request_id: string };
@@ -921,6 +1016,10 @@ export type Database = {
           p_request_id: string;
         };
         Returns: Json;
+      };
+      start_media_cleanup_run: {
+        Args: Record<PropertyKey, never>;
+        Returns: string;
       };
       update_category_taxonomy: {
         Args: {

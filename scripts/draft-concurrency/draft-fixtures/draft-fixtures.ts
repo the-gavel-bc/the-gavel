@@ -82,6 +82,9 @@ export async function withDraftFixtures(
       delete from public.article_categories where article_id in(select id from public.articles where owner_profile_id='${PROFILE}');
       delete from public.article_tags where article_id in(select id from public.articles where owner_profile_id='${PROFILE}');
       delete from public.article_contributors where article_id in(select id from public.articles where owner_profile_id='${PROFILE}');
+      delete from private.media_cleanup_ledger where article_id in(select id from public.articles where owner_profile_id='${PROFILE}');
+      delete from private.media_key_registry where article_id in(select id from public.articles where owner_profile_id='${PROFILE}');
+      delete from private.article_id_registry where article_id in(select id from public.articles where owner_profile_id='${PROFILE}');
       delete from public.articles where owner_profile_id='${PROFILE}';
       delete from public.categories where id='${CATEGORY}';delete from public.sections where id='${SECTION}';
       delete from public.profiles where id in('${PROFILE}','${GUEST}');

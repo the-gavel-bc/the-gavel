@@ -246,6 +246,12 @@ Editable-in-flight state never changes the submitted command's ownership, payloa
 
 The navigation provider contains only a leave-check callback. Canceling sign-out prevents its request before the unchanged server action runs; clean and no-JS form behavior stay server-owned. Supported app links are guarded, new tabs/hash anchors remain usable, and full-document reload/close warnings are best-effort. Same-document history interception, crash recovery, hosted provider/session assurance and human screen-reader/security review remain separate limitations.
 
+## Archived deletion and cleanup
+
+Eligible active administrators alone can request confirmed, version-checked deletion of archived articles. Database locks serialize deletion with restoration, homepage edits, slug allocation and media metadata changes; active finalizer lock contention fails safely. Article and actor audit identifiers survive, while revisions and the article are removed. Article IDs, public slugs and retired object keys cannot be reused. Application roles cannot directly mutate the registry, ledger, receipts or Storage objects.
+
+A bounded worker uses the server-only service role to sweep permanently retained keys and discover canonical keys under retired article prefixes. It checks Storage write/delete capability, fails closed on unknown keys or ownership conflicts, and never treats a successful sweep as proof of final erasure. A production-only cron endpoint requires `CRON_SECRET`; administrator retry has an independent active-role check and is restricted to production or the verified local Supabase URL. Failed, stale or overlapping runs prevent new deletions until recovery.
+
 ## Administrator site information
 
 Task 14 closes direct application access to site settings and receipts. A user-scoped server client calls checked RPCs that derive the actor from Auth, require eligible active administrator membership and an active profile, and serialize with membership and profile operations. Updates validate named fields, reject markup and unsafe social URLs, prevent lost writes with versions, preserve exact retries, and audit without copying settings text. Public access remains Phase 5 work.

@@ -12,6 +12,7 @@ it("renders safe action, actor, resource and timestamp with filtered pagination"
             id: "00000000-0000-0000-0000-000000000001",
             action: "article.archived",
             actorLabel: "Editor",
+            articleExists: true,
             resourceId: "00000000-0000-0000-0000-000000000002",
             createdAt: "2026-11-05T12:00:00+00:00",
           },
@@ -36,4 +37,29 @@ it("renders safe action, actor, resource and timestamp with filtered pagination"
     "href",
     "/dashboard/admin/audit?cursor=safe-cursor&action=article.archived",
   );
+});
+
+it("does not link prior activity to a deleted article", () => {
+  render(
+    <AdminAudit
+      action={null}
+      page={{
+        nextCursor: null,
+        items: [
+          {
+            id: "00000000-0000-0000-0000-000000000001",
+            action: "article.archived",
+            actorLabel: "Editor",
+            resourceId: "00000000-0000-0000-0000-000000000002",
+            createdAt: "2026-11-05T12:00:00+00:00",
+            articleExists: false,
+          },
+        ],
+      }}
+    />,
+  );
+  expect(
+    screen.queryByRole("link", { name: /View article/ }),
+  ).not.toBeInTheDocument();
+  expect(screen.getByText(/Deleted article 00000000/)).toBeVisible();
 });
