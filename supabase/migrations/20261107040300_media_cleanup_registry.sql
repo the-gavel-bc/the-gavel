@@ -1,3 +1,5 @@
+-- The CLI does not implicitly wrap this migration; retain locks through backfill and trigger installation.
+begin;
 -- Atomic cutover: every live key is registered before guarded writes resume.
 lock table public.media_assets in share row exclusive mode;
 lock table public.articles in share row exclusive mode;
@@ -53,3 +55,5 @@ begin
 end $$;
 create trigger retire_media_key after delete on public.media_assets for each row execute function private.retire_media_key();
 revoke all on function private.register_article_id(),private.register_media_key(),private.retire_media_key() from public,anon,authenticated;
+
+commit;
