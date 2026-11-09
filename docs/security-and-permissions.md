@@ -271,3 +271,7 @@ Anonymous and authenticated callers can execute the same published-only, fixed-s
 The public list RPC uses the same role-independent publication boundary and returns summary fields only. It validates scope, page size and cursor directly in PostgreSQL, including for callers bypassing the server adapter. A cursor conveys no access and does not freeze future pages. Inactive section, category and profile filters do not expose private records; direct article table grants remain unchanged.
 
 The public site navigation RPC exposes only active sections and categories under active parents plus the four approved site-information fields. It removes invalid stored links and unsafe text before returning data to any role. The settings table, administrator RPC and receipts retain their existing access controls; the public reader never uses a user session or service-role key.
+
+## Approved public-image caching policy
+
+The owner approved a five-minute cache lifetime for published images; implementation is pending. Article pages continue fresh visibility checks. Cached images may remain available for up to five minutes after archive, deletion or reference removal, while origin requests check current access. Private previews and failures remain no-store. The [reader contract](superpowers/plans/2026-11-09-phase-five-reader-contract.md#media-responses-and-metadata) defines the bounds and rollout checks. Existing one-hour Storage headers must be resolved before public media access; this decision does not expand service-key scope.
