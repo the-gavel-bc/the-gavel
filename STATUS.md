@@ -9,3 +9,5 @@
 - PR: [draft #47](https://github.com/dylandrozario/the-gavel/pull/47), stacked on Task 15 PR #46.
 - Pending: dependent Task 15 merge, owner-run hosted CI and human maintainer review. Phase 4 Task 16 and hosted OAuth/cron/security/accessibility gates remain separate.
 - Plan/mapping/evidence: [ownership refactor](docs/superpowers/plans/2026-11-08-frontend-backend-ownership.md).
+
+- CI compatibility follow-up: inherited registry migration now has an explicit transaction. Fresh disposable CLI startup with auxiliary services excluded locally and all 1,575 SQL assertions passed. Full hosted CI remains owner-verified; failure logs are now redacted and visible.

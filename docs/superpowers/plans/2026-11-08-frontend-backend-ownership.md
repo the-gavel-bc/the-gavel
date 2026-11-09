@@ -262,3 +262,9 @@ Follow-up results:
 - `pnpm typecheck`, `pnpm lint`, and `pnpm exec prettier --check src scripts/import-boundaries docs/testing.md` passed. `git diff --check` passed.
 - Focused `pnpm exec vitest run` passed 322 tests in 15 files: import boundaries; article save state, command/category hooks, body-image controls and document conversion; draft queries; media removal/cleanup; draft validation; and the article media route.
 - No executable, import, configuration or schema changes. Database, concurrency and browser suites were not repeated for this comment/documentation-only follow-up.
+
+## CI compatibility follow-up
+
+Inherited Task 15 migration `20261107040300` failed clean CLI startup with SQLSTATE 25P01 because its `LOCK TABLE` statements lacked an explicit transaction. Applied the same correction as PR #46: wrap the existing migration in BEGIN/COMMIT, preserving its schema/data operations and holding locks through backfill and trigger installation. A later migration cannot repair an earlier clean-start failure. Existing applied databases need no reset or replay.
+
+The full duplicate local stack passed all migrations, then timed out on auxiliary service health. A clean disposable CLI start with studio/realtime/logflare/vector excluded completed successfully; all 1,575 SQL assertions passed. CI retains its full service configuration. CI startup now prints a bounded redacted failure tail and preserves the exit status; synthetic success/failure/redaction checks and workflow formatting passed. Hosted CI remains for owner verification.
