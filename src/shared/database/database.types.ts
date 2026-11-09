@@ -819,6 +819,10 @@ export type Database = {
         }[];
       };
       get_public_article: { Args: { p_slug: string }; Returns: Json };
+      get_public_article_media: {
+        Args: { p_article_id: string; p_asset_id: string };
+        Returns: Json;
+      };
       get_public_site_navigation: {
         Args: Record<PropertyKey, never>;
         Returns: Json;
