@@ -1,14 +1,10 @@
 # Current work
 
-- Branch: `refactor/frontend-backend-ownership`, isolated at `/private/tmp/the-gavel-ownership`.
-- Baseline: Main at `44a5583` includes Task 15 PR #46. PR #47 now integrates that main commit.
-- Implemented: frontend/backend/shared ownership, import restrictions, server-only guards, updated tooling and documentation. Next.js/Supabase behavior and database migrations are unchanged.
-- Verification: 628 existing tests passed before/after moves; 639 passed with boundary tests, then all 13 boundary cases passed after review fixes. Types/lint/format/build/type drift passed; 1,575 SQL assertions, 214 contract, 8 editor and 48 concurrency tests passed.
-- Browser: full run 132 passed, 3 skipped, 1 fixture-teardown failure. Restored Task 14 cleanup omitted during integration; focused recheck 3 passed, 1 skipped. No application assertion was removed or weakened.
-- Readability follow-up: structure docs completed and intent comments added in 12 source files. Executable tokens match `cf1d39c`; types/lint/format and 322 focused tests passed. See the existing plan for evidence.
-- Main integration recheck: types, lint, 36 focused tests, production build and nine desktop/mobile browser cases passed; one shared-state mobile deletion skipped.
-- PR: [draft #47](https://github.com/dylandrozario/the-gavel/pull/47), targeting main after Task 15 merged.
-- Pending: owner-run hosted CI and human maintainer review. Phase 4 Task 16 and hosted OAuth/cron/security/accessibility gates remain separate.
-- Plan/mapping/evidence: [ownership refactor](docs/superpowers/plans/2026-11-08-frontend-backend-ownership.md).
-
-- CI compatibility follow-up: inherited registry migration now has an explicit transaction. Fresh disposable CLI startup with auxiliary services excluded locally and all 1,575 SQL assertions passed. Full hosted CI remains owner-verified; failure logs are now redacted and visible.
+- Phase: 4, Task 16 local verification complete; owner-run hosted CI and human maintainer review pending. Public reader work remains Phase 5.
+- Branch: `docs/phase-four-verification`, isolated at `/private/tmp/the-gavel-phase4-verify`, based on merged main `cd67443` (Tasks 1–15 plus ownership refactor).
+- Verified application-code commit: `2a6ce63`. Subsequent handoff changes are documentation only.
+- Fixed two reproduced authorization gaps with forward migrations: trusted media calls now retain actor eligibility across lock waits; deactivated caller profiles lose direct article/media read authority. Nine race cases and direct-denial regressions pass. Deletion copy now describes delayed image removal.
+- Local gates: 641 unit tests, 1,590 SQL assertions on existing/clean databases, 214 contract cases, eight editor cases, 57 concurrency cases, types/lint/format/schema/type drift/build and history secret scan passed. Upgrade preserves baseline values except expected profile timestamp backfill. Existing local data was not reset/stopped; disposable project removed.
+- Browser: default full run had 12 desktop server/membership-access failures (27 serial cases not run). Entire desktop rerun with one worker passed 68; initial mobile run passed 65 with three shared-state writes skipped. Assertions/timeouts were not weakened; intermittent local API root cause remains unproven.
+- Audits: production clean; full high/critical gate passes with one moderate development-only minimatch advisory still present.
+- Handoff: [Phase 4 evidence](docs/reviews/phase-4-editorial-workflow.md). [Draft PR #48](https://github.com/dylandrozario/the-gavel/pull/48) is open against main. Human review, real OAuth/session checks, hosted cron/capacity/alerts, initial cleanup health, screen-reader and recovery exercises remain launch gates. No MVP-complete claim.

@@ -259,3 +259,7 @@ A bounded worker uses the server-only service role to sweep permanently retained
 ## Administrator site information
 
 Task 14 closes direct application access to site settings and receipts. A user-scoped server client calls checked RPCs that derive the actor from Auth, require eligible active administrator membership and an active profile, and serialize with membership and profile operations. Updates validate named fields, reject markup and unsafe social URLs, prevent lost writes with versions, preserve exact retries, and audit without copying settings text. Public access remains Phase 5 work.
+
+## Phase 4 integrated authorization corrections
+
+The direct article-read and administrator predicates require the caller's linked profile to remain active as well as eligible Auth and active membership. Checked profile deactivation therefore also closes dependent article, association, media and Storage reads; hiding the dashboard alone is insufficient. Trusted media upload claiming, finalization and removal completion lock the supplied actor's Auth, membership and profile rows before resource locks, then check current eligibility and role. Locks retain that authority through commit, including after waits. The service role still cannot invoke the internal actor-lock helper directly. See the [Phase 4 evidence](reviews/phase-4-editorial-workflow.md).

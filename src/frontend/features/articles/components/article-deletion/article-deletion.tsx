@@ -65,8 +65,7 @@ export function ArticleDeletion({
       <h2 id="permanent-deletion-heading">Permanently delete article</h2>
       <p>
         This permanently removes the article and its revision history. Audit
-        records remain. Articles with media or media history cannot be deleted
-        yet.
+        records remain. Image removal may continue after the article is deleted.
       </p>
       <label>
         Type DELETE to confirm
