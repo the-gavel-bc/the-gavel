@@ -268,3 +268,9 @@ Follow-up results:
 Inherited Task 15 migration `20261107040300` failed clean CLI startup with SQLSTATE 25P01 because its `LOCK TABLE` statements lacked an explicit transaction. Applied the same correction as PR #46: wrap the existing migration in BEGIN/COMMIT, preserving its schema/data operations and holding locks through backfill and trigger installation. A later migration cannot repair an earlier clean-start failure. Existing applied databases need no reset or replay.
 
 The full duplicate local stack passed all migrations, then timed out on auxiliary service health. A clean disposable CLI start with studio/realtime/logflare/vector excluded completed successfully; all 1,575 SQL assertions passed. CI retains its full service configuration. CI startup now prints a bounded redacted failure tail and preserves the exit status; synthetic success/failure/redaction checks and workflow formatting passed. Hosted CI remains for owner verification.
+
+## Main integration — 2026-11-09
+
+After Task 15 merged as `44a5583`, integrated current main and retargeted PR #47 to main. Kept the refactored imports in the administrator detail/cleanup routes and cron route/test. Retained Task 15's new integration/CI evidence. Removed 12 old-path duplicates introduced by the squash merge only after comparing each byte-for-byte with the original Task 15 snapshot. The resolved source tree matches the pre-merge refactor source; only handoff/evidence docs change.
+
+Verification: TypeScript, lint and 36 focused unit tests passed. Production build and administrator deletion/audit browser suites passed nine cases; one shared-state mobile deletion was skipped. No database/schema operation was changed, so database reset and broad SQL/concurrency reruns were not repeated. Hosted CI remains for the owner.
