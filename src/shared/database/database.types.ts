@@ -905,6 +905,16 @@ export type Database = {
           user_id: string;
         }[];
       };
+      list_public_articles: {
+        Args: {
+          p_cursor: Json;
+          p_limit: number;
+          p_primary: string;
+          p_scope: string;
+          p_secondary: string;
+        };
+        Returns: Json;
+      };
       mark_article_image_for_removal: {
         Args: { p_asset_id: string };
         Returns: Json;
