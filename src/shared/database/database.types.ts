@@ -818,6 +818,15 @@ export type Database = {
           slug_frozen: boolean;
         }[];
       };
+      get_public_article: { Args: { p_slug: string }; Returns: Json };
+      get_public_article_media: {
+        Args: { p_article_id: string; p_asset_id: string };
+        Returns: Json;
+      };
+      get_public_site_navigation: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
       get_site_information: {
         Args: Record<PropertyKey, never>;
         Returns: {
@@ -903,6 +912,16 @@ export type Database = {
           state: string;
           user_id: string;
         }[];
+      };
+      list_public_articles: {
+        Args: {
+          p_cursor: Json;
+          p_limit: number;
+          p_primary: string;
+          p_scope: string;
+          p_secondary: string;
+        };
+        Returns: Json;
       };
       mark_article_image_for_removal: {
         Args: { p_asset_id: string };

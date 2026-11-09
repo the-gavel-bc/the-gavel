@@ -66,7 +66,7 @@ Run focused tests and fast checks while implementing. Run a task's heavy SQL/con
 
 ## Task 1 — accept the public contract and UI map: ready for review
 
-The [focused Task 1 contract](2026-11-09-phase-five-reader-contract.md) records the owner's News, category-URL and shared search-limit decisions; exact public visibility, role-independent reads, cursor/order bounds, no-cache and media authorization constraints; demo file fingerprints; and remaining asset/copy/screenshot gates. The 120-per-minute shared budget is an initial technical default, not an owner-selected number; Task 17 must measure capacity, cover cancellation/rollback limits, and retain direct-RPC enforcement before public release.
+The [focused Task 1 contract](2026-11-09-phase-five-reader-contract.md) records the owner's News, category-URL and shared search-limit decisions; exact public visibility, role-independent reads, cursor/order bounds, fresh page checks, five-minute public-image caching and media authorization constraints; demo file fingerprints; and remaining asset/copy/screenshot gates. The 120-per-minute shared budget is an initial technical default, not an owner-selected number; Task 17 must measure capacity, cover cancellation/rollback limits, and retain direct-RPC enforcement before public release.
 
 - [x] Inspect merged main and Phase 4 outstanding gates; fingerprint the demo and map reader components/routes.
 - [x] Record visibility, public DTO fields, response/error constraints, pagination/search limits, rate-limit authority and retry, curation/row duplication, caching and canonical routes.
@@ -113,14 +113,14 @@ The [focused Task 1 contract](2026-11-09-phase-five-reader-contract.md) records 
 - [ ] Permit only the necessary public Storage read operations for those keys; keep listing, writes and private-only metadata/media paths closed. Preserve existing owner/admin access.
 - [ ] Prove guessed draft/archived/deleting/unattached/revision-only assets fail, including a formerly published image removed from the live body. Exercise archive/restore/reference-change races and helper grants. Verify direct Storage network requests and upstream cache/authorization headers as well as the app proxy; do not assume a private bucket alone settles cache revocation.
 
-**Acceptance/validation:** Public delivery is possible only for live published references; private Storage never becomes a public bucket. SQL/independent-session checks and security review pass before delivery UI. If existing object headers or upstream caching defeat next-request authorization, settle a concrete Storage-API compatibility/backfill approach in this task before granting reads; do not silently extend service-key scope or weaken the visibility contract.
+**Acceptance/validation:** Public delivery is possible only for live published references; private Storage never becomes a public bucket. SQL/independent-session checks and security review pass before delivery UI. If existing object headers or upstream caching exceed the approved five-minute public-image lifetime, settle a concrete Storage-API compatibility/backfill approach in this task before granting reads; do not silently extend service-key scope or weaken the visibility contract.
 
 ## Task 6 — public media delivery route
 
 **Files:** `src/app/api/public/articles/[articleId]/media/[assetId]/route.ts` and tests; `src/backend/reader/media-query/`; typed media descriptors as needed.
 
 - [ ] Validate both IDs and authorize through the published projection and anonymous Storage policy. Never accept a caller URL/object path or use a service credential.
-- [ ] Stream validated WebP with correct type/nosniff and the accepted no-store policy. Avoid image-optimizer/CDN derivatives that bypass later visibility checks.
+- [ ] Stream validated WebP with correct type/nosniff and the approved five-minute public-image cache policy (private previews and errors remain no-store). Avoid image-optimizer/CDN derivatives that extend the approved five-minute removal window.
 - [ ] Test GET/HEAD as applicable, missing/invalid assets, service failures, cross-article substitution and archive-after-visit. Existing private preview routes must retain their behavior.
 
 **Acceptance/validation:** Published images load while private/retired variants remain unavailable; route/unit and real Storage/browser header checks pass.

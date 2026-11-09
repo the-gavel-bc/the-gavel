@@ -6,6 +6,8 @@ Copy [template.md](template.md) to a descriptive filename and add its link below
 
 ## Index
 
+- [Verified media cache header maintenance](../superpowers/plans/2026-11-09-published-media-authorization.md#maintenance-procedure): approved one-time backfill; requires all writers and cleanup to be stopped.
+
 Runbooks will be added and verified when the corresponding services and commands exist. Required before production:
 
 - Security incident triage and credential rotation

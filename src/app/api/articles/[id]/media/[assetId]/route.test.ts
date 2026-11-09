@@ -212,7 +212,11 @@ it("uploads only decoded WebP and finalizes the owned reservation", async () => 
   const [key, bytes, options] = mocks.upload.mock.calls[0];
   expect(key).toBe(`${articleId}/${assetId}.webp`);
   expect((await sharp(bytes).metadata()).format).toBe("webp");
-  expect(options).toMatchObject({ contentType: "image/webp", upsert: false });
+  expect(options).toMatchObject({
+    contentType: "image/webp",
+    upsert: false,
+    headers: { "cache-control": "no-store" },
+  });
   expect(mocks.finalize).toHaveBeenCalledOnce();
   expect(mocks.claim.mock.invocationCallOrder[0]).toBeLessThan(
     mocks.upload.mock.invocationCallOrder[0],

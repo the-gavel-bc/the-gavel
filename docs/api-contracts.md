@@ -1,5 +1,17 @@
 # API contracts
 
+## Public article detail projection
+
+`get_public_article(p_slug text)` returns `{kind: "notFound"}` for malformed, unknown, draft, archived, or deleted slugs. Published articles with invalid documents or unavailable required references return `{kind: "unavailable"}`; valid ones return `{kind: "ok", article}`. The allowlisted article includes its canonical document, public taxonomy and credits, and descriptors for finalized current images. It excludes storage paths and private identity, workflow, and history fields. The server adapter validates the response with a cookie-free publishable-key client and disables fetch caching. This interface does not grant public object access or implement a reader page. See the [Task 2 plan](superpowers/plans/2026-11-09-public-article-projection.md).
+
+## Public article lists
+
+`list_public_articles(scope, primary, secondary, limit, cursor)` returns bounded published-only cards for latest, section, section/category, tag, and owner-or-contributor author scopes. Limits are 1–24; the server adapter defaults to 12. Cards contain title, excerpt, publication timestamp, public section/owner/writer fields and a finalized main-image descriptor. They omit article bodies and private metadata. Cursors bind scope and filters, preserve timestamp microseconds, and are not authorization; malformed or mismatched requests return `invalid`. Database failures and invalid results return `unavailable`. New requests recheck publication and may see changes between pages. The server uses the cookie-free, no-store public client. See the [Task 3 plan](superpowers/plans/2026-11-09-public-article-list.md).
+
+## Public navigation and information
+
+`get_public_site_navigation()` returns active sections and active categories in configured order, together with the public mission, contact email, Instagram URL and submission instructions. Unset or unsafe stored fields return null. Public email validation is stricter than the current administrator editor: a malformed address accepted there can be hidden here until corrected. The projection fails safely rather than truncating when more than 100 sections or 1,000 categories are active; these limits do not restrict editorial writes. It excludes settings versions, IDs, receipts and audit data. The server adapter uses the cookie-free, no-store public client and validates the complete result. See the [Task 4 plan](superpowers/plans/2026-11-09-public-site-navigation.md).
+
 ## Implemented private draft main image
 
 `request_article_image_upload(articleId,requestId)` reserves an opaque media asset for an authorized draft owner or active administrator. `POST /api/articles/[id]/media/[assetId]` accepts one bounded multipart `file`, validates and re-encodes JPEG/PNG/WebP to private WebP, then uses the server-only service role to finalize the checked reservation. `set_article_main_image(articleId,expectedVersion,requestId,assetId,altText,credit)` attaches a finalized same-article asset or unlinks with null asset/metadata. It returns the existing draft write result envelope, creates history on a change, and replays exact requests. These interfaces leave the Phase 3 draft payload and receipts unchanged.
@@ -10,7 +22,7 @@
 
 The existing `save_article_draft(articleId,expectedVersion,requestId,draft)` accepts canonical `gavel-draft` version 2 bodies with image blocks containing only `assetId`, required alt text (1–240 characters), and optional caption (1–500 characters). Version 1 bodies remain valid. Database save checks each asset is finalized for that article and reconciles body references in the same transaction as content, revision, audit, and retry receipt. Draft creation does not accept version 2 bodies because assets require an existing article. `GET /api/articles/[id]/media/[assetId]` serves a finalized same-article WebP only through the active caller's RLS-scoped client, with private no-store and nosniff headers. Video embeds remain unavailable pending a provider allowlist.
 
-Status: Foundation access/session interfaces, Phase 2 private content/history storage, Phase 3 private draft queries/actions, and Phase 4 article lifecycle and administrator list/detail commands implemented. Public article reads remain planned.
+Status: Foundation access/session interfaces, private draft and editorial commands, and the Phase 5 public article detail projection are implemented. Public pages and media delivery remain planned.
 
 ## Style and ownership
 
@@ -198,3 +210,11 @@ Private object keys are retained in a permanent registry and cleanup ledger. A b
 ## Integrated Phase 4 authorization verification
 
 Trusted `begin_article_image_upload`, `finalize_article_image_upload` and `complete_article_image_removal` retain supplied-actor Auth, membership and active-profile locks through commit, checking current role after waits. The internal actor-lock helper is not callable by application roles or the service role. Direct article/media reads also require an active caller profile. Existing public signatures, response codes and owner/administrator scopes are preserved. See [Phase 4 evidence](reviews/phase-4-editorial-workflow.md) for reproduced failures and passing regressions.
+
+## Published media Storage reads
+
+The private article-media bucket permits public object GET only for finalized same-article assets currently linked as main images or present in a validated current body of a published article. The object metadata must specify no-store. Public object listing, metadata enumeration and writes remain denied; private owner/admin reads retain their existing policy. Newly finalized uploads explicitly set no-store. The approved five-minute cache belongs to the forthcoming Task 6 public delivery response, not to upstream Storage. Legacy objects require the [approved maintenance backfill](superpowers/plans/2026-11-09-published-media-authorization.md#maintenance-procedure) before public access.
+
+## Public image delivery
+
+GET and HEAD `/api/public/articles/[articleId]/media/[assetId]` accept UUIDs only. A cookie-free published-media projection returns byte size and finalized SHA-256, followed by an independently authorized no-store Storage download. The server verifies size, hash and WebP envelope before returning bytes. No object path, caller identity or service key is accepted. Missing/private/substituted images return generic 404; backend or integrity failures return 503. Both error classes use private/no-store. Successful images use WebP/nosniff and `public, max-age=300, s-maxage=300, must-revalidate, proxy-revalidate`; HEAD runs the same checks without returning bytes. Conditional client headers are not forwarded upstream and never bypass authorization. Existing private previews retain private/no-store behavior. See the [Task 6 plan](superpowers/plans/2026-11-09-public-media-delivery.md).

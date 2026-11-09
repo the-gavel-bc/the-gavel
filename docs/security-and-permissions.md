@@ -1,6 +1,6 @@
 # Security and permissions
 
-Status: Foundation access/session controls, Phase 2 content/history read permissions, and checked Phase 4 publish/archive transitions implemented; public article reads and hosted provider controls remain planned.
+Status: Foundation access/session controls, private content permissions, checked editorial transitions, and the public article detail projection are implemented; public media delivery and hosted provider controls remain planned.
 
 Phase 4 private article media uses a server-only Supabase service-role key for validated WebP Storage writes and cleanup. Reservation, attachment, and removal still begin with active user-scoped checks; trusted finalization and completion independently check the claimed actor and asset state. The private bucket has no direct browser write grant. Finalized objects are readable only for an authorized article reader; pending, uploading, or deleting objects are hidden. Current and historical article image references block physical deletion.
 
@@ -263,3 +263,23 @@ Task 14 closes direct application access to site settings and receipts. A user-s
 ## Phase 4 integrated authorization corrections
 
 The direct article-read and administrator predicates require the caller's linked profile to remain active as well as eligible Auth and active membership. Checked profile deactivation therefore also closes dependent article, association, media and Storage reads; hiding the dashboard alone is insufficient. Trusted media upload claiming, finalization and removal completion lock the supplied actor's Auth, membership and profile rows before resource locks, then check current eligibility and role. Locks retain that authority through commit, including after waits. The service role still cannot invoke the internal actor-lock helper directly. See the [Phase 4 evidence](reviews/phase-4-editorial-workflow.md).
+
+## Public article projection
+
+Anonymous and authenticated callers can execute the same published-only, fixed-search-path projection. Existing private table grants and RLS remain unchanged. The projection checks the canonical body and current image links before returning an allowlist; unpublished slugs share the same not-found result. Public Storage grants and image delivery remain separate work. Responses observe one statement snapshot, so archiving prevents subsequent reads but cannot recall a response already in flight.
+
+The public list RPC uses the same role-independent publication boundary and returns summary fields only. It validates scope, page size and cursor directly in PostgreSQL, including for callers bypassing the server adapter. A cursor conveys no access and does not freeze future pages. Inactive section, category and profile filters do not expose private records; direct article table grants remain unchanged.
+
+The public site navigation RPC exposes only active sections and categories under active parents plus the four approved site-information fields. It removes invalid stored links and unsafe text before returning data to any role. The settings table, administrator RPC and receipts retain their existing access controls; the public reader never uses a user session or service-role key.
+
+## Approved public-image caching policy
+
+The owner approved a five-minute cache lifetime for published images; Task 5 implements the Storage authorization prerequisite and Task 6 supplies public response caching. Article pages continue fresh visibility checks. Cached images may remain available for up to five minutes after archive, deletion or reference removal, while origin requests check current access. Private previews and failures remain no-store. The [reader contract](superpowers/plans/2026-11-09-phase-five-reader-contract.md#media-responses-and-metadata) defines the bounds and rollout checks. Existing one-hour Storage headers must be resolved before public media access; the separate Task 5 maintenance approval covers only verified header migration.
+
+## Published-media database authorization
+
+Task 5 adds a narrow Storage GET policy for finalized assets currently referenced as main images or validated current-body images by published articles. Storage object metadata must state no-store; legacy cache headers fail closed. Anonymous metadata/list/write grants remain closed. Existing owner/admin preview authorization is retained. Upstream uploads now explicitly use no-store; Task 6 owns the approved five-minute public response cache. The owner approved a bounded service-role maintenance backfill of identical hash-verified bytes; all writers and cleanup must be quiesced, including in-flight requests. See the [Task 5 procedure](superpowers/plans/2026-11-09-published-media-authorization.md#maintenance-procedure).
+
+## Public media delivery route
+
+Task 6 uses only the anonymous publishable-key client for both the allowlisted metadata projection and Storage download. UUIDs determine a canonical key internally; callers cannot supply a URL or object key. Size, finalized SHA-256 and WebP envelope are checked before a cacheable success. Storage authorization rechecks publication when an archive races the initial projection. Successful responses may remain cached for five minutes under the approved policy; private previews and all failures remain no-store. Hosted cache behavior and maintenance migration of legacy images remain release gates.
