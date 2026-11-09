@@ -16,6 +16,12 @@
 
 **Scope boundary:** This phase covers editorial dashboard and storage workflows. Public article pages, public search/archives, and public image rendering remain Phase 5. Scheduled publishing, comments, newsletter, legacy import, and public letter submission remain outside MVP. The secure media and editor slices are included because approved MVP requirements include article imagery, captions, and approved video; it does not include public reader routes.
 
+## Execution update — 2026-11-09
+
+Tasks 1–15 and the frontend/backend/shared refactor are merged into main at `cd67443`. The task sections below retain the original planning checklist and provisional paths; current implementation paths/contracts are authoritative in architecture/API docs and each focused task record. Task 16 runs on `docs/phase-four-verification`; its [evidence map](../../reviews/phase-4-editorial-workflow.md) records the integrated proof and discovered authorization fixes. Owner-run hosted CI and human review remain separate gates. Public reader work remains Phase 5.
+
+The owner subsequently chose individual task PRs against main, lean task docs, and no routine screenshots or CI watching. Those instructions supersede the original stacked-phase branch, screenshot and hosted-monitoring steps below.
+
 ## Global constraints
 
 - Authors act only on articles they own. Credits do not grant access or mutation authority. Administrators may manage all articles and memberships. Test positive and denied paths at the database operation and server/UI boundaries.
@@ -295,19 +301,14 @@ Task 8 implementation and local proof: [PR #36](https://github.com/dylandrozario
 
 **Validation:** SQL allowlist/role tests, input validation tests, accessible admin browser checks, and focused/full documented gates.
 
-## Task 15 — permanent deletion (decision-gated)
+## Task 15 — permanent deletion: implemented after approved decisions
 
-**Files:** None until the retention and reference-semantics decision is recorded. If approved, use a separately reviewed migration/operation, direct-denial tests, explicit-confirmation UI, media-reference checks, and docs.
+The owner approved immediate administrator deletion after archiving, deletion of revisions with the article, retained audit/actor identifiers and Auth accounts, and permanent repeated cleanup of unreferenced image objects. The [focused Task 15 record](2026-11-07-archived-article-deletion.md) replaces the original retention gate and records its implementation, migration correction and merge in PR #46.
 
-**Interfaces:** The deletion signature, reference policy, and retention predicate remain undefined until the decision gate is accepted; no provisional callable operation is exposed.
-
-**Test-first and commit boundary:** After approval only: RED archived-only/admin-only/confirmation/retry/history/media-reference cases; GREEN the narrow operation and explicit-confirmation UI, then preservation and rollback evidence.
-
-- [ ] Do not implement or expose permanent deletion until the owner/client answers the retention question in `docs/product-requirements.md` and approves the treatment of revisions, surviving audit identifiers, actor Auth references, and unreferenced media.
-- [ ] After approval, produce a focused deletion subplan and obtain review before migration. Permit only an administrator to delete an archived article with explicit confirmation; capture one audit effect and delete media only when no retained article references it.
-- [ ] If no decision is available, leave this task visibly blocked and carry it forward. Do not claim Phase 4's deletion requirement is complete.
-
-**Acceptance:** The task is complete only when the approved policy is implemented and verified; otherwise its unresolved status is documented without weakening data retention safeguards.
+- [x] Archived-only administrator deletion with typed confirmation, expected-version checks, exact retry receipts and retained identifiers/slugs.
+- [x] Atomic article/history/reference deletion and audit capture; current/historical media references and late uploads remain protected by the permanent registry/cleanup ledger.
+- [x] Bounded cleanup with run/claim leases, health probe, fail-closed deletion readiness, administrator retry and production-only scheduled entry point.
+- [ ] Hosted cron credentials, capacity/alerts, initial healthy check, human security review and recovery exercise remain deployment requirements.
 
 ## Task 16 — integrated Phase 4 verification and handoff
 
@@ -317,11 +318,12 @@ Task 8 implementation and local proof: [PR #36](https://github.com/dylandrozario
 
 **Test-first and commit boundary:** Run the smallest focused rechecks for any discovered defect before the full source-matching gates; commit only demonstrated fixes and evidence. Stop after the required proof passes or report a precise unavailable gate.
 
-- [ ] Verify additive upgrade preservation from the completed Phase 3 Task 11 / PR #26 baseline and a clean install; keep existing database projects and data intact. Test real owner/admin/non-owner/credited/inactive/anonymous denials for every new operation.
-- [ ] Run focused and full database tests, migrations/lint, generated type drift, unit/component tests, strict types, lint, formatting, production build, desktop/mobile browser journeys, unfiltered dependency/security scans, and exact-head hosted CI. Run only commands actually configured in the repository.
-- [ ] Obtain a fresh whole-slice security/code review of every new migration, grant, storage policy, operation, route, and unresolved gate. Resolve Critical/Important findings with observed failing and passing regression checks.
-- [ ] Verify accessibility behavior for dashboard forms/lists and upload interactions. Record automated evidence separately from any outstanding human screen-reader/security review, hosted OAuth/provider setup, and recovery exercise.
-- [ ] Report permanent deletion as outstanding if Task 15 remains gated. Do not describe the entire MVP as complete while required public routes, search, or reader media rendering remain in Phase 5.
+- [x] Populated upgrade from Phase 3 `1285933` and clean install verified in a disposable project; existing local data was not reset. Existing role/ownership denials and new revocation/profile regressions run in the full suites.
+- [x] Database, schema/type drift, unit/component, contract/editor/concurrency and unfiltered dependency/history scans executed. See the evidence map for initial failures, reruns and the moderate development-only advisory.
+- [x] Fresh whole-phase agent security/code review completed; two Important findings reproduced and corrected with forward migrations and passing regressions. Human maintainer approval remains outstanding.
+- [x] Browser/automated accessibility evidence recorded: all 68 desktop cases pass in a one-worker rerun and all 65 mobile cases passed initially; the earlier default run's server errors remain documented. Human screen-reader checks remain separate.
+- [ ] Owner verifies hosted CI on the final PR commit; monitoring was delegated by the owner and is not claimed here.
+- [x] Permanent deletion is implemented under the approved policy; public routes, search, public media and MVP launch work remain Phase 5 and operational gates.
 
 **Acceptance:** All completed Phase 4 features have matching docs, role/ownership denial coverage, local verification, fresh review, and CI evidence tied to the final commit. Unresolved client, policy, and human-review items are listed explicitly.
 

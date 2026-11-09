@@ -194,3 +194,7 @@ Private object keys are retained in a permanent registry and cleanup ledger. A b
 ## Administrator site information
 
 `get_site_information()` returns the allowlisted settings only to an eligible active administrator. `save_site_information(expected_version, request_id, mission, contact_email, instagram_url, submission_instructions)` checks the same authority and validates each named field. Empty fields are represented by null; only HTTPS Instagram URLs are accepted. Changed saves increment the version and atomically record a bounded audit event. Exact retries return their original result; stale edits and changed request payloads return conflicts. No caller-supplied arbitrary key, HTML, audit data, or public read is supported. See the [Task 14 plan](superpowers/plans/2026-11-07-admin-site-information.md).
+
+## Integrated Phase 4 authorization verification
+
+Trusted `begin_article_image_upload`, `finalize_article_image_upload` and `complete_article_image_removal` retain supplied-actor Auth, membership and active-profile locks through commit, checking current role after waits. The internal actor-lock helper is not callable by application roles or the service role. Direct article/media reads also require an active caller profile. Existing public signatures, response codes and owner/administrator scopes are preserved. See [Phase 4 evidence](reviews/phase-4-editorial-workflow.md) for reproduced failures and passing regressions.

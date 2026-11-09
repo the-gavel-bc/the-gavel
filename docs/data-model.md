@@ -199,3 +199,7 @@ Task 15 retains article-ID and public-slug tombstones, opaque deletion receipts,
 ### Site information
 
 Task 14 adds one permission-closed `site_information` record with an edit version and nullable mission, contact email, Instagram URL, and submission instructions. Mission and instructions are plain text of at most 5,000 characters; email is at most 254 characters and Instagram URL at most 255. Unknown values stay null. Private request receipts bind an administrator's request ID and payload to the committed result. See the [Task 14 plan](superpowers/plans/2026-11-07-admin-site-information.md).
+
+### Phase 4 verification corrections
+
+`20261109010000_trusted_media_actor_locks.sql` retains supplied-actor Auth/membership/profile locks for the existing trusted media functions. `20261109010100_active_profile_reads.sql` adds active caller-profile checks to the existing read predicates. They preserve public signatures, grants and stored rows; no new public mutation or schema backfill is added. See [Phase 4 verification](reviews/phase-4-editorial-workflow.md).

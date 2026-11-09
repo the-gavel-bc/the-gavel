@@ -1,8 +1,8 @@
 # Component hierarchy
 
-Status: Foundation shell, access routes and private My Articles listing, create form, constrained draft edit route and private draft main-image control implemented; publication and other dashboard feature routes below remain planned.
+Status: Editorial dashboard routes through Phase 4 are implemented; public article/archive/search and site composition remain Phase 5 work. See [integrated evidence](reviews/phase-4-editorial-workflow.md).
 
-The existing draft edit page loads the current private main-image link server-side. `ArticleMedia` in `DraftForm` reserves and uploads a JPEG/PNG/WebP image, collects alt text and credit, then saves the link through a separate versioned mutation. It can update image metadata, unlink the current image, or discard an upload that was never attached. Unsaved draft fields disable image changes; unsaved image input participates in the navigation guard. The current linked image is described as text until the private preview and public rendering work lands.
+The existing draft edit page loads the current private main-image link server-side. `ArticleMedia` in `DraftForm` reserves and uploads a JPEG/PNG/WebP image, collects alt text and credit, then saves the link through a separate versioned mutation. It can update image metadata, unlink the current image, or discard an upload that was never attached. Unsaved draft fields disable image changes; unsaved image input participates in the navigation guard. The current main-image link is described as text; body-image previews use the authenticated media route. Public rendering remains Phase 5 work.
 
 Task 4 adds a body-image control to the private editor. It reuses the checked upload protocol, inserts a canonical image block, edits or removes a selected block, and previews finalized WebP through an authenticated route. Uninserted uploads participate in the unsaved-navigation guard. A safe read-only body is server-rendered inside the no-JavaScript fallback. Video remains visibly unavailable pending provider approval; public rendering is Phase 5.
 
