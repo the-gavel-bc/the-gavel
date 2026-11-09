@@ -119,7 +119,6 @@ Draft -> Published -> Archived -> Permanently deleted
 
 ## Client questions to confirm before launch
 
-- Should News appear in the main navigation or remain accessible from the homepage and archives?
 - Confirm `Outside of BC` versus `Off Campus` as the final Features category label.
 - Which initial News categories should be created?
 - Which newsletter provider should be integrated after the MVP?
@@ -129,3 +128,7 @@ Draft -> Published -> Archived -> Permanently deleted
 - What Boston College privacy, branding, accessibility, records, or security policies apply?
 
 Owner decision for archived deletion: an administrator may delete immediately after archiving. Revisions are deleted with the article; audit events keep article and actor identifiers, Auth accounts remain, and unreferenced images enter permanent recurring cleanup. Deletion is unavailable when the cleanup worker is unhealthy. Public slugs and article IDs stay reserved after deletion.
+
+## Accepted Phase 5 navigation decisions
+
+On 2026-11-09 the owner confirmed News belongs in main navigation. Category URLs use `/sections/[sectionSlug]/categories/[categorySlug]` because category slugs are unique within their section. This replaces the earlier proposed `/categories/[slug]`; no public category route has yet been implemented. The [Phase 5 plan](superpowers/plans/2026-11-09-phase-five-public-reader.md) records the public-reader work breakdown and demo UI reference.

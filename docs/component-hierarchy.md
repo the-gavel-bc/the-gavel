@@ -16,7 +16,7 @@ Task 4 adds a body-image control to the private editor. It reuses the checked up
 | `/access-pending` | Denied/pending membership experience and sign-out                              |
 | `/dashboard`      | Protected owned-article listing with pagination, role-aware shell and sign-out |
 
-The header's section links and dashboard profile/administration links identify future destinations; those feature routes are not implemented. Both dashboard layout and page independently call the server membership guard. Components live in named folders under `src/frontend/components/site`, `src/frontend/components/dashboard`, and `src/frontend/components/ui`, alongside their owned CSS Modules and existing tests. See [file colocation](coding-style.md#file-colocation).
+The header's public section links identify planned Phase 5 destinations. Dashboard profile and administrator routes are implemented. Both dashboard layout and page independently call the server membership guard. Components live in named folders under `src/frontend/components/site`, `src/frontend/components/dashboard`, and `src/frontend/components/ui`, alongside their owned CSS Modules and existing tests. See [file colocation](coding-style.md#file-colocation).
 
 ## Full MVP public route design
 
@@ -24,8 +24,8 @@ The header's section links and dashboard profile/administration links identify f
 | ------------------------ | ------------------------------------------ | --------------------- |
 | `/`                      | Lead, featured, and section-based homepage | Public                |
 | `/articles/[slug]`       | Published article                          | Public when published |
-| `/sections/[slug]`       | Section archive                            | Public                |
-| `/categories/[slug]`     | Category archive                           | Public                |
+| `/sections/[sectionSlug]`       | Section archive                            | Public                |
+| `/sections/[sectionSlug]/categories/[categorySlug]`     | Category archive                           | Public                |
 | `/tags/[slug]`           | Tag archive                                | Public                |
 | `/authors/[slug]`        | Author biography and articles              | Public                |
 | `/search`                | Published-content search                   | Public                |
@@ -162,3 +162,7 @@ The `draft-save-state/` reducer owns current/acknowledged input, committed ident
 Archived administrator article details expose a typed-confirmation deletion control. `/dashboard/admin/media-cleanup` shows bounded operational counts and permits an eligible administrator to retry cleanup; it never exposes object keys or credentials. Deleted article audit events and prior events display retained IDs without dead article links.
 
 The `/dashboard/admin/site` route independently verifies administrator access and renders the site-information form with bounded plain-text fields, save confirmation, retry, conflict recovery, and unsaved-change protection. Public site and footer rendering remain planned for Phase 5.
+
+## Phase 5 planning reference
+
+The [public-reader task plan](superpowers/plans/2026-11-09-phase-five-public-reader.md) maps demo masthead/navigation, hero/Latest/Featured News, cards/archive chips, article presentation and footer into the current ownership structure. News is confirmed in primary navigation and category routes are section-scoped. The demo is a visual reference; current app taxonomy, authentication, canonical bodies and editorial workflow remain authoritative. Later owner screenshots refine the visual tasks. Reader components and public data operations remain proposed until their task is implemented.

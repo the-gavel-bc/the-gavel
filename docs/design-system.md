@@ -50,3 +50,7 @@ Target WCAG 2.2 AA.
 - Confirm destructive actions with the affected title.
 - Do not expose internal errors or security details.
 - Preserve editorial punctuation and names accurately.
+
+## Phase 5 visual reference
+
+The owner identified `/Users/dylandrozario/Desktop/work/testing/demo-gavel-frontend` as the public-reader UI reference on 2026-11-09. Its static HTML/CSS supplies candidate masthead, navigation, hero, cards, archives, article/prose and footer patterns; the [Phase 5 plan](superpowers/plans/2026-11-09-phase-five-public-reader.md#demo-inventory-and-adaptation-map) maps these to app components. Its color/font values and assets are candidates subject to contrast, licensing and owner review, not approved global replacements. Keep dashboard styles isolated. Further screenshots will refine layout and visual signoff; do not import demo policy copy, content, auth behavior or taxonomy as design approval.
