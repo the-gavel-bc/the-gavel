@@ -100,6 +100,8 @@ These are unimplemented coverage tasks, not confirmed runtime defects or claims 
 
 ## CI and security gates
 
+The Supabase startup step keeps successful output private and prints the last 80 redacted diagnostic lines on failure, preserving the original nonzero exit code. Clean-start verification must use the CLI migration runner as well as any transactional upgrade checks; an external `psql --single-transaction` wrapper can hide missing transaction boundaries in migration files.
+
 `.github/workflows/ci.yml` installs the frozen lockfile and runs the local gates, generated-type drift check, dependency audit, and Gitleaks v8.30.1 history scan. It needs no production secrets. Hosted CI passed for merged foundation commit `66f2f82`; see the [review evidence](reviews/phase-1-foundation.md#review-evidence). This verifies that commit, not future changes.
 
 The former CI exception for [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) was retired on 2026-10-23 after upstream withdrew the advisory and unfiltered production/full audits reported zero findings. CI now runs `pnpm audit --prod --audit-level=high` and `pnpm audit --audit-level=high` without any ignore. All high/critical findings remain blocking. [ADR 0005](decisions/0005-temporary-ci-audit-exception.md) retains the historical approval and retirement evidence.
