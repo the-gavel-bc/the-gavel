@@ -64,16 +64,16 @@ Each numbered task is one reviewable deliverable/PR. Its bullets are ordered sub
 
 Run focused tests and fast checks while implementing. Run a task's heavy SQL/concurrency/browser gate once before its PR, then rerun only affected checks after fixes. Review each completed slice once. Use synthetic content and real role/ownership denials; do not weaken tests to make demos fit. Keep authorization/compatibility comments beside subtle code. Update authoritative docs only for changed lasting contracts; otherwise append decisions/results to the focused task record. Hosted CI monitoring remains with the owner.
 
-## Task 1 — accept the public contract and UI map
+## Task 1 — accept the public contract and UI map: ready for review
 
-**Files:** This plan; affected proposed sections in API/data/security/component/design docs. No application or database changes.
+The [focused Task 1 contract](2026-11-09-phase-five-reader-contract.md) records the owner's News, category-URL and shared search-limit decisions; exact public visibility, role-independent reads, cursor/order bounds, no-cache and media authorization constraints; demo file fingerprints; and remaining asset/copy/screenshot gates. The 120-per-minute shared budget is an initial technical default, not an owner-selected number; Task 17 must measure capacity, cover cancellation/rollback limits, and retain direct-RPC enforcement before public release.
 
-- [ ] Inspect current main and Phase 4 outstanding gates; snapshot demo file identifiers, map the routes/DTO fields and screenshot-dependent pieces above.
-- [ ] Resolve publication/media visibility, public-profile fields, errors/status codes, pagination/search bounds, bypass-resistant search rate limits and throttled retry behavior, response caching, curation/row duplication and canonical route behavior. Record deliberate omissions, not implied requirements.
-- [ ] Confirm available logo/fonts, initial site copy/taxonomy and screenshot inputs. Unknown content stays unset; missing providers/profile-image contracts remain named gates rather than invented APIs.
-- [ ] Review this contract, publish the accepted task order and validate all plan/doc links. Only then begin grants or reader implementation.
+- [x] Inspect merged main and Phase 4 outstanding gates; fingerprint the demo and map reader components/routes.
+- [x] Record visibility, public DTO fields, response/error constraints, pagination/search limits, rate-limit authority and retry, curation/row duplication, caching and canonical routes.
+- [x] Record candidate logo/fonts, missing content/taxonomy and incoming screenshots as task/launch gates; no fake content or extra public access is introduced.
+- [x] Validate links and task ordering and obtain focused contract review. Public grants and implementation remain in subsequent tasks.
 
-**Acceptance/validation:** One agreed public contract and component map; both confirmed navigation/URL decisions appear in authoritative docs. No demo publishing/auth/taxonomy behavior enters the contract accidentally.
+**Acceptance/validation:** Product decisions reflect the owner’s answers; technical defaults and outstanding tests are explicit. The document is reviewable before any application code, database grant or route changes.
 
 ## Task 2 — public article-detail projection
 
