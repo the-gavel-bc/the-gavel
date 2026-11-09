@@ -113,7 +113,11 @@ export async function POST(
     const { error: uploadError } = await bucket.upload(
       asset.object_key,
       processed.bytes,
-      { contentType: "image/webp", upsert: false },
+      {
+        contentType: "image/webp",
+        upsert: false,
+        headers: { "cache-control": "no-store" },
+      },
     );
     if (uploadError) {
       // A committed upload with a lost response is retryable, but never
