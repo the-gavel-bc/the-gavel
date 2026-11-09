@@ -267,3 +267,5 @@ The direct article-read and administrator predicates require the caller's linked
 ## Public article projection
 
 Anonymous and authenticated callers can execute the same published-only, fixed-search-path projection. Existing private table grants and RLS remain unchanged. The projection checks the canonical body and current image links before returning an allowlist; unpublished slugs share the same not-found result. Public Storage grants and image delivery remain separate work. Responses observe one statement snapshot, so archiving prevents subsequent reads but cannot recall a response already in flight.
+
+The public list RPC uses the same role-independent publication boundary and returns summary fields only. It validates scope, page size and cursor directly in PostgreSQL, including for callers bypassing the server adapter. A cursor conveys no access and does not freeze future pages. Inactive section, category and profile filters do not expose private records; direct article table grants remain unchanged.
