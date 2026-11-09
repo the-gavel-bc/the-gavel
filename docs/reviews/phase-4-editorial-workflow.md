@@ -12,6 +12,8 @@ Status: local integrated verification and agent review completed on `docs/phase-
 
 ## Verification ledger
 
+[Draft PR #48](https://github.com/dylandrozario/the-gavel/pull/48) carries this handoff. The owner verifies its final commit in [PR checks](https://github.com/dylandrozario/the-gavel/pull/48/checks); no hosted pass is claimed.
+
 The verified application-code commit is `2a6ce63` (later handoff commits change documentation only). Node 22.20.0, pnpm 11.25.0, and pinned Supabase CLI 2.121.0 were used. Existing local Supabase data was not reset or stopped.
 
 | Gate                           | Observed result                                                                                                                                                                 |
