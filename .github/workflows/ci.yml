@@ -48,6 +48,8 @@ jobs:
       - run: pnpm test
       - name: Scan repository history for secrets
         run: docker run --rm -v "$PWD:/repo:ro" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --redact --no-banner
+      - name: Select available CI database port
+        run: node scripts/ci-supabase/prepare-database-port.mjs
       - name: Start isolated local Supabase
         run: |
           if pnpm supabase start > "$RUNNER_TEMP/supabase-start.log" 2>&1; then
