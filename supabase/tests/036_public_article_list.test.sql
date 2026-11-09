@@ -65,5 +65,9 @@ update public.articles set status='archived',archived_at=now() where slug='list-
 set local role anon;
 select is(jsonb_array_length(public.list_public_articles('section','list-proof',null,2,(select value->'nextCursor' from list_proof))->'items'),0,'archive before next request removes the article');
 reset role;
+update public.articles set status='published',published_at='2026-01-02T00:00:00Z' where slug='list-secret';
+set local role anon;
+select is(jsonb_array_length(public.list_public_articles('section','list-proof',null,2,(select value->'nextCursor' from list_proof))->'items'),0,'newer publication does not duplicate an earlier page');
+reset role;
 select * from finish();
 rollback;
