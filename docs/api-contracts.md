@@ -210,3 +210,7 @@ Private object keys are retained in a permanent registry and cleanup ledger. A b
 ## Integrated Phase 4 authorization verification
 
 Trusted `begin_article_image_upload`, `finalize_article_image_upload` and `complete_article_image_removal` retain supplied-actor Auth, membership and active-profile locks through commit, checking current role after waits. The internal actor-lock helper is not callable by application roles or the service role. Direct article/media reads also require an active caller profile. Existing public signatures, response codes and owner/administrator scopes are preserved. See [Phase 4 evidence](reviews/phase-4-editorial-workflow.md) for reproduced failures and passing regressions.
+
+## Published media Storage reads
+
+The private article-media bucket permits public object GET only for finalized same-article assets currently linked as main images or present in a validated current body of a published article. The object metadata must specify no-store. Public object listing, metadata enumeration and writes remain denied; private owner/admin reads retain their existing policy. Newly finalized uploads explicitly set no-store. The approved five-minute cache belongs to the forthcoming Task 6 public delivery response, not to upstream Storage. Legacy objects require the [approved maintenance backfill](superpowers/plans/2026-11-09-published-media-authorization.md#maintenance-procedure) before public access.
