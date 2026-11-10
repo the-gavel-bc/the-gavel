@@ -1,0 +1,16 @@
+.page {
+  width: min(100%, 72rem);
+  margin-inline: auto;
+  padding: 2rem 1rem 3rem;
+  color: var(--reader-ink);
+  overflow-wrap: anywhere;
+}
+.article {
+  max-width: 52rem;
+  margin-inline: auto;
+}
+@media (min-width: 45rem) {
+  .page {
+    padding: 3rem 2rem 4rem;
+  }
+}
