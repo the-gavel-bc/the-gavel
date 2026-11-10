@@ -1,0 +1,57 @@
+begin;
+select no_plan();
+\ir support/draft-fixtures/draft-fixtures.inc
+create function pg_temp.search_input(word text default 'Oldbodyalpha',head text default 'Searchheadalpha') returns jsonb language sql as $$
+ select pg_temp.draft_input(jsonb_build_object('title',head,'content',jsonb_build_object('format','gavel-draft','version',1,'document',jsonb_build_object('type','doc','content',jsonb_build_array(jsonb_build_object('type','paragraph','content',jsonb_build_array(jsonb_build_object('type','text','text',word))))))));
+$$;
+create temp table search_target as select (public.create_article_draft('8a000000-0000-0000-0000-000000000045',pg_temp.search_input())->>'articleId')::uuid id;
+create temp table search_outcomes(label text primary key,result jsonb);
+grant select on search_target to authenticated;
+grant select,insert on search_outcomes to authenticated;
+select is((select count(*)::int from private.search_article_candidates(array['oldbodyalpha'])),0,'checked create remains unsearchable while draft');
+insert into public.media_assets(id,article_id,uploader_user_id,request_id,object_key,status,byte_size,width,height,sha256,finalized_at)
+select '6a000000-0000-0000-0000-000000000045',id,'00000000-0000-0000-0000-000000000002','8a000000-0000-0000-0000-000000000046',id::text||'/6a000000-0000-0000-0000-000000000045.webp','finalized',1234,120,90,repeat('a',64),now() from search_target;
+insert into public.article_main_images(article_id,asset_id,alt_text,credit) select id,'6a000000-0000-0000-0000-000000000045','Newsroom','Synthetic photographer' from search_target;
+set local role authenticated;
+insert into search_outcomes select 'publish',public.publish_article(id,1,'8a000000-0000-0000-0000-000000000047') from search_target;
+reset role;
+select is((select result->>'ok' from search_outcomes where label='publish'),'true','checked publish succeeds with indexing');
+select is((select count(*)::int from private.search_article_candidates(array['oldbodyalpha'])),1,'published body visible on next statement');
+create temp table search_identity as select slug,published_at from public.articles where id=(select id from search_target);
+set local role authenticated;
+insert into search_outcomes select 'save',public.save_published_article(id,2,'8a000000-0000-0000-0000-000000000048',pg_temp.search_input('Newbodyalpha','Editedheadalpha')) from search_target;
+reset role;
+select is((select result->>'ok' from search_outcomes where label='save'),'true','checked published save succeeds');
+create temp table search_saved as select md5(to_jsonb(a)::text) hash from public.articles a where id=(select id from search_target);
+set local role authenticated;
+insert into search_outcomes select 'retry',public.save_published_article(id,2,'8a000000-0000-0000-0000-000000000048',pg_temp.search_input('Newbodyalpha','Editedheadalpha')) from search_target;
+reset role;
+select is((select result->>'replayed' from search_outcomes where label='retry'),'true','exact retry remains a replay');
+select is((select md5(to_jsonb(a)::text) from public.articles a where id=(select id from search_target)),(select hash from search_saved),'retry does not rewrite source/version/timestamps');
+select is((select count(*)::int from private.search_article_candidates(array['oldbodyalpha'])),0,'retained old revision text is not searchable');
+select is((select count(*)::int from private.search_article_candidates(array['newbodyalpha','editedheadalpha'])),1,'only latest saved title/body indexed');
+create function pg_temp.fail_search_audit() returns trigger language plpgsql as $$ begin
+ if new.action='article.updated' then raise exception 'synthetic indexing rollback proof'; end if; return new; end; $$;
+create trigger fail_search_audit before insert on public.audit_events for each row execute function pg_temp.fail_search_audit();
+set local role authenticated;
+insert into search_outcomes select 'rollback',public.save_published_article(id,3,'8a000000-0000-0000-0000-000000000049',pg_temp.search_input('Rollbackalpha','Rollbackheadalpha')) from search_target;
+reset role;
+select is((select result->>'ok' from search_outcomes where label='rollback'),'false','failed audit rolls back source and index');
+select is((select count(*)::int from private.search_article_candidates(array['rollbackalpha'])),0,'rolled-back body never enters search');
+select is((select count(*)::int from private.search_article_candidates(array['newbodyalpha'])),1,'prior committed searchable body retained');
+drop trigger fail_search_audit on public.audit_events;
+set local role authenticated;
+insert into search_outcomes select 'archive',public.archive_article(id,3,'8a000000-0000-0000-0000-000000000050') from search_target;
+reset role;
+select is((select result->>'ok' from search_outcomes where label='archive'),'true','checked archive succeeds');
+select is((select count(*)::int from private.search_article_candidates(array['newbodyalpha'])),0,'archive removes search match');
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);
+set local role authenticated;
+insert into search_outcomes select 'restore',public.restore_article(id,4,'8a000000-0000-0000-0000-000000000051') from search_target;
+reset role;
+select is((select result->>'ok' from search_outcomes where label='restore'),'true','checked admin restore succeeds');
+select is((select count(*)::int from private.search_article_candidates(array['newbodyalpha'])),1,'restored current body searchable');
+select is((select slug from public.articles where id=(select id from search_target)),(select slug from search_identity),'search maintenance preserves slug');
+select is((select published_at from public.articles where id=(select id from search_target)),(select published_at from search_identity),'search maintenance preserves original publication time');
+select * from finish();
+rollback;
