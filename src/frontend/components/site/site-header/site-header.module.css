@@ -2,46 +2,30 @@
   border-bottom: 1px solid #d7dde4;
 }
 .inner {
-  composes: container headerRow from "../../../styles/shell/shell.module.css";
+  width: min(72rem, calc(100% - 2rem));
+  margin-inline: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-block: 1.5rem;
 }
 .identity {
-  composes: identity from "../../../styles/shell/shell.module.css";
+  color: var(--reader-ink, #14161c);
+  text-decoration: none;
+  font:
+    700 clamp(2rem, 6vw, 4rem)/1.1 Georgia,
+    serif;
+  letter-spacing: -0.045em;
 }
 .signIn {
-  composes: button from "../../ui/button/button.module.css";
-}
-.menu {
-  position: relative;
-}
-.menu summary {
-  color: var(--color-brand-dark);
-  cursor: pointer;
-  font-weight: 700;
+  color: var(--reader-blue, #1e4aa8);
+  font:
+    600 0.875rem/1.4 system-ui,
+    sans-serif;
   min-height: 2.75rem;
-  padding: var(--space-3);
-}
-.menu nav {
-  background: var(--color-paper);
-  border: 1px solid #d7dde4;
-  min-width: 15rem;
-  padding: var(--space-4);
-  position: absolute;
-  right: 0;
-  z-index: 10;
-}
-.menu ul {
-  display: grid;
-  gap: var(--space-3);
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-@media (max-width: 42rem) {
-  .menu {
-    order: 3;
-    width: 100%;
-  }
-  .menu nav {
-    position: static;
-  }
+  display: inline-flex;
+  align-items: center;
+  text-underline-offset: 0.2em;
 }

@@ -1,3 +1,46 @@
 .footer {
-  composes: container footer from "../../../styles/shell/shell.module.css";
+  color: #fff;
+  background: #14161c;
+  margin-top: 3rem;
+  padding-block: 3rem;
+  font-family: system-ui, sans-serif;
+}
+.inner {
+  width: min(72rem, calc(100% - 2rem));
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 2rem;
+}
+.inner h2 {
+  font:
+    700 1.25rem/1.3 Georgia,
+    serif;
+  margin: 0 0 1rem;
+}
+.inner ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.inner a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  color: #dce4f5;
+  text-underline-offset: 0.2em;
+  overflow-wrap: anywhere;
+}
+.footer .inner a:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+.prose {
+  white-space: pre-line;
+  font:
+    1rem/1.6 Georgia,
+    serif;
+  color: #dce4f5;
+  margin: 0;
+  overflow-wrap: anywhere;
 }
