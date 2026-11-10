@@ -236,11 +236,13 @@ Implemented on `feat/search-index-foundation`; see the [focused plan and verific
 
 ## Task 17 — bounded public search query
 
-**Files:** New read-operation migration/tests; `src/backend/reader/search-query/`; `src/shared/reader/search-contract/`.
+Implemented on `feat/bounded-public-search`; see the [focused plan and verification](2026-11-10-bounded-public-search.md). Main integration, human review and hosted deadline/capacity proof remain separate gates.
 
-- [ ] Implement Task 1's bounded natural-language query over title, descriptions, body, writers, sections, categories and tags. Return cards and filter-bound continuation only.
-- [ ] Parameterize input; normalize whitespace and bound length/terms/page size. Treat quotes, wildcard-like text and hostile strings as data under the accepted search grammar. Implement Task 1's rate-limit boundary and bounded safe throttled result, including direct-RPC protection; no new provider is assumed.
-- [ ] Test all required match fields, duplicate authors/joins, missing results, invalid cursors, rename/edit/archive/restore and direct anon/authenticated parity. Verify no snippet exposes private/HTML content. Exercise bursts, forged quota/identity inputs and direct anonymous calls to prove the selected rate limit cannot be bypassed through another entry point.
+**Files:** Additive admission/public RPC migrations and SQL/HTTP tests; `src/backend/public-articles/public-search/`; `src/shared/reader/public-search/`.
+
+- [x] Implement Task 1's bounded natural-language query over title, descriptions, body, writers, sections, categories and tags. Return cards and filter-bound continuation only.
+- [x] Parameterize input; normalize whitespace and bound length/terms/page size. Treat quotes, wildcard-like text and hostile strings as data under the accepted search grammar. Implement Task 1's rate-limit boundary and bounded safe throttled result, including direct-RPC protection; no new provider is assumed.
+- [x] Test all required match fields, duplicate authors/joins, missing results, invalid cursors, rename/edit/archive/restore and direct anon/authenticated parity. Verify no snippet exposes private/HTML content. Exercise bursts, forged quota/identity inputs and direct anonymous calls to prove the selected rate limit cannot be bypassed through another entry point.
 
 **Acceptance/validation:** Published-only search works through the anonymous reader with predictable bounded ordering. SQL/security/unit and relevant concurrency checks pass.
 

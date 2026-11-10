@@ -24,3 +24,5 @@ Copy [template.md](template.md) to `0001-descriptive-title.md`, increasing the n
 - [0009: Promote validated private images on the server](0009-private-image-promotion-and-retention.md) — Accepted for Phase 4 Task 3
 
 - [0010: Use private native lexeme indexes with live labels](0010-private-search-lexeme-indexes.md) — Accepted for Phase 5 Task 16; public search endpoint pending
+
+- [0011: Admit public search inside the database](0011-database-public-search-admission.md) — Accepted for Phase 5 Task 17; hosted timeout/capacity proof pending

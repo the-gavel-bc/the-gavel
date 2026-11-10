@@ -291,3 +291,9 @@ Task 9 grants anonymous and authenticated callers the same public-only homepage 
 ## Canonical body rendering
 
 The shared renderer validates the full v1/v2 document under existing byte/node/depth bounds before rendering explicit React elements. Unsafe protocols, unknown fields/nodes and malformed bodies have no HTML/JSON fallback. All supplied media resolutions are preflighted and copied into a local map; only canonical public/private media routes matching the asset UUID and bounded dimensions are accepted. Public adapters construct their own public routes from checked IDs, and reject missing or duplicate descriptors before body text is exposed. Private preview authorization remains in the existing media route. This layer adds no media grants and does not replace database authorization.
+
+## Public search admission
+
+Task 17 grants anon/authenticated execution of one fixed-search-path definer RPC with the same published-only card projection for both roles. Source tables, candidate helpers, quota helper and quota sequence gain no public access. Query/cursor validation precedes quota; current visibility and public card projection share one statement snapshot. Body matches produce no snippets, Auth links, revisions or storage paths.
+
+Successful search requires trusted PostgREST direct-POST context. Caller headers cannot select an actor, counter or window. The shared private sequence preserves charges through ordinary rollback/cancellation, with a transaction lock preventing concurrent overspend and session-lock leakage. PostgREST must hoist the two-second deadline; cancellation aborts the RPC with a fixed no-store 503. Raw SQL function settings alone do not prove an active deadline. See [ADR 0011](decisions/0011-database-public-search-admission.md) for global-limit, clock/crash and availability limitations; this boundary is not per-IP flood protection. Human security review and hosted timeout/capacity proof remain release gates.
