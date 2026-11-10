@@ -224,11 +224,13 @@ Implemented on `feat/public-author-pages`; see the [focused plan and verificatio
 
 ## Task 16 — searchable published-text extraction and indexes
 
+Implemented on `feat/search-index-foundation`; see the [focused plan and verification](2026-11-10-search-index-foundation.md). Private-only foundation; public search/quota/cancellation remain Task 17. Main integration and hosted/human review are separate gates.
+
 **Files:** New additive migration/SQL tests; private canonical-body text extractor/index helpers as needed. No external search service or browser article download.
 
-- [ ] Specify text extraction from supported canonical text nodes/captions; do not index arbitrary JSON keys, asset identifiers, hidden revision data or unknown legacy blobs.
-- [ ] Choose PostgreSQL-native search/index paths for article text and current public writer/taxonomy names. Avoid denormalized joined fields unless every rename/association/publication change has a tested refresh path.
-- [ ] Prove upgrade preservation and live edit/archive/restore/name-change behavior; measure representative query plans and bound query work.
+- [x] Specify text extraction from supported canonical text nodes/captions; do not index arbitrary JSON keys, asset identifiers, hidden revision data or unknown legacy blobs.
+- [x] Choose PostgreSQL-native search/index paths for article text and current public writer/taxonomy names. Avoid denormalized joined fields unless every rename/association/publication change has a tested refresh path.
+- [x] Prove upgrade preservation and live edit/archive/restore/name-change behavior; measure representative query plans and bound query work.
 
 **Acceptance/validation:** Searchable data remains published-only at query time with no stale private-content index exposure. SQL/extractor/query-plan and schema checks pass; this task exposes no public search endpoint yet.
 

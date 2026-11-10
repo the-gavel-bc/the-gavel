@@ -18,7 +18,8 @@
     "db:types:check": "node scripts/database-types/database-types.mjs --check",
     "test:draft-contract": "vitest run --config scripts/draft-contract-check/vitest.config.ts",
     "test:draft-concurrency": "vitest run --config scripts/draft-concurrency/vitest.config.ts",
-    "test:draft-editor": "vitest run --config scripts/draft-editor-check/vitest.config.ts"
+    "test:draft-editor": "vitest run --config scripts/draft-editor-check/vitest.config.ts",
+    "test:search-index": "node scripts/search-index-check/search-index-check.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
