@@ -260,11 +260,13 @@ Implemented on `feat/public-search-page`; see the [focused plan and verification
 
 ## Task 19 — About and submission instructions
 
+Implemented on `feat/public-information-pages`; see the [focused plan and verification](2026-11-10-public-information-pages.md). Production mission/submission/contact and history/staff copy remain owner-input gates; no demo copy is published.
+
 **Files:** `src/app/(public)/about/page.tsx`, `letters/how-to-submit/page.tsx`; reader prose component; public settings reader tests if needed.
 
-- [ ] Render mission and submission instructions as escaped plain text with paragraph breaks from approved settings. Show contact/Instagram only when valid and configured.
-- [ ] Add history/staff sections only when approved source content exists; demo “Est. 2009”, mission, Gmail address and policy wording are references, not authorization to publish copy.
-- [ ] Test unset content, long paragraphs, safe mail/social links and no-JavaScript rendering. Do not add submission forms, newsletter signup or legal/policy pages without separate scope approval.
+- [x] Render mission and submission instructions as escaped plain text with paragraph breaks from approved settings. Show contact/Instagram only when valid and configured.
+- [x] Add history/staff sections only when approved source content exists; demo “Est. 2009”, mission, Gmail address and policy wording are references, not authorization to publish copy.
+- [x] Test unset content, long paragraphs, safe mail/social links and no-JavaScript rendering. Do not add submission forms, newsletter signup or legal/policy pages without separate scope approval.
 
 **Acceptance/validation:** Informational routes are useful and honest with missing inputs; component/route and focused browser checks pass. Unprovided publication copy is a pre-launch input gate.
 
