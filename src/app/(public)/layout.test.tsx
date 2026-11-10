@@ -14,7 +14,7 @@ vi.mock("@/backend/public-homepage/public-homepage", () => ({
 }));
 vi.mock(
   "@/backend/public-site/public-site-navigation/public-site-navigation",
-  () => ({ getPublicSiteNavigation: mocks.read }),
+  () => ({ getPublicSiteNavigationForRequest: mocks.read }),
 );
 vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
 import PublicLayout from "./layout";
