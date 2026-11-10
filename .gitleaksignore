@@ -1,0 +1,2 @@
+# False positive in a Task 18 test-plan sentence. Remove if the flagged commit leaves branch history.
+e380cafb22319f330c4cde570dc4506de511281c:docs/superpowers/plans/2026-11-10-search-page-and-recovery.md:generic-api-key:31
