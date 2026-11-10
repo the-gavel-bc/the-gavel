@@ -191,4 +191,13 @@ The public layout's Read This footer and page/metadata share `getPublicHomepageF
 
 ArticleBody owns semantic React rendering for validated gavel-draft v1/v2 documents. It uses the existing bounded canonical validator, then resolves all required media before rendering paragraphs, h2/h3, marks, safe links, lists, blockquotes, figures and captions. Unsupported data produces a fixed unavailable message; no stored HTML, attributes or raw JSON are spread into output. Shared code has no editor/Tiptap runtime dependency.
 
-PublicArticleBody adapts checked public image IDs/dimensions into the public media route and applies reader-scoped prose typography. Missing/invalid descriptors fail the whole body rather than revealing a partial rendering. DraftReadOnlyBody is now a compatibility adapter supplying private preview routes, the existing read-only label and preview/empty messages; when no valid article ID is supplied it retains plain image descriptions. The public article route itself remains Task 12 work.
+PublicArticleBody adapts checked public image IDs/dimensions into the public media route and applies reader-scoped prose typography. Missing/invalid descriptors fail the whole body rather than revealing a partial rendering. DraftReadOnlyBody is now a compatibility adapter supplying private preview routes, the existing read-only label and preview/empty messages; when no valid article ID is supplied it retains plain image descriptions. The public article route composes this adapter as described below.
+
+
+## Public article page (Phase 5 Task 12)
+
+`/articles/[slug]` resolves only the anonymous public projection, including for signed-in owners. Metadata and page share one request-scoped detail read. Missing, draft, archived and deleted projections call `notFound()` before streaming; no route loading boundary is added. Unsupported content and expected backend failures use a generic unavailable state with noindex metadata; unexpected errors have a route-owned retry boundary that never displays diagnostics.
+
+ArticleHeader renders title/dek, UTC publication date and eager authorized main media with dimensions/credit. ArticleCredits separates ownership from writer/editor/creative attribution. PublicArticleBody renders the validated canonical body and lazy body media. ArticleContext adds section-scoped category links, tags, the public owner's biography, search and up to three related cards. Its backend helper reads at most four same-section candidates and, when needed, four recent candidates, excluding the current article and duplicates. Related failures leave the readable article intact. Components use explicit type-only imports of the validated projection; no backend runtime enters presentation.
+
+The [Task 12 plan](superpowers/plans/2026-11-10-public-article-page.md) records verification and limits. Archive, author, search and About destinations remain owned by later tasks; complete SEO metadata remains Task 20 work.
