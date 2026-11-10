@@ -26,3 +26,9 @@ Status: implemented and verified locally on `feat/public-reader-shell`, based on
 - TypeScript and lint passed. Final format checks are recorded before PR. No database schema or authorization changed, so database tests were not repeated. Human accessibility/branding signoff remains outstanding; no screenshot approval is claimed.
 
 - Final `pnpm exec vitest run --maxWorkers=2` passed all 688 tests. Production build, TypeScript, lint and format checks passed.
+
+## CI follow-up (2026-11-10)
+
+The inherited homepage foundation test still clicked the removed Sections label and assumed a hardcoded Features link. It now keyboard-opens the progressively enhanced mobile Menu and checks static primary links/current state, native search, visible focus and overflow without assuming seeded taxonomy. The focus helper now measures the nearest nontransparent surrounding surface instead of always the body, retaining its width and 3:1 contrast assertions for white focus rings on the blue navigation band.
+
+The six homepage/reader-shell desktop/mobile tests passed. Five of six additional focus-helper usage cases passed initially; a desktop draft-create case tried to focus its temporarily disabled submit button and passed unchanged in isolation. Targeted lint/format passed. No product behavior changed and hosted CI was not monitored.
