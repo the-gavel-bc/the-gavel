@@ -1,6 +1,6 @@
 # Phase 5 Task 17 — bounded public search
 
-Status: implementation on `feat/bounded-public-search`, based on Task 16 PR #65 (open). Target main; #65 remains a prerequisite while open. Task 18 owns the GET search page/UI.
+Status: implemented in draft [PR #66](https://github.com/dylandrozario/the-gavel/pull/66) on `feat/bounded-public-search`, based on Task 16 PR #65 (open). Target main; #65 remains a prerequisite while open. Task 18 owns the GET search page/UI.
 
 ## Requirements and design risks
 
@@ -33,3 +33,5 @@ Implementation uses `src/backend/public-articles/public-search/` beside the exis
 - One fresh agent review found no actionable issues in the migrations, adapter, contracts and SQL coverage. It ran no suites; the HTTP evidence above is separate. Human maintainer review remains required. No UI changed, so no screenshot/browser suite was run. Task 18 must prove native GET page states, accessibility, query retention and request-local render deduplication.
 
 Before public launch, repeat deadline/cancellation/transport checks against the hosted gateway and measure capacity/pool behavior. The global limiter can temporarily throttle every reader; it is not per-source flood protection. Hosted CI remains owner-monitored. Task 16 PR #65 is still open; this task targets main and explicitly depends on it.
+
+Final clean-install HTTP rerun also passed: 120 successful/40 limited, anonymous/authenticated deadlines approximately 2,048/2,030 ms, and cancellation/response-loss retention and lock release. The disposable project was then stopped with `supabase stop --workdir /private/tmp/gavel-task17-api --no-backup`; no working-project containers or data were removed.
