@@ -1,3 +1,6 @@
+vi.mock("@/backend/infrastructure/env/server/server", () => ({
+  getServerEnv: () => ({ SITE_URL: "https://gavel.example" }),
+}));
 import { render, screen } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 const read = vi.hoisted(() => vi.fn());
@@ -23,8 +26,10 @@ it("routes use the existing request-cached public reader and correct fields", as
   render(await About());
   expect(screen.getByText("Approved mission")).toBeVisible();
   expect(read).toHaveBeenCalledTimes(1);
-  expect(await aboutMetadata()).toEqual({ title: "About The Gavel" });
-  expect(await submitMetadata()).toEqual({ title: "How to submit a letter" });
+  expect(await aboutMetadata()).toMatchObject({ title: "About The Gavel" });
+  expect(await submitMetadata()).toMatchObject({
+    title: "How to submit a letter",
+  });
 });
 it("renders the independent submission route", async () => {
   render(await Submit());
@@ -59,3 +64,12 @@ it.each(["unset", "unavailable"])(
     );
   },
 );
+
+it("each information route has its own canonical identity", async () => {
+  expect((await aboutMetadata()).alternates?.canonical).toBe(
+    "https://gavel.example/about",
+  );
+  expect((await submitMetadata()).alternates?.canonical).toBe(
+    "https://gavel.example/letters/how-to-submit",
+  );
+});
