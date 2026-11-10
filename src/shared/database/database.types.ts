@@ -1026,6 +1026,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      search_public_articles: {
+        Args: { p_cursor?: Json; p_limit?: number; p_query: string };
+        Returns: Json;
+      };
       set_article_main_image: {
         Args: {
           p_alt_text: string;
