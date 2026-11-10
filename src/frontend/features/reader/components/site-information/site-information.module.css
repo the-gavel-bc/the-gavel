@@ -1,0 +1,47 @@
+.page {
+  width: min(100%, 52rem);
+  margin-inline: auto;
+  padding: 2rem 1rem 3rem;
+  overflow-wrap: anywhere;
+}
+.page h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.2;
+}
+.page h2 {
+  font-size: 1.5rem;
+  line-height: 1.3;
+}
+.page section {
+  margin-block: 2rem;
+}
+.page p {
+  font-size: 1.125rem;
+  line-height: 1.75;
+}
+.prose {
+  white-space: pre-line;
+}
+.page ul {
+  list-style: none;
+  padding: 0;
+}
+.page a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  color: var(--reader-blue);
+  text-underline-offset: 0.2em;
+  max-width: 100%;
+}
+.page nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin-top: 2rem;
+}
+@media (min-width: 45rem) {
+  .page {
+    padding: 3rem 2rem 4rem;
+  }
+}
