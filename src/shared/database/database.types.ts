@@ -823,6 +823,7 @@ export type Database = {
         Args: { p_article_id: string; p_asset_id: string };
         Returns: Json;
       };
+      get_public_homepage: { Args: Record<PropertyKey, never>; Returns: Json };
       get_public_site_navigation: {
         Args: Record<PropertyKey, never>;
         Returns: Json;
