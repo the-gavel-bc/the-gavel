@@ -50,3 +50,5 @@ Implemented. SITE_URL production configuration, preview protection, human review
 - One fresh read-only agent review found no actionable issues; it ran no suites. No UI screenshots were needed. Production/preview origin and cache/header checks, human security/visual/screen-reader review, unresolved content/assets and the upstream recovery blocker remain release gates. Owner monitors hosted CI.
 
 The disposable project used current migrations under `/private/tmp/gavel-task20-browser` (API57321/DB57322), one worker and synthetic fixtures only. Its temporary Playwright configuration is local tooling, not application code. Standard CI runs `pnpm exec playwright test e2e/public-metadata`; exact global statement counting is declared only for the dedicated scratch run. Root/default social metadata is deliberately absent; every indexable page supplies its own checked identity. Descriptions are capped at 320 Unicode code points in the formatter; SQL remains the sole content/visibility authority.
+
+Draft PR #69 targets main and depends on #67 and #68. Main includes #65 and #66. The main sync preserved the verified tree exactly. Task 21 covers sitemap and robots.

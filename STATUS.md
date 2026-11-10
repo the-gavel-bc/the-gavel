@@ -1,6 +1,6 @@
 # Current work
 
-- Phase 5 Task 20 implemented on `feat/public-page-metadata`, isolated `/private/tmp/the-gavel-phase5-task17`; baseline Task 19 `e8da9ca`. Draft PR preparation next; target main. #65 and #66 are merged. #67 and #68 remain open prerequisites.
+- Phase 5 Task 20 implemented on `feat/public-page-metadata`, isolated `/private/tmp/the-gavel-phase5-task17`; baseline Task 19 `e8da9ca`. Draft [PR #69](https://github.com/dylandrozario/the-gavel/pull/69) targets main. #65 and #66 are merged. #67 and #68 remain open prerequisites.
 - [Task 20 plan](docs/superpowers/plans/2026-11-10-public-page-metadata.md) records trusted-origin canonical/social formatting over existing checked DTOs, initial-head metadata, private/auth/search/continuation exclusions and safe public media/author links.
 - Verified: all 813 unit tests; final 26 formatter/config tests after test-file split; eight positive desktop/mobile browser cases across targeted runs, production build, types/lint/format. Exact query counting proved one article RPC per metadata/page render. Initial measurement/fixture cleanup failures and corrections are recorded, without a claimed clean full-browser invocation.
 - Synthetic articles, media-key rows and Storage objects verified removed. Scratch `/private/tmp/gavel-task20-browser` (API57321/DB57322) was stopped without backup; local runner saved at `/private/tmp/gavel-task20-playwright.config.ts`. Working database, main checkout and screenshots untouched.
