@@ -368,3 +368,7 @@ Fresh agent review found trusted-media authorization surviving lock waits and di
 [Run 42662450352](https://github.com/dylandrozario/the-gavel/actions/runs/42662450352) failed before migrations because Docker could not bind host TCP port 54322. The retained log does not identify which process owned that runner port. CI now chooses an available database host port instead of assuming that fixed port is free; it does not change application or database authorization.
 
 Verification reproduced the 54322 collision in a disposable project while the existing local project remained running. The real CLI helper skipped an intentionally occupied candidate at 15422, selected 15423, and changed only the database port. Supabase startup then passed all migrations/seed on that selected port, and generated database types matched the repository byte-for-byte. Auxiliary services were excluded only in this disposable local check; the hosted workflow still starts its full stack. Nine focused tests, targeted lint, TypeScript, formatting and diff checks passed. The disposable project was stopped afterward. Hosted CI is left for owner verification; these local results are not a hosted pass claim.
+
+## Task 18 history scan false positive
+
+Gitleaks v8.30.1 flagged a test-plan sentence about encoded search pagination in commit `e380caf`. The text contains no credential. The exact fingerprint in `.gitleaksignore` covers this historical match. CI scans the rest of the history with its existing rules. Remove the entry if the flagged commit leaves the history that CI scans.
