@@ -59,3 +59,8 @@ Installed Next 16.4.2's `getErrorRSCPayload` builds the empty shell on SSR error
 
 
 Final focused Vitest rerun passed all 52 tests across ten files, including the unchanged import-boundary suite and all affected public route/form/recovery cases. Strict types passed again. The broad unit invocation remains recorded above with its isolated timeout. The approved limitation is also listed in deployment's release gates; it is not treated as a successful no-JavaScript resource-recovery check.
+
+
+Approved recovery verification (`--grep 'unmatched|missing,|resource 404'`, reusing the unchanged production build) completed successfully: four positive desktop/mobile cases passed, and two explicitly expected failures reproduced the upstream no-JavaScript resource bug. Positive checks separately cover unmatched-URL native recovery, actual 404 statuses, article/archive headings and hydrated forms across missing taxonomy, private, archived and deleted articles. Playwright labels the run six passed because the two failures are expected; they are not counted here as recovery successes. Together with the earlier four search and two quota cases, ten positive browser cases passed across the focused runs. No clean all-scenarios no-JavaScript recovery claim is made.
+
+Final lint, full configured formatting and diff checks passed after the expected-failure classification. The scratch project was stopped with no backup after fixtures/counter restoration. No hosted CI was monitored.
