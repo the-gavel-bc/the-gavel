@@ -201,10 +201,12 @@ Implemented on `feat/public-section-archives`; see the [focused plan and verific
 
 ## Task 14 — topic-tag archives
 
+Implemented on `feat/public-tag-archives`; see the [focused plan and verification](2026-11-10-public-tag-archives.md). Main integration and human visual/accessibility approval remain separate gates.
+
 **Files:** `src/app/(public)/tags/[slug]/page.tsx` and tests; shared archive components/reader scope.
 
-- [ ] Resolve an existing tag and list only matching published articles, including multi-section results and taxonomy links.
-- [ ] Test duplicate joins, inactive/missing associations, no results and pagination isolation. No tag creation/normalization UI or new write grant is added.
+- [x] Resolve an existing tag and list only matching published articles, including multi-section results and taxonomy links.
+- [x] Test duplicate joins, inactive/missing associations, no results and pagination isolation. No tag creation/normalization UI or new write grant is added.
 
 **Acceptance/validation:** Tag links from articles lead to correct bounded public lists; route/unit and browser checks pass.
 

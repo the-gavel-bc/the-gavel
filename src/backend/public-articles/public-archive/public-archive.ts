@@ -11,13 +11,14 @@ type Section = Extract<
   PublicSiteNavigation,
   { kind: "ok" }
 >["sections"][number];
-export type PublicArchiveContext = {
-  title: string;
-  section: Section;
-  category: Section["categories"][number] | null;
-  href: string;
-  isLetters: boolean;
-};
+export type PublicArchiveContext = { title: string; href: string } & (
+  | {
+      section: Section;
+      category: Section["categories"][number] | null;
+      isLetters: boolean;
+    }
+  | { section: null; category: null; isLetters: false }
+);
 export type PublicArchiveResult =
   | { kind: "notFound" }
   | { kind: "unavailable" }

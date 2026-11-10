@@ -129,3 +129,39 @@ it("links letters submission guidance and keeps continuation pages as a grid", (
     "/letters",
   );
 });
+
+it("renders sectionless tag archives as a grid without section-only controls", () => {
+  render(
+    <ArchiveGrid
+      result={{
+        ...result,
+        archive: {
+          title: "Campus life",
+          section: null,
+          category: null,
+          isLetters: false,
+          href: "/tags/campus-life",
+        },
+      }}
+    />,
+  );
+  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+    "Campus life",
+  );
+  expect(
+    screen.queryByRole("navigation", { name: "Categories" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("link", { name: "How to submit a letter" }),
+  ).not.toBeInTheDocument();
+  expect(screen.getAllByRole("article")).toHaveLength(2);
+  expect(screen.getAllByText("No image")).toHaveLength(2);
+  expect(screen.getAllByRole("link", { name: "News" })[0]).toHaveAttribute(
+    "href",
+    "/sections/news",
+  );
+  expect(screen.getByRole("link", { name: "Older articles" })).toHaveAttribute(
+    "href",
+    "/tags/campus-life?cursor=opaque_token",
+  );
+});
