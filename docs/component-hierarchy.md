@@ -166,3 +166,9 @@ The `/dashboard/admin/site` route independently verifies administrator access an
 ## Phase 5 planning reference
 
 The [public-reader task plan](superpowers/plans/2026-11-09-phase-five-public-reader.md) maps demo masthead/navigation, hero/Latest/Featured News, cards/archive chips, article presentation and footer into the current ownership structure. News is confirmed in primary navigation and category routes are section-scoped. The demo is a visual reference; current app taxonomy, authentication, canonical bodies and editorial workflow remain authoritative. Later owner screenshots refine the visual tasks. Reader components and public data operations remain proposed until their task is implemented.
+
+## Reader card primitives (Phase 5 Task 7)
+
+ReaderSurface supplies reader-scoped presentation without adding a main landmark or replacing the application shell. ArticleGrid arranges ArticleCard components; each card consumes the shared browser-safe PublicArticleCard type, links to canonical article/section paths, and uses StoryMeta for credited writers (falling back to the public owner) and UTC publication dates. Card headings default to h3 with an h2 option. Images use the authorized public media route directly, preserving the approved cache lifetime and displaying credits. ArticlePagination renders available native newer/older links; ReaderState distinguishes empty content from unavailable reads. Pagination/retry URLs are supplied by the owning server-rendered page. No client directive or stateful presentation dependency is required.
+
+The runtime card validator remains in the backend listing boundary and its results are checked against the shared type. These primitives are not yet wired into the homepage or masthead; subsequent Phase 5 tasks own that integration.

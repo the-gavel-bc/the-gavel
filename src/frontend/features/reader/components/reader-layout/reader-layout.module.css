@@ -1,0 +1,36 @@
+.surface {
+  --reader-ink: #14161c;
+  --reader-muted: #5d6470;
+  --reader-blue: #1e4aa8;
+  --reader-paper: #fff;
+  --reader-soft: #eef2fc;
+  --reader-line: #e3e6ee;
+  --reader-space-small: 0.5rem;
+  --reader-space-medium: 1rem;
+  --reader-space-large: 2rem;
+  --reader-radius: 0.625rem;
+  --reader-serif: Georgia, "Times New Roman", serif;
+  --reader-sans: system-ui, sans-serif;
+  color: var(--reader-ink);
+  background: var(--reader-paper);
+  font-family: var(--reader-serif);
+}
+.surface a:focus-visible {
+  outline: 3px solid var(--reader-blue);
+  outline-offset: 4px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--reader-space-large);
+}
+@media (min-width: 45rem) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 70rem) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

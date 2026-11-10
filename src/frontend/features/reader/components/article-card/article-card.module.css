@@ -1,0 +1,58 @@
+.card {
+  min-width: 0;
+}
+.credit {
+  margin: 0 0 0.5rem;
+  color: var(--reader-muted);
+  font: 0.75rem/1.5 var(--reader-sans);
+  overflow-wrap: anywhere;
+}
+.section {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  color: var(--reader-blue);
+  font: 700 0.75rem/1.4 var(--reader-sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-underline-offset: 0.2em;
+}
+.story {
+  color: var(--reader-ink);
+  text-decoration: none;
+  display: block;
+}
+.story:hover .title {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+.image {
+  aspect-ratio: 3 / 2;
+  border-radius: var(--reader-radius);
+  overflow: hidden;
+  background: var(--reader-soft);
+}
+.image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.missing {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--reader-muted);
+  font: 0.8125rem var(--reader-sans);
+}
+.title {
+  margin: 1rem 0 0.75rem;
+  font: 700 1.375rem/1.25 var(--reader-serif);
+  overflow-wrap: anywhere;
+}
+.excerpt {
+  margin: 0.75rem 0 0;
+  color: var(--reader-muted);
+  font: 1rem/1.6 var(--reader-serif);
+  overflow-wrap: anywhere;
+}

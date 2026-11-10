@@ -1,0 +1,17 @@
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-block: 2rem;
+  font-family: var(--reader-sans);
+}
+.pagination a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0.625rem 1rem;
+  color: var(--reader-blue);
+  border: 1px solid currentcolor;
+  border-radius: 0.25rem;
+  text-underline-offset: 0.2em;
+}
