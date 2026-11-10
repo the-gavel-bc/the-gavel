@@ -1,6 +1,17 @@
 import { render, screen } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ read: vi.fn() }));
+vi.mock("@/backend/public-homepage/public-homepage", () => ({
+  getPublicHomepageForRequest: () =>
+    Promise.resolve({
+      kind: "ok",
+      lead: null,
+      featured: [],
+      latest: [],
+      readThis: [{ title: "Footer story", slug: "footer-story" }],
+      sections: [],
+    }),
+}));
 vi.mock(
   "@/backend/public-site/public-site-navigation/public-site-navigation",
   () => ({ getPublicSiteNavigation: mocks.read }),
@@ -25,6 +36,10 @@ it("loads public data once and renders a single shell", async () => {
   expect(screen.getAllByRole("contentinfo")).toHaveLength(1);
   expect(screen.getByRole("main")).toHaveAttribute("tabindex", "-1");
   expect(screen.getByText("Mission")).toBeVisible();
+  expect(screen.getByRole("link", { name: "Footer story" })).toHaveAttribute(
+    "href",
+    "/articles/footer-story",
+  );
 });
 it("keeps static navigation available without inventing taxonomy", async () => {
   mocks.read.mockResolvedValue({ kind: "unavailable" });
