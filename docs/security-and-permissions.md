@@ -283,3 +283,7 @@ Task 5 adds a narrow Storage GET policy for finalized assets currently reference
 ## Public media delivery route
 
 Task 6 uses only the anonymous publishable-key client for both the allowlisted metadata projection and Storage download. UUIDs determine a canonical key internally; callers cannot supply a URL or object key. Size, finalized SHA-256 and WebP envelope are checked before a cacheable success. Storage authorization rechecks publication when an archive races the initial projection. Successful responses may remain cached for five minutes under the approved policy; private previews and all failures remain no-store. Hosted cache behavior and maintenance migration of legacy images remain release gates.
+
+## Public homepage authorization
+
+Task 9 grants anonymous and authenticated callers the same public-only homepage RPC. Private slot resolution and batch-card helpers have no application EXECUTE grants; the administrator reader retains its access check and saved-state contract. Public cards require published articles with active public owner/section references; missing required data fails unavailable. The body, private selection records, credentials, workflow metadata and storage paths are excluded. All composition reads share a stable statement snapshot. Archive/restore affects the next statement; an already in-flight response cannot be recalled.
