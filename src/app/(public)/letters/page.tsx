@@ -1,3 +1,4 @@
+import { publicArchiveMetadata } from "@/backend/reader/public-metadata/public-metadata";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getPublicArchiveForRequest } from "@/backend/public-articles/public-archive/public-archive";
@@ -13,17 +14,7 @@ async function read({ searchParams }: Props) {
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const result = await read(props);
   if (result.kind === "notFound") notFound();
-  if (result.kind === "unavailable")
-    return {
-      title: "Archive temporarily unavailable",
-      robots: { index: false, follow: false },
-    };
-  return {
-    title: result.archive.title,
-    ...(result.kind === "invalid"
-      ? { robots: { index: false, follow: false } }
-      : {}),
-  };
+  return publicArchiveMetadata(result);
 }
 export default async function ArchivePage(props: Props) {
   // Resolve active scope before streaming; missing taxonomy must remain HTTP 404.

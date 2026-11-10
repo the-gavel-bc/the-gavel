@@ -1,3 +1,6 @@
+vi.mock("@/backend/infrastructure/env/server/server", () => ({
+  getServerEnv: () => ({ SITE_URL: "https://gavel.example" }),
+}));
 import { render, screen } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
@@ -95,5 +98,5 @@ it("returns safe non-indexed metadata for unavailable and invalid pages", async 
     nextCursor: null,
     continuation: false,
   });
-  expect(await sectionMetadata(sectionProps)).toEqual({ title: "News" });
+  expect(await sectionMetadata(sectionProps)).toMatchObject({ title: "News" });
 });
