@@ -64,3 +64,7 @@ Grids use one column below 45rem, two from 45rem, and four from 70rem. Thumbnail
 ## Public shell implementation
 
 Task 8 adds a serif text masthead, deep-blue navigation band and dark footer using scoped CSS Modules with reader-token fallbacks. This replaces no dashboard styles and imports no unverified logo or external font. Native navigation/search and 44px minimum-height controls support keyboard and mobile use. Category disclosures expand in document flow to avoid clipping long labels. Mission paragraph breaks are preserved as plain text. Final logo/assets, screenshots and human accessibility approval remain pending.
+
+## Homepage presentation
+
+Task 10 uses the reader tokens for a large serif lead, a Latest column above 56rem, a soft-blue Featured News band and section card grids. Single-story/text-only heroes use a centered reading-friendly width. Headlines wrap without truncation, image regions reserve 3:2 space and credits remain visible. No new logo/font/media asset or motion is introduced. Partial groups render actual stories only; exact screenshot reconciliation and human visual approval remain pending.
