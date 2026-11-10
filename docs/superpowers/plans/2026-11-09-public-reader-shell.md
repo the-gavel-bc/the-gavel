@@ -24,3 +24,5 @@ Status: implemented and verified locally on `feat/public-reader-shell`, based on
 - A removed synthetic Chromium fixture checked News/category links, nested Escape focus, native GET search submission, no horizontal overflow at 320/1440px, JavaScript-disabled navigation and recovery after resizing a closed menu.
 - Review found reserved email characters needed mailto URI encoding; the fix and regression passed. Browser proof exposed a second-Escape issue at a closed nested disclosure; using the nearest open disclosure fixed it and tests passed.
 - TypeScript and lint passed. Final format checks are recorded before PR. No database schema or authorization changed, so database tests were not repeated. Human accessibility/branding signoff remains outstanding; no screenshot approval is claimed.
+
+- Final `pnpm exec vitest run --maxWorkers=2` passed all 688 tests. Production build, TypeScript, lint and format checks passed.
