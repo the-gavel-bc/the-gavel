@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { getPublicSiteNavigation } from "@/backend/public-site/public-site-navigation/public-site-navigation";
+import { getPublicSiteNavigationForRequest } from "@/backend/public-site/public-site-navigation/public-site-navigation";
 import { getPublicHomepageForRequest } from "@/backend/public-homepage/public-homepage";
 import { PublicShell } from "@/frontend/components/site/public-shell/public-shell";
 import { ReaderSurface } from "@/frontend/features/reader/components/reader-layout/reader-layout";
@@ -11,7 +11,7 @@ export default async function PublicLayout({
   children: ReactNode;
 }) {
   const [site, homepage] = await Promise.all([
-    getPublicSiteNavigation(),
+    getPublicSiteNavigationForRequest(),
     getPublicHomepageForRequest(),
   ]);
   return (

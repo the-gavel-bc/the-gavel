@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { z } from "zod";
 import { createPublicReaderClient } from "@/backend/infrastructure/supabase/public-reader/public-reader";
 
@@ -94,3 +95,6 @@ export async function getPublicSiteNavigation(): Promise<PublicSiteNavigation> {
     return { kind: "unavailable" };
   }
 }
+
+// Reuse one active catalog within this render, without retaining it across requests.
+export const getPublicSiteNavigationForRequest = cache(getPublicSiteNavigation);

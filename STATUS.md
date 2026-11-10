@@ -1,8 +1,8 @@
 # Current work
 
-- Phase: 5, Task 12 public article page on `feat/public-article-page`, based on Task 11 PR #60. Preceding reader PRs through #60 are merged; this task targets main.
-- [Task 12 plan](docs/superpowers/plans/2026-11-10-public-article-page.md) records decisions, checks, startup/test-fixture issues and proof limits.
-- Implemented server-rendered article header, explicit credits, authorized media, safe body, taxonomy, public owner biography and bounded related/recent stories. Anonymous and owners receive the same projection; private/archived/missing slugs return real 404.
-- Build/types/lint/format and focused tests pass. Full unit run: 711 passed, one existing import-boundary timeout; unchanged module passed its targeted default-timeout rerun. Four desktop/mobile browser cases and disposable responsive/no-JavaScript media/edit/archive/restore proof passed.
-- No schema/auth/lifecycle change. Human visual/security/screen-reader review remains pending. Owner monitors hosted CI.
-- Next: Task 13 section, category and letters archives.
+- Phase: 5, Task 13 section/category/letters archives on `feat/public-section-archives`, based on Task 12 PR #61. Targets main; #61 is a prerequisite while open.
+- [Task 13 plan](docs/superpowers/plans/2026-11-10-public-section-archives.md) records scope, letters configuration, cursor behavior and verification.
+- Implemented active-scope archives, disambiguated category URLs, first-page section lead, category chips/breadcrumbs, native bounded pagination, empty/final/recovery states, real scope 404 and noindex failures. Shared request-only catalog/archive reads retain anonymous/no-store behavior.
+- All 726 unit tests, 57 relevant SQL assertions, types/lint/format and production build passed. Four desktop/mobile browser cases passed, including 320px/no-JavaScript pagination, public-only owner views and letters mapping. One review found no issues.
+- No schema/auth/lifecycle change. Real active Letter to the Editor configuration and human visual/accessibility approval remain pending. Owner monitors hosted CI.
+- Next: Task 14 topic-tag archives.
