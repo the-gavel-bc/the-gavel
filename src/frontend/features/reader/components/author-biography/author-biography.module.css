@@ -1,0 +1,12 @@
+.biography {
+  max-width: 68ch;
+  margin-block: 1.5rem 2.5rem;
+}
+.biography h2 {
+  font: 700 1.5rem/1.3 var(--reader-serif);
+}
+.biography p {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  font: 1.125rem/1.75 var(--reader-serif);
+}
