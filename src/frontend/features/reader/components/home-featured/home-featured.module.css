@@ -1,0 +1,10 @@
+.featured {
+  padding: clamp(1rem, 3vw, 2rem);
+  background: var(--reader-soft);
+  margin-block: 3rem;
+  border-radius: var(--reader-radius);
+}
+.featured h2 {
+  font: 700 clamp(1.75rem, 3vw, 2.5rem)/1.2 var(--reader-serif);
+  margin: 0 0 1.5rem;
+}
