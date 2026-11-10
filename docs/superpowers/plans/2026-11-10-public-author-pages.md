@@ -1,6 +1,6 @@
 # Phase 5 Task 15 — public author projection and page
 
-Status: implementation on `feat/public-author-pages`, based on Task 14 PR #63, still open. Target main; #63 remains a prerequisite while open. Task 13 PR #62 is merged.
+Status: implemented and locally verified on `feat/public-author-pages`, based on Task 14 PR #63, still open. Target main; #63 remains a prerequisite while open. Task 13 PR #62 is merged.
 
 ## Scope, decisions and acceptance
 
@@ -19,3 +19,14 @@ Status: implementation on `feat/public-author-pages`, based on Task 14 PR #63, s
 4. Record commands/results and limits here, update API/component docs and STATUS, then open a main-targeting draft PR. Owner monitors hosted CI; remove synthetic fixtures and stop test services.
 
 Rollback: revert application consumers/reader; no stored data, schema, authorization or lifecycle migration changes.
+
+
+## Verification record
+
+- RED: the new query/route/biography suites failed because implementation modules were missing. GREEN: sixteen focused cases passed, including existing archive-grid behavior. `pnpm test --maxWorkers=2` passed all 747 unit/component tests.
+- `pnpm typecheck`, `pnpm lint`, `pnpm format:check` and `git diff --check` passed. Playwright built and started the production app successfully.
+- `pnpm exec supabase test db supabase/tests/036_public_article_list.test.sql supabase/tests/042_public_author_archives.test.sql`: all 42 assertions passed. These cover public guest/empty/inactive lookup, forbidden direct Auth linkage selection, owned-or-multi-credit deduplication, inactive membership retention, private/archived/inactive-reference exclusion, cross-author/scope cursors, public role parity and frozen guest slugs. Fixtures rolled back; no reset/migration/grant change was needed.
+- `pnpm exec playwright test e2e/public-authors/public-authors.spec.ts e2e/public-tags/public-tags.spec.ts`: all eight desktop/mobile cases passed on the first run. Four author cases verify credit-to-guest navigation, escaped biography text and paragraph breaks, twelve-card and one-card final pages, cross-author/repeated cursor recovery/noindex, no-store HTML, inactive membership anonymous/owner parity, inactive-own-profile real 404, missing/empty profiles, exclusion of Auth IDs/emails and private stories, keyboard focus, 320px reflow and no-JavaScript credit/author/pagination/article navigation. Four existing tag cases protect shared archive composition.
+- One fresh-context read-only review found no issues. Browser teardown removed profiles/articles/memberships/Auth identities; scoped article/profile/Auth counts were zero. Playwright stopped its test app. No hosted CI monitoring or screenshots were used.
+
+Profile images remain outside the unresolved media contract. Human visual/security/screen-reader approval and later search/information/SEO tasks remain pending. No mutation/media/concurrency boundary was touched, so those unrelated heavy suites were not repeated.

@@ -200,7 +200,7 @@ PublicArticleBody adapts checked public image IDs/dimensions into the public med
 
 ArticleHeader renders title/dek, UTC publication date and eager authorized main media with dimensions/credit. ArticleCredits separates ownership from writer/editor/creative attribution. PublicArticleBody renders the validated canonical body and lazy body media. ArticleContext adds section-scoped category links, tags, the public owner's biography, search and up to three related cards. Its backend helper reads at most four same-section candidates and, when needed, four recent candidates, excluding the current article and duplicates. Related failures leave the readable article intact. Components use explicit type-only imports of the validated projection; no backend runtime enters presentation.
 
-The [Task 12 plan](superpowers/plans/2026-11-10-public-article-page.md) records verification and limits. Author archives, search and About destinations remain owned by later tasks; complete SEO metadata remains Task 20 work.
+The [Task 12 plan](superpowers/plans/2026-11-10-public-article-page.md) records verification and limits. Search and About destinations remain owned by later tasks; complete SEO metadata remains Task 20 work.
 
 
 ## Public section and category archives (Phase 5 Task 13)
@@ -217,3 +217,10 @@ The letters route resolves the configured active section by the approved `Letter
 `/tags/[slug]` uses the narrow anonymous tag resolver and existing public tag list scope. The shared archive context now has an explicit sectionless variant: ArchiveHeader retains Home/current-topic breadcrumbs, CategoryChips returns no controls, and ArchiveGrid renders cards without a section hero. Each story retains its actual section link across multi-section results. Existing section/category/letters behavior remains unchanged.
 
 Metadata/page share request-local resolution, and shared route boundaries retain real missing-tag 404, generic errors and safe cursor recovery. Native links support article-to-tag discovery and pagination without JavaScript. The [Task 14 plan](superpowers/plans/2026-11-10-public-tag-archives.md) records validation, SQL authority and limits; no tag editor or new write boundary is introduced.
+
+
+## Public author pages (Phase 5 Task 15)
+
+`/authors/[slug]` combines the narrow public author resolver with the shared sectionless archive grid. ArchiveHeader owns the display-name h1; an optional server-rendered introduction slot renders AuthorBiography before cards or cursor-recovery feedback. Biography text is escaped with preserved line breaks and omitted when absent. The shared PublicAuthor DTO has presentation fields only. No profile-image placeholder or editor is added.
+
+Existing writer/owner/contributor links now resolve to public biographies and deduplicated owned-or-credited published stories. Shared native pagination and safe error/not-found boundaries are retained. The [author interface](api-contracts.md#public-author-archive-resolution) owns projection/visibility rules; the [Task 15 plan](superpowers/plans/2026-11-10-public-author-pages.md) records verification and remaining human/media/SEO gates.

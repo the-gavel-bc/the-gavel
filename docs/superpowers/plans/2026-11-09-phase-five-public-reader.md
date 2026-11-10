@@ -212,11 +212,13 @@ Implemented on `feat/public-tag-archives`; see the [focused plan and verificatio
 
 ## Task 15 — public author projection and page
 
+Implemented on `feat/public-author-pages`; see the [focused plan and verification](2026-11-10-public-author-pages.md). Existing anonymous profile policy supports the narrow application projection without a migration. Main integration, human review and unresolved profile media remain separate gates.
+
 **Files:** New narrow profile-reader SQL/tests where necessary; `src/backend/reader/author-query/`; `src/shared/reader/author-contract/`; `src/app/(public)/authors/[slug]/page.tsx` and owned components/tests.
 
-- [ ] Return only approved active public profile fields. Keep public names/bios independent of membership/Auth details and never join those fields into reader DTOs.
-- [ ] List owned or credited published articles once per article using Task 3's author scope; support guests, multiple roles and empty current archives. Preserve frozen author URLs.
-- [ ] Test inactive/missing profiles, credited non-owners, deactivated memberships with retained published journalism and private-article exclusion. Profile images remain explicitly gated by the unresolved media contract.
+- [x] Return only approved active public profile fields. Keep public names/bios independent of membership/Auth details and never join those fields into reader DTOs.
+- [x] List owned or credited published articles once per article using Task 3's author scope; support guests, multiple roles and empty current archives. Preserve frozen author URLs.
+- [x] Test inactive/missing profiles, credited non-owners, deactivated memberships with retained published journalism and private-article exclusion. Profile images remain explicitly gated by the unresolved media contract.
 
 **Acceptance/validation:** Correct public biography/byline links and deduplicated author articles with no identity linkage leak. Commit projection/tests, then thin route/presentation; SQL/unit/browser checks pass.
 
