@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { z } from "zod";
 import { createPublicReaderClient } from "@/backend/infrastructure/supabase/public-reader/public-reader";
 import {
@@ -72,6 +73,7 @@ const resultSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("unavailable") }),
   z.strictObject({ kind: z.literal("ok"), article: articleSchema }),
 ]);
+export type PublicArticle = z.infer<typeof articleSchema>;
 export type PublicArticleResult = z.infer<typeof resultSchema>;
 
 export async function getPublicArticle(
@@ -90,3 +92,6 @@ export async function getPublicArticle(
     return { kind: "unavailable" };
   }
 }
+
+// Metadata and page reuse one anonymous read within a request, never across requests.
+export const getPublicArticleForRequest = cache(getPublicArticle);
