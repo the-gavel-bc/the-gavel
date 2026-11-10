@@ -19,8 +19,25 @@ test("homepage exposes its accessible foundation", async ({ page }) => {
 
   await expectVisibleFocus(page.getByRole("link", { name: "Skip to content" }));
 
-  await page.getByText("Sections", { exact: true }).click();
-  await expect(page.getByRole("link", { name: "Features" })).toBeVisible();
+  const menu = page.locator("header details").first();
+  if ((page.viewportSize()?.width ?? 0) < 720) {
+    // Mobile progressively collapses after hydration; taxonomy is configured
+    // data, so this foundation check must not assume a seeded section exists.
+    await expect(menu).not.toHaveAttribute("open");
+    await menu.locator(":scope > summary").press("Enter");
+  }
+  const navigation = page.getByRole("navigation", {
+    name: "Primary navigation",
+  });
+  const home = navigation.getByRole("link", { name: "Home", exact: true });
+  await expect(home).toBeVisible();
+  await expect(home).toHaveAttribute("aria-current", "page");
+  await expect(
+    navigation.getByRole("link", { name: "About", exact: true }),
+  ).toHaveAttribute("href", "/about");
+  await home.focus();
+  await expectVisibleFocus(home);
+  await expect(page.getByRole("search")).toHaveAttribute("method", "get");
 
   const hasHorizontalOverflow = await page.evaluate(
     () =>

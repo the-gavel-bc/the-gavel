@@ -2,11 +2,27 @@ import { expect, type Locator } from "@playwright/test";
 
 export async function expectVisibleFocus(locator: Locator) {
   await expect(locator).toBeFocused();
-  const colors = await locator.evaluate((element) => ({
-    outline: getComputedStyle(element).outlineColor,
-    background: getComputedStyle(document.body).backgroundColor,
-    width: Number.parseFloat(getComputedStyle(element).outlineWidth),
-  }));
+  const colors = await locator.evaluate((element) => {
+    // Outlines sit outside the element: navigation can have a different
+    // surrounding surface from the page background.
+    let background = getComputedStyle(document.body).backgroundColor;
+    for (
+      let parent = element.parentElement;
+      parent;
+      parent = parent.parentElement
+    ) {
+      const color = getComputedStyle(parent).backgroundColor;
+      if (color !== "transparent" && color !== "rgba(0, 0, 0, 0)") {
+        background = color;
+        break;
+      }
+    }
+    return {
+      outline: getComputedStyle(element).outlineColor,
+      background,
+      width: Number.parseFloat(getComputedStyle(element).outlineWidth),
+    };
+  });
   const luminance = (color: string) => {
     const channels = color
       .match(/\d+/g)!
