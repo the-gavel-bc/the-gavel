@@ -1,0 +1,12 @@
+.meta {
+  color: var(--reader-muted);
+  font: 0.8125rem/1.6 var(--reader-sans);
+  overflow-wrap: anywhere;
+}
+.meta p {
+  margin: 0;
+}
+.meta a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
