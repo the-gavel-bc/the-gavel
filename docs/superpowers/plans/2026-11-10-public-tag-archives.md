@@ -1,6 +1,6 @@
 # Phase 5 Task 14 — topic-tag archives
 
-Status: implementation on `feat/public-tag-archives`, based on Task 13 PR #62, still open. PR targets main; merge #62 first while it remains a prerequisite. Task 12 PR #61 is merged.
+Status: implemented and locally verified on `feat/public-tag-archives`, based on Task 13 PR #62, still open. PR targets main; merge #62 first while it remains a prerequisite. Task 12 PR #61 is merged.
 
 ## Scope and acceptance
 
@@ -18,3 +18,14 @@ Status: implementation on `feat/public-tag-archives`, based on Task 13 PR #62, s
 3. Record commands/results and limits here; update authoritative interface/component docs and STATUS. Open a main-targeting draft PR; owner monitors hosted CI. Do not reset the database or retain fixtures.
 
 Rollback: revert application readers/presentation changes; no stored data, schema or grants change. Human visual/accessibility review remains separate.
+
+
+## Verification record
+
+- RED: new query/route modules were absent and the existing grid crashed on sectionless context. GREEN: 23 focused query/route/presentation cases passed, including section/category regressions. `pnpm test --maxWorkers=2` then passed all 736 unit/component tests.
+- `pnpm typecheck`, `pnpm lint`, `pnpm format:check` and `git diff --check` passed. Production build/start passed through Playwright.
+- `pnpm exec supabase test db supabase/tests/036_public_article_list.test.sql supabase/tests/041_public_tag_archives.test.sql`: the existing file passed 27 assertions, but initial new fixture setup correctly hit the inactive-owner publication guard. The fixture now publishes while active, then models a stale legacy reference through a privileged profile update, without disabling guards or changing application operations. A focused rerun of `041_public_tag_archives.test.sql` passed all 12 assertions. Thus all 39 relevant assertions passed across those runs; no database reset/migration/grant change was used. SQL covers multi-section matches, extra tags/contributor-role deduplication, empty tags, scope-bound/final cursors, removed associations, inactive references, direct association denial and anonymous/authenticated parity.
+- `pnpm exec playwright test e2e/public-tags/public-tags.spec.ts e2e/public-archives/public-archives.spec.ts`: all eight desktop/mobile cases passed on the first run. Four tag cases cover article topic links, cross-section taxonomy links, twelve-card and one-card final pages, cross-tag/repeated cursor recovery/noindex, real missing-tag 404, empty tags, owner public-only views, stale inactive references, no-store HTML, keyboard focus, 320px reflow and no-JavaScript article-to-tag/pagination/article navigation. Four existing section/category/letters cases protect shared behavior.
+- One fresh-context read-only review found no issues. Teardown removed all synthetic fixtures; scoped article/tag/section counts were zero and Playwright stopped its production server. Hosted CI remains owner-monitored. No screenshots or unrelated media/concurrency suite reruns were needed.
+
+Human visual and screen-reader approval, real publication inputs and later author/search/information/SEO tasks remain pending. No tag activation or normalization decision was invented.
