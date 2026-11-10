@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
+import { SearchForm } from "@/frontend/features/reader/components/search-form/search-form";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import type { PublicSection } from "@/shared/reader/site-navigation/site-navigation";
@@ -96,23 +97,7 @@ export function ReaderNavigation({ sections }: { sections: PublicSection[] }) {
             </ul>
           </nav>
         </details>
-        <form
-          className={styles.search}
-          role="search"
-          action="/search"
-          method="get"
-        >
-          <label className={styles.srOnly} htmlFor="reader-search">
-            Search stories
-          </label>
-          <input
-            id="reader-search"
-            type="search"
-            name="q"
-            placeholder="Search stories"
-          />
-          <button type="submit">Search</button>
-        </form>
+        <SearchForm id="reader-search" navigation />
       </div>
     </div>
   );
