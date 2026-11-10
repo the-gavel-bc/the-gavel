@@ -4,7 +4,7 @@ export function ArchiveNotFound() {
   return (
     <div className={styles.page}>
       <h1>Archive not found</h1>
-      <p>This section or category is not available.</p>
+      <p>This archive is not available.</p>
       <Link href="/">Home</Link>
     </div>
   );

@@ -33,7 +33,9 @@ export function ArchiveGrid({
       </div>
     );
   const lead =
-    !archive.category && !result.continuation ? result.items[0] : null;
+    archive.section && !archive.category && !result.continuation
+      ? result.items[0]
+      : null;
   const cards = lead ? result.items.slice(1) : result.items;
   return (
     <div className={styles.page}>
