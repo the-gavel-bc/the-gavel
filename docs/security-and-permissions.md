@@ -287,3 +287,7 @@ Task 6 uses only the anonymous publishable-key client for both the allowlisted m
 ## Public homepage authorization
 
 Task 9 grants anonymous and authenticated callers the same public-only homepage RPC. Private slot resolution and batch-card helpers have no application EXECUTE grants; the administrator reader retains its access check and saved-state contract. Public cards require published articles with active public owner/section references; missing required data fails unavailable. The body, private selection records, credentials, workflow metadata and storage paths are excluded. All composition reads share a stable statement snapshot. Archive/restore affects the next statement; an already in-flight response cannot be recalled.
+
+## Canonical body rendering
+
+The shared renderer validates the full v1/v2 document under existing byte/node/depth bounds before rendering explicit React elements. Unsafe protocols, unknown fields/nodes and malformed bodies have no HTML/JSON fallback. All supplied media resolutions are preflighted and copied into a local map; only canonical public/private media routes matching the asset UUID and bounded dimensions are accepted. Public adapters construct their own public routes from checked IDs, and reject missing or duplicate descriptors before body text is exposed. Private preview authorization remains in the existing media route. This layer adds no media grants and does not replace database authorization.
