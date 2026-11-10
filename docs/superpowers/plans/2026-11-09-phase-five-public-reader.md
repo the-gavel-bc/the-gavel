@@ -272,11 +272,13 @@ Implemented on `feat/public-information-pages`; see the [focused plan and verifi
 
 ## Task 20 — public page metadata and canonical identity
 
+Implemented on `feat/public-page-metadata`; see the [focused plan and verification](2026-11-10-public-page-metadata.md). Existing anonymous readers supply all data; no metadata query/RPC is added. Initial-head and privacy proof passed; the owner-approved Task 18 resource-404 body blocker and hosted/human gates remain separate.
+
 **Files:** Public route metadata helpers; `src/backend/reader/metadata-query/` only if existing detail/list readers cannot supply it; private/auth metadata settings; relevant tests.
 
-- [ ] Produce title/description/canonical/social metadata from the same published read used by the page. Reuse within a request without adding persistent stale caches or an unrestricted metadata reader.
-- [ ] Preserve article/author URL freezes, canonical section-scoped categories and safe plain-text previews. Keep private/auth/search variants appropriately excluded from indexing per Task 1.
-- [ ] Test archive/deletion between visits, malformed canonical inputs, absent media, legacy unsupported bodies and signed-in public requests. Public metadata must not become a draft preview side channel.
+- [x] Produce title/description/canonical/social metadata from the same published read used by the page. Reuse within a request without adding persistent stale caches or an unrestricted metadata reader.
+- [x] Preserve article/author URL freezes, canonical section-scoped categories and safe plain-text previews. Keep private/auth/search variants appropriately excluded from indexing per Task 1.
+- [x] Test archive/deletion between visits, malformed canonical inputs, absent media, legacy unsupported bodies and signed-in public requests. Public metadata must not become a draft preview side channel.
 
 **Acceptance/validation:** Correct initial server HTML and headers for indexable pages and safe noindex/error handling elsewhere. Metadata/route/header and production-build checks pass.
 
