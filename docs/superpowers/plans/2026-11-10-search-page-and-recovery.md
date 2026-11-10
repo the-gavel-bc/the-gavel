@@ -28,7 +28,7 @@ The approved server-rendered GET approach fits shareable URLs and no-JavaScript 
 ## File map and execution
 
 1. **Shared presentation** — `src/frontend/features/reader/components/search-form/` owns labeled GET form/styles/tests; navigation reuses it. `search-results/` owns checked state rendering and query/cursor links. Add optional prefetch control to existing `pagination/` without changing other consumers.
-   - [x] Write focused tests for labels/GET semantics, literal query escaping, throttled/unavailable/invalid/empty states, query-bound encoded links, cursor reset and prefetch-disabled pagination; observe failure.
+   - [x] Test native GET labels, literal queries, empty results, invalid input, throttling, and service failures. Check that pagination retains the query, a new search drops the cursor, and links skip prefetch. Observe the tests fail before implementation.
    - [x] Implement minimal presentation; run focused Vitest and commit.
 2. **Route and recovery** — `src/app/(public)/search/page.tsx` and colocated tests own input shape, one read, static noindex metadata and state composition. `not-found-recovery/` supplies generic content. `src/app/not-found.tsx` supplies root shell; public route/group and existing resource boundaries reuse recovery without duplicate shells.
    - [x] Test blank/repeated/invalid inputs, exactly one checked read and no metadata read, query retention, and resource/root recovery; observe failure.
