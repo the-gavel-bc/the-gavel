@@ -1,4 +1,5 @@
 import "server-only";
+import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
 
 import { z } from "zod";
 import { createPublicReaderClient } from "@/backend/infrastructure/supabase/public-reader/public-reader";
@@ -115,7 +116,7 @@ const responseSchema = z.discriminatedUnion("kind", [
     nextCursor: cursorSchema.nullable(),
   }),
 ]);
-export type PublicArticleCard = z.infer<typeof cardSchema>;
+export type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
 export type PublicListResult =
   | { kind: "invalid" | "unavailable" }
   | { kind: "ok"; items: PublicArticleCard[]; nextCursor: string | null };
