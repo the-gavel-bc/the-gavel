@@ -1,8 +1,8 @@
 # Current work
 
-- Phase: 5, Task 15 public author pages on `feat/public-author-pages`, based on Task 14 PR #63. Targets main; #63 remains a prerequisite while open. Task 13 PR #62 is merged.
-- [Task 15 plan](docs/superpowers/plans/2026-11-10-public-author-pages.md) records existing-policy projection, DTO, biography composition and verification.
-- Implemented `/authors/[slug]`: active public profiles/guests/empty archives, plain biographies, deduplicated owned-or-credited published cards, bounded native pagination, real inactive/missing-profile 404 and noindex failures. Auth/membership linkage stays outside the projection; inactive membership alone retains journalism.
-- All 747 unit tests, 42 relevant SQL assertions, types/lint/format and production build passed. Eight desktop/mobile author/tag cases passed, including 320px/no-JavaScript reading and signed-in parity. One review found no issues; fixtures removed.
-- No schema/grant/auth/lifecycle change. Profile images remain unresolved; human visual/security/accessibility review remains pending. Owner monitors hosted CI.
-- Next: Task 16 searchable published-text extraction and indexes.
+- Phase: 5, Task 16 search foundation on `feat/search-index-foundation`, based on Task 15 PR #64. All reader PRs through #64 are merged; this task targets main.
+- [Task 16 plan](docs/superpowers/plans/2026-11-10-search-index-foundation.md) and [ADR 0010](docs/decisions/0010-private-search-lexeme-indexes.md) record private extraction, native word-array indexes, live labels and rollout/rebuild rules.
+- Implemented additive private helpers, five GIN indexes and a private bounded candidate reader. No public endpoint/grant or source-column change. Maximum-size canonical bodies retain tail matches; metadata is not denormalized.
+- Populated upgrade preserved 35 source-table hashes; lock rollback/retry and clean rebuild passed. Full SQL: 1,818 assertions; final fallback correction: 77 targeted assertions plus clean schema lint. All 747 unit tests, types/lint/format/build and public generated-type comparison passed. Representative 10k-article plans passed; one review found no issues.
+- Migrations verified only on a disposable DB; the existing working database was left untouched. Hosted CI/performance and human review remain separate. Owner monitors CI.
+- Next: Task 17 bounded public search query, shared quota and cancellation proof; Task 18 supplies UI.

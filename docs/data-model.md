@@ -203,3 +203,10 @@ Task 14 adds one permission-closed `site_information` record with an edit versio
 ### Phase 4 verification corrections
 
 `20261109010000_trusted_media_actor_locks.sql` retains supplied-actor Auth/membership/profile locks for the existing trusted media functions. `20261109010100_active_profile_reads.sql` adds active caller-profile checks to the existing read predicates. They preserve public signatures, grants and stored rows; no new public mutation or schema backfill is added. See [Phase 4 verification](reviews/phase-4-editorial-workflow.md).
+
+
+## Private search index foundation (Phase 5 Task 16)
+
+No source table/column or application grant changes. Five GIN expression indexes cover published article title/excerpt/meta-description/canonical body words and active profile/section/category names plus tag names. Canonical extraction reads validated text nodes and captions only; arbitrary JSON/attributes, revisions, SEO keyphrase and identity fields are excluded. Current association joins supply public labels without copying them onto articles. Private candidate IDs remain inaccessible to anonymous/authenticated callers until the separate bounded public search operation exists.
+
+[ADR 0010](decisions/0010-private-search-lexeme-indexes.md) owns normalization, size-limit and rebuild decisions. The [Task 16 plan](superpowers/plans/2026-11-10-search-index-foundation.md) records migration compatibility, query measurements and exact checks. Private helpers and indexes add no public generated-type fields.
