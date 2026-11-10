@@ -1,6 +1,6 @@
 # Design system
 
-Status: Approved direction — exact tokens await implementation and asset inspection.
+Status: Reader-scoped card primitives and provisional tokens are implemented in Phase 5 Task 7; shell/page composition and final visual signoff remain pending.
 
 ## Direction
 
@@ -54,3 +54,9 @@ Target WCAG 2.2 AA.
 ## Phase 5 visual reference
 
 The owner identified `/Users/dylandrozario/Desktop/work/testing/demo-gavel-frontend` as the public-reader UI reference on 2026-11-09. Its static HTML/CSS supplies candidate masthead, navigation, hero, cards, archives, article/prose and footer patterns; the [Phase 5 plan](superpowers/plans/2026-11-09-phase-five-public-reader.md#demo-inventory-and-adaptation-map) maps these to app components. Its color/font values and assets are candidates subject to contrast, licensing and owner review, not approved global replacements. Keep dashboard styles isolated. Further screenshots will refine layout and visual signoff; do not import demo policy copy, content, auth behavior or taxonomy as design approval.
+
+## Implemented reader primitives
+
+ReaderSurface owns local reader tokens; ArticleGrid and ArticleCard must render within it. The demo-inspired palette uses ink #14161c, muted #5d6470, deep blue #1e4aa8, white and soft #eef2fc. Normal text contrast against its backgrounds ranges from 5.32:1 to 18.08:1. Local spacing roles and a 0.625rem image radius accompany Georgia editorial type and system sans-serif metadata. No external font, network font request or unverified logo was added.
+
+Grids use one column below 45rem, two from 45rem, and four from 70rem. Thumbnails reserve a 3:2 region and retain intrinsic dimensions; cards show a truthful absence placeholder. Titles wrap without truncation, credits remain visible, and no animation is introduced. Scoped focus rings and native links support keyboard use. These choices are provisional pending the owner's screenshots and branding provenance; human screen-reader review remains outstanding.

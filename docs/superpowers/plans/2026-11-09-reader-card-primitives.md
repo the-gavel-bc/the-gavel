@@ -1,6 +1,6 @@
 # Phase 5 Task 7 — reader tokens and card primitives
 
-Status: implementation on `feat/reader-card-primitives`, based on PR #55; PR #55 is now merged; this PR targets main independently.
+Status: implemented and verified locally on `feat/reader-card-primitives`, based on PR #55; PR #55 is now merged; this PR targets main independently.
 
 ## Design and acceptance
 
@@ -24,3 +24,5 @@ Status: implementation on `feat/reader-card-primitives`, based on PR #55; PR #55
 - Computed token contrast: ink/white 18.08:1, muted/white 5.96:1, blue/white 8.08:1, muted/soft 5.32:1.
 - The reviewer service was interrupted by its usage limit. A subsequent inline review checked type boundaries, scoped styles, native links and credits; the missing credit display was corrected. This is not human accessibility or visual approval.
 - The temporary fixture and development server were removed/stopped. No synthetic content or preview route is committed. Exact screenshot reconciliation, branding provenance and human screen-reader review remain pending.
+
+- Production build and format checks passed. The first build found stale generated development types for the removed fixture; clearing only `.next/dev` resolved it. Main synchronization introduced no application-code changes.
