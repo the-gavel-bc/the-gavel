@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import type { PublicArchiveResult } from "@/backend/public-articles/public-archive/public-archive";
 import { ArchiveHeader } from "../archive-header/archive-header";
 import { ArticleGrid } from "../reader-layout/reader-layout";
@@ -10,8 +11,10 @@ import styles from "./archive-grid.module.css";
 
 export function ArchiveGrid({
   result,
+  introduction,
 }: {
   result: Exclude<PublicArchiveResult, { kind: "notFound" }>;
+  introduction?: ReactNode;
 }) {
   if (result.kind === "unavailable")
     return (
@@ -28,6 +31,7 @@ export function ArchiveGrid({
     return (
       <div className={styles.page}>
         <ArchiveHeader archive={archive} />
+        {introduction}
         <p>This article page is invalid or expired.</p>
         <Link href={archive.href}>Newest articles</Link>
       </div>
@@ -40,6 +44,7 @@ export function ArchiveGrid({
   return (
     <div className={styles.page}>
       <ArchiveHeader archive={archive} />
+      {introduction}
       {lead && (
         <div className={styles.lead}>
           <HomeHero article={lead} />
