@@ -189,11 +189,13 @@ Implemented on `feat/public-article-page`; see the [focused plan and verificatio
 
 ## Task 13 — section, category and letters archives
 
+Implemented on `feat/public-section-archives`; see the [focused plan and verification](2026-11-10-public-section-archives.md). Main integration, real letters configuration and human visual/accessibility approval remain separate gates.
+
 **Files:** `src/app/(public)/sections/[sectionSlug]/page.tsx`, `sections/[sectionSlug]/categories/[categorySlug]/page.tsx`, `letters/page.tsx`; `frontend/features/reader/components/archive-header/`, `archive-grid/`, `category-chips/`.
 
-- [ ] Resolve active catalog scope and compose the shared bounded list with section lead, category chips/breadcrumbs and native next-page links.
-- [ ] Use one `sections/[sectionSlug]/` directory for both section and nested category routes; differently named sibling dynamic segments are invalid. Build `/letters` as the approved Letter to the Editor section archive and link submission guidance. Do not reclassify it or Allston–Brighton to match the demo.
-- [ ] Test equal category slugs in different sections, inactive/missing parents, empty/final pages and cursor reuse across scopes. Missing real taxonomy remains a configuration/input gate, not invented seed data.
+- [x] Resolve active catalog scope and compose the shared bounded list with section lead, category chips/breadcrumbs and native next-page links.
+- [x] Use one `sections/[sectionSlug]/` directory for both section and nested category routes; differently named sibling dynamic segments are invalid. Build `/letters` as the approved Letter to the Editor section archive and link submission guidance. Do not reclassify it or Allston–Brighton to match the demo.
+- [x] Test equal category slugs in different sections, inactive/missing parents, empty/final pages and cursor reuse across scopes. Missing real taxonomy remains a configuration/input gate, not invented seed data.
 
 **Acceptance/validation:** All three route shapes reuse the same tested listing contract and preserve category disambiguation. SQL/route and focused desktop/mobile checks pass; keep each thin route in a separate commit if needed.
 

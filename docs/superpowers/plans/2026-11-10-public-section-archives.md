@@ -1,6 +1,6 @@
 # Phase 5 Task 13 — section, category and letters archives
 
-Status: implementation on `feat/public-section-archives`, based on Task 12 PR #61, which is still open. Target main; merge #61 first if it remains open.
+Status: implemented and locally verified on `feat/public-section-archives`, based on Task 12 PR #61, which is still open. Target main; merge #61 first if it remains open.
 
 ## Scope, decisions and acceptance
 
@@ -20,3 +20,14 @@ Status: implementation on `feat/public-section-archives`, based on Task 12 PR #6
 4. Record commands/results and limitations here, update component ownership docs and STATUS, then open a main-targeting draft PR. Owner monitors hosted CI. Human visual/accessibility signoff and missing real taxonomy remain separate gates.
 
 Rollback: revert application consumers and resolver; no migration or stored-data change is required.
+
+
+## Verification record
+
+- Backend and archive UI tests first failed because their implementation modules were missing; the first implementation passed twelve focused cases. Expanded route/query/navigation regression coverage passed 23 cases.
+- `pnpm test --maxWorkers=2`: all 726 unit/component tests passed. `pnpm typecheck`, `pnpm lint`, `pnpm format:check` and `git diff --check` passed. Initial TypeScript checks identified a combined-union narrowing issue and an unsupported Testing Library option; both were corrected without weakening assertions.
+- `pnpm exec supabase test db supabase/tests/036_public_article_list.test.sql supabase/tests/037_public_site_navigation.test.sql`: all 57 existing SQL assertions passed. No migrations, grant changes, generated-type changes or database reset were needed.
+- `pnpm exec playwright test e2e/public-archives/public-archives.spec.ts`: all four desktop/mobile cases passed on the first run. Playwright built and started the production app. Checks covered twelve-card first pages, nonduplicated section lead, one-card final pages, equal category slugs in distinct parents, cross-scope/repeated cursor recovery and noindex, empty scopes, inactive/missing parent/child real 404, public-only owner views, native keyboard focus, 320px reflow and no-JavaScript pagination into a readable article. `/letters` displayed only its synthetic published letter from a deliberately non-guessed catalog slug and linked submission guidance.
+- One fresh-context read-only review found no issues. Browser fixtures were removed by teardown; a scoped database count confirmed no archive fixtures remain. The app test server stopped after the suite. No hosted CI monitoring or screenshots were used.
+
+Dependency installation initially hit sandbox DNS restrictions; the same frozen-lockfile install succeeded with network access. Human visual and screen-reader approval, real letters taxonomy configuration, later tag/author/search/information routes and complete SEO remain pending. Existing media and mutation concurrency boundaries were untouched, so their heavy suites were not repeated.
