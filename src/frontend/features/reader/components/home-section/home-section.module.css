@@ -1,0 +1,25 @@
+.section {
+  padding-top: 2rem;
+  border-top: 1px solid var(--reader-line);
+  margin-block: 3rem;
+}
+.heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.heading h2 {
+  font: 700 clamp(1.75rem, 3vw, 2.5rem)/1.2 var(--reader-serif);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.heading a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  color: var(--reader-blue);
+  font: 600 0.875rem/1.4 var(--reader-sans);
+}

@@ -1,0 +1,34 @@
+.latest {
+  min-width: 0;
+  padding-top: 0.75rem;
+}
+.latest h2 {
+  font: 700 0.875rem/1.4 var(--reader-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 2px solid var(--reader-ink);
+  padding-bottom: 0.875rem;
+  margin: 0;
+}
+.latest ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.latest li {
+  padding-block: 1.5rem;
+  border-bottom: 1px solid var(--reader-line);
+}
+.latest h3 {
+  font: 700 1.375rem/1.25 var(--reader-serif);
+  margin: 0 0 0.75rem;
+  overflow-wrap: anywhere;
+}
+.latest a {
+  color: var(--reader-ink);
+  text-decoration: none;
+}
+.latest h3 a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}

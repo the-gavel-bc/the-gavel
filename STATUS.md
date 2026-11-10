@@ -1,8 +1,8 @@
 # Current work
 
-- Phase: 5, Task 9 public homepage query on `feat/public-homepage-query`, based on Task 8 PR #57. PRs #56/#57 are still prerequisites; Task 9 targets main.
-- [Task 9 plan](docs/superpowers/plans/2026-11-09-public-homepage-query.md) records shared admin/public slot resolution, bounded public card batching, Latest/section grouping and verification.
-- Approved homepage: one lead, four featured and four Read This with saved-pick reservation and cross-slot deduplication. Latest has three newest excluding lead; section rows have four and can repeat curated articles.
-- Public shell/primitives remain in preceding tasks. No homepage presentation changes in Task 9; Task 10 wires these results into the reader UI and footer.
-- Verified: 1,715 clean-stack database assertions, 65 focused curation SQL assertions, 14 focused unit tests, independent-session archive/restore, schema/type/lint/format and production build.
-- Reader branding/screenshots and human review remain pending. Owner monitors hosted CI. Approved media cache/backfill and other Phase 5 decisions remain in the reader contract.
+- Phase: 5, Task 10 homepage reader UI on `feat/public-homepage-ui`, based on Task 9 PR #58. Merge prerequisites #56–#58 before this main-targeting PR.
+- [Task 10 plan](docs/superpowers/plans/2026-11-09-public-homepage-ui.md) records hero/Latest/Featured/section composition, request-scoped body/footer reuse and verification.
+- Verified: all 696 unit tests, production build, TypeScript, lint and formatting.
+- Real production browser proof passed at 320/768/1440px and mobile without JavaScript. Checked curation/edit/archive/restore appeared on the next request; one homepage RPC served metadata/body/footer. Empty, reserved-only, text-only and unavailable/noindex states passed.
+- Branding/screenshots and human visual/accessibility review remain pending. Owner monitors hosted CI. Media cache/backfill and other Phase 5 decisions remain in the reader contract.
+- Next: Task 11 safe canonical article-body renderer, then Task 12 public article page.

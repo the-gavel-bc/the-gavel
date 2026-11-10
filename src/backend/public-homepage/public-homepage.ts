@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { z } from "zod";
 import { createPublicReaderClient } from "@/backend/infrastructure/supabase/public-reader/public-reader";
 import { publicArticleCardSchema as card } from "@/backend/public-articles/article-card-schema/article-card-schema";
@@ -66,3 +67,7 @@ export async function getPublicHomepage(): Promise<PublicHomepageResult> {
     return { kind: "unavailable" };
   }
 }
+
+// React cache deduplicates only within one server render. A new request still
+// performs the no-store RPC; page content and footer receive the same snapshot.
+export const getPublicHomepageForRequest = cache(getPublicHomepage);

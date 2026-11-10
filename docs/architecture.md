@@ -152,3 +152,7 @@ Task 15 introduces a narrow permanent media-cleanup ledger and daily Vercel job 
 ## Public route composition
 
 The `(public)` Next.js route group owns reader shell data loading and dynamically renders public navigation through the anonymous, no-store client. It does not wrap dashboard or auth route groups. PublicShell remains usable without data for auth screens; frontend presentation receives browser-safe shared navigation types and never imports the backend query. The root homepage path stays `/` after moving its owned files into the public group.
+
+## Request-scoped homepage reuse
+
+The public layout, homepage and homepage failure metadata use one exported React `cache` wrapper around the anonymous no-store composition query. React scopes this reuse to a server render; it is not a cross-request cache, and a new request rechecks current publication/curation. Browser verification confirmed one homepage RPC per render and fresh output after checked curation, published edit, archive and restore. Public image caching remains the separate approved five-minute policy.
