@@ -148,3 +148,7 @@ Task 10 isolates current input, acknowledged input, committed identity/version a
 A dashboard-scoped client provider shares only a leave-check callback. Server shell composition and authorization remain intact; supported Next Link navigation and sign-out consult the guard before leaving/submitting. Draft data, pending commands and recovery references remain in the form's memory, without browser persistence. Full-document unload is best-effort; same-document browser history is not guaranteed blocked. No internal router/history patch is used.
 
 Task 15 introduces a narrow permanent media-cleanup ledger and daily Vercel job for deleted article objects. This is not a general-purpose application job queue. The worker uses bounded leases, retries and retained keys; it does not claim a final erasure time for late uploads.
+
+## Public route composition
+
+The `(public)` Next.js route group owns reader shell data loading and dynamically renders public navigation through the anonymous, no-store client. It does not wrap dashboard or auth route groups. PublicShell remains usable without data for auth screens; frontend presentation receives browser-safe shared navigation types and never imports the backend query. The root homepage path stays `/` after moving its owned files into the public group.
