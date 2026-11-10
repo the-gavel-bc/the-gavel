@@ -177,6 +177,8 @@ The [focused Task 1 contract](2026-11-09-phase-five-reader-contract.md) records 
 
 ## Task 12 — public article page
 
+Implemented on `feat/public-article-page`; see the [focused plan and verification](2026-11-10-public-article-page.md). Integration into main and human visual/accessibility approval remain separate gates.
+
 **Files:** `src/app/(public)/articles/[slug]/page.tsx`, owned loading/error/not-found boundaries; `src/frontend/features/reader/components/article-header/`, `article-credits/`, `article-context/`.
 
 - [ ] Compose title/dek, owner/writer/other credits, publication date, main image/credit, body, taxonomy and author biography from checked detail data.

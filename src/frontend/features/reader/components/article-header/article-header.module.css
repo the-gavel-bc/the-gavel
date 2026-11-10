@@ -1,0 +1,39 @@
+.header {
+  display: grid;
+  gap: 1rem;
+}
+.header h1 {
+  margin: 0;
+  font-family: var(--reader-serif);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+}
+.header p {
+  margin: 0;
+}
+.dek {
+  font-size: clamp(1.125rem, 2vw, 1.4rem);
+  line-height: 1.6;
+}
+.date,
+.header figcaption {
+  color: var(--reader-muted);
+  font-size: 0.875rem;
+}
+.header figure {
+  margin: 0.5rem 0 0;
+}
+.header img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 40rem;
+  object-fit: contain;
+  background: var(--reader-soft);
+  border-radius: var(--reader-radius);
+}
+.header figcaption {
+  padding-top: 0.5rem;
+  overflow-wrap: anywhere;
+}
