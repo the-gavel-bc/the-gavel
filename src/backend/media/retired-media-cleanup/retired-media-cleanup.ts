@@ -4,6 +4,12 @@ import { z } from "zod";
 import { isDraftUuid } from "@/shared/articles/draft-cursor/draft-cursor";
 import { createTrustedMediaClient } from "@/backend/infrastructure/supabase/media-admin/media-admin";
 const uuid = z.custom<string>(isDraftUuid);
+// ponytail: one time-boxed run per day; capacity is roughly budget / batch
+// latency. If arrivals outgrow it the backlog check reports unhealthy rather
+// than claiming erasure; raise the budget or schedule runs more often then.
+const SWEEP_BUDGET_MS = 40_000;
+const PREFIX_BATCH = 20;
+const KEY_BATCH = 100;
 const prefixes = z
   .array(
     z.object({
@@ -12,12 +18,12 @@ const prefixes = z
       claim_token: uuid,
     }),
   )
-  .max(5);
+  .max(PREFIX_BATCH);
 const keys = z
   .array(
     z.object({ object_key: z.string().min(1).max(1024), claim_token: uuid }),
   )
-  .max(30);
+  .max(KEY_BATCH);
 async function performSweep(
   client: ReturnType<typeof createTrustedMediaClient>,
   runToken: string,
@@ -65,12 +71,10 @@ async function performSweep(
     verified.data.some((item) => item.name === filename)
   )
     return false;
-  const prefixResult = await client.rpc("claim_retired_article_prefixes", {
-    p_limit: 5,
-  });
-  if (prefixResult.error) return false;
-  const claims = prefixes.parse(prefixResult.data);
-  for (const claim of claims) {
+  // Claims made during this run skip rows it already attempted, so each loop
+  // ends once the backlog is covered or the budget is spent.
+  const deadline = Date.now() + SWEEP_BUDGET_MS;
+  const scanPrefix = async (claim: z.infer<typeof prefixes>[number]) => {
     let count = 0;
     let success = false;
     let pageRead = false;
@@ -114,27 +118,46 @@ async function performSweep(
       p_page_read: pageRead,
       p_clean: success,
     });
-    if (!success || finished.error || finished.data !== true) failed = true;
+    return success && !finished.error && finished.data === true;
+  };
+  while (Date.now() < deadline) {
+    const prefixResult = await client.rpc("claim_retired_article_prefixes", {
+      p_limit: PREFIX_BATCH,
+    });
+    if (prefixResult.error) return false;
+    const claims = prefixes.parse(prefixResult.data);
+    if (!claims.length) break;
+    const results = await Promise.all(claims.map(scanPrefix));
+    if (results.includes(false)) failed = true;
   }
   // Ledger keys remain eligible after successful removal: a previously started
   // upload can finish late and recreate the object, requiring another sweep.
-  const keyResult = await client.rpc("claim_media_cleanup", { p_limit: 30 });
-  if (keyResult.error) return false;
-  const keyClaims = keys.parse(keyResult.data);
-  for (const claim of keyClaims) {
-    let success = false;
-    try {
-      const removed = await bucket.remove([claim.object_key]);
-      success = !removed.error;
-    } catch {
-      success = false;
-    }
-    const finished = await client.rpc("finish_media_cleanup", {
-      p_object_key: claim.object_key,
-      p_claim_token: claim.claim_token,
-      p_success: success,
+  while (Date.now() < deadline) {
+    const keyResult = await client.rpc("claim_media_cleanup", {
+      p_limit: KEY_BATCH,
     });
-    if (!success || finished.error || finished.data !== true) failed = true;
+    if (keyResult.error) return false;
+    const keyClaims = keys.parse(keyResult.data);
+    if (!keyClaims.length) break;
+    let removed = false;
+    try {
+      // One Storage call per batch; any error marks every key in it as failed.
+      const result = await bucket.remove(keyClaims.map((c) => c.object_key));
+      removed = !result.error;
+    } catch {
+      removed = false;
+    }
+    const finished = await Promise.all(
+      keyClaims.map((claim) =>
+        client.rpc("finish_media_cleanup", {
+          p_object_key: claim.object_key,
+          p_claim_token: claim.claim_token,
+          p_success: removed,
+        }),
+      ),
+    );
+    if (!removed || finished.some((f) => f.error || f.data !== true))
+      failed = true;
   }
   const backlog = await client.rpc("get_media_cleanup_backlog");
   const parsed = z

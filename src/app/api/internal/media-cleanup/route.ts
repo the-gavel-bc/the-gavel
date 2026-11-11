@@ -1,5 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { runRetiredMediaCleanup } from "@/backend/media/retired-media-cleanup/retired-media-cleanup";
+// The sweep is time-boxed to about 40 s; leave headroom for the probe and health check.
+export const maxDuration = 60;
 export async function GET(request: Request): Promise<Response> {
   if (process.env.VERCEL_ENV !== "production")
     return new Response(null, { status: 404 });

@@ -20,6 +20,14 @@ const token = "85000000-0000-4000-8000-000000000003";
 describe("retired media cleanup", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.restoreAllMocks();
+    // Each queue yields one batch per run, then reports nothing left to claim.
+    const claimed = new Set<string>();
+    const once = (name: string, data: unknown) => {
+      if (claimed.has(name)) return { data: [], error: null };
+      claimed.add(name);
+      return { data, error: null };
+    };
     m.rpc.mockImplementation(async (name: string) => {
       if (name === "start_media_cleanup_run")
         return { data: token, error: null };
@@ -31,17 +39,13 @@ describe("retired media cleanup", () => {
       if (name === "get_media_cleanup_backlog")
         return { data: { staleKeys: 0, stalePrefixes: 0 }, error: null };
       if (name === "claim_retired_article_prefixes")
-        return {
-          data: [{ article_id: article, scan_offset: 0, claim_token: token }],
-          error: null,
-        };
+        return once(name, [
+          { article_id: article, scan_offset: 0, claim_token: token },
+        ]);
       if (name === "claim_media_cleanup")
-        return {
-          data: [
-            { object_key: `${article}/${asset}.webp`, claim_token: token },
-          ],
-          error: null,
-        };
+        return once(name, [
+          { object_key: `${article}/${asset}.webp`, claim_token: token },
+        ]);
       return { data: true, error: null };
     });
     m.list.mockImplementation(async (path: string) =>
@@ -130,5 +134,50 @@ describe("retired media cleanup", () => {
       p_token: token,
       p_success: false,
     });
+  });
+  it("keeps claiming batches until the run has covered the backlog", async () => {
+    const batch = (start: number) =>
+      Array.from({ length: 100 }, (_, i) => ({
+        object_key: `${article}/k${start + i}.webp`,
+        claim_token: token,
+      }));
+    const pages = [batch(0), batch(100), []];
+    const base = m.rpc.getMockImplementation()!;
+    m.rpc.mockImplementation(async (name: string, args: unknown) =>
+      name === "claim_media_cleanup"
+        ? { data: pages.shift(), error: null }
+        : base(name, args),
+    );
+    expect(await runRetiredMediaCleanup()).toEqual({ ok: true });
+    expect(
+      m.rpc.mock.calls.filter(([name]) => name === "claim_media_cleanup"),
+    ).toHaveLength(3);
+    expect(m.rpc).toHaveBeenCalledWith("claim_media_cleanup", { p_limit: 100 });
+    // One Storage call per batch, plus the probe.
+    expect(m.remove).toHaveBeenCalledTimes(3);
+    expect(m.remove).toHaveBeenCalledWith(batch(100).map((c) => c.object_key));
+    expect(
+      m.rpc.mock.calls.filter(([name]) => name === "finish_media_cleanup"),
+    ).toHaveLength(200);
+  });
+  it("stops claiming when the time budget is spent", async () => {
+    let now = 0;
+    vi.spyOn(Date, "now").mockImplementation(() => (now += 15_000));
+    const base = m.rpc.getMockImplementation()!;
+    m.rpc.mockImplementation(async (name: string, args: unknown) =>
+      name === "claim_media_cleanup"
+        ? {
+            data: [
+              { object_key: `${article}/${asset}.webp`, claim_token: token },
+            ],
+            error: null,
+          }
+        : base(name, args),
+    );
+    await runRetiredMediaCleanup();
+    expect(
+      m.rpc.mock.calls.filter(([name]) => name === "claim_media_cleanup")
+        .length,
+    ).toBeLessThanOrEqual(3);
   });
 });
