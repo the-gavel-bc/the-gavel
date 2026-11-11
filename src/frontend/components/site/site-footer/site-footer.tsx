@@ -1,3 +1,4 @@
+import { sectionHref } from "@/shared/reader/section-link/section-link";
 import { contactMailto } from "@/shared/reader/contact-link/contact-link";
 import Link from "next/link";
 import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
@@ -32,9 +33,7 @@ export function SiteFooter({
             </li>
             {sections.map((section) => (
               <li key={section.slug}>
-                <Link href={`/sections/${encodeURIComponent(section.slug)}`}>
-                  {section.name}
-                </Link>
+                <Link href={sectionHref(section)}>{section.name}</Link>
               </li>
             ))}
             {information?.submissionInstructions && (

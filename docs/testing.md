@@ -372,3 +372,7 @@ Verification reproduced the 54322 collision in a disposable project while the ex
 ## Task 18 history scan false positive
 
 Gitleaks v8.30.1 flagged a test-plan sentence about encoded search pagination in commit `e380caf`. The text contains no credential. The exact fingerprint in `.gitleaksignore` covers this historical match. CI scans the rest of the history with its existing rules. Remove the entry if the flagged commit leaves the history that CI scans.
+
+## Single CI production build
+
+The browser-check step is also the production-build gate: Playwright runs `pnpm build && pnpm start --port 3100` with its verified synthetic local Supabase environment and refuses to reuse an existing server. CI has no preceding standalone build with placeholder public settings. Build failure prevents server startup and fails the browser step. Standalone `pnpm build` remains available locally; no artifact is shared across environments.

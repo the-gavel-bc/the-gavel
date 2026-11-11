@@ -121,3 +121,21 @@ it("maps letters through the approved label without assuming a database slug", a
     kind: "unavailable",
   });
 });
+
+it("preserves a letters category URL rather than appending it to the letters root", async () => {
+  const section = {
+    name: "Letter to the Editor",
+    slug: "configured-letters",
+    categories: [{ name: "Campus", slug: "campus" }],
+  };
+  mocks.catalog.mockResolvedValue({ kind: "ok", sections: [section] });
+  expect(
+    await getPublicArchive("category", section.slug, "campus"),
+  ).toMatchObject({
+    kind: "ok",
+    archive: {
+      href: "/sections/configured-letters/categories/campus",
+      isLetters: true,
+    },
+  });
+});

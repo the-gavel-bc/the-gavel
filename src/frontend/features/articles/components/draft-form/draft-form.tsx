@@ -112,6 +112,9 @@ export function DraftForm({
   }, [catalog.revision]);
   const [recoveryVisible, setRecoveryVisible] = useState(false);
   const [recoveryBlocked, setRecoveryBlocked] = useState(false);
+  const [recoveryStatus, setRecoveryStatus] = useState<
+    "draft" | "published" | null
+  >(null);
   const categories = useDraftCategories(
     command.draft.sectionId,
     catalog.sectionId,
@@ -273,6 +276,13 @@ export function DraftForm({
               setRecoveryVisible(true);
             }}
             onLoad={(detail, nextOptions) => {
+              // The mounted save action is status-specific. Never combine a new
+              // status/version with this editor's old mutation mode or local input.
+              if (detail.status !== status) {
+                setRecoveryStatus(detail.status);
+                setRecoveryBlocked(true);
+                return false;
+              }
               if (
                 !command.reload(detail.draft, {
                   id: detail.articleId,
@@ -289,11 +299,27 @@ export function DraftForm({
               setEditorFailure(null);
               setSelectionErrors({});
               setRecoveryBlocked(false);
+              setRecoveryStatus(null);
               setRecoveryVisible(true);
               return true;
             }}
           />
         )}
+      {recoveryStatus && (
+        <section aria-label="Article status changed">
+          <p role="alert">
+            This article is now {recoveryStatus}. Your local input has not been
+            replaced. Reload to open its current editor.
+          </p>
+          <Button
+            type="button"
+            disabled={Boolean(command.pending)}
+            onClick={() => window.location.reload()}
+          >
+            Reload article
+          </Button>
+        </section>
+      )}
       <fieldset
         disabled={
           !ready ||

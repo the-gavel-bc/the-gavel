@@ -1,3 +1,4 @@
+import { sectionHref } from "@/shared/reader/section-link/section-link";
 import Link from "next/link";
 import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
 import { StoryMeta } from "../story-meta/story-meta";
@@ -5,10 +6,7 @@ import styles from "./home-hero.module.css";
 export function HomeHero({ article }: { article: PublicArticleCard }) {
   return (
     <article className={styles.hero}>
-      <Link
-        className={styles.section}
-        href={`/sections/${encodeURIComponent(article.section.slug)}`}
-      >
+      <Link className={styles.section} href={sectionHref(article.section)}>
         {article.section.name}
       </Link>
       <Link

@@ -36,3 +36,7 @@ Use squash merge for task branches unless preserving a deliberate multi-commit h
 ## Issues and releases
 
 Use issues with acceptance criteria for meaningful work. Track MVP work in a milestone/project board if helpful. Adopt semantic version tags when production releases begin. Release notes summarize user-visible behavior, migrations, security changes, rollback notes, and known limitations.
+
+## Updating CI executable pins
+
+Pin GitHub Actions to full upstream commit SHAs and container images to registry digests, with readable version comments. Resolve each intended tag through its official upstream repository (peeling annotated tags) or registry, record the resolution in the task evidence, and review the resulting change. Pinning must not silently upgrade versions or expand workflow permissions. Validate action downloads and scanner execution in hosted CI; local syntax checks alone do not prove those steps ran.

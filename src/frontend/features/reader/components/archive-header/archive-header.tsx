@@ -1,3 +1,4 @@
+import { sectionHref } from "@/shared/reader/section-link/section-link";
 import Link from "next/link";
 import type { PublicArchiveContext } from "@/backend/public-articles/public-archive/public-archive";
 import { CategoryChips } from "../category-chips/category-chips";
@@ -12,7 +13,7 @@ export function ArchiveHeader({ archive }: { archive: PublicArchiveContext }) {
           </li>
           {archive.category && (
             <li>
-              <Link href={`/sections/${archive.section.slug}`}>
+              <Link href={sectionHref(archive.section)}>
                 {archive.section.name}
               </Link>
             </li>

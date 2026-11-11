@@ -1,3 +1,4 @@
+import { sectionHref } from "@/shared/reader/section-link/section-link";
 import Link from "next/link";
 import type { PublicArticle } from "@/backend/public-articles/public-article/public-article";
 import styles from "./article-header.module.css";
@@ -5,9 +6,7 @@ import styles from "./article-header.module.css";
 export function ArticleHeader({ article }: { article: PublicArticle }) {
   return (
     <header className={styles.header}>
-      <Link href={`/sections/${article.section.slug}`}>
-        {article.section.name}
-      </Link>
+      <Link href={sectionHref(article.section)}>{article.section.name}</Link>
       <h1>{article.title}</h1>
       {article.excerpt && <p className={styles.dek}>{article.excerpt}</p>}
       <p className={styles.date}>
