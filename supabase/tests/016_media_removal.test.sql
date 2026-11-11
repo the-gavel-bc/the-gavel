@@ -95,7 +95,8 @@ insert into results values ('uploading',public.mark_article_image_for_removal('6
 reset role;
 select is((select result->>'ok' from results where label='claimed'),'true',
   'trusted route claims pending asset before Storage upload');
-select is((select result->>'code' from results where label='uploading'),'conflict',
-  'cleanup cannot race a claimed upload');
+select is((select result->>'ok' from results where label='uploading'),'true',
+  'explicit cancellation retires an unreferenced claimed upload');
+select is((select status from public.media_assets where id='60000000-0000-0000-0000-000000000603'),'deleting','cancellation fences future finalization');
 select * from finish();
 rollback;

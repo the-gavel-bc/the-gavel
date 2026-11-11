@@ -260,6 +260,7 @@ export function DraftForm({
           (!command.pending &&
             [
               "conflict",
+              "request_conflict",
               "forbidden",
               "not_found",
               "unsupported_content",

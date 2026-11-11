@@ -180,4 +180,54 @@ describe("retired media cleanup", () => {
         .length,
     ).toBeLessThanOrEqual(3);
   });
+  it.each([
+    [5_000, false],
+    [41_000, false],
+    [41_000, true],
+  ] as const)(
+    "gives keys a turn across runs (latency=%s, failure=%s)",
+    async (latency, failure) => {
+      let now = 0;
+      vi.spyOn(Date, "now").mockImplementation(() => now);
+      const base = m.rpc.getMockImplementation()!;
+      m.rpc.mockImplementation(async (name: string, args: unknown) => {
+        if (name === "claim_retired_article_prefixes")
+          return {
+            data: [{ article_id: article, scan_offset: 0, claim_token: token }],
+            error: null,
+          };
+        if (name === "claim_media_cleanup")
+          return {
+            data: [
+              { object_key: `${article}/${asset}.webp`, claim_token: token },
+            ],
+            error: null,
+          };
+        return base(name, args);
+      });
+      m.list.mockImplementation(async (path: string) => {
+        if (path === "probe") return { data: [], error: null };
+        now += latency;
+        return {
+          data: failure ? null : [],
+          error: failure ? new Error("Storage unavailable") : null,
+        };
+      });
+      await runRetiredMediaCleanup();
+      await runRetiredMediaCleanup();
+      expect(
+        m.rpc.mock.calls.filter(([name]) => name === "claim_media_cleanup"),
+      ).toHaveLength(latency === 5_000 ? 16 : 2);
+      expect(
+        m.remove.mock.calls.filter(([paths]) =>
+          paths.includes(`${article}/${asset}.webp`),
+        ),
+      ).toHaveLength(latency === 5_000 ? 16 : 2);
+      if (failure)
+        expect(m.rpc).toHaveBeenLastCalledWith("finish_media_cleanup_run", {
+          p_token: token,
+          p_success: false,
+        });
+    },
+  );
 });
