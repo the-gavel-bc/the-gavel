@@ -20,10 +20,13 @@ export async function getCurrentAccess(): Promise<AccessState> {
     error: authError,
   } = await client.auth.getUser();
   if (authError || !user) return { status: "signedOut" };
+  // Google must be the only linked provider: a linked email identity could
+  // belong to someone who pre-registered this address. Matches the SQL gate.
+  const providers: unknown = user.app_metadata.providers;
   const google =
-    user.app_metadata.provider === "google" ||
-    (Array.isArray(user.app_metadata.providers) &&
-      user.app_metadata.providers.includes("google"));
+    user.app_metadata.provider === "google" &&
+    (providers === undefined ||
+      (Array.isArray(providers) && providers.every((p) => p === "google")));
   if (
     !google ||
     !user.email_confirmed_at ||
