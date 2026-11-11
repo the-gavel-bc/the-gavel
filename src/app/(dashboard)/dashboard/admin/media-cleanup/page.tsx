@@ -3,6 +3,8 @@ import { unstable_rethrow } from "next/navigation";
 import { requireActiveMembership } from "@/backend/auth/access/access";
 import { getMediaCleanupStatus } from "@/backend/media/retired-media-cleanup/cleanup-status";
 import { MediaCleanupControl } from "@/frontend/features/media/components/media-cleanup/media-cleanup-control";
+// The retry action runs the time-boxed sweep (about 40 s) in this function.
+export const maxDuration = 60;
 export default async function MediaCleanupPage() {
   const access = await requireActiveMembership();
   if (access.role !== "administrator")
