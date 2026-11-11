@@ -14,13 +14,29 @@ const text = z
         !/[<>]/u.test(value) &&
         !/[\p{Cc}]/u.test(value.replace(/[\n\t]/gu, ""))),
   );
-const email = z
-  .string()
-  .max(254)
-  .regex(
-    /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/u,
+// Same rule as SQL private.is_valid_contact_email and the public reader, so an
+// address that saves is never silently hidden on public pages.
+export function isValidContactEmail(value: string): boolean {
+  if (
+    value.length > 254 ||
+    /[\p{Cc}]/u.test(value) ||
+    !/^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/u.test(
+      value,
+    )
   )
-  .nullable();
+    return false;
+  const [local, domain] = value.split("@");
+  return (
+    local.length <= 64 &&
+    !/(^\.|\.\.|\.$)/u.test(local) &&
+    domain
+      .split(".")
+      .every((label) =>
+        /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?$/u.test(label),
+      )
+  );
+}
+const email = z.string().refine(isValidContactEmail).nullable();
 const instagram = z
   .string()
   .max(255)

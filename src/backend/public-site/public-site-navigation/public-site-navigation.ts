@@ -3,6 +3,7 @@ import "server-only";
 import { cache } from "react";
 import { z } from "zod";
 import { createPublicReaderClient } from "@/backend/infrastructure/supabase/public-reader/public-reader";
+import { isValidContactEmail } from "@/shared/site-information/site-information/site-information-command";
 
 const slug = z
   .string()
@@ -21,25 +22,7 @@ const plainText = boundedText(5000)
       !/[<>]/u.test(value) && !/[\p{Cc}]/u.test(value.replace(/[\n\t]/gu, "")),
   )
   .nullable();
-const email = z
-  .string()
-  .max(254)
-  .refine(
-    (value) =>
-      !/[\p{Cc}]/u.test(value) &&
-      /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/u.test(
-        value,
-      ) &&
-      value.split("@")[0].length <= 64 &&
-      !/(^\.|\.\.|\.$)/u.test(value.split("@")[0]) &&
-      value
-        .split("@")[1]
-        .split(".")
-        .every((label) =>
-          /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?$/u.test(label),
-        ),
-  )
-  .nullable();
+const email = z.string().refine(isValidContactEmail).nullable();
 const instagram = z
   .string()
   .max(255)

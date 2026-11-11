@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { siteInformationCommandSchema } from "./site-information-command";
+import {
+  isValidContactEmail,
+  siteInformationCommandSchema,
+} from "./site-information-command";
 
 const valid = {
   requestId: "00000000-0000-4000-8000-000000000001",
@@ -33,5 +36,28 @@ describe("site information command", () => {
       { ...valid, submissionInstructions: "x".repeat(5001) },
     ])
       expect(siteInformationCommandSchema.safeParse(value).success).toBe(false);
+  });
+  it.each([
+    "first..last@bc.edu",
+    ".desk@bc.edu",
+    "desk.@bc.edu",
+    "desk@-bc.edu",
+    "desk@bc-.edu",
+    `${"a".repeat(65)}@bc.edu`,
+    `desk@${"a".repeat(64)}.edu`,
+  ])("rejects %s, which the public reader would hide", (contactEmail) => {
+    expect(isValidContactEmail(contactEmail)).toBe(false);
+    expect(
+      siteInformationCommandSchema.safeParse({ ...valid, contactEmail })
+        .success,
+    ).toBe(false);
+  });
+  it("accepts addresses the public reader shows", () => {
+    for (const address of [
+      "desk?letters@bc.edu",
+      "a.b@news.bc.edu",
+      `${"a".repeat(64)}@bc.edu`,
+    ])
+      expect(isValidContactEmail(address)).toBe(true);
   });
 });
