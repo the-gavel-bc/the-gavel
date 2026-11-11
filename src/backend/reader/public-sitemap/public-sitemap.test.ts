@@ -98,6 +98,21 @@ it("omits informational pages without primary copy", async () => {
   ]);
 });
 
+it("keeps archives and articles when navigation is unavailable", async () => {
+  mocks.site.mockResolvedValue({ kind: "unavailable" });
+  respond([{ kind: "ok", items: [article(1)], hasMore: false }]);
+  const result = await getPublicSitemap();
+  expect(result.kind === "ok" && result.entries.map((e) => e.url)).toEqual([
+    "https://gavel.example/",
+    "https://gavel.example/sections/letter-to-the-editor",
+    "https://gavel.example/sections/news",
+    "https://gavel.example/sections/news/categories/campus",
+    "https://gavel.example/tags/housing",
+    "https://gavel.example/authors/guest-writer",
+    "https://gavel.example/articles/story-1",
+  ]);
+});
+
 it("pages articles by keyset until the projection reports no more", async () => {
   const first = Array.from({ length: 1000 }, (_, n) => article(n + 1));
   respond([
@@ -125,10 +140,6 @@ it("fails closed instead of truncating past the protocol limit", async () => {
 });
 
 it.each([
-  [
-    "navigation unavailable",
-    () => mocks.site.mockResolvedValue({ kind: "unavailable" }),
-  ],
   ["archives unavailable", () => respond([], { kind: "unavailable" })],
   [
     "unsafe archive slug",

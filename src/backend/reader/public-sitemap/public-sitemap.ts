@@ -5,18 +5,16 @@ import { createPublicReaderClient } from "@/backend/infrastructure/supabase/publ
 import { getPublicSiteNavigation } from "@/backend/public-site/public-site-navigation/public-site-navigation";
 import { isLettersSection } from "@/backend/public-articles/public-archive/public-archive";
 import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
-import { isDatabaseTimestamp } from "@/shared/articles/draft-cursor/draft-cursor";
+import {
+  publicSlugSchema,
+  publicTimestampSchema,
+} from "@/backend/public-articles/article-card-schema/article-card-schema";
 
 const PAGE = 1000;
 // ponytail: one sitemap file; split with generateSitemaps before the catalog nears 50,000 URLs.
 const MAX_URLS = 50_000;
 
-const slug = (max: number) =>
-  z
-    .string()
-    .min(1)
-    .max(max)
-    .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/u);
+const slug = (max: number) => publicSlugSchema.max(max);
 const archivesSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("unavailable") }),
   z.strictObject({
@@ -38,13 +36,7 @@ const articlesSchema = z.discriminatedUnion("kind", [
         z.strictObject({
           id: z.string().refine(isDraftUuid),
           slug: slug(180),
-          publishedAt: z
-            .string()
-            .refine(
-              (s) =>
-                /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/u.test(s) &&
-                isDatabaseTimestamp(s),
-            ),
+          publishedAt: publicTimestampSchema,
         }),
       )
       .max(PAGE),
@@ -66,7 +58,7 @@ export async function getPublicSitemap(): Promise<PublicSitemapResult> {
       getPublicSiteNavigation(),
       client.rpc("list_public_sitemap_archives"),
     ]);
-    if (site.kind !== "ok" || archiveResponse.error) return unavailable;
+    if (archiveResponse.error) return unavailable;
     const archives = archivesSchema.safeParse(archiveResponse.data);
     if (!archives.success || archives.data.kind !== "ok") return unavailable;
 
@@ -79,11 +71,15 @@ export async function getPublicSitemap(): Promise<PublicSitemapResult> {
       });
 
     add("/");
-    if (site.information.mission?.trim()) add("/about");
-    if (site.information.submissionInstructions?.trim())
-      add("/letters/how-to-submit");
+    // Navigation only supplies copy flags and the letters label. Without it,
+    // omit those pages and list letters at its section path, which also resolves.
+    const info = site.kind === "ok" ? site.information : null;
+    if (info?.mission?.trim()) add("/about");
+    if (info?.submissionInstructions?.trim()) add("/letters/how-to-submit");
     const letters = new Set(
-      site.sections.filter(isLettersSection).map((s) => s.slug),
+      site.kind === "ok"
+        ? site.sections.filter(isLettersSection).map((s) => s.slug)
+        : [],
     );
     const { sections, categories, tags, authors } = archives.data;
     for (const s of sections)
