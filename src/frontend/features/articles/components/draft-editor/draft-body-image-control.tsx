@@ -92,6 +92,12 @@ export function DraftBodyImageControl({
         { method: "POST", body: form },
       );
       const result: unknown = await response.json();
+      if (response.status === 429) {
+        setError(
+          "Too many upload attempts. Wait a minute, then retry the same file.",
+        );
+        return;
+      }
       if (response.status >= 400 && response.status < 500) {
         const removed = await cleanup(reserved.assetId);
         setError(

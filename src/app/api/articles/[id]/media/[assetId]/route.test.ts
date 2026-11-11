@@ -14,8 +14,14 @@ const mocks = vi.hoisted(() => ({
   download: vi.fn(),
   finalize: vi.fn(),
   claim: vi.fn(),
+  admit: vi.fn(),
+  acquire: vi.fn(),
+  release: vi.fn(),
   userClient: vi.fn(),
   trustedClient: vi.fn(),
+}));
+vi.mock("@/backend/media/image-intake/processing-gate", () => ({
+  acquireImageProcessing: mocks.acquire,
 }));
 vi.mock("@/backend/auth/access/access", () => ({
   getCurrentAccess: mocks.access,
@@ -60,7 +66,13 @@ beforeEach(() => {
     },
     error: null,
   });
+  mocks.acquire.mockReturnValue(mocks.release);
+  mocks.admit.mockResolvedValue({
+    data: { ok: true, replayed: false },
+    error: null,
+  });
   mocks.userClient.mockResolvedValue({
+    rpc: mocks.admit,
     from: () => ({
       select: () => ({ eq: () => ({ maybeSingle: mocks.asset }) }),
     }),
@@ -258,4 +270,53 @@ it("retries finalization after a matching Storage upload lost its response", asy
   const response = await POST(await uploadRequest(), routeParams);
   expect(response.status).toBe(200);
   expect(mocks.finalize).toHaveBeenCalledOnce();
+});
+
+it.each([
+  [{ ok: false, code: "rate_limited", retryAfter: 42 }, 429],
+  [{ ok: false, code: "forbidden" }, 403],
+  [{ ok: false, code: "not_found" }, 404],
+  [{ ok: false, code: "conflict" }, 409],
+])(
+  "refuses admission before buffering or processing: %j",
+  async (result, status) => {
+    mocks.admit.mockResolvedValue({ data: result, error: null });
+    const request = await uploadRequest();
+    const read = vi.spyOn(request.body!, "getReader");
+    const response = await POST(request, routeParams);
+    expect(response.status).toBe(status);
+    expect(read).not.toHaveBeenCalled();
+    expect(mocks.trustedClient).not.toHaveBeenCalled();
+    expect(mocks.release).toHaveBeenCalledOnce();
+    if (status === 429) {
+      expect(response.headers.get("Retry-After")).toBe("42");
+      expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+    }
+  },
+);
+it("refuses local overload before reading or spending quota", async () => {
+  mocks.acquire.mockReturnValue(null);
+  const request = await uploadRequest();
+  const read = vi.spyOn(request.body!, "getReader");
+  expect((await POST(request, routeParams)).status).toBe(503);
+  expect(mocks.admit).not.toHaveBeenCalled();
+  expect(read).not.toHaveBeenCalled();
+});
+it("releases a processing slot when admission fails unexpectedly", async () => {
+  mocks.admit.mockRejectedValue(new Error("private transport"));
+  expect((await POST(await uploadRequest(), routeParams)).status).toBe(503);
+  expect(mocks.release).toHaveBeenCalledOnce();
+});
+it("does not process a finalized replay discovered at admission", async () => {
+  mocks.admit.mockResolvedValue({
+    data: { ok: true, replayed: true },
+    error: null,
+  });
+  const request = await uploadRequest();
+  const read = vi.spyOn(request.body!, "getReader");
+  const response = await POST(request, routeParams);
+  expect(await response.json()).toEqual({ ok: true, assetId, replayed: true });
+  expect(read).not.toHaveBeenCalled();
+  expect(mocks.upload).not.toHaveBeenCalled();
+  expect(mocks.release).toHaveBeenCalledOnce();
 });

@@ -649,6 +649,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      admit_article_image_upload: {
+        Args: { p_article_id: string; p_asset_id: string };
+        Returns: Json;
+      };
       approve_membership: {
         Args: {
           p_display_name: string;
@@ -824,6 +828,7 @@ export type Database = {
         Returns: Json;
       };
       get_public_homepage: { Args: Record<PropertyKey, never>; Returns: Json };
+      get_public_read_this: { Args: Record<PropertyKey, never>; Returns: Json };
       get_public_site_navigation: {
         Args: Record<PropertyKey, never>;
         Returns: Json;
@@ -930,6 +935,10 @@ export type Database = {
           p_after_published_at: string;
           p_limit: number;
         };
+        Returns: Json;
+      };
+      list_unused_article_uploads: {
+        Args: { p_after_id?: string; p_article_id: string; p_limit?: number };
         Returns: Json;
       };
       mark_article_image_for_removal: {

@@ -47,16 +47,18 @@ test("independent owner and admin tabs review conflicts and deliberately adopt a
       admin.getByRole("alert").filter({ hasText: "changed elsewhere" }),
     ).toBeVisible();
     fixture.setCategoryActive(false);
-    admin.on("request", (request) => {
-      if (request.method() === "POST" && request.headers()["next-action"]) {
-        const args = JSON.parse(request.postData()!);
-        if (args[0] === fixture.id(15))
-          reviewActionId = request.headers()["next-action"];
-      }
-    });
+    // Capture only this review; loading its version also refreshes unused uploads
+    // with the same article ID and must not replace the action used by denial tests.
+    const reviewRequest = admin.waitForRequest(
+      (request) =>
+        request.method() === "POST" &&
+        Boolean(request.headers()["next-action"]) &&
+        request.postData() === JSON.stringify([fixture.id(15)]),
+    );
     await admin
       .getByRole("button", { name: "Review latest saved version" })
       .click();
+    reviewActionId = (await reviewRequest).headers()["next-action"];
     await expect(
       admin.getByRole("heading", { name: "Latest saved version (2)" }),
     ).toBeVisible();

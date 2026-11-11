@@ -20,20 +20,20 @@ The header's public section links identify planned Phase 5 destinations. Dashboa
 
 ## Full MVP public route design
 
-| Route                    | Purpose                                    | Access                |
-| ------------------------ | ------------------------------------------ | --------------------- |
-| `/`                      | Lead, featured, and section-based homepage | Public                |
-| `/articles/[slug]`       | Published article                          | Public when published |
-| `/sections/[sectionSlug]`       | Section archive                            | Public                |
-| `/sections/[sectionSlug]/categories/[categorySlug]`     | Category archive                           | Public                |
-| `/tags/[slug]`           | Tag archive                                | Public                |
-| `/authors/[slug]`        | Author biography and articles              | Public                |
-| `/search`                | Published-content search                   | Public                |
-| `/about`                 | Mission, history, and staff information    | Public                |
-| `/letters`               | Published Letter to the Editor archive     | Public                |
-| `/letters/how-to-submit` | Submission instructions                    | Public                |
-| `/sign-in`               | Google sign-in                             | Public                |
-| Not-found boundary       | Search and return-home recovery            | Public                |
+| Route                                               | Purpose                                    | Access                |
+| --------------------------------------------------- | ------------------------------------------ | --------------------- |
+| `/`                                                 | Lead, featured, and section-based homepage | Public                |
+| `/articles/[slug]`                                  | Published article                          | Public when published |
+| `/sections/[sectionSlug]`                           | Section archive                            | Public                |
+| `/sections/[sectionSlug]/categories/[categorySlug]` | Category archive                           | Public                |
+| `/tags/[slug]`                                      | Tag archive                                | Public                |
+| `/authors/[slug]`                                   | Author biography and articles              | Public                |
+| `/search`                                           | Published-content search                   | Public                |
+| `/about`                                            | Mission, history, and staff information    | Public                |
+| `/letters`                                          | Published Letter to the Editor archive     | Public                |
+| `/letters/how-to-submit`                            | Submission instructions                    | Public                |
+| `/sign-in`                                          | Google sign-in                             | Public                |
+| Not-found boundary                                  | Search and return-home recovery            | Public                |
 
 Newsletter signup is deferred.
 
@@ -175,24 +175,23 @@ The runtime card validator remains in the backend listing boundary and its resul
 
 ## Public reader shell (Phase 5 Task 8)
 
-The `(public)` route-group layout loads the session-independent public site projection and passes validated data into ReaderSurface and one PublicShell. The homepage and its CSS/test move into this group without changing `/`. Root layout still owns html/body; dashboard and auth route groups retain their own composition. Sign-in continues using one PublicShell without public-data loading.
+The `(home)` and `(public)` route-group layouts supply footer reads to the shared `PublicReaderShell` server component under `src/app/_components/public-reader-shell/`. It loads session-independent navigation in parallel and passes checked data into ReaderSurface and one PublicShell. The homepage page, CSS and tests belong to `(home)` without changing `/`; other reader pages remain in `(public)`. Root layout still owns html/body; dashboard and auth route groups retain their own composition. Sign-in continues using one PublicShell without public-data loading.
 
 SiteHeader provides the text masthead and member link. Its small ReaderNavigation client component highlights current paths and enhances native section/category disclosures; links and a GET `/search?q=` form exist in server-rendered HTML. Mobile navigation starts expanded without JavaScript and collapses after enhancement. Escape closes the nearest open disclosure and focuses its summary. Desktop summaries remain reachable if a menu was closed before a no-JavaScript resize. PublicShell owns exactly one focusable main/skip target.
 
-SiteFooter displays only supplied mission/contact/Instagram, configured sections and submission navigation. Contact addresses are encoded into mailto URIs. Its typed Read This slot is absent until a later task supplies stories. Header/footer show no invented taxonomy or policy copy when data is absent. Taxonomy, search and About destinations are implemented by their owning later tasks.
+SiteFooter displays only supplied mission/contact/Instagram, configured sections and submission navigation. Contact addresses are encoded into mailto URIs. Its typed Read This slot displays only supplied public cards. Header/footer show no invented taxonomy or policy copy when data is absent. Taxonomy, search and About destinations are implemented by their owning later tasks.
 
 ## Data-backed homepage (Phase 5 Task 10)
 
 The public homepage composes HomeHero, HomeLatest, HomeFeatured and HomeSection from the checked Task 9 result. A publication h1 remains accessible; the hero, Latest and section headings use h2, with subordinate story titles at h3. Hero media uses the authorized image route with intrinsic dimensions, visible credit and eager/high-priority loading; lower cards remain lazy. Empty groups are omitted and a missing hero image produces text-only editorial presentation.
 
-The public layout's Read This footer and page/metadata share `getPublicHomepageForRequest`, a React request-scoped cache of the no-store query. This deduplicates calls within a server render without retaining content across requests. The layout does not load protected/user data. A null lead does not imply an empty catalog: reserved Featured or Read This stories can leave no free lead, so remaining groups render independently. Unavailable reads show retry feedback, omit uncertain footer picks and mark the response noindex; empty results use the existing empty state.
+The `(home)` layout's Read This footer and page/metadata share `getPublicHomepageForRequest`, a React request-scoped cache of the no-store query. This deduplicates calls within a server render without retaining content across requests. The `(public)` layout uses `getPublicReadThis` for footer cards without loading full homepage composition. Neither layout loads protected/user data. A null lead does not imply an empty catalog: reserved Featured or Read This stories can leave no free lead, so remaining groups render independently. Unavailable reads show retry feedback, omit uncertain footer picks and mark the response noindex; empty results use the existing empty state.
 
 ## Canonical article-body renderer (Phase 5 Task 11)
 
 ArticleBody owns semantic React rendering for validated gavel-draft v1/v2 documents. It uses the existing bounded canonical validator, then resolves all required media before rendering paragraphs, h2/h3, marks, safe links, lists, blockquotes, figures and captions. Unsupported data produces a fixed unavailable message; no stored HTML, attributes or raw JSON are spread into output. Shared code has no editor/Tiptap runtime dependency.
 
 PublicArticleBody adapts checked public image IDs/dimensions into the public media route and applies reader-scoped prose typography. Missing/invalid descriptors fail the whole body rather than revealing a partial rendering. DraftReadOnlyBody is now a compatibility adapter supplying private preview routes, the existing read-only label and preview/empty messages; when no valid article ID is supplied it retains plain image descriptions. The public article route composes this adapter as described below.
-
 
 ## Public article page (Phase 5 Task 12)
 
@@ -202,7 +201,6 @@ ArticleHeader renders title/dek, UTC publication date and eager authorized main 
 
 The [Task 12 plan](superpowers/plans/2026-11-10-public-article-page.md) records verification and limits. Search and About destinations remain owned by later tasks; complete SEO metadata remains Task 20 work.
 
-
 ## Public section and category archives (Phase 5 Task 13)
 
 `/sections/[sectionSlug]`, `/sections/[sectionSlug]/categories/[categorySlug]` and `/letters` use one checked archive resolver. It resolves active scope from the anonymous public catalog before requesting twelve bounded cards, preserving category parent disambiguation and scope-bound cursors. Metadata and page reuse request-local archive reads; the public layout now shares the same request-local navigation reader. No persistent cache or caller session is introduced.
@@ -211,13 +209,11 @@ ArchiveHeader owns breadcrumbs and the page h1; CategoryChips links active categ
 
 The letters route resolves the configured active section by the approved `Letter to the Editor` label, case-insensitively, rather than guessing its database slug or adopting the demo's category. Missing configuration fails unavailable. Its submission-guidance link targets the future Task 19 page. The [Task 13 plan](superpowers/plans/2026-11-10-public-section-archives.md) records this configuration gate, validation and remaining human review.
 
-
 ## Public tag archives (Phase 5 Task 14)
 
 `/tags/[slug]` uses the narrow anonymous tag resolver and existing public tag list scope. The shared archive context now has an explicit sectionless variant: ArchiveHeader retains Home/current-topic breadcrumbs, CategoryChips returns no controls, and ArchiveGrid renders cards without a section hero. Each story retains its actual section link across multi-section results. Existing section/category/letters behavior remains unchanged.
 
 Metadata/page share request-local resolution, and shared route boundaries retain real missing-tag 404, generic errors and safe cursor recovery. Native links support article-to-tag discovery and pagination without JavaScript. The [Task 14 plan](superpowers/plans/2026-11-10-public-tag-archives.md) records validation, SQL authority and limits; no tag editor or new write boundary is introduced.
-
 
 ## Public author pages (Phase 5 Task 15)
 
