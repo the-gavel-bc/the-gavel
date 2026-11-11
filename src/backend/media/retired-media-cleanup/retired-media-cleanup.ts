@@ -120,25 +120,49 @@ async function performSweep(
     });
     return success && !finished.error && finished.data === true;
   };
-  while (Date.now() < deadline) {
-    const prefixResult = await client.rpc("claim_retired_article_prefixes", {
-      p_limit: PREFIX_BATCH,
-    });
-    if (prefixResult.error) return false;
-    const claims = prefixes.parse(prefixResult.data);
-    if (!claims.length) break;
-    const results = await Promise.all(claims.map(scanPrefix));
-    if (results.includes(false)) failed = true;
-  }
-  // Ledger keys remain eligible after successful removal: a previously started
-  // upload can finish late and recreate the object, requiring another sweep.
-  while (Date.now() < deadline) {
+  let prefixesDone = false;
+  let keysDone = false;
+  while (Date.now() < deadline && !(prefixesDone && keysDone)) {
+    if (!prefixesDone) {
+      try {
+        const prefixResult = await client.rpc(
+          "claim_retired_article_prefixes",
+          {
+            p_limit: PREFIX_BATCH,
+          },
+        );
+        if (prefixResult.error) {
+          failed = true;
+          prefixesDone = true;
+        }
+        const claims = prefixResult.error
+          ? []
+          : prefixes.parse(prefixResult.data);
+        if (!claims.length) prefixesDone = true;
+        const results = await Promise.all(claims.map(scanPrefix));
+        if (results.includes(false)) failed = true;
+      } catch {
+        failed = true;
+        prefixesDone = true;
+      }
+    }
+    // Ledger keys remain eligible after successful removal: a previously started
+    // upload can finish late and recreate the object, requiring another sweep.
+    // Finish both work classes in the current round even if a Storage call overruns.
+    if (keysDone) continue;
     const keyResult = await client.rpc("claim_media_cleanup", {
       p_limit: KEY_BATCH,
     });
-    if (keyResult.error) return false;
+    if (keyResult.error) {
+      failed = true;
+      keysDone = true;
+      continue;
+    }
     const keyClaims = keys.parse(keyResult.data);
-    if (!keyClaims.length) break;
+    if (!keyClaims.length) {
+      keysDone = true;
+      continue;
+    }
     let removed = false;
     try {
       // One Storage call per batch; any error marks every key in it as failed.
