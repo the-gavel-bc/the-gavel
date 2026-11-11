@@ -100,3 +100,11 @@ Validation: the original owner edit failure reproduced before the patch; six edi
 ## Main integration after PR 78
 
 Merged `origin/main` at `fc43967` into the PR branch without rewriting history. Resolved overlapping image form guards by retaining both cleanup and media busy checks, preserving main's version acknowledgement and exact retry behavior. Retained both branches' regression tests and authoritative documentation additions. Updated STATUS.md to reflect integration. Validation: 66 tests across seven media/form/save-state files, TypeScript, targeted ESLint, full formatting check and diff checks passed. Hosted CI remains required.
+
+## PR 79 E2E follow-up
+
+CI run `43086280925` fails two recovery tests on desktop and mobile. The save barrier records every Server Action, including the unused-upload lookup triggered after acknowledgement. The conflict test keeps a request listener active after review and overwrites the recovery action ID with the unused-upload action ID when adopting the reviewed version. Both failures reproduced locally before the fix; the local lookup returned `unavailable` because the existing database lacks the new RPC, while CI returned `not_found`.
+
+Acceptance: count and hold only create/save commands; capture the recovery action only during the explicit review request; retain exact-retry, newer-input, non-owner and signed-out denial assertions. Keep application behavior and authorization unchanged. Race safety requires excluding subsequent catalog requests rather than relying on request timing. Validate the original failing specs on both browser projects, plus formatting, lint and types. No schema change or database reset is required.
+
+Verification: `pnpm exec playwright test e2e/drafts/draft-save-recovery.spec.ts e2e/drafts/draft-conflict-recovery.spec.ts` passed all 18 desktop/mobile cases, including exact retries, retained newer input and ownership/access denials. Its production build passed. `pnpm typecheck`, targeted ESLint for the two changed TypeScript files, targeted Prettier for those files and this plan, and `git diff --check` passed. An independent diff review found no issues. Generated screenshots were restored rather than included. The existing local database was not reset or migrated; the full hosted CI suite remains the merge gate.
