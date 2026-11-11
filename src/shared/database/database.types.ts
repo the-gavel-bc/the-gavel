@@ -924,6 +924,14 @@ export type Database = {
         };
         Returns: Json;
       };
+      list_public_sitemap_articles: {
+        Args: {
+          p_after_id: string;
+          p_after_published_at: string;
+          p_limit: number;
+        };
+        Returns: Json;
+      };
       mark_article_image_for_removal: {
         Args: { p_asset_id: string };
         Returns: Json;

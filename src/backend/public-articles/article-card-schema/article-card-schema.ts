@@ -2,20 +2,22 @@ import "server-only";
 import { z } from "zod";
 import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
 import { isDatabaseTimestamp } from "@/shared/articles/draft-cursor/draft-cursor";
-const slug = z
+export const publicSlugSchema = z
   .string()
   .min(1)
   .max(180)
   .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+const slug = publicSlugSchema;
 const categorySlug = slug.max(120);
 const uuid = z.string().refine(isDraftUuid);
-const timestamp = z
+export const publicTimestampSchema = z
   .string()
   .refine(
     (s) =>
       /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/.test(s) &&
       isDatabaseTimestamp(s),
   );
+const timestamp = publicTimestampSchema;
 // Match PostgreSQL's Unicode code-point length semantics.
 const text = (max: number, min = 0) =>
   z.string().refine((s) => {

@@ -34,6 +34,8 @@ Configure Google OAuth in the environment-specific Supabase/Google projects, usi
 
 Use HTTPS `SITE_URL` values in staging/production so session cookies are Secure. Browser sessions use HttpOnly cookies; foundation authentication and authenticated reads run on the server. Preview protection and hosted OAuth smoke checks remain launch gates.
 
+`/robots.txt` and `/sitemap.xml` read `SITE_URL` per request, so it must be the final production origin in the production runtime environment. Previews serve the same robots file and rely on Vercel protection rather than a disallow-all rule. Confirm both routes on the production origin as a release check.
+
 ## Release requirements
 
 - Approved change and required review.
@@ -84,7 +86,6 @@ Task 14 uses the additive `20261107030000_site_information.sql` migration. It pr
 ## Phase 4 handoff
 
 The [Phase 4 evidence map](reviews/phase-4-editorial-workflow.md) records local verification and forward authorization corrections. Deploy both `20261109010000` and `20261109010100` before relying on inactive-profile read denial and media revocation safety. They preserve stored rows and public interfaces; application rollback can retain these stricter predicates and actor locks. Do not restore the vulnerable definitions as a routine rollback. Human maintainer review and a green check on the release commit remain required. Real Google OAuth/session checks, hosted cleanup credentials/cron/capacity/alerts, a successful initial cleanup check, screen-reader review, and backup/restore exercises remain launch gates; local synthetic tests do not establish them.
-
 
 ## Phase 5 search foundation rollout
 
