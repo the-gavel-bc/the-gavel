@@ -36,6 +36,12 @@ export function ReaderNavigation({ sections }: { sections: PublicSection[] }) {
               event.target as HTMLElement
             ).closest<HTMLDetailsElement>("details[open]");
             if (!detail) return;
+            // The outer desktop disclosure is the persistent primary navigation.
+            if (
+              detail === menu.current &&
+              window.matchMedia?.("(min-width: 45rem)").matches
+            )
+              return;
             detail.open = false;
             detail.querySelector("summary")?.focus();
             event.preventDefault();

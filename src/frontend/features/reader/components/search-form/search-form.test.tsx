@@ -23,7 +23,7 @@ it("associates instructions and invalid feedback with the input", () => {
     /160 characters/,
   );
 });
-it("caps typed input at the documented 160-character search limit", () => {
+it("allows enough UTF-16 units for 160 supplementary code points", () => {
   render(<SearchForm id="query" />);
-  expect(screen.getByRole("searchbox")).toHaveAttribute("maxLength", "160");
+  expect(screen.getByRole("searchbox")).toHaveAttribute("maxLength", "320");
 });

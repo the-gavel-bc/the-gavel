@@ -46,7 +46,7 @@ it("closes the nearest disclosure on Escape and restores focus", () => {
   expect(detail.open).toBe(false);
   expect(detail.querySelector("summary")).toHaveFocus();
   fireEvent.keyDown(detail.querySelector("summary")!, { key: "Escape" });
-  expect(detail.parentElement?.closest("details")?.open).toBe(false);
+  expect(detail.parentElement?.closest("details")?.open).toBe(true);
 });
 it("encodes reserved characters in contact links", () => {
   render(

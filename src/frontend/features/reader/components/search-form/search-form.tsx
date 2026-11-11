@@ -28,7 +28,7 @@ export function SearchForm({
           name="q"
           defaultValue={query}
           placeholder="Search stories"
-          maxLength={160}
+          maxLength={320}
           aria-invalid={invalid || undefined}
           aria-describedby={navigation ? undefined : `${id}-help`}
         />
