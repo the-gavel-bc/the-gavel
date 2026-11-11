@@ -32,6 +32,9 @@ test("creates a private draft and opens it for editing", async ({
   await expect(
     page.getByRole("textbox", { name: "Article body" }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Create draft" }),
+  ).toBeEnabled();
   await page.getByLabel(/Section/).focus();
   // Catalog-backed fields add a variable number of native keyboard stops.
   const stops = await page
@@ -56,7 +59,11 @@ test("creates a private draft and opens it for editing", async ({
   });
   page.on("request", (request) => {
     const actionId = request.headers()["next-action"];
-    if (request.method() === "POST" && actionId)
+    if (
+      request.method() === "POST" &&
+      actionId &&
+      new URL(request.url()).pathname === "/dashboard/articles/new"
+    )
       transport = { actionId, body: request.postData()! };
   });
   await page.keyboard.press("Enter");

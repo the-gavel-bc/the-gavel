@@ -88,3 +88,11 @@ All six slices are implemented locally. No commit, push, pull request, merge or 
 - Added the cleanup browser scenario to `e2e/drafts/body-images.spec.ts`; local end-to-end execution is deferred to CI because the disposable SQL database has no separate Auth/Storage/API stack. Local action/widget/form tests and real SQL/races cover cleanup, reference denials and retries. Full unit/SQL/concurrency/browser suites, clean rebuild/type drift, hosted checks, security scans and human review remain CI/release gates.
 
 Initial failures were corrected before passing reruns: two invalid archived fixture timestamps, a published race fixture missing publication prerequisites, missing clone-only pgTAP/bucket configuration, and clone migration-owner fixture permissions. Initial concurrent import-boundary testing exceeded its existing 5-second timeout; bounded-worker final testing passed without changing the test timeout. Full lint found render-time ref access and effect-triggered synchronous state updates; both were redesigned without suppressions.
+
+## PR 79 CI regression correction
+
+CI exposed strict JSON validation rejecting the editor's non-enumerable Symbol ownership marker. Native document ownership now lives in a per-editor WeakSet, preserving delayed-echo protection without modifying documents. Editor regressions validate emitted documents through the actual draft contract.
+
+The new unused-upload list action also contaminated two browser fixtures that captured every server action. Capture now filters the create route or the versioned save payload. The keyboard create flow waits for the submit button to become enabled before traversing tab stops. No authorization or schema contract changed.
+
+Validation: the original owner edit failure reproduced before the patch; six editor tests, targeted ESLint, formatting, and TypeScript passed after the patch. All 24 desktop/mobile create and edit browser cases passed (`pnpm test:e2e e2e/drafts/edit-drafts.spec.ts e2e/drafts/create-drafts.spec.ts --workers=1`), including role denials, lost-response retries and near-limit saves. The existing local Supabase schema was not changed; cleanup browser coverage still requires CI’s migrated database. Full CI remains the merge gate.

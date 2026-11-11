@@ -40,15 +40,14 @@ export function DraftEditor({
   allowImageUpload?: boolean;
   onMediaDirtyChange?: (dirty: boolean) => void;
 }) {
-  const [nativeOwner] = useState(() => Symbol("native draft editor"));
-  // Native changes carry an immutable, nonserialized owner marker. Reading the
-  // incoming document avoids consulting mutable editor state during render.
+  const [nativeDocuments] = useState(() => new WeakSet<DraftDocument>());
+  // Track native ownership outside the document so strict JSON validation stays valid.
   const source = useMemo(
     () =>
-      value !== null && Object.hasOwn(value, nativeOwner)
+      value !== null && nativeDocuments.has(value)
         ? null
         : toEditorDocument(value),
-    [value, nativeOwner],
+    [value, nativeDocuments],
   );
   const [extensions] = useState(() => createDraftExtensions(articleId));
   const [failure, setFailure] = useState<DraftFailure | null>(null);
@@ -126,9 +125,8 @@ export function DraftEditor({
     onUpdate: ({ editor: current }) => {
       const result = fromEditorDocument(current.getJSON());
       if (result.ok) {
-        // Stamp the fresh document before handing ownership to the form. JSON and
-        // structuredClone omit this marker, so external snapshots are revalidated.
-        Object.defineProperty(result.document, nativeOwner, { value: true });
+        // Cloned external snapshots are absent from this set and get revalidated.
+        nativeDocuments.add(result.document);
         setFailure(null);
         onChange(result.document);
       } else reject(result);

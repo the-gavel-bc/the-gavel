@@ -33,6 +33,8 @@ vi.mock(
 );
 import { toEditorDocument } from "@/frontend/features/articles/draft-document/draft-document";
 import { DraftEditor } from "./draft-editor";
+import { checkDraftInput } from "@/shared/articles/draft-contract/draft-contract";
+import { baseDraft } from "@/shared/articles/draft-contract/draft-test-cases";
 it("hydrates an empty editor without changing a NULL body", async () => {
   const change = vi.fn();
   render(
@@ -130,6 +132,7 @@ it("ignores delayed native echoes without discarding newer input but accepts an 
     live.editor!.commands.insertContent({ type: "text", text: "First" });
   });
   const echo = change.mock.calls[0][0] as DraftDocument;
+  expect(checkDraftInput({ ...baseDraft, content: echo }).ok).toBe(true);
   act(() => {
     live.editor!.commands.insertContent({ type: "text", text: "Second" });
   });
@@ -182,6 +185,7 @@ it("keeps invalid native input when a delayed echo or disabled state arrives", a
     live.editor!.commands.insertContent({ type: "text", text: "Valid" });
   });
   const echo = change.mock.calls[0][0] as DraftDocument;
+  expect(checkDraftInput({ ...baseDraft, content: echo }).ok).toBe(true);
   act(() => {
     live.editor!.commands.setContent({
       type: "doc",
