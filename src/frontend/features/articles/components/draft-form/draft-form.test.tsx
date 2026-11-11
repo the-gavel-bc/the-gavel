@@ -420,3 +420,39 @@ it("keeps title edits while an image write completes and saves using its new ver
     ),
   );
 });
+
+it.each(["conflict", "request_conflict"] as const)(
+  "offers review after an uncertain save resolves to %s",
+  async (code) => {
+    mocks.save
+      .mockResolvedValueOnce({ ok: false, code: "unavailable" })
+      .mockResolvedValueOnce({ ok: false, code });
+    render(
+      <DraftForm
+        initialDraft={baseDraft}
+        options={options}
+        article={{
+          id: baseDraft.sectionId,
+          version: 1,
+          updatedAt: "2026-11-11T12:00:00Z",
+        }}
+      />,
+    );
+    await userEvent.type(screen.getByLabelText(/Title/), " retained");
+    await userEvent.click(screen.getByRole("button", { name: "Save draft" }));
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Retry original save" }),
+    );
+    expect(
+      await screen.findByRole("button", {
+        name: "Review latest saved version",
+      }),
+    ).toBeEnabled();
+    expect(screen.getByLabelText(/Title/)).toHaveValue(
+      `${baseDraft.title} retained`,
+    );
+    expect(
+      screen.queryByRole("button", { name: "Retry original save" }),
+    ).toBeNull();
+  },
+);

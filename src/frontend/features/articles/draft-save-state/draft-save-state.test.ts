@@ -192,3 +192,54 @@ it("rejects media acknowledgements for a pending save, another article or older 
     }),
   ).toBe(pendingState);
 });
+
+it.each(["conflict", "request_conflict"] as const)(
+  "recovers uncertain saves after definitive %s while retaining newer input",
+  (code) => {
+    let state = reduceDraftSave(submitted(), {
+      type: "resolve",
+      requestId: command.requestId,
+      result: { ok: false, code: "unavailable" },
+    });
+    state = reduceDraftSave(state, {
+      type: "edit",
+      input: { ...baseDraft, title: "Keep newer input" },
+    });
+    state = reduceDraftSave(state, { type: "submit", pending: state.pending! });
+    state = reduceDraftSave(state, {
+      type: "resolve",
+      requestId: command.requestId,
+      result: { ok: false, code },
+    });
+    expect(state.phase).toBe("conflict");
+    expect(state.pending).toBeNull();
+    expect(state.uncertain).toBe(false);
+    expect(state.current.title).toBe("Keep newer input");
+    expect(isDraftSaveDirty(state)).toBe(true);
+    state = reduceDraftSave(state, {
+      type: "reload",
+      article: { ...article, version: 3 },
+      input: baseDraft,
+    });
+    expect(state.article?.version).toBe(3);
+    expect(state.phase).toBe("idle");
+  },
+);
+it.each(["not_found", "forbidden"] as const)(
+  "keeps uncertain receipt after %s",
+  (code) => {
+    let state = reduceDraftSave(submitted(), {
+      type: "resolve",
+      requestId: command.requestId,
+      result: { ok: false, code: "unavailable" },
+    });
+    state = reduceDraftSave(state, { type: "submit", pending: state.pending! });
+    state = reduceDraftSave(state, {
+      type: "resolve",
+      requestId: command.requestId,
+      result: { ok: false, code },
+    });
+    expect(state.phase).toBe("uncertain");
+    expect(state.pending?.command.requestId).toBe(command.requestId);
+  },
+);

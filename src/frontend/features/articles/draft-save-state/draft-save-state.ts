@@ -107,19 +107,19 @@ export function reduceDraftSave(
         return state;
       const result = event.result;
       if (!result.ok) {
-        // A lost response may hide a commit. Later denial cannot prove it never happened,
-        // so keep the original retry handle until a successful receipt resolves it.
-        const uncertain = state.uncertain || result.code === "unavailable";
+        // A lost response may hide a commit; preserve its handle unless receipt lookup proves failure.
+        // Conflict responses follow receipt lookup; access/missing-resource denials may precede it.
+        const definitive =
+          pending.kind === "save" &&
+          (result.code === "conflict" || result.code === "request_conflict");
+        const uncertain =
+          !definitive && (state.uncertain || result.code === "unavailable");
         return {
           ...state,
           lastResult: result,
           uncertain,
           pending: uncertain ? pending : null,
-          phase: uncertain
-            ? "uncertain"
-            : result.code === "conflict"
-              ? "conflict"
-              : "error",
+          phase: uncertain ? "uncertain" : definitive ? "conflict" : "error",
         };
       }
       if (
