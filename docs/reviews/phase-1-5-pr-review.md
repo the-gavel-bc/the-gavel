@@ -417,3 +417,9 @@ The six ordered tasks in the [easy-first plan](../superpowers/plans/2026-11-10-r
 Verification after all implementations: 885 unit/component tests, 217 read-only TS/SQL parity cases and 30 desktop/mobile browser cases passed. TypeScript, lint, formatting and the browser suite's production build passed. The plan records exact commands, independent review and initial failures/corrections. The query optimization proves removal of four duplicate catalog requests in the normal case, without shared caching; latency was not benchmarked.
 
 Final type checking also uncovered a pre-existing merged #71 typo calling undefined `letters(section)` in public archive resolution. It now uses the existing `isLettersSection(section)` predicate; existing archive and full unit checks pass. Other findings, especially administrator eligibility (24), cleanup fairness (28) and the known no-JavaScript matched-resource 404 release blocker, remain outside this six-task slice.
+
+## Remaining low-priority and optimization implementation follow-up
+
+The [optimization plan](../superpowers/plans/2026-11-11-low-priority-optimizations.md) records local implementation of **O2–O4 and findings 10/11**, plus shared contact-link construction for **19**, on `perf/review-optimizations` from corrected PR #77 head `1dfa5bd`. Finding 19 is a consistency improvement without a reproduced mail-client failure. Original summary tables remain historical review snapshots. Explicit cleanup on published articles was approved; no automatic expiry was added.
+
+The plan records focused tests, independent review, synthetic index measurements, rollout/locking costs and unrun CI gates. No merge or deployment is claimed. The separate second batch for 13/18/20 and O5 remains in worktree `cc50`; it is not included in this branch. Medium/high recovery, identity and cleanup fairness findings remain outside this low-priority batch.

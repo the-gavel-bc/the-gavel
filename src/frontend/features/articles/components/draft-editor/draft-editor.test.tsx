@@ -21,6 +21,17 @@ vi.mock("@tiptap/react", async (load) => {
     },
   };
 });
+vi.mock(
+  "@/frontend/features/articles/draft-document/draft-document",
+  async (load) => {
+    const actual =
+      await load<
+        typeof import("@/frontend/features/articles/draft-document/draft-document")
+      >();
+    return { ...actual, toEditorDocument: vi.fn(actual.toEditorDocument) };
+  },
+);
+import { toEditorDocument } from "@/frontend/features/articles/draft-document/draft-document";
 import { DraftEditor } from "./draft-editor";
 it("hydrates an empty editor without changing a NULL body", async () => {
   const change = vi.fn();
@@ -122,6 +133,7 @@ it("ignores delayed native echoes without discarding newer input but accepts an 
   act(() => {
     live.editor!.commands.insertContent({ type: "text", text: "Second" });
   });
+  const conversions = vi.mocked(toEditorDocument).mock.calls.length;
   view.rerender(
     <DraftEditor
       value={echo}
@@ -131,6 +143,7 @@ it("ignores delayed native echoes without discarding newer input but accepts an 
     />,
   );
   expect(live.editor!.getText()).toBe("FirstSecond");
+  expect(toEditorDocument).toHaveBeenCalledTimes(conversions);
   const external: DraftDocument = {
     format: "gavel-draft",
     version: 1,
@@ -150,4 +163,67 @@ it("ignores delayed native echoes without discarding newer input but accepts an 
     />,
   );
   expect(live.editor!.getText()).toBe("External");
+  expect(toEditorDocument).toHaveBeenCalledTimes(conversions + 1);
+});
+
+it("keeps invalid native input when a delayed echo or disabled state arrives", async () => {
+  const change = vi.fn(),
+    error = vi.fn();
+  const view = render(
+    <DraftEditor
+      value={null}
+      onChange={change}
+      onError={error}
+      disabled={false}
+    />,
+  );
+  await screen.findByRole("textbox", { name: "Article body" });
+  act(() => {
+    live.editor!.commands.insertContent({ type: "text", text: "Valid" });
+  });
+  const echo = change.mock.calls[0][0] as DraftDocument;
+  act(() => {
+    live.editor!.commands.setContent({
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "Invalid",
+              marks: [
+                {
+                  type: "link",
+                  attrs: { href: "https://example.org", target: "_self" },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+  });
+  await waitFor(() => expect(error).toHaveBeenCalled());
+  const conversions = vi.mocked(toEditorDocument).mock.calls.length;
+  view.rerender(
+    <DraftEditor
+      value={echo}
+      onChange={change}
+      onError={error}
+      disabled={false}
+    />,
+  );
+  expect(live.editor!.getText()).toBe("Invalid");
+  expect(screen.getByRole("textbox", { name: "Article body" })).toHaveAttribute(
+    "aria-invalid",
+    "true",
+  );
+  view.rerender(
+    <DraftEditor value={echo} onChange={change} onError={error} disabled />,
+  );
+  expect(live.editor!.getText()).toBe("Invalid");
+  expect(live.editor!.isEditable).toBe(false);
+  expect(toEditorDocument).toHaveBeenCalledTimes(conversions);
+  expect(change).toHaveBeenCalledTimes(1);
 });

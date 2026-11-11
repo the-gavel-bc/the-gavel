@@ -5,11 +5,12 @@ import { createDraftExtensions } from "@/frontend/features/articles/draft-docume
 import { expect, it, vi } from "vitest";
 
 const reserve = vi.hoisted(() => vi.fn());
+const remove = vi.hoisted(() => vi.fn());
 vi.mock("@/backend/media/media-actions/media-actions", () => ({
   requestArticleImageUpload: reserve,
 }));
 vi.mock("@/backend/media/media-removal/media-removal", () => ({
-  removeUnusedArticleImage: vi.fn(),
+  removeUnusedArticleImage: remove,
 }));
 import { DraftBodyImageControl } from "./draft-body-image-control";
 
@@ -114,5 +115,53 @@ it("updates and removes a selected image without accepting a URL", () => {
     ).toBe(false);
   } finally {
     editor.destroy();
+  }
+});
+
+it("keeps a throttled body upload retryable with the same reservation", async () => {
+  reserve.mockReset();
+  remove.mockReset();
+  reserve.mockResolvedValue({
+    ok: true,
+    assetId: "60000000-0000-0000-0000-000000000701",
+  });
+  const fetcher = vi
+    .fn()
+    .mockResolvedValueOnce(
+      Response.json(
+        { ok: false, code: "rate_limited", retryAfter: 60 },
+        { status: 429 },
+      ),
+    )
+    .mockResolvedValueOnce(Response.json({ ok: true }));
+  vi.stubGlobal("fetch", fetcher);
+  const editor = {
+    commands: { insertContent: vi.fn() },
+    getJSON: () => ({ type: "doc", content: [] }),
+  } as unknown as Editor;
+  try {
+    render(
+      <DraftBodyImageControl
+        articleId="50000000-0000-0000-0000-000000000701"
+        editor={editor}
+        disabled={false}
+        onError={vi.fn()}
+      />,
+    );
+    fireEvent.change(screen.getByLabelText("Body image file"), {
+      target: {
+        files: [new File(["image"], "image.png", { type: "image/png" })],
+      },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload body image" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "retry the same file",
+    );
+    expect(remove).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Upload body image" }));
+    await screen.findByText("Image ready to insert.");
+    expect(reserve.mock.calls[1]).toEqual(reserve.mock.calls[0]);
+  } finally {
+    vi.unstubAllGlobals();
   }
 });

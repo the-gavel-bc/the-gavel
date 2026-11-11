@@ -224,3 +224,33 @@ it("clears the media navigation guard after a confirmed unlink", async () => {
   expect(await screen.findByText("Image removed.")).toBeInTheDocument();
   expect(onDirtyChange).toHaveBeenLastCalledWith(false);
 });
+
+it("retains the same file and reservation after throttling without cleanup", async () => {
+  const user = userEvent.setup();
+  vi.mocked(fetch).mockResolvedValueOnce(
+    Response.json(
+      { ok: false, code: "rate_limited", retryAfter: 60 },
+      { status: 429 },
+    ),
+  );
+  render(
+    <ArticleMedia
+      article={article}
+      initialImage={null}
+      disabled={false}
+      onCommit={vi.fn()}
+    />,
+  );
+  await user.upload(
+    screen.getByLabelText("Image file"),
+    new File(["image"], "image.png", { type: "image/png" }),
+  );
+  await user.click(screen.getByRole("button", { name: "Upload image" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "retry the same file",
+  );
+  expect(mocks.removeUnused).not.toHaveBeenCalled();
+  await user.click(screen.getByRole("button", { name: "Retry upload" }));
+  expect(await screen.findByText("Image ready to attach.")).toBeVisible();
+  expect(mocks.request.mock.calls[1]).toEqual(mocks.request.mock.calls[0]);
+});

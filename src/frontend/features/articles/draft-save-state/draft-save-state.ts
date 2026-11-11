@@ -5,7 +5,10 @@ import type {
   DraftWriteResult,
   DraftFailure,
 } from "../../../../shared/articles/draft-contract/draft-contract";
-import { draftInputKey } from "./draft-input-key";
+import {
+  draftContentKey,
+  draftInputKeyWithContentKey,
+} from "./draft-input-key";
 export type DraftArticle = { id: string; version: number; updatedAt: string };
 export type PendingDraftCommand =
   | { kind: "create"; command: CreateDraftCommand }
@@ -16,6 +19,7 @@ export type DraftSaveState = {
   current: DraftInput;
   acknowledged: DraftInput;
   currentKey: string;
+  currentContentKey: string;
   acknowledgedKey: string;
   article?: DraftArticle;
   pending: PendingDraftCommand | null;
@@ -38,11 +42,13 @@ export function createDraftSaveState(
   input: DraftInput,
   article?: DraftArticle,
 ): DraftSaveState {
-  const key = draftInputKey(input);
+  const contentKey = draftContentKey(input.content);
+  const key = draftInputKeyWithContentKey(input, contentKey);
   return {
     current: input,
     acknowledged: input,
     currentKey: key,
+    currentContentKey: contentKey,
     acknowledgedKey: key,
     article,
     pending: null,
@@ -61,17 +67,25 @@ export function reduceDraftSave(
   event: DraftSaveEvent,
 ): DraftSaveState {
   switch (event.type) {
-    case "edit":
+    case "edit": {
+      // Form edits replace bodies rather than mutating them. Metadata changes retain
+      // the body identity, so reuse its key without traversing the document again.
+      const contentKey =
+        event.input.content === state.current.content
+          ? state.currentContentKey
+          : draftContentKey(event.input.content);
       return {
         ...state,
         current: event.input,
-        currentKey: draftInputKey(event.input),
+        currentKey: draftInputKeyWithContentKey(event.input, contentKey),
+        currentContentKey: contentKey,
         nativeInvalid: event.nativeInvalid ?? false,
         phase:
           state.pending || state.phase === "conflict" ? state.phase : "idle",
         lastResult:
           state.pending || state.phase === "conflict" ? state.lastResult : null,
       };
+    }
     case "reject":
       return state.pending
         ? state
@@ -134,12 +148,17 @@ export function reduceDraftSave(
         };
       // Confirm only the submitted snapshot; edits made during the request stay dirty.
       const acknowledged = pending.command.draft;
-      const acknowledgedKey = draftInputKey(acknowledged);
+      const contentKey = draftContentKey(acknowledged.content);
+      const acknowledgedKey = draftInputKeyWithContentKey(
+        acknowledged,
+        contentKey,
+      );
       const newer = state.nativeInvalid || state.currentKey !== acknowledgedKey;
       return {
         ...state,
         current: newer ? state.current : acknowledged,
         currentKey: newer ? state.currentKey : acknowledgedKey,
+        currentContentKey: newer ? state.currentContentKey : contentKey,
         acknowledged,
         acknowledgedKey,
         article: {

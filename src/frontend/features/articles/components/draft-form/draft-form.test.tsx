@@ -14,6 +14,8 @@ const mocks = vi.hoisted(() => ({
   push: vi.fn(),
   refresh: vi.fn(),
   review: vi.fn(),
+  unused: vi.fn(),
+  removeUnused: vi.fn(),
 }));
 vi.mock("@/backend/articles/draft-actions/draft-actions", () => ({
   createDraftAction: mocks.create,
@@ -32,8 +34,14 @@ vi.mock("@/backend/media/media-actions/media-actions", () => ({
   requestArticleImageUpload: vi.fn(),
 }));
 vi.mock("@/backend/media/media-removal/media-removal", () => ({
-  removeUnusedArticleImage: vi.fn(),
+  removeUnusedArticleImage: mocks.removeUnused,
 }));
+vi.mock(
+  "@/backend/media/unused-article-uploads/unused-article-uploads",
+  () => ({
+    listUnusedArticleUploads: mocks.unused,
+  }),
+);
 import { DraftForm } from "./draft-form";
 const options = {
   sections: [{ id: baseDraft.sectionId, name: "Synthetic section" }],
@@ -43,6 +51,7 @@ const options = {
 };
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.unused.mockResolvedValue({ ok: true, items: [], nextCursor: null });
 });
 it("requires title and section, then focuses a safe error summary", async () => {
   render(
@@ -341,4 +350,120 @@ it("toolbar correction does not clear an independent invalid native body", async
   await userEvent.clear(input);
   expect(screen.getByRole("button", { name: "Create draft" })).toBeDisabled();
   expect(mocks.create).not.toHaveBeenCalled();
+});
+
+it.each(["draft", "published"] as const)(
+  "exposes explicit unused cleanup on %s articles",
+  async (status) => {
+    render(
+      <DraftForm
+        initialDraft={baseDraft}
+        options={options}
+        status={status}
+        article={{
+          id: baseDraft.sectionId,
+          version: 1,
+          updatedAt: "2026-11-11T12:00:00Z",
+        }}
+      />,
+    );
+    expect(
+      await screen.findByRole("region", { name: "Unused uploads" }),
+    ).toBeVisible();
+    await waitFor(() =>
+      expect(mocks.unused).toHaveBeenCalledWith(baseDraft.sectionId),
+    );
+  },
+);
+
+it("holds save, editing, lifecycle, and navigation guards during explicit cleanup", async () => {
+  const assetId = "60000000-0000-0000-0000-000000000401";
+  mocks.unused.mockResolvedValue({
+    ok: true,
+    items: [
+      { assetId, createdAt: "2026-11-11T12:00:00Z", status: "finalized" },
+    ],
+    nextCursor: null,
+  });
+  let finish!: (value: { ok: true; assetId: string }) => void;
+  mocks.removeUnused.mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+  );
+  render(
+    <DraftForm
+      initialDraft={baseDraft}
+      options={options}
+      article={{
+        id: baseDraft.sectionId,
+        version: 1,
+        updatedAt: "2026-11-11T12:00:00Z",
+      }}
+    />,
+  );
+  await userEvent.click(
+    await screen.findByRole("button", { name: "Discard unused upload" }),
+  );
+  expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
+  expect(
+    screen.getByRole("button", { name: "Publish article" }),
+  ).toBeDisabled();
+  expect(screen.getByLabelText(/Title/)).toBeDisabled();
+  const event = new Event("beforeunload", { cancelable: true });
+  window.dispatchEvent(event);
+  expect(event.defaultPrevented).toBe(true);
+  await act(async () => finish({ ok: true, assetId }));
+  expect(screen.getByRole("button", { name: "Publish article" })).toBeEnabled();
+});
+
+it("keeps lifecycle, save and navigation guarded across uncertain cleanup until explicit recovery", async () => {
+  const assetId = "60000000-0000-0000-0000-000000000401";
+  mocks.unused.mockResolvedValue({
+    ok: true,
+    items: [
+      { assetId, createdAt: "2026-11-11T12:00:00Z", status: "finalized" },
+    ],
+    nextCursor: null,
+  });
+  mocks.removeUnused
+    .mockResolvedValueOnce({ ok: false, code: "unavailable" })
+    .mockResolvedValueOnce({ ok: false, code: "not_found" });
+  render(
+    <DraftForm
+      initialDraft={baseDraft}
+      options={options}
+      article={{
+        id: baseDraft.sectionId,
+        version: 1,
+        updatedAt: "2026-11-11T12:00:00Z",
+      }}
+    />,
+  );
+  await userEvent.click(
+    await screen.findByRole("button", { name: "Discard unused upload" }),
+  );
+  await screen.findByRole("button", { name: "Retry cleanup" });
+  expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
+  expect(
+    screen.getByRole("button", { name: "Publish article" }),
+  ).toBeDisabled();
+  expect(screen.getByLabelText(/Title/)).toBeDisabled();
+  const event = new Event("beforeunload", { cancelable: true });
+  window.dispatchEvent(event);
+  expect(event.defaultPrevented).toBe(true);
+  mocks.unused.mockResolvedValue({ ok: true, items: [], nextCursor: null });
+  await userEvent.click(
+    screen.getByRole("button", { name: "Refresh unused uploads" }),
+  );
+  await screen.findByText(/Refreshing does not confirm deletion/);
+  expect(
+    screen.getByRole("button", { name: "Publish article" }),
+  ).toBeDisabled();
+  await userEvent.click(screen.getByRole("button", { name: "Retry cleanup" }));
+  expect(
+    await screen.findByText(/This does not confirm deletion/),
+  ).toBeVisible();
+  expect(screen.getByRole("button", { name: "Publish article" })).toBeEnabled();
 });

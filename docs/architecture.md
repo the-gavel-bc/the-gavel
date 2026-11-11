@@ -151,11 +151,11 @@ Task 15 introduces a narrow permanent media-cleanup ledger and daily Vercel job 
 
 ## Public route composition
 
-The `(public)` Next.js route group owns reader shell data loading and dynamically renders public navigation through the anonymous, no-store client. It does not wrap dashboard or auth route groups. PublicShell remains usable without data for auth screens; frontend presentation receives browser-safe shared navigation types and never imports the backend query. The root homepage path stays `/` after moving its owned files into the public group.
+The sibling `(home)` and `(public)` Next.js route groups dynamically compose the reader shell through `src/app/_components/public-reader-shell/public-reader-shell.tsx`. The homepage page, CSS and tests belong to `(home)`; other public pages remain in `(public)`. Both layouts load anonymous no-store navigation and footer data in parallel. The shared server shell passes checked data into frontend presentation, which never imports backend queries. Public URLs and existing not-found/error boundaries remain unchanged. Neither group wraps dashboard or auth routes; PublicShell remains usable without data for auth screens.
 
 ## Request-scoped homepage reuse
 
-The public layout, homepage and homepage failure metadata use one exported React `cache` wrapper around the anonymous no-store composition query. React scopes this reuse to a server render; it is not a cross-request cache, and a new request rechecks current publication/curation. Browser verification confirmed one homepage RPC per render and fresh output after checked curation, published edit, archive and restore. Public image caching remains the separate approved five-minute policy.
+The `(home)` layout, homepage and homepage failure metadata use one exported React `cache` wrapper around the anonymous no-store full composition query. React scopes reuse to one server render, so homepage content and footer share a snapshot while each new request rechecks publication/curation. Other public pages use the narrow `get_public_read_this()` footer projection and avoid full homepage composition. Neither path adds cross-request caching. The full RPC remains compatible; public image caching retains its separate approved five-minute policy. Verification for the route split is tracked in the [optimization plan](superpowers/plans/2026-11-11-low-priority-optimizations.md).
 
 ## Public metadata identity
 

@@ -61,7 +61,7 @@ it("encodes reserved characters in contact links", () => {
   );
   expect(
     screen.getByRole("link", { name: "desk?letters@bc.edu" }),
-  ).toHaveAttribute("href", "mailto:desk%3Fletters%40bc.edu");
+  ).toHaveAttribute("href", "mailto:desk%3Fletters@bc.edu");
 });
 it("footer omits unknown information and accepts a typed Read This slot", () => {
   const { rerender } = render(<SiteFooter />);
@@ -86,6 +86,6 @@ it("footer omits unknown information and accepts a typed Read This slot", () => 
   );
   expect(screen.getByRole("link", { name: "editor@bc.edu" })).toHaveAttribute(
     "href",
-    "mailto:editor%40bc.edu",
+    "mailto:editor@bc.edu",
   );
 });
