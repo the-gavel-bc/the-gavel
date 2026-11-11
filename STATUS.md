@@ -1,9 +1,8 @@
 # Current work
 
-- Phase: easy-first review fixes completed locally. [Plan and verification](docs/superpowers/plans/2026-11-10-review-fixes-easy-first.md).
-- Workspace: managed worktree `/Users/dylandrozario/.codex/worktrees/cc50/the-gavel`, branch `fix/review-easy-wins`, base `895bd98`. PR preparation is authorized against `main`; no merge performed. Original checkout, its uncommitted review artifacts and `screenshots/` are preserved.
-- Completed: findings 12, 14, 17, 27, 29 and O1. Also corrected an undefined archive predicate found during final TypeScript validation. [Review record](docs/reviews/phase-1-5-pr-review.md).
-- Verification after all fixes: 885 unit/component tests, 217 read-only contract-parity cases, 30 desktop/mobile browser cases, production build, types, lint and formatting passed. Browser checks used fixed synthetic local fixtures; no database reset or migration ran. Independent review found no blocking implementation defect.
-- Stack position: PRs #70–#76 merged into the base; this branch follows them. Hosted CI was not checked for this working tree.
-- Remaining review priorities: identity/last-admin consistency (24), cleanup fairness (28), then deferred editor/media recovery work. These are not fixed by the easy-first slice.
-- Product work remains Phase 5 Tasks 22–23 and the existing matched-resource no-JavaScript 404 release blocker. Preserve approved sitemap/robots decisions in the Task 21 plan; this slice changes no public URLs, lifecycle or access model.
+- Phase: easiest medium fixes implemented and focused verification complete. [Plan and evidence](docs/superpowers/plans/2026-11-11-medium-easy-fixes.md).
+- Branch/worktree: `fix/review-medium-easy`, base `1dfa5bd`, `/Users/dylandrozario/.codex/worktrees/5169/the-gavel`. Local changes are uncommitted; no PR, push, merge or deployment performed.
+- Scope: findings 7/26/25. Preserve edits across image saves, exact uncertain media retries, and consistent finalization locks. No authorization/lifecycle/public-URL policy change.
+- Stack: separate prior low-priority batch remains uncommitted in `25a2`; second batch remains uncommitted in `cc50`; original checkout preserved. Reconcile overlapping files when stacking. Parent merges need rechecking before a future PR.
+- Verification: 46 distinct unit/component tests, 68 SQL assertions, 14 race cases, strict types, full lint and formatting passed. Independent review finding corrected and delta review clear. SQL ran only on disposable `gavel_opt_index_20261111`; working database schema preserved.
+- Remaining: full suites, build/browser, branch-only clean rebuild, type drift and hosted security checks left to CI. Human maintainer review remains outstanding. Findings 5/6/24/28 and matched-resource no-JavaScript 404 blocker remain outside scope.

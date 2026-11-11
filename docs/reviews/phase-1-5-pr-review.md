@@ -417,3 +417,9 @@ The six ordered tasks in the [easy-first plan](../superpowers/plans/2026-11-10-r
 Verification after all implementations: 885 unit/component tests, 217 read-only TS/SQL parity cases and 30 desktop/mobile browser cases passed. TypeScript, lint, formatting and the browser suite's production build passed. The plan records exact commands, independent review and initial failures/corrections. The query optimization proves removal of four duplicate catalog requests in the normal case, without shared caching; latency was not benchmarked.
 
 Final type checking also uncovered a pre-existing merged #71 typo calling undefined `letters(section)` in public archive resolution. It now uses the existing `isLettersSection(section)` predicate; existing archive and full unit checks pass. Other findings, especially administrator eligibility (24), cleanup fairness (28) and the known no-JavaScript matched-resource 404 release blocker, remain outside this six-task slice.
+
+## Easiest medium implementation follow-up
+
+Findings **7, 26 and 25** are implemented and locally verified in `fix/review-medium-easy`, based on corrected PR #77 head `1dfa5bd`. Image writes preserve newer form content; explicit retries retain the complete original command and newer metadata; finalization uses the common article-before-asset lock order. Later access/missing-resource denials preserve an uncertain image command until its receipt can be recovered.
+
+The [medium fix plan](../superpowers/plans/2026-11-11-medium-easy-fixes.md) records scope, independent review, 46 distinct unit/component cases, 68 SQL assertions, 14 independent-session races, strict types, lint and formatting. Full suites/build/browser/clean-install and hosted checks remain CI work. These changes are uncommitted; no merge or deployment is claimed. Historical tables above retain their original review status. Findings 5/6/24/28 remain outside this batch.
