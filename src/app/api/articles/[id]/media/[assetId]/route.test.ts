@@ -259,3 +259,25 @@ it("retries finalization after a matching Storage upload lost its response", asy
   expect(response.status).toBe(200);
   expect(mocks.finalize).toHaveBeenCalledOnce();
 });
+
+it.each(["begin", "finalize"])(
+  "maps %s business failures without retryable 503",
+  async (stage) => {
+    for (const [code, status] of [
+      ["forbidden", 403],
+      ["not_found", 404],
+      ["conflict", 409],
+      ["request_conflict", 409],
+      ["invalid_input", 400],
+    ] as const) {
+      const target = stage === "begin" ? mocks.claim : mocks.finalize;
+      target.mockResolvedValueOnce({ data: { ok: false, code }, error: null });
+      const response = await POST(await uploadRequest(), {
+        params: Promise.resolve({ id: articleId, assetId }),
+      });
+      expect(response.status).toBe(status);
+      expect(await response.json()).toEqual({ ok: false, code });
+      expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+    }
+  },
+);

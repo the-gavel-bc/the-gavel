@@ -19,6 +19,33 @@ function reply(status: number, body: Record<string, unknown>) {
   });
 }
 
+function businessFailure(data: unknown): Response | null {
+  const parsed = z
+    .strictObject({
+      ok: z.literal(false),
+      code: z.enum([
+        "invalid_input",
+        "forbidden",
+        "not_found",
+        "conflict",
+        "request_conflict",
+      ]),
+    })
+    .safeParse(data);
+  if (!parsed.success) return null;
+  const code = parsed.data.code;
+  return reply(
+    code === "forbidden"
+      ? 403
+      : code === "not_found"
+        ? 404
+        : code === "invalid_input"
+          ? 400
+          : 409,
+    parsed.data,
+  );
+}
+
 export async function GET(
   _request: Request,
   context: { params: Promise<{ id: string; assetId: string }> },
@@ -106,6 +133,8 @@ export async function POST(
       { p_actor_user_id: access.userId, p_asset_id: assetId },
     );
     if (claimError) return reply(503, { ok: false, code: "unavailable" });
+    const claimFailure = businessFailure(claim);
+    if (claimFailure) return claimFailure;
     const claimed = finalizedReceipt.safeParse(claim);
     if (!claimed.success || claimed.data.assetId !== assetId)
       return reply(409, { ok: false, code: "conflict" });
@@ -147,6 +176,8 @@ export async function POST(
       },
     );
     if (finalizeError) return reply(503, { ok: false, code: "unavailable" });
+    const finalizeFailure = businessFailure(data);
+    if (finalizeFailure) return finalizeFailure;
     const receipt = finalizedReceipt.safeParse(data);
     if (!receipt.success || receipt.data.assetId !== assetId)
       return reply(503, { ok: false, code: "unavailable" });
