@@ -1,5 +1,5 @@
 begin;
-select plan(122);
+select plan(124);
 
 -- Synthetic fixtures only; all Auth/content/history rows roll back.
 update auth.users set email = 'gavel-history-' || right(id::text, 1) || '@bc.edu',
@@ -129,7 +129,7 @@ select throws_ok($$ delete from public.audit_events $$, '42501', null, 'anonymou
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000001', true);
-select is_empty($$ select * from public.article_revisions $$, 'inactive owner has no revision access');
+select is_empty($$ select id from public.article_revisions $$, 'inactive owner has no revision access');
 select is_empty($$ select * from public.audit_events $$, 'inactive owner cannot read audits');
 select throws_ok($$ insert into public.article_revisions (article_id, actor_user_id, snapshot) values ('50000000-0000-0000-0000-000000000041', '00000000-0000-0000-0000-000000000004', '{}') $$, '42501', null, 'inactive owner: article_revisions forged actor insert denied');
 select throws_ok($$ update public.article_revisions set snapshot = '{}' $$, '42501', null, 'inactive owner: article_revisions payload update denied');
@@ -149,6 +149,8 @@ select throws_ok($$ insert into public.article_revisions (article_id, actor_user
 select throws_ok($$ update public.article_revisions set snapshot = '{}' $$, '42501', null, 'Author A without credits: article_revisions payload update denied');
 select throws_ok($$ update public.article_revisions set actor_user_id = '00000000-0000-0000-0000-000000000004' $$, '42501', null, 'Author A without credits: article_revisions actor update denied');
 select throws_ok($$ delete from public.article_revisions $$, '42501', null, 'Author A without credits: article_revisions delete denied');
+select throws_ok($$ select actor_user_id from public.article_revisions $$, '42501', null, 'Author A cannot read revision actor Auth IDs');
+select throws_ok($$ select * from public.article_revisions $$, '42501', null, 'Author A cannot select every revision column');
 select throws_ok($$ insert into public.audit_events (actor_user_id, action, resource_type, resource_id) values ('00000000-0000-0000-0000-000000000004', 'article.created', 'article', '50000000-0000-0000-0000-000000000041') $$, '42501', null, 'Author A without credits: audit_events forged actor insert denied');
 select throws_ok($$ update public.audit_events set action = 'article.deleted' $$, '42501', null, 'Author A without credits: audit_events payload update denied');
 select throws_ok($$ update public.audit_events set actor_user_id = '00000000-0000-0000-0000-000000000004' $$, '42501', null, 'Author A without credits: audit_events actor update denied');
@@ -187,49 +189,49 @@ set local role postgres;
 update auth.users set raw_app_meta_data = '{"provider":"email","providers":["email"]}'::jsonb where id = '00000000-0000-0000-0000-000000000002';
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000002', true);
-select is_empty($$ select * from public.article_revisions $$, 'non-Google owner cannot read article_revisions');
+select is_empty($$ select id from public.article_revisions $$, 'non-Google owner cannot read article_revisions');
 select is_empty($$ select * from public.audit_events $$, 'non-Google owner cannot read audit_events');
 
 set local role postgres;
 update auth.users set raw_app_meta_data = '{"provider":"google","providers":["google"]}'::jsonb, email_confirmed_at = null where id = '00000000-0000-0000-0000-000000000002';
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000002', true);
-select is_empty($$ select * from public.article_revisions $$, 'unconfirmed owner cannot read article_revisions');
+select is_empty($$ select id from public.article_revisions $$, 'unconfirmed owner cannot read article_revisions');
 select is_empty($$ select * from public.audit_events $$, 'unconfirmed owner cannot read audit_events');
 
 set local role postgres;
 update auth.users set email_confirmed_at = now(), email = 'gavel-history-ineligible-' || right(id::text, 1) || '@example.test' where id = '00000000-0000-0000-0000-000000000002';
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000002', true);
-select is_empty($$ select * from public.article_revisions $$, 'out-of-domain owner cannot read article_revisions');
+select is_empty($$ select id from public.article_revisions $$, 'out-of-domain owner cannot read article_revisions');
 select is_empty($$ select * from public.audit_events $$, 'out-of-domain owner cannot read audit_events');
 
 set local role postgres;
 update auth.users set raw_app_meta_data = '{"provider":"email","providers":["email"]}'::jsonb where id = '00000000-0000-0000-0000-000000000004';
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000004', true);
-select is_empty($$ select * from public.article_revisions $$, 'non-Google administrator cannot read article_revisions');
+select is_empty($$ select id from public.article_revisions $$, 'non-Google administrator cannot read article_revisions');
 select is_empty($$ select * from public.audit_events $$, 'non-Google administrator cannot read audit_events');
 
 set local role postgres;
 update auth.users set raw_app_meta_data = '{"provider":"google","providers":["google"]}'::jsonb, email_confirmed_at = null where id = '00000000-0000-0000-0000-000000000004';
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000004', true);
-select is_empty($$ select * from public.article_revisions $$, 'unconfirmed administrator cannot read article_revisions');
+select is_empty($$ select id from public.article_revisions $$, 'unconfirmed administrator cannot read article_revisions');
 select is_empty($$ select * from public.audit_events $$, 'unconfirmed administrator cannot read audit_events');
 
 set local role postgres;
 update auth.users set email_confirmed_at = now(), email = 'gavel-history-ineligible-' || right(id::text, 1) || '@example.test' where id = '00000000-0000-0000-0000-000000000004';
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000004', true);
-select is_empty($$ select * from public.article_revisions $$, 'out-of-domain administrator cannot read article_revisions');
+select is_empty($$ select id from public.article_revisions $$, 'out-of-domain administrator cannot read article_revisions');
 select is_empty($$ select * from public.audit_events $$, 'out-of-domain administrator cannot read audit_events');
 
 set local role postgres;
 update auth.users set email = 'gavel-history-4@bc.edu' where id = '00000000-0000-0000-0000-000000000004';
 update public.memberships set active = false where user_id = '00000000-0000-0000-0000-000000000004';
 set local role authenticated;
-select is_empty($$ select * from public.article_revisions $$, 'deactivated administrator loses revision reads');
+select is_empty($$ select id from public.article_revisions $$, 'deactivated administrator loses revision reads');
 select is_empty($$ select * from public.audit_events $$, 'deactivated administrator loses audit reads');
 
 select * from finish();
