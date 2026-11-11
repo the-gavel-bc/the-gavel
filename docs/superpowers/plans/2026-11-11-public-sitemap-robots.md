@@ -35,13 +35,22 @@ Technical defaults:
 ## File map and execution
 
 1. `supabase/migrations/20261111010000_public_sitemap.sql`, `supabase/tests/047_public_sitemap.test.sql`.
-   - [ ] Failing pgTAP tests for grants, visibility, emptiness, dedup, keyset ties and bounds; implement both functions; db reset, `test:db`, db lint, regenerate types.
+   - [x] Failing pgTAP tests for grants, visibility, emptiness, dedup, keyset ties and bounds; implement both functions; db reset, `test:db`, db lint, regenerate types.
 2. `src/backend/reader/public-sitemap/`: reader composing the projections and navigation into sitemap entries, with unit tests.
-   - [ ] Failing tests for static/letters rules, paging, cap, unavailable states and origin; implement.
+   - [x] Failing tests for static/letters rules, paging, cap, unavailable states and origin; implement.
 3. `src/app/sitemap.ts`, `src/app/robots.ts`, focused route tests; production-build header check.
-   - [ ] Implement; verify headers and output against a production build with synthetic data.
+   - [x] Implement; verify headers and output against a production build with synthetic data.
 4. Docs: API contract, security note, this record, phase checklist, STATUS.
 
 ## Verification record
 
-Pending.
+Implemented. Local checks only; hosted CI and human review are pending. A disposable Supabase project (`/private/tmp/gavel-task21-db`, ports 58421/58422, symlinked migrations/tests) was used; the primary local project was not reset.
+
+- `047_public_sitemap.test.sql`: 30 assertions passed. They cover grants, draft/archived/inactive-section/inactive-owner exclusion, empty/inactive section/category/tag/author exclusion, repeated credit/tag dedup, microsecond ordering, uuid tie-breaks, keyset continuation, page bounds, partial cursors and anonymous/authenticated parity. The tests and migration were applied together, so no failing run before implementation is claimed for SQL.
+- Full `supabase test db`: 61 files, 1,899 assertions passed. `supabase db lint`: no schema errors. Types were regenerated from the disposable DB; the diff is only the two new functions.
+- Reader/route unit tests failed before implementation (module missing), then passed. Full unit suite: 849 tests in 132 files passed with `--maxWorkers=2`. `pnpm format:check`, `pnpm typecheck` and `pnpm lint` passed.
+- Robots tests use longest-prefix matching and assert `/authors/...` is not blocked by the `/auth/` rule.
+- Production build (`pnpm build`, Next.js 16.4.2): `/sitemap.xml` dynamic, `/robots.txt` static. Against `next start` with synthetic rows: forged `Host`/`X-Forwarded-Host` did not change URLs; draft absent; letters section served as `/letters`; microsecond `lastmod`. Metadata routes default to `public, max-age=0, must-revalidate`, so a `next.config.ts` header now sets the same `private, no-cache, no-store` value public pages use; confirmed on the built server. Archiving the only article on a tag/guest/section removed all four URLs on the next request; restoring brought them back. Stopping PostgREST returned a generic 500 with `no-store` and no internal detail; recovery returned 200.
+- Not run: draft-contract/editor/concurrency suites and the Playwright browser suite. Neither the editor nor the existing grants changed; sitemap/robots are non-HTML and were checked with HTTP requests. Task 23 owns integrated browser and hosted verification.
+
+Remaining: production-origin and CDN header checks, human review, and the existing Task 18 no-JavaScript resource-404 blocker.

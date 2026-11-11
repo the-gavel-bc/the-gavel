@@ -284,11 +284,13 @@ Implemented on `feat/public-page-metadata`; see the [focused plan and verificati
 
 ## Task 21 — sitemap and robots
 
+Implemented on `feat/public-sitemap-robots`; see the [focused plan and verification](2026-11-11-public-sitemap-robots.md). Owner decisions: non-empty archives only, `/search` disallowed, `published_at` lastmod, one robots file for all environments. A single sitemap fails closed above 50,000 URLs; splitting is deferred until the catalog nears it.
+
 **Files:** Framework sitemap/robots entry points; a bounded public sitemap reader if needed; SQL/route tests and deployment docs for final origin.
 
-- [ ] Enumerate only public eligible URLs using bounded database pages; exclude dashboard/auth, private statuses and noncanonical/invalid routes. Do not load every article/body into one query.
-- [ ] Use validated `SITE_URL`; split sitemap output when required by actual dataset/protocol limits. Keep previews protected and excluded from indexing; robots is not authorization.
-- [ ] Test pagination scale, duplicates, archive/deletion removal, unpublished authors/taxonomy according to Task 1, and sitemap failures without leaking internal data.
+- [x] Enumerate only public eligible URLs using bounded database pages; exclude dashboard/auth, private statuses and noncanonical/invalid routes. Do not load every article/body into one query.
+- [x] Use validated `SITE_URL`; split sitemap output when required by actual dataset/protocol limits. Keep previews protected and excluded from indexing; robots is not authorization.
+- [x] Test pagination scale, duplicates, archive/deletion removal, unpublished authors/taxonomy according to Task 1, and sitemap failures without leaking internal data.
 
 **Acceptance/validation:** Sitemap/robots agree with route visibility and fresh publication state; SQL/route/header and build checks pass.
 
