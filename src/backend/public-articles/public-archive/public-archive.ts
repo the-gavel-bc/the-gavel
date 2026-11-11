@@ -31,6 +31,11 @@ export type PublicArchiveResult =
       continuation: boolean;
     };
 
+// Taxonomy has no approved stable letters identifier. Resolve the approved
+// label rather than guessing a slug or importing the demo's category model.
+export const isLettersSection = (section: Pick<Section, "name">) =>
+  section.name.toLowerCase() === "letter to the editor";
+
 export async function getPublicArchive(
   kind: "section" | "category" | "letters",
   sectionSlug: string,
@@ -39,13 +44,9 @@ export async function getPublicArchive(
 ): Promise<PublicArchiveResult> {
   const site = await getPublicSiteNavigationForRequest();
   if (site.kind !== "ok") return { kind: "unavailable" };
-  // Taxonomy has no approved stable letters identifier. Resolve the approved
-  // label rather than guessing a slug or importing the demo's category model.
-  const letters = (section: Section) =>
-    section.name.toLowerCase() === "letter to the editor";
   const section =
     kind === "letters"
-      ? site.sections.find(letters)
+      ? site.sections.find(isLettersSection)
       : site.sections.find((section) => section.slug === sectionSlug);
   if (!section)
     return { kind: kind === "letters" ? "unavailable" : "notFound" };
@@ -63,7 +64,7 @@ export async function getPublicArchive(
     section,
     category: category ?? null,
     href,
-    isLetters: letters(section),
+    isLetters: isLettersSection(section),
   };
   if (
     cursor !== undefined &&
