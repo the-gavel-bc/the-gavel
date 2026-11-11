@@ -55,8 +55,10 @@ export async function getPublicArchive(
       ? section.categories.find((category) => category.slug === categorySlug)
       : null;
   if (kind === "category" && !category) return { kind: "notFound" };
+  // The letters section also resolves at /sections/<slug>; keep one canonical
+  // archive identity (and its pagination) at the approved /letters route.
   const href =
-    kind === "letters"
+    kind === "letters" || (kind === "section" && letters(section))
       ? "/letters"
       : `/sections/${section.slug}${category ? `/categories/${category.slug}` : ""}`;
   const archive: PublicArchiveContext = {
