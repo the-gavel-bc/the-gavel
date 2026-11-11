@@ -35,3 +35,7 @@ All six authorization/serialization races passed. Independent review found no pr
 Fourteen app access unit cases, TypeScript, full lint, full formatting, targeted documentation formatting and diff checks passed. Types and targeted lint/format were rerun after the cleanup correction. Public function argument/result signatures are unchanged; the new helper remains private with no application/service-role execution grant. No UI, accessibility surface or public API/schema contract changes. Full database/browser/security suites and human security review remain CI/release gates. No working database migration/reset, merge or deployment occurred.
 
 Opened [PR #82](https://github.com/dylandrozario/the-gavel/pull/82) against `main` after focused verification and review. Implementation and regression commits are `7b94012` and `39c9068`. Hosted CI remains pending; no merge or deployment performed.
+
+## Integration after PR 80 merged
+
+Merged main `29ff33c` without rewriting shared history. Only `STATUS.md` conflicted; it now records PR 80 as merged and PR 82 as the active branch. Both review-evidence sections are retained. The eligibility migration and its SQL/concurrency regressions match the previously green PR 82 head byte-for-byte. Targeted documentation formatting and merge diff checks passed; runtime suites were not rerun for the status-only conflict. Hosted CI must rerun on the merged head. No working database changes, merge to main or deployment performed.

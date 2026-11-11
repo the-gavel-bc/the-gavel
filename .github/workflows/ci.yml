@@ -23,11 +23,11 @@ jobs:
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_local_build_example
       SITE_URL: http://127.0.0.1:3100
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version-file: .nvmrc
       - name: Activate pinned pnpm
@@ -35,7 +35,7 @@ jobs:
       - name: Locate pnpm store
         id: pnpm-store
         run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache@v6
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ${{ steps.pnpm-store.outputs.path }}
           key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
@@ -47,7 +47,8 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - name: Scan repository history for secrets
-        run: docker run --rm -v "$PWD:/repo:ro" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --redact --no-banner
+        # gitleaks v8.30.1 OCI index, including the linux/amd64 runner image.
+        run: docker run --rm -v "$PWD:/repo:ro" ghcr.io/gitleaks/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f git /repo --redact --no-banner
       - name: Select available CI database port
         run: node scripts/ci-supabase/prepare-database-port.mjs
       - name: Start isolated local Supabase
@@ -71,10 +72,12 @@ jobs:
       - run: pnpm test:draft-contract
       - run: pnpm test:draft-editor
       - run: pnpm test:draft-concurrency
-      - run: pnpm build
       - name: Install browser runtime
         run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm test:e2e
+      # Playwright builds once with its verified local public environment,
+      # then starts that production artifact; build failure fails this step.
+      - name: Production build and browser checks
+        run: pnpm test:e2e
       - name: Scan production dependencies
         run: pnpm audit --prod --audit-level=high
       - name: Scan all dependencies

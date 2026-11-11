@@ -418,6 +418,12 @@ Verification after all implementations: 885 unit/component tests, 217 read-only 
 
 Final type checking also uncovered a pre-existing merged #71 typo calling undefined `letters(section)` in public archive resolution. It now uses the existing `isLettersSection(section)` predicate; existing archive and full unit checks pass. Other findings, especially administrator eligibility (24), cleanup fairness (28) and the known no-JavaScript matched-resource 404 release blocker, remain outside this six-task slice.
 
+## Second-batch local implementation follow-up
+
+Findings **13, 18, 20** and optimization **O5** are implemented locally on `fix/review-second-batch`, stacked on PR #77 head `ef21147`. The [second-batch plan](../superpowers/plans/2026-11-10-review-fixes-second-batch.md) records the exact changes, official CI-reference resolutions and verification.
+
+Focused validation after implementation passed 70 unit/component/boundary cases, the new recovery browser scenario on desktop and mobile (2 cases, including production build/start), types and targeted source formatting/lint. The workflow parsed successfully and all existing gates/settings except the duplicate standalone build were preserved. Independent review's missing-image test-fixture finding was corrected before the passing browser run. No hosted CI result, merge, deployment or measured speedup is claimed; broader checks are left to CI as requested. The earlier findings tables remain historical review snapshots.
+
 ## Remaining low-priority and optimization implementation follow-up
 
 The [optimization plan](../superpowers/plans/2026-11-11-low-priority-optimizations.md) records local implementation of **O2–O4 and findings 10/11**, plus shared contact-link construction for **19**, on `perf/review-optimizations` from corrected PR #77 head `1dfa5bd`. Finding 19 is a consistency improvement without a reproduced mail-client failure. Original summary tables remain historical review snapshots. Explicit cleanup on published articles was approved; no automatic expiry was added.

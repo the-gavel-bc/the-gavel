@@ -1,7 +1,8 @@
 # Current work
 
-- Phase: finding 24 implemented and focused verification passed; [PR #82](https://github.com/dylandrozario/the-gavel/pull/82) open against main.
-- Branch: `fix/eligible-administrator-guard`; base main `ede546d`; PRs 80/81 remain independent.
-- Plan: [eligible administrator guard](docs/superpowers/plans/2026-11-11-eligible-administrator-guard.md).
-- Approved: preserve Google-only policy; plan, build, focused tests, then PR to main. No merge/deployment or working database reset.
-- Verification: 203 SQL assertions, seven concurrency/cleanup cases and 14 app access cases; types, lint, formatting and independent review. Full hosted CI remains pending.
+- Phase: [PR #82](https://github.com/dylandrozario/the-gavel/pull/82) integration after PR #80 merged to main `29ff33c`.
+- Branch: `fix/eligible-administrator-guard`; PR #81 remains independent.
+- Scope: preserve finding 24 eligibility protection alongside main's status-change recovery, canonical Letters links and pinned single-build CI.
+- Plans: [eligible administrator guard](docs/superpowers/plans/2026-11-11-eligible-administrator-guard.md), [merged second batch](docs/superpowers/plans/2026-11-10-review-fixes-second-batch.md).
+- Prior PR #82 CI passed. Only this status file conflicted; eligibility migration and regression files are unchanged.
+- Hosted CI must pass again after integration. Human security review remains required; no merge to main or deployment performed.

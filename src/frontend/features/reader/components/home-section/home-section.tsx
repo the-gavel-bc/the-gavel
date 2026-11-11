@@ -1,3 +1,4 @@
+import { sectionHref } from "@/shared/reader/section-link/section-link";
 import Link from "next/link";
 import type { PublicHomepage } from "@/shared/reader/homepage/homepage";
 import { ArticleGrid } from "../reader-layout/reader-layout";
@@ -14,9 +15,7 @@ export function HomeSection({
     <section className={styles.section} aria-labelledby={headingId}>
       <div className={styles.heading}>
         <h2 id={headingId}>{section.name}</h2>
-        <Link href={`/sections/${encodeURIComponent(section.slug)}`}>
-          View all {section.name}
-        </Link>
+        <Link href={sectionHref(section)}>View all {section.name}</Link>
       </div>
       <ArticleGrid>
         {section.articles.map((article) => (

@@ -1,3 +1,4 @@
+import { sectionHref } from "@/shared/reader/section-link/section-link";
 import Link from "next/link";
 import type { PublicArchiveContext } from "@/backend/public-articles/public-archive/public-archive";
 import styles from "./category-chips.module.css";
@@ -9,7 +10,7 @@ export function CategoryChips({ archive }: { archive: PublicArchiveContext }) {
       <ul>
         <li>
           <Link
-            href={archive.category ? `/sections/${section.slug}` : archive.href}
+            href={sectionHref(section)}
             aria-current={!archive.category ? "page" : undefined}
           >
             All stories

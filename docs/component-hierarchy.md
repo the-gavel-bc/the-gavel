@@ -230,3 +230,12 @@ SearchForm supplies the labeled native GET query to navigation, results and reco
 ## Public information pages (Phase 5 Task 19)
 
 `/about` and `/letters/how-to-submit` reuse the checked request-cached public site reader. SiteInformationPage renders mission or submission instructions as escaped paragraphs, preserves single line breaks, and shows only configured contact/Instagram links. Missing primary copy has honest feedback and noindex metadata; unavailable reads have separate noindex/retry feedback. No client component, intake form, history/staff copy or new settings contract is introduced. The [Task 19 plan](superpowers/plans/2026-11-10-public-information-pages.md) records verification and unresolved production copy.
+
+## Status changes during private conflict recovery
+
+The mounted private form keeps its original draft/published save mode. If a reviewed editable snapshot has a different status, recovery does not adopt its fields or version: it retains local input, blocks stale-mode saves and offers an explicit full Reload article action. The existing dirty-input unload warning remains active. Same-status deliberate loads still preserve the previous local snapshot; unresolved writes remain ineligible for recovery. No publication or mutation authority changes.
+
+
+## Canonical section-root links
+
+Reader navigation, footer, story cards/heroes/headers, home section links and archive breadcrumbs/chips use the browser-safe `shared/reader/section-link` helper. The approved case-insensitive `Letter to the Editor` label maps section roots to `/letters`; other roots retain encoded section slugs. Category links stay `/sections/<section>/categories/<category>`, including letters categories. Existing routes, redirects, metadata policy and publication checks are unchanged.
