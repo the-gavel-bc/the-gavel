@@ -1,6 +1,12 @@
 import Link from "next/link";
 import type { PublicSiteInformation } from "@/shared/reader/site-navigation/site-navigation";
 import styles from "./site-information.module.css";
+// Encode the local part (it may contain ?, # or %) but keep a literal @, which
+// some mail clients do not decode from %40. The domain is validated hostname text.
+const mailto = (email: string) => {
+  const at = email.lastIndexOf("@");
+  return `mailto:${encodeURIComponent(email.slice(0, at))}@${email.slice(at + 1)}`;
+};
 export function SiteInformationPage({
   page,
   information,
@@ -56,9 +62,7 @@ export function SiteInformationPage({
               <ul>
                 {information.contactEmail && (
                   <li>
-                    <a
-                      href={`mailto:${encodeURIComponent(information.contactEmail)}`}
-                    >
+                    <a href={mailto(information.contactEmail)}>
                       {information.contactEmail}
                     </a>
                   </li>

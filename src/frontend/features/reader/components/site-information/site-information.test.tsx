@@ -25,7 +25,7 @@ it("shows submission copy and configured safe contact destinations only", () => 
   expect(screen.getByText("Include your name.")).toBeVisible();
   expect(
     screen.getByRole("link", { name: "desk?letters@bc.edu" }),
-  ).toHaveAttribute("href", "mailto:desk%3Fletters%40bc.edu");
+  ).toHaveAttribute("href", "mailto:desk%3Fletters@bc.edu");
   expect(screen.getByRole("link", { name: "Instagram" })).toHaveAttribute(
     "href",
     information.instagramUrl,

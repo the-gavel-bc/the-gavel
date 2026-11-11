@@ -110,6 +110,12 @@ it("maps letters through the approved label without assuming a database slug", a
     scope: { kind: "section", slug: "configured-editor-letters" },
     limit: 12,
   });
+  expect(
+    await getPublicArchive("section", "configured-editor-letters", ""),
+  ).toMatchObject({
+    kind: "ok",
+    archive: { href: "/letters", isLetters: true },
+  });
   mocks.catalog.mockResolvedValue({ kind: "ok", sections: [news] });
   expect(await getPublicArchive("letters", "", "")).toEqual({
     kind: "unavailable",

@@ -97,7 +97,7 @@ if (workdir)
       ).toBe("pre-line");
       await expect(
         main.getByRole("link", { name: "desk?letters@bc.edu" }),
-      ).toHaveAttribute("href", "mailto:desk%3Fletters%40bc.edu");
+      ).toHaveAttribute("href", "mailto:desk%3Fletters@bc.edu");
       await expect(
         main.getByRole("link", { name: "Instagram" }),
       ).toHaveAttribute("href", "https://www.instagram.com/synthetic_gavel/");
