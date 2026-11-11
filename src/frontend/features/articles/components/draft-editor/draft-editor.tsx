@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState, useCallback, useRef } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { DraftToolbar } from "../draft-toolbar/draft-toolbar";
 import { createDraftExtensions } from "@/frontend/features/articles/draft-document/draft-extensions";
@@ -40,8 +40,15 @@ export function DraftEditor({
   allowImageUpload?: boolean;
   onMediaDirtyChange?: (dirty: boolean) => void;
 }) {
-  const emitted = useRef(new WeakSet<DraftDocument>());
-  const source = useMemo(() => toEditorDocument(value), [value]);
+  const [nativeDocuments] = useState(() => new WeakSet<DraftDocument>());
+  // Track native ownership outside the document so strict JSON validation stays valid.
+  const source = useMemo(
+    () =>
+      value !== null && nativeDocuments.has(value)
+        ? null
+        : toEditorDocument(value),
+    [value, nativeDocuments],
+  );
   const [extensions] = useState(() => createDraftExtensions(articleId));
   const [failure, setFailure] = useState<DraftFailure | null>(null);
   const reject = useCallback(
@@ -62,9 +69,9 @@ export function DraftEditor({
     });
   const editor = useEditor({
     extensions,
-    content: source.ok ? source.document : undefined,
+    content: source?.ok ? source.document : undefined,
     immediatelyRender: false,
-    editable: !disabled && source.ok,
+    editable: !disabled && (source === null || source.ok),
     enableContentCheck: true,
     enablePasteRules: false,
     editorProps: {
@@ -118,7 +125,8 @@ export function DraftEditor({
     onUpdate: ({ editor: current }) => {
       const result = fromEditorDocument(current.getJSON());
       if (result.ok) {
-        emitted.current.add(result.document);
+        // Cloned external snapshots are absent from this set and get revalidated.
+        nativeDocuments.add(result.document);
         setFailure(null);
         onChange(result.document);
       } else reject(result);
@@ -126,7 +134,7 @@ export function DraftEditor({
     onContentError: () => reject({ ok: false, code: "unsupported_content" }),
   });
   useEffect(() => {
-    if (!source.ok) {
+    if (source !== null && !source.ok) {
       editor?.setEditable(false, false);
       onError(source);
       return;
@@ -134,10 +142,7 @@ export function DraftEditor({
     if (!editor) return;
     if (editor.isEditable !== !disabled) editor.setEditable(!disabled, false);
     // A delayed echo of our own change must not replace newer native input.
-    if (value !== null && emitted.current.has(value)) {
-      emitted.current.delete(value);
-      return;
-    }
+    if (source === null) return;
     const current = fromEditorDocument(editor.getJSON());
     const expected = fromEditorDocument(source.document);
     if (
@@ -150,7 +155,7 @@ export function DraftEditor({
         errorOnInvalidContent: true,
       });
   }, [source, value, editor, disabled, onError]);
-  const error = !source.ok ? source : failure;
+  const error = source !== null && !source.ok ? source : failure;
   return (
     <section className={styles.editor} aria-label="Draft body">
       <p>Article body</p>
@@ -158,7 +163,7 @@ export function DraftEditor({
         Paste plain text and use the formatting controls. Files and formatted
         content cannot be pasted.
       </p>
-      {source.ok && (
+      {(source === null || source.ok) && (
         <>
           <DraftToolbar editor={editor} disabled={disabled} onError={reject} />
           {articleId && allowImageUpload && (

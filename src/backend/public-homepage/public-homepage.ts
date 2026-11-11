@@ -3,6 +3,7 @@ import { cache } from "react";
 import { z } from "zod";
 import { createPublicReaderClient } from "@/backend/infrastructure/supabase/public-reader/public-reader";
 import { publicArticleCardSchema as card } from "@/backend/public-articles/article-card-schema/article-card-schema";
+import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
 import type { PublicHomepageResult } from "@/shared/reader/homepage/homepage";
 
 const schema = z.discriminatedUnion("kind", [
@@ -71,3 +72,32 @@ export async function getPublicHomepage(): Promise<PublicHomepageResult> {
 // React cache deduplicates only within one server render. A new request still
 // performs the no-store RPC; page content and footer receive the same snapshot.
 export const getPublicHomepageForRequest = cache(getPublicHomepage);
+
+const readThisSchema = z.discriminatedUnion("kind", [
+  z.strictObject({ kind: z.literal("unavailable") }),
+  z.strictObject({ kind: z.literal("ok"), readThis: z.array(card).max(4) }),
+]);
+
+// Other public routes need only footer cards, never full homepage composition.
+export async function getPublicReadThis(): Promise<
+  { kind: "ok"; readThis: PublicArticleCard[] } | { kind: "unavailable" }
+> {
+  try {
+    const { data, error } = await createPublicReaderClient().rpc(
+      "get_public_read_this",
+    );
+    if (error) return { kind: "unavailable" };
+    const parsed = readThisSchema.safeParse(data);
+    if (!parsed.success) return { kind: "unavailable" };
+    const result = parsed.data;
+    if (
+      result.kind === "ok" &&
+      new Set(result.readThis.map((item) => item.id)).size !==
+        result.readThis.length
+    )
+      return { kind: "unavailable" };
+    return result;
+  } catch {
+    return { kind: "unavailable" };
+  }
+}

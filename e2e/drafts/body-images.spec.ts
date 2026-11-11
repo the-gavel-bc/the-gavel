@@ -94,3 +94,68 @@ test("authorized reader sees saved body text and image without JavaScript", asyn
     await context.close();
   }
 });
+
+test("unused uploads survive reload and can be explicitly discarded after publication", async ({
+  context,
+  page,
+}) => {
+  await setLocalSession(context, fixture.users.author);
+  await page.goto(`/dashboard/articles/${fixture.id(21)}`);
+  const cleanup = page.getByRole("region", { name: "Unused uploads" });
+  // Publication requires body text and a finalized main image, independent of the unused file.
+  const body = page.getByRole("textbox", { name: "Article body" });
+  await body.press("ControlOrMeta+End");
+  await body.press("Enter");
+  await body.pressSequentially("Published cleanup story.");
+  await page.getByRole("button", { name: "Save draft" }).click();
+  await expect(
+    page.getByRole("status").filter({ hasText: "Draft saved" }),
+  ).toBeVisible();
+  const png = await sharp({
+    create: { width: 12, height: 8, channels: 3, background: "#123456" },
+  })
+    .png()
+    .toBuffer();
+  await page
+    .getByLabel("Image file", { exact: true })
+    .setInputFiles({ name: "main.png", mimeType: "image/png", buffer: png });
+  await page.getByRole("button", { name: "Upload image", exact: true }).click();
+  await expect(page.getByText("Image ready to attach.")).toBeVisible();
+  await page
+    .getByLabel("Alt text", { exact: true })
+    .fill("Publication main graphic");
+  await page.getByLabel("Image credit").fill("The Gavel");
+  await page.getByRole("button", { name: "Attach image" }).click();
+  await expect(page.getByText("Image attached.")).toBeVisible();
+  await page
+    .getByLabel("Body image file")
+    .setInputFiles({ name: "unused.png", mimeType: "image/png", buffer: png });
+  await page.getByRole("button", { name: "Upload body image" }).click();
+  await expect(page.getByText("Image ready to insert.")).toBeVisible();
+  await expect(cleanup.getByText(/Finish uploads/)).toBeVisible();
+  await page.getByLabel("Body image alt text").fill("Unsaved local graphic");
+  await page.getByRole("button", { name: "Insert body image" }).click();
+  await expect(
+    page.getByRole("img", { name: "Unsaved local graphic" }),
+  ).toBeVisible();
+  await expect(
+    cleanup.getByRole("button", { name: "Discard unused upload" }),
+  ).toHaveCount(0);
+  await page.getByRole("img", { name: "Unsaved local graphic" }).click();
+  await page.getByRole("button", { name: "Remove selected image" }).click();
+  page.on("dialog", (dialog) => dialog.accept());
+  await page.reload();
+  await expect(
+    cleanup.getByRole("button", { name: "Discard unused upload" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Publish article" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Edit published article" }),
+  ).toBeVisible();
+  await cleanup.getByRole("button", { name: "Discard unused upload" }).click();
+  await expect(cleanup.getByText("Unused upload discarded.")).toBeVisible();
+  await page.reload();
+  await expect(
+    cleanup.getByRole("button", { name: "Discard unused upload" }),
+  ).toHaveCount(0);
+});

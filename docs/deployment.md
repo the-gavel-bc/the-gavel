@@ -102,3 +102,9 @@ The local HTTP checker is `SEARCH_CHECK_WORKDIR=/private/tmp/gavel-task17-api pn
 ## Resource 404 initial-HTML release blocker
 
 Do not approve public release while matched missing/private/archived/deleted resource URLs render blank initial HTML without JavaScript. Task 18 reproduced this on Next 16.4.2, matching [upstream issue #100596](https://github.com/vercel/next.js/issues/100596). HTTP 404 status, hydrated recovery and unmatched-URL initial recovery remain intact. The owner approved keeping the framework unchanged and recording this gap; no framework fork or routing precheck is introduced. The explicit expected-failure browser assertion must become a passing assertion before release; an unexpected pass forces its marker to be revisited. See the [Task 18 evidence](superpowers/plans/2026-11-10-search-page-and-recovery.md#framework-recovery-investigation).
+
+## Remaining review optimization rollout
+
+Apply migrations `20261111060000` through `20261111060300` before deploying the optimization consumers. They add a narrow public footer RPC, private processing quota/checked admission, an article pagination index and checked explicit unused-upload listing/removal. Existing full-homepage and media signatures remain compatible. No row rewrite or automatic media deletion runs. Rollback the application first; additive objects can remain while the previous application runs.
+
+The ordinary pagination `CREATE INDEX` blocks writes during its build. Schedule an acceptable write pause; production build time and write overhead have not been measured. For a larger catalog, plan an operational concurrent build before migration rollout. The two-job image gate is per process and does not impose a deployment-wide cap. See the [optimization plan](superpowers/plans/2026-11-11-low-priority-optimizations.md) for scoped verification and measurements.

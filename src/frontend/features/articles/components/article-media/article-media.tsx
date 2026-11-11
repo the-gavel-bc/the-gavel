@@ -93,6 +93,12 @@ export function ArticleMedia({
         { method: "POST", body },
       );
       const result: unknown = await response.json();
+      if (response.status === 429) {
+        setError(
+          "Too many upload attempts. Wait a minute, then retry the same file.",
+        );
+        return;
+      }
       if (response.status >= 400 && response.status < 500) {
         setCleanupAssetId(reservation.assetId);
         const removed = await removeUnusedArticleImage(reservation.assetId);

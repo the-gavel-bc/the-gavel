@@ -424,6 +424,12 @@ Findings **13, 18, 20** and optimization **O5** are implemented locally on `fix/
 
 Focused validation after implementation passed 70 unit/component/boundary cases, the new recovery browser scenario on desktop and mobile (2 cases, including production build/start), types and targeted source formatting/lint. The workflow parsed successfully and all existing gates/settings except the duplicate standalone build were preserved. Independent review's missing-image test-fixture finding was corrected before the passing browser run. No hosted CI result, merge, deployment or measured speedup is claimed; broader checks are left to CI as requested. The earlier findings tables remain historical review snapshots.
 
+## Remaining low-priority and optimization implementation follow-up
+
+The [optimization plan](../superpowers/plans/2026-11-11-low-priority-optimizations.md) records local implementation of **O2–O4 and findings 10/11**, plus shared contact-link construction for **19**, on `perf/review-optimizations` from corrected PR #77 head `1dfa5bd`. Finding 19 is a consistency improvement without a reproduced mail-client failure. Original summary tables remain historical review snapshots. Explicit cleanup on published articles was approved; no automatic expiry was added.
+
+The plan records focused tests, independent review, synthetic index measurements, rollout/locking costs and unrun CI gates. No merge or deployment is claimed. The separate second batch for 13/18/20 and O5 remains in worktree `cc50`; it is not included in this branch. Medium/high recovery, identity and cleanup fairness findings remain outside this low-priority batch.
+
 ## Easiest medium implementation follow-up
 
 Findings **7, 26 and 25** are implemented and locally verified in `fix/review-medium-easy`, based on corrected PR #77 head `1dfa5bd`. Image writes preserve newer form content; explicit retries retain the complete original command and newer metadata; finalization uses the common article-before-asset lock order. Later access/missing-resource denials preserve an uncertain image command until its receipt can be recovered.

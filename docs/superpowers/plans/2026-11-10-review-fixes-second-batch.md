@@ -152,7 +152,6 @@ Checks ran only after implementation, under Node 22.20.0 / pnpm 11.25.0:
 
 Independent final review found one important test-fixture omission (publication readiness required an image); it was corrected and the affected browser scenario passed. No other blocking finding was reported. Full local unit/browser/SQL/concurrency suites, dependency scans and hosted action/image execution were deliberately left to CI at the user's request. These local checks are not a claim that CI has run or passed.
 
-
 ### PR preparation update — 2026-11-11
 
 PR #77 merged into main at `6789a35`. This batch was reapplied to that merge, preserving the original implementation and verification evidence. The commit and PR are being prepared from the updated base.
@@ -162,3 +161,9 @@ PR #77 merged into main at `6789a35`. This batch was reapplied to that merge, pr
 Merged main at `fc43967` into this branch without rewriting history. PR 79 remains separate and unmerged. The form retains status-mismatch recovery alongside main's image busy guards and version-only acknowledgements. Resolved the shared test insertion by retaining both recovery and media acknowledgement regressions; retained both review follow-up sections and updated STATUS.md.
 
 Validation: 62 focused tests across nine form, conflict, media and save-state files passed. TypeScript, targeted ESLint and full formatting checks passed. Both desktop/mobile status-changing recovery browser cases passed, including a production build/start. Hosted CI remains required.
+
+## Integration with merged PR 79
+
+Merge main `ede546d` without rewriting shared history. Keep both footer helpers (canonical section paths and contact links), both recovery and unused-upload form tests, and both review-evidence sections. Preserve main's precise E2E action capture. Acceptance: no unresolved conflicts, no dropped regression tests, status-changing recovery retains local input, cleanup guards remain enforced, canonical links stay intact and the pinned single-build CI workflow is retained. Run focused form/reader tests, types, lint, formatting and desktop/mobile recovery browser cases before publishing.
+
+Integration verification passed: 58 focused unit/component cases; 24 desktop/mobile browser cases across draft conflict recovery, save recovery and public archives, including the production build; `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, targeted plan formatting and diff checks. Independent review found no actionable issues. Generated browser screenshots were restored. Full hosted CI remains the merge gate; no PR was merged or deployed.
