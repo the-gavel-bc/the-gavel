@@ -15,7 +15,11 @@ vi.mock("@/backend/infrastructure/supabase/server/server", () => ({
   createServerSupabaseClient: mocks.client,
 }));
 vi.mock("next/server", () => ({ connection: vi.fn() }));
-import { getDraftDetail, getDraftOptions } from "./draft-queries";
+import {
+  getDraftDetail,
+  getDraftOptions,
+  getDraftEditorData,
+} from "./draft-queries";
 let http: ReturnType<typeof queryTestClient>;
 const row = {
   id: articleId,
@@ -191,4 +195,63 @@ it("does not mark a selected tag after catalog row 1000 unavailable", async () =
     expect(result.draft.tagIds).toEqual([articleId]);
     expect(result.unavailableSelections.tagIds).toEqual([]);
   }
+});
+
+it("returns editor detail and one shared catalog load", async () => {
+  http.respond(row);
+  http.respond([{ id: row.section_id, name: "Section" }]);
+  http.respond([]);
+  http.respond([]);
+  http.respond([]);
+  const result = await getDraftEditorData(articleId);
+  expect(result.detail).toMatchObject({
+    kind: "editable",
+    unavailableSelections: { sectionId: null },
+  });
+  expect(result.options?.sections).toEqual([
+    { id: row.section_id, name: "Section" },
+  ]);
+  expect(http.network).toHaveBeenCalledTimes(5);
+  expect(mocks.guard).toHaveBeenCalledOnce();
+  for (const table of ["sections", "categories", "tags", "profiles"]) {
+    expect(
+      http.network.mock.calls.filter(([url]) =>
+        new URL(String(url)).pathname.endsWith("/" + table),
+      ),
+    ).toHaveLength(1);
+  }
+});
+it("does not reuse private catalogs between users or requests", async () => {
+  http.respond(row);
+  for (let i = 0; i < 4; i++) http.respond([]);
+  const first = await getDraftEditorData(articleId);
+  const other = queryTestClient();
+  other.respond(row);
+  other.respond([{ id: row.section_id, name: "Fresh section" }]);
+  for (let i = 0; i < 3; i++) other.respond([]);
+  mocks.client.mockResolvedValue(other.client);
+  mocks.guard.mockResolvedValue({
+    ...access,
+    profileId: articleId,
+    userId: articleId,
+  });
+  const second = await getDraftEditorData(articleId);
+  expect(first.options?.sections).toEqual([]);
+  expect(second.options?.sections[0].name).toBe("Fresh section");
+  expect(
+    new URL(String(other.network.mock.calls[0][0])).searchParams.get(
+      "owner_profile_id",
+    ),
+  ).toBe(`eq.${articleId}`);
+  expect(mocks.guard).toHaveBeenCalledTimes(2);
+  expect(other.network).toHaveBeenCalledTimes(5);
+});
+it.each([
+  null,
+  { ...row, status: "archived" },
+  { ...row, content: { legacy: true } },
+])("omits catalogs for noneditable editor reads", async (value) => {
+  http.respond(value);
+  expect((await getDraftEditorData(articleId)).options).toBeNull();
+  expect(http.network).toHaveBeenCalledOnce();
 });

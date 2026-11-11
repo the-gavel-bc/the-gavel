@@ -58,7 +58,7 @@ export async function getPublicArchive(
   // The letters section also resolves at /sections/<slug>; keep one canonical
   // archive identity (and its pagination) at the approved /letters route.
   const href =
-    kind === "letters" || (kind === "section" && letters(section))
+    kind === "letters" || (kind === "section" && isLettersSection(section))
       ? "/letters"
       : `/sections/${section.slug}${category ? `/categories/${category.slug}` : ""}`;
   const archive: PublicArchiveContext = {

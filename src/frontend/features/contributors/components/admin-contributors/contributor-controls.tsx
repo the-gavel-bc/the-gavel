@@ -56,6 +56,7 @@ export function ContributorControls({
     setPending(false);
     busy.current = false;
     if (next.ok) {
+      if (!next.changed) setResult(null);
       if (!contributor) {
         setDisplayName("");
         setBiography("");

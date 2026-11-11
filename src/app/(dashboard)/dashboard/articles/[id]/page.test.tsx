@@ -20,8 +20,13 @@ vi.mock("@/backend/auth/access/access", () => ({
   requireActiveMembership: mocks.guard,
 }));
 vi.mock("@/backend/articles/draft-queries/draft-queries", () => ({
-  getDraftDetail: mocks.detail,
-  getDraftOptions: mocks.options,
+  getDraftEditorData: async (id: string) => {
+    const detail = await mocks.detail(id);
+    return {
+      detail,
+      options: detail.kind === "editable" ? await mocks.options() : null,
+    };
+  },
 }));
 vi.mock("@/backend/articles/draft-actions/draft-actions", () => ({
   createDraftAction: vi.fn(),

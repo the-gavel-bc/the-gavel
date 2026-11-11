@@ -139,9 +139,21 @@ export async function getDraftOptions(
   return loadDraftOptions(client, sectionId);
 }
 
+export type DraftEditorData = {
+  detail: DraftDetailResult;
+  options: DraftOptions | null;
+};
+
+// Compatibility reader retains its existing public result shape.
 export async function getDraftDetail(
   articleId: string,
 ): Promise<DraftDetailResult> {
+  return (await getDraftEditorData(articleId)).detail;
+}
+
+export async function getDraftEditorData(
+  articleId: string,
+): Promise<DraftEditorData> {
   if (!isDraftUuid(articleId)) throw new Error("Invalid article ID.");
   const { access, client } = await reader();
   try {
@@ -157,16 +169,22 @@ export async function getDraftDetail(
       query = query.eq("owner_profile_id", access.profileId);
     const { data, error } = await query.maybeSingle();
     if (error) throw error;
-    if (!data) return { kind: "notFound" };
+    if (!data) return { detail: { kind: "notFound" }, options: null };
     const summary = summaryRow.parse(data);
     if (summary.status === "archived")
-      return { kind: "readOnly", status: summary.status };
+      return {
+        detail: { kind: "readOnly", status: summary.status },
+        options: null,
+      };
     if (!isValidDraftDocument(data.content))
       return {
-        kind: "unsupportedContent",
-        status: summary.status,
-        articleId: summary.id,
-        version: summary.edit_version,
+        detail: {
+          kind: "unsupportedContent",
+          status: summary.status,
+          articleId: summary.id,
+          version: summary.edit_version,
+        },
+        options: null,
       };
     const checked = checkDraftInput({
       schemaVersion: 1,
@@ -189,7 +207,7 @@ export async function getDraftDetail(
     const options = await loadDraftOptions(client, draft.sectionId);
     const missing = (ids: string[], choices: { id: string }[]) =>
       ids.filter((id) => !choices.some((choice) => choice.id === id));
-    return {
+    const detail: DraftDetailResult = {
       kind: "editable",
       status: summary.status,
       articleId: summary.id,
@@ -214,6 +232,7 @@ export async function getDraftDetail(
         ],
       },
     };
+    return { detail, options };
   } catch {
     throw new Error("Unable to load draft.");
   }
