@@ -210,6 +210,8 @@ No source table/column or application grant changes. Five GIN expression indexes
 
 [ADR 0010](decisions/0010-private-search-lexeme-indexes.md) owns normalization, size-limit and rebuild decisions. The [Task 16 plan](superpowers/plans/2026-11-10-search-index-foundation.md) records migration compatibility, query measurements and exact checks. Private helpers and indexes add no public generated-type fields.
 
+Explicit interrupted-upload cancellation uses the existing uploading → deleting state transition, followed by row deletion and the existing permanent retired-key registry/ledger trigger. No table, column, retention timer or application grant changes. See the [recovery plan](superpowers/plans/2026-11-11-recovery-cleanup-fixes.md).
+
 ## Optimization support
 
 `20261111060100_upload_processing_admission.sql` adds private `upload_processing_limits`, keyed to Auth user with cascading deletion, a window start and bounded attempt count. It is separate from draft-write quota and has no application table grants. `20261111060200_admin_article_pagination_index.sql` adds `articles_updated_page_idx(updated_at DESC,id DESC)` without changing pagination, RLS or article data. The index adds storage and write maintenance; the existing OR continuation predicate still filters newer rows. Design measurements and rollback are recorded in the [optimization plan](superpowers/plans/2026-11-11-low-priority-optimizations.md).

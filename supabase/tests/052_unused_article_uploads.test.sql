@@ -34,6 +34,7 @@ insert into unused_results select 'page2',public.list_unused_article_uploads(art
 insert into unused_results select 'end',public.list_unused_article_uploads(article_id,'60000000-0000-0000-0000-000000005209',1) from unused_target;
 insert into unused_results select 'bounds',public.list_unused_article_uploads(article_id,null,51) from unused_target;
 insert into unused_results values ('uploading',public.mark_article_image_for_removal('60000000-0000-0000-0000-000000005206'));
+insert into unused_results values ('uploading_retry',public.mark_article_image_for_removal('60000000-0000-0000-0000-000000005206'));
 reset role;
 select is(jsonb_array_length((select result->'items' from unused_results where label='list')),4,
   'only finalized unused and deleting rows are discoverable after reload');
@@ -42,7 +43,11 @@ select is((select result->>'nextCursor' from unused_results where label='page1')
 select is((select result#>>'{items,0,status}' from unused_results where label='page2'),'deleting','deleting rows support uncertain cleanup retry');
 select is((select result->'items' from unused_results where label='end'),'[]'::jsonb,'last page is empty and bounded');
 select is((select result->>'code' from unused_results where label='bounds'),'invalid_input','oversized requests rejected');
-select is((select result->>'code' from unused_results where label='uploading'),'conflict','in-flight uploads cannot be marked');
+select is((select result->>'ok' from unused_results where label='uploading'),'true','owner can explicitly cancel an unreferenced in-flight upload');
+select is((select status from public.media_assets where id='60000000-0000-0000-0000-000000005206'),
+  'deleting','explicit cancellation fences the in-flight upload');
+select is((select result->>'replayed' from unused_results where label='uploading_retry'),'true',
+  'explicit cancellation retains exact retry behavior');
 select ok(not exists(select 1 from unused_results r cross join lateral jsonb_array_elements(r.result->'items') i
   cross join lateral jsonb_object_keys(i) k where k not in ('assetId','createdAt','status')),
   'listing exposes no object paths or actor identifiers');

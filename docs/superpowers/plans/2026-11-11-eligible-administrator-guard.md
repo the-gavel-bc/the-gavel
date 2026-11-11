@@ -39,3 +39,7 @@ Opened [PR #82](https://github.com/dylandrozario/the-gavel/pull/82) against `mai
 ## Integration after PR 80 merged
 
 Merged main `29ff33c` without rewriting shared history. Only `STATUS.md` conflicted; it now records PR 80 as merged and PR 82 as the active branch. Both review-evidence sections are retained. The eligibility migration and its SQL/concurrency regressions match the previously green PR 82 head byte-for-byte. Targeted documentation formatting and merge diff checks passed; runtime suites were not rerun for the status-only conflict. Hosted CI must rerun on the merged head. No working database changes, merge to main or deployment performed.
+
+## Integration after PR 81 merged
+
+Merged main `fb18a23` without rewriting shared history. Resolved `STATUS.md` and the review document by recording PR 81's merged state and retaining both recovery/cleanup and finding 24 evidence. Eligibility migration and regression files remain byte-for-byte unchanged; main's cancellation migration and corrected SQL coverage are also retained unchanged. Targeted documentation formatting and merge diff checks passed. Runtime suites were not repeated for these documentation conflicts; hosted CI must rerun on the merged head. No working database changes, merge of PR 82 or deployment performed.

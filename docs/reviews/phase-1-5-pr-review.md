@@ -436,6 +436,10 @@ Findings **7, 26 and 25** are implemented and locally verified in `fix/review-me
 
 The [medium fix plan](../superpowers/plans/2026-11-11-medium-easy-fixes.md) records scope, independent review, 46 distinct unit/component cases, 68 SQL assertions, 14 independent-session races, strict types, lint and formatting. Full suites/build/browser/clean-install and hosted checks remain CI work. These changes are uncommitted; no merge or deployment is claimed. Historical tables above retain their original review status. Findings 5/6/24/28 remain outside this batch.
 
+## Recovery and cleanup follow-up
+
+Findings 28, 5 and 6 were implemented on `fix/review-recovery-cleanup`, based on main `fc43967`, and merged through [PR #81](https://github.com/dylandrozario/the-gavel/pull/81) in `fb18a23`. The [focused plan](../superpowers/plans/2026-11-11-recovery-cleanup-fixes.md) records fairness, explicit cancellation, receipt-safe recovery and targeted verification. The plan retains the original implementation evidence; no deployment is claimed. Original findings remain historical; missing-resource/access responses intentionally retain uncertain retry handles because they can precede receipt lookup. No automatic upload expiration was added.
+
 ## Finding 24 implementation follow-up
 
 The [eligible administrator guard plan](../superpowers/plans/2026-11-11-eligible-administrator-guard.md) records the shared identity predicate, serialized administrator counting, trusted-media revalidation and focused regression proof. Original findings remain historical review snapshots; hosted CI and human security review remain required.

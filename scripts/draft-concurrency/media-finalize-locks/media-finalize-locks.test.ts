@@ -140,3 +140,30 @@ describe("upload begin and finalize share article-before-asset locks", () => {
     });
   }
 });
+
+it("cancellation commits before a waiting finalizer and leaves the upload fenced", async () => {
+  await withSaveFixtures(async ({ observer, a, b, articleId }) => {
+    await withAsset(observer, articleId, async (assetId) => {
+      await observer.execute(
+        `update public.media_assets set status='uploading' where id='${assetId}';`,
+      );
+      await a.execute(
+        `begin; set local role authenticated; select set_config('request.jwt.claim.sub','${ACTOR}',true);`,
+      );
+      expect(
+        await a.json(`public.mark_article_image_for_removal('${assetId}')`),
+      ).toEqual({ ok: true, assetId, replayed: false });
+      await b.execute("begin; set local role service_role;");
+      const pending = b.json(finalize(assetId));
+      await waitForLock(observer, b);
+      await a.execute("commit;");
+      expect(await pending).toEqual({ ok: false, code: "conflict" });
+      await b.execute("commit;");
+      expect(
+        await observer.json(
+          `(select to_jsonb(status) from public.media_assets where id='${assetId}')`,
+        ),
+      ).toBe("deleting");
+    });
+  });
+});
