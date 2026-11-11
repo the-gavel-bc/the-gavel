@@ -22,7 +22,7 @@
 - [x] Build: add `20261111110000_identity_eligibility_consistency.sql`; define `private.has_eligible_identity_for(uuid)`, make session/media helpers delegate, and replace `private.manage_membership` while retaining existing contracts. Add focused pgTAP cases in `supabase/tests/055_identity_eligibility_consistency.test.sql` and targeted lock-wait cases under `scripts/draft-concurrency/identity-eligibility/`.
 - [x] Test after implementation, as requested: run the new SQL regression against the unpatched disposable database to establish failure, apply migration, rerun it and existing identity/membership/profile/media denial suites. Run targeted concurrency cases for serialized admin removal, Auth-provider revocation during a wait and trusted-media revocation. Do not run broad suites locally.
 - [x] Run types, lint, formatting and diff checks. Verify no generated public type changes. Update this plan with exact evidence and security documentation with the lasting shared-predicate rule.
-- [ ] Review the completed slice independently, fix blocking findings and rerun affected checks. Commit, push a new branch and open a PR against `main`; do not merge or deploy. Hosted CI and human security review remain required.
+- [x] Review the completed slice independently, fix blocking findings and rerun affected checks. Commit, push a new branch and open a PR against `main`; do not merge or deploy. Hosted CI and human security review remain required.
 
 ## Verification notes
 
@@ -33,3 +33,5 @@ A disposable `gavel_identity_20261111` database was cloned from the existing opt
 All six authorization/serialization races passed. Independent review found no production-code issues, but identified a fixture-cleanup path that could skip restoring existing synthetic administrators if a session exited. A new regression reproduced `Database session already ended.`; cleanup now closes both sessions before restoring state, and all seven focused cases pass. The test-only Docker wrapper redirects only the local hardcoded psql database to the clone and is not committed.
 
 Fourteen app access unit cases, TypeScript, full lint, full formatting, targeted documentation formatting and diff checks passed. Types and targeted lint/format were rerun after the cleanup correction. Public function argument/result signatures are unchanged; the new helper remains private with no application/service-role execution grant. No UI, accessibility surface or public API/schema contract changes. Full database/browser/security suites and human security review remain CI/release gates. No working database migration/reset, merge or deployment occurred.
+
+Opened [PR #82](https://github.com/dylandrozario/the-gavel/pull/82) against `main` after focused verification and review. Implementation and regression commits are `7b94012` and `39c9068`. Hosted CI remains pending; no merge or deployment performed.

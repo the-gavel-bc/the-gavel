@@ -1,6 +1,6 @@
 # Current work
 
-- Phase: finding 24 implemented and focused verification passed; preparing PR to main.
+- Phase: finding 24 implemented and focused verification passed; [PR #82](https://github.com/dylandrozario/the-gavel/pull/82) open against main.
 - Branch: `fix/eligible-administrator-guard`; base main `ede546d`; PRs 80/81 remain independent.
 - Plan: [eligible administrator guard](docs/superpowers/plans/2026-11-11-eligible-administrator-guard.md).
 - Approved: preserve Google-only policy; plan, build, focused tests, then PR to main. No merge/deployment or working database reset.
