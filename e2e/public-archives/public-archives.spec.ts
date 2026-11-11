@@ -205,6 +205,16 @@ test("archives enforce public visibility, real scope404, empty/recovery states a
   }
   if (project === "desktop") {
     await page.goto("/letters");
+    await expect(
+      page
+        .getByRole("navigation", { name: "Primary navigation" })
+        .getByRole("link", { name: "Letter to the Editor", exact: true }),
+    ).toHaveAttribute("href", "/letters");
+    await expect(
+      page
+        .getByRole("main")
+        .getByRole("link", { name: "Letter to the Editor", exact: true }),
+    ).toHaveAttribute("href", "/letters");
     await expect(main.getByRole("heading", { level: 1 })).toHaveText(
       "Letter to the Editor",
     );

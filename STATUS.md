@@ -1,8 +1,7 @@
 # Current work
 
-- Phase: PR #79 conflict resolution after PR #78 merged into main.
-- Branch: `perf/review-optimizations`; PR branch `codex/review-optimizations-20261111`.
-- Preserve PR #78 image retry/version recovery and PR #79 resource bounds, editor optimizations and explicit unused-upload cleanup.
-- Approved cleanup includes published articles, with reference checks and no automatic expiry.
-- Focused plans: [optimizations](docs/superpowers/plans/2026-11-11-low-priority-optimizations.md), [medium fixes](docs/superpowers/plans/2026-11-11-medium-easy-fixes.md).
+- Phase: PR #80 conflict resolution against main `ede546d`, which includes PR #79.
+- Branch: `fix/pr80-conflicts`; PR branch `codex/review-second-batch-20261111`.
+- Scope: preserve status-change recovery, canonical Letters links and pinned single-build CI alongside main's upload cleanup and resource bounds.
+- Plan: [second batch](docs/superpowers/plans/2026-11-10-review-fixes-second-batch.md).
 - Hosted CI and human maintainer review remain required before merge.
