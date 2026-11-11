@@ -15,20 +15,13 @@ const PAGE = 1000;
 const MAX_URLS = 50_000;
 
 const slug = (max: number) => publicSlugSchema.max(max);
-const archivesSchema = z.discriminatedUnion("kind", [
-  z.strictObject({ kind: z.literal("unavailable") }),
-  z.strictObject({
-    kind: z.literal("ok"),
-    sections: z.array(slug(120)).max(5000),
-    categories: z
-      .array(z.strictObject({ section: slug(120), slug: slug(120) }))
-      .max(5000),
-    tags: z.array(slug(120)).max(5000),
-    authors: z.array(slug(180)).max(5000),
-  }),
-]);
+const slugs = (max: number) => z.array(slug(max)).max(64);
 const articlesSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("invalid") }),
+  z.strictObject({
+    kind: z.literal("rate_limited"),
+    retryAfter: z.number().int().min(1).max(60),
+  }),
   z.strictObject({
     kind: z.literal("ok"),
     items: z
@@ -37,6 +30,10 @@ const articlesSchema = z.discriminatedUnion("kind", [
           id: z.string().refine(isDraftUuid),
           slug: slug(180),
           publishedAt: publicTimestampSchema,
+          section: slug(120),
+          categories: slugs(120),
+          tags: slugs(120),
+          authors: slugs(180).min(1),
         }),
       )
       .max(PAGE),
@@ -46,48 +43,26 @@ const articlesSchema = z.discriminatedUnion("kind", [
 
 export type SitemapEntry = { url: string; lastModified?: string };
 export type PublicSitemapResult =
-  { kind: "ok"; entries: SitemapEntry[] } | { kind: "unavailable" };
+  | { kind: "ok"; entries: SitemapEntry[] }
+  | { kind: "rate_limited"; retryAfter: number }
+  | { kind: "unavailable" };
 
 const unavailable = { kind: "unavailable" } as const;
 
 // Request-time read through the anonymous projection; SQL owns visibility.
+// Archive pages are derived from the listed articles themselves, so every
+// listed archive has a listed article even if publication changes between
+// pages. A change mid-read is reflected on the next request.
 export async function getPublicSitemap(): Promise<PublicSitemapResult> {
   try {
     const client = createPublicReaderClient();
-    const [site, archiveResponse] = await Promise.all([
-      getPublicSiteNavigation(),
-      client.rpc("list_public_sitemap_archives"),
-    ]);
-    if (archiveResponse.error) return unavailable;
-    const archives = archivesSchema.safeParse(archiveResponse.data);
-    if (!archives.success || archives.data.kind !== "ok") return unavailable;
-
-    const origin = getServerEnv().SITE_URL;
-    const entries: SitemapEntry[] = [];
-    const add = (path: string, lastModified?: string) =>
-      entries.push({
-        url: new URL(path, origin).href,
-        ...(lastModified && { lastModified }),
-      });
-
-    add("/");
-    // Navigation only supplies copy flags and the letters label. Without it,
-    // omit those pages and list letters at its section path, which also resolves.
-    const info = site.kind === "ok" ? site.information : null;
-    if (info?.mission?.trim()) add("/about");
-    if (info?.submissionInstructions?.trim()) add("/letters/how-to-submit");
-    const letters = new Set(
-      site.kind === "ok"
-        ? site.sections.filter(isLettersSection).map((s) => s.slug)
-        : [],
-    );
-    const { sections, categories, tags, authors } = archives.data;
-    for (const s of sections)
-      add(letters.has(s) ? "/letters" : `/sections/${s}`);
-    for (const c of categories)
-      add(`/sections/${c.section}/categories/${c.slug}`);
-    for (const t of tags) add(`/tags/${t}`);
-    for (const a of authors) add(`/authors/${a}`);
+    const site = await getPublicSiteNavigation();
+    const articles: SitemapEntry[] = [];
+    const seen = new Set<string>();
+    const sections = new Set<string>();
+    const categories = new Set<string>();
+    const tags = new Set<string>();
+    const authors = new Set<string>();
 
     let after: { publishedAt: string; id: string } | null = null;
     for (;;) {
@@ -99,14 +74,67 @@ export async function getPublicSitemap(): Promise<PublicSitemapResult> {
       });
       if (error) return unavailable;
       const page = articlesSchema.safeParse(data);
-      if (!page.success || page.data.kind !== "ok") return unavailable;
+      if (!page.success || page.data.kind === "invalid") return unavailable;
+      if (page.data.kind === "rate_limited") return page.data;
       const { items, hasMore } = page.data;
-      for (const item of items) add(`/articles/${item.slug}`, item.publishedAt);
-      if (entries.length > MAX_URLS) return unavailable;
-      if (!hasMore) return { kind: "ok", entries };
+      for (const item of items) {
+        if (seen.has(item.slug)) continue;
+        seen.add(item.slug);
+        articles.push({
+          url: `/articles/${item.slug}`,
+          lastModified: item.publishedAt,
+        });
+        sections.add(item.section);
+        for (const c of item.categories) categories.add(`${item.section}/${c}`);
+        for (const t of item.tags) tags.add(t);
+        for (const a of item.authors) authors.add(a);
+      }
+      if (
+        articles.length +
+          sections.size +
+          categories.size +
+          tags.size +
+          authors.size +
+          3 >
+        MAX_URLS
+      )
+        return unavailable;
+      if (!hasMore) break;
       if (items.length !== PAGE) return unavailable;
       after = items[PAGE - 1];
     }
+
+    const paths: string[] = ["/"];
+    // Navigation only supplies copy flags and the letters label. Without it,
+    // omit those pages and list letters at its section path, which also resolves.
+    const info = site.kind === "ok" ? site.information : null;
+    if (info?.mission?.trim()) paths.push("/about");
+    if (info?.submissionInstructions?.trim())
+      paths.push("/letters/how-to-submit");
+    const letters = new Set(
+      site.kind === "ok"
+        ? site.sections.filter(isLettersSection).map((s) => s.slug)
+        : [],
+    );
+    const sorted = (set: Set<string>) => [...set].sort();
+    for (const s of sorted(sections))
+      paths.push(letters.has(s) ? "/letters" : `/sections/${s}`);
+    for (const c of sorted(categories)) {
+      const [section, category] = c.split("/");
+      paths.push(`/sections/${section}/categories/${category}`);
+    }
+    for (const t of sorted(tags)) paths.push(`/tags/${t}`);
+    for (const a of sorted(authors)) paths.push(`/authors/${a}`);
+
+    const origin = getServerEnv().SITE_URL;
+    const absolute = (entry: SitemapEntry) => ({
+      ...entry,
+      url: new URL(entry.url, origin).href,
+    });
+    return {
+      kind: "ok",
+      entries: [...paths.map((url) => ({ url })), ...articles].map(absolute),
+    };
   } catch {
     return unavailable;
   }

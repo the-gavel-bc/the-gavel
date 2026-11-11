@@ -15,10 +15,15 @@ import { getPublicSitemap } from "./public-sitemap";
 
 const id = (n: number) =>
   `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
-const article = (n: number) => ({
+const article = (n: number, overrides = {}) => ({
   id: id(n),
   slug: `story-${n}`,
   publishedAt: "2026-11-01T12:00:00.123456Z",
+  section: "news",
+  categories: [],
+  tags: [],
+  authors: ["owner"],
+  ...overrides,
 });
 const site = (mission: string | null, instructions: string | null) => ({
   kind: "ok",
@@ -37,27 +42,34 @@ const site = (mission: string | null, instructions: string | null) => ({
     submissionInstructions: instructions,
   },
 });
-const archives = {
-  kind: "ok",
-  sections: ["letter-to-the-editor", "news"],
-  categories: [{ section: "news", slug: "campus" }],
-  tags: ["housing"],
-  authors: ["guest-writer"],
-};
-function respond(pages: unknown[], archiveData: unknown = archives) {
-  mocks.rpc.mockImplementation(async (name: string) =>
-    name === "list_public_sitemap_archives"
-      ? { data: archiveData, error: null }
-      : { data: pages.shift(), error: null },
-  );
+function respond(...pages: unknown[]) {
+  mocks.rpc.mockImplementation(async () => ({
+    data: pages.shift(),
+    error: null,
+  }));
 }
+const urls = async () => {
+  const result = await getPublicSitemap();
+  return result.kind === "ok" ? result.entries.map((e) => e.url) : result;
+};
 beforeEach(() => {
   vi.resetAllMocks();
   mocks.site.mockResolvedValue(site("Our mission.", "Send letters."));
 });
 
-it("lists canonical non-empty public pages from validated SITE_URL", async () => {
-  respond([{ kind: "ok", items: [article(1)], hasMore: false }]);
+it("derives non-empty archives from listed articles on validated SITE_URL", async () => {
+  respond({
+    kind: "ok",
+    items: [
+      article(1, {
+        categories: ["campus"],
+        tags: ["housing"],
+        authors: ["guest-writer", "owner"],
+      }),
+      article(2, { section: "letter-to-the-editor", tags: ["housing"] }),
+    ],
+    hasMore: false,
+  });
   expect(await getPublicSitemap()).toEqual({
     kind: "ok",
     entries: [
@@ -69,58 +81,53 @@ it("lists canonical non-empty public pages from validated SITE_URL", async () =>
       { url: "https://gavel.example/sections/news/categories/campus" },
       { url: "https://gavel.example/tags/housing" },
       { url: "https://gavel.example/authors/guest-writer" },
+      { url: "https://gavel.example/authors/owner" },
       {
         url: "https://gavel.example/articles/story-1",
         lastModified: "2026-11-01T12:00:00.123456Z",
       },
+      {
+        url: "https://gavel.example/articles/story-2",
+        lastModified: "2026-11-01T12:00:00.123456Z",
+      },
     ],
   });
-  expect(mocks.rpc).toHaveBeenCalledWith("list_public_sitemap_articles", {
-    p_after_published_at: null,
-    p_after_id: null,
-    p_limit: 1000,
-  });
+  expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith(
+    "list_public_sitemap_articles",
+    { p_after_published_at: null, p_after_id: null, p_limit: 1000 },
+  );
 });
 
 it("omits informational pages without primary copy", async () => {
   mocks.site.mockResolvedValue(site("  ", null));
-  respond([{ kind: "ok", items: [], hasMore: false }], {
-    ...archives,
-    sections: ["news"],
-  });
-  const result = await getPublicSitemap();
-  expect(result.kind === "ok" && result.entries.map((e) => e.url)).toEqual([
-    "https://gavel.example/",
-    "https://gavel.example/sections/news",
-    "https://gavel.example/sections/news/categories/campus",
-    "https://gavel.example/tags/housing",
-    "https://gavel.example/authors/guest-writer",
-  ]);
+  respond({ kind: "ok", items: [], hasMore: false });
+  expect(await urls()).toEqual(["https://gavel.example/"]);
 });
 
-it("keeps archives and articles when navigation is unavailable", async () => {
+it("keeps articles and archives when navigation is unavailable", async () => {
   mocks.site.mockResolvedValue({ kind: "unavailable" });
-  respond([{ kind: "ok", items: [article(1)], hasMore: false }]);
-  const result = await getPublicSitemap();
-  expect(result.kind === "ok" && result.entries.map((e) => e.url)).toEqual([
+  respond({
+    kind: "ok",
+    items: [article(1, { section: "letter-to-the-editor" })],
+    hasMore: false,
+  });
+  expect(await urls()).toEqual([
     "https://gavel.example/",
     "https://gavel.example/sections/letter-to-the-editor",
-    "https://gavel.example/sections/news",
-    "https://gavel.example/sections/news/categories/campus",
-    "https://gavel.example/tags/housing",
-    "https://gavel.example/authors/guest-writer",
+    "https://gavel.example/authors/owner",
     "https://gavel.example/articles/story-1",
   ]);
 });
 
-it("pages articles by keyset until the projection reports no more", async () => {
+it("pages by keyset and lists an article seen on two pages once", async () => {
   const first = Array.from({ length: 1000 }, (_, n) => article(n + 1));
-  respond([
+  respond(
     { kind: "ok", items: first, hasMore: true },
-    { kind: "ok", items: [article(1001)], hasMore: false },
-  ]);
-  const result = await getPublicSitemap();
-  expect(result.kind === "ok" && result.entries.length).toBe(1009);
+    { kind: "ok", items: [article(1000), article(1001)], hasMore: false },
+  );
+  const result = await urls();
+  // "/", about, how-to-submit, one section, one author, 1001 articles.
+  expect(Array.isArray(result) && result.length).toBe(1006);
   expect(mocks.rpc).toHaveBeenLastCalledWith("list_public_sitemap_articles", {
     p_after_published_at: "2026-11-01T12:00:00.123456Z",
     p_after_id: id(1000),
@@ -128,35 +135,78 @@ it("pages articles by keyset until the projection reports no more", async () => 
   });
 });
 
-it("fails closed instead of truncating past the protocol limit", async () => {
-  const page = Array.from({ length: 1000 }, (_, n) => article(n + 1));
-  mocks.rpc.mockImplementation(async (name: string) =>
-    name === "list_public_sitemap_archives"
-      ? { data: archives, error: null }
-      : { data: { kind: "ok", items: page, hasMore: true }, error: null },
+it("passes the shared budget's retry time through", async () => {
+  respond(
+    {
+      kind: "ok",
+      items: Array.from({ length: 1000 }, (_, n) => article(n)),
+      hasMore: true,
+    },
+    { kind: "rate_limited", retryAfter: 17 },
   );
+  expect(await getPublicSitemap()).toEqual({
+    kind: "rate_limited",
+    retryAfter: 17,
+  });
+});
+
+it("fails closed instead of truncating past the protocol limit", async () => {
+  let n = 0;
+  mocks.rpc.mockImplementation(async () => ({
+    data: {
+      kind: "ok",
+      items: Array.from({ length: 1000 }, () => article(++n)),
+      hasMore: true,
+    },
+    error: null,
+  }));
   expect(await getPublicSitemap()).toEqual({ kind: "unavailable" });
-  expect(mocks.rpc.mock.calls.length).toBeLessThanOrEqual(52);
+  expect(mocks.rpc.mock.calls.length).toBeLessThanOrEqual(51);
 });
 
 it.each([
-  ["archives unavailable", () => respond([], { kind: "unavailable" })],
-  [
-    "unsafe archive slug",
-    () => respond([], { ...archives, tags: ["../dashboard"] }),
-  ],
-  ["extra archive field", () => respond([], { ...archives, secret: true })],
-  ["invalid article page", () => respond([{ kind: "invalid" }])],
+  ["invalid article page", () => respond({ kind: "invalid" })],
   [
     "unsafe article slug",
     () =>
-      respond([
-        { kind: "ok", items: [{ ...article(1), slug: "a/b" }], hasMore: false },
-      ]),
+      respond({
+        kind: "ok",
+        items: [article(1, { slug: "a/b" })],
+        hasMore: false,
+      }),
+  ],
+  [
+    "unsafe archive slug",
+    () =>
+      respond({
+        kind: "ok",
+        items: [article(1, { tags: ["../dashboard"] })],
+        hasMore: false,
+      }),
+  ],
+  [
+    "oversized association list",
+    () =>
+      respond({
+        kind: "ok",
+        items: [
+          article(1, { tags: Array.from({ length: 65 }, (_, i) => `t${i}`) }),
+        ],
+        hasMore: false,
+      }),
+  ],
+  [
+    "extra article field",
+    () =>
+      respond({
+        kind: "ok",
+        items: [article(1, { secret: true })],
+        hasMore: false,
+      }),
   ],
   [
     "short page claiming more",
-    () => respond([{ kind: "ok", items: [article(1)], hasMore: true }]),
+    () => respond({ kind: "ok", items: [article(1)], hasMore: true }),
   ],
   [
     "database error",
@@ -168,7 +218,6 @@ it.each([
   ],
   ["client throws", () => mocks.rpc.mockRejectedValue(new Error("network"))],
 ])("returns a generic unavailable result for %s", async (_, arrange) => {
-  respond([{ kind: "ok", items: [], hasMore: false }]);
   arrange();
   expect(await getPublicSitemap()).toEqual({ kind: "unavailable" });
 });

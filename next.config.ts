@@ -9,31 +9,17 @@ const nextConfig: NextConfig = {
   htmlLimitedBots: /.*/,
   async headers() {
     return [
-      ...[
-        "/dashboard/:path*",
-        "/sign-in",
-        "/access-pending",
-        "/auth/:path*",
-        "/search",
-        "/api/articles/:path*",
-        "/api/internal/:path*",
-      ].map((source) => ({
-        source,
-        headers: [
-          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
-        ],
-      })),
-      {
-        // Metadata routes default to shared-cacheable; archive must apply on the next request.
-        source: "/sitemap.xml",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "private, no-cache, no-store, max-age=0, must-revalidate",
-          },
-        ],
-      },
-    ];
+      "/dashboard/:path*",
+      "/sign-in",
+      "/access-pending",
+      "/auth/:path*",
+      "/search",
+      "/api/articles/:path*",
+      "/api/internal/:path*",
+    ].map((source) => ({
+      source,
+      headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" }],
+    }));
   },
   // Flight transport includes metadata/encoding overhead beyond the 1 MiB draft body.
   experimental: { serverActions: { bodySizeLimit: 4 * 1024 * 1024 } },

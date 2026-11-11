@@ -32,12 +32,3 @@ it("blocks streamed metadata and adds robots headers to private/search families"
     });
   }
 });
-it("keeps the request-time sitemap out of shared caches", async () => {
-  const headers = await config.headers!();
-  expect(
-    headers.find((header) => header.source === "/sitemap.xml")?.headers,
-  ).toContainEqual({
-    key: "Cache-Control",
-    value: "private, no-cache, no-store, max-age=0, must-revalidate",
-  });
-});
