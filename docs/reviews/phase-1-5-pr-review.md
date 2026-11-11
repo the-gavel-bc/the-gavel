@@ -429,3 +429,7 @@ The plan records focused tests, independent review, synthetic index measurements
 Findings **7, 26 and 25** are implemented and locally verified in `fix/review-medium-easy`, based on corrected PR #77 head `1dfa5bd`. Image writes preserve newer form content; explicit retries retain the complete original command and newer metadata; finalization uses the common article-before-asset lock order. Later access/missing-resource denials preserve an uncertain image command until its receipt can be recovered.
 
 The [medium fix plan](../superpowers/plans/2026-11-11-medium-easy-fixes.md) records scope, independent review, 46 distinct unit/component cases, 68 SQL assertions, 14 independent-session races, strict types, lint and formatting. Full suites/build/browser/clean-install and hosted checks remain CI work. These changes are uncommitted; no merge or deployment is claimed. Historical tables above retain their original review status. Findings 5/6/24/28 remain outside this batch.
+
+## Finding 24 implementation follow-up
+
+The [eligible administrator guard plan](../superpowers/plans/2026-11-11-eligible-administrator-guard.md) records the shared identity predicate, serialized administrator counting, trusted-media revalidation and focused regression proof. Original findings remain historical review snapshots; hosted CI and human security review remain required.
