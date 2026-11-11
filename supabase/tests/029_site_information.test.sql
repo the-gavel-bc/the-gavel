@@ -20,6 +20,8 @@ select is((select count(*)::integer from public.get_site_information()),1,'admin
 select is(public.save_site_information(1,'83000000-0000-0000-0000-000000000002','<script>',null,null,null)->>'code','invalid_input','markup rejected');
 select is(public.save_site_information(1,'83000000-0000-0000-0000-000000000003','Mission','bad@',null,null)->>'code','invalid_input','invalid email rejected');
 select is(public.save_site_information(1,'83000000-0000-0000-0000-000000000004','Mission',null,'https://instagram.com.evil.test/a',null)->>'code','invalid_input','unsafe social URL rejected');
+select is(public.save_site_information(1,'83000000-0000-0000-0000-0000000000e1','Mission','first..last@bc.edu',null,null)->>'code','invalid_input','email the public reader would hide is rejected at save');
+select is(public.save_site_information(1,'83000000-0000-0000-0000-0000000000e2','Mission','desk@-bc.edu',null,null)->>'code','invalid_input','hyphen-edged domain label rejected at save');
 select is(public.save_site_information(1,'83000000-0000-0000-0000-000000000005',repeat('x',5001),null,null,null)->>'code','invalid_input','oversized text rejected');
 select is(public.save_site_information(1,'83000000-0000-0000-0000-000000000006',E'Mission\n\nparagraph','editor@bc.edu','https://www.instagram.com/thegavel/','Send a letter')->>'version','2','valid edit increments version');
 select is(public.save_site_information(1,'83000000-0000-0000-0000-000000000006',E'Mission\n\nparagraph','editor@bc.edu','https://www.instagram.com/thegavel/','Send a letter')->>'replayed','true','exact retry returns receipt');

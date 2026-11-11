@@ -52,8 +52,15 @@ select is((public.update_section_taxonomy('81000000-0000-0000-0000-000000000002'
   '81000000-0000-0000-0000-000000000016','Stale',0,true)->>'code'),
   'conflict','stale section edit rejected');
 select is((public.update_category_taxonomy('81000000-0000-0000-0000-000000000004',1,
-  '81000000-0000-0000-0000-000000000017','Outside of BC',0,true)->>'code'),
-  'conflict','category cannot activate beneath inactive section');
+  '81000000-0000-0000-0000-000000000017','Outside of BC',0,true)->>'ok'),
+  'true','already-active category beneath inactive section can still be saved');
+reset role;
+insert into public.categories(id,section_id,name,slug,active) values
+  ('81000000-0000-0000-0000-0000000000a1','81000000-0000-0000-0000-000000000002','Dormant','dormant',false);
+set local role authenticated;
+select is((public.update_category_taxonomy('81000000-0000-0000-0000-0000000000a1',1,
+  '81000000-0000-0000-0000-0000000000a2','Dormant',0,true)->>'code'),
+  'conflict','inactive category cannot activate beneath inactive section');
 select is((public.update_section_taxonomy('81000000-0000-0000-0000-000000000002',2,
   '81000000-0000-0000-0000-000000000018','Task 11 renamed',2,false)->>'changed'),
   'false','no-op records no changed event');
