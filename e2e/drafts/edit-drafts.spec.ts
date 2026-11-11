@@ -33,7 +33,12 @@ test("owner formats saves and reopens a private body with a second versioned sav
   ).toBeVisible();
   page.on("request", (request) => {
     const action = request.headers()["next-action"];
-    if (request.method() === "POST" && action) saveActionId = action;
+    if (
+      request.method() === "POST" &&
+      action &&
+      request.postData()?.includes('"expectedVersion"')
+    )
+      saveActionId = action;
   });
   await page.getByRole("button", { name: "Save draft" }).click();
   await expect(

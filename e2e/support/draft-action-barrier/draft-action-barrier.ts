@@ -23,6 +23,25 @@ export async function draftActionBarrier(
       await route.continue();
       return;
     }
+    let args: unknown;
+    try {
+      args = JSON.parse(request.postData() ?? "null");
+    } catch {
+      await route.continue();
+      return;
+    }
+    const command: unknown = Array.isArray(args) ? args[0] : null;
+    // Reads such as unused-upload refreshes share this URL and action transport.
+    // Only create/save commands belong to the held response and retry history.
+    if (
+      !command ||
+      typeof command !== "object" ||
+      !("requestId" in command) ||
+      !("draft" in command)
+    ) {
+      await route.continue();
+      return;
+    }
     bodies.push(request.postData()!);
     if (!first) {
       await route.continue();

@@ -5,6 +5,7 @@ import {
   useSyncExternalStore,
   useState,
   useCallback,
+  useMemo,
   type FormEvent,
 } from "react";
 import dynamic from "next/dynamic";
@@ -30,6 +31,7 @@ import { GuardedDashboardLink } from "../../../../components/dashboard/guarded-d
 import { ArticleMedia } from "../article-media/article-media";
 import type { MainImage } from "@/backend/media/media-queries/media-queries";
 import { DraftReadOnlyBody } from "../draft-editor/draft-read-only-body";
+import { UnusedArticleUploads } from "../unused-article-uploads/unused-article-uploads";
 import { ArticleLifecycleControls } from "../article-lifecycle-controls/article-lifecycle-controls";
 
 const DraftEditor = dynamic(
@@ -75,6 +77,23 @@ export function DraftForm({
   const [mediaBusy, setMediaBusy] = useState(false);
   const [bodyMediaDirty, setBodyMediaDirty] = useState(false);
   const [lifecycleBusy, setLifecycleBusy] = useState(false);
+  const [cleanupBusy, setCleanupBusy] = useState(false);
+  const localAssetIds = useMemo(() => {
+    const ids = new Set<string>();
+    function visit(node: { type: string; attrs?: unknown; content?: unknown }) {
+      if (
+        node.type === "image" &&
+        node.attrs &&
+        typeof node.attrs === "object" &&
+        "assetId" in node.attrs &&
+        typeof node.attrs.assetId === "string"
+      )
+        ids.add(node.attrs.assetId.toLowerCase());
+      if (Array.isArray(node.content)) node.content.forEach(visit);
+    }
+    if (command.draft.content) visit(command.draft.content.document);
+    return ids;
+  }, [command.draft.content]);
   const { editorInvalid } = command;
   const reportEditorFailure = useCallback(
     (failure: DraftFailure) => {
@@ -131,11 +150,17 @@ export function DraftForm({
       mediaDirty ||
       mediaBusy ||
       bodyMediaDirty ||
-      lifecycleBusy,
+      lifecycleBusy ||
+      cleanupBusy,
   );
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (mediaBusy || lifecycleBusy || (recoveryBlocked && !command.pending))
+    if (
+      cleanupBusy ||
+      mediaBusy ||
+      lifecycleBusy ||
+      (recoveryBlocked && !command.pending)
+    )
       return;
     if (
       !ready ||
@@ -242,7 +267,7 @@ export function DraftForm({
             local={command.draft}
             options={currentOptions}
             nativeInvalid={Boolean(editorFailure)}
-            disabled={Boolean(command.pending)}
+            disabled={Boolean(command.pending) || cleanupBusy}
             onBlocked={() => {
               setRecoveryBlocked(true);
               setRecoveryVisible(true);
@@ -271,7 +296,10 @@ export function DraftForm({
         )}
       <fieldset
         disabled={
-          !ready || lifecycleBusy || (!article && command.phase === "saved")
+          !ready ||
+          lifecycleBusy ||
+          cleanupBusy ||
+          (!article && command.phase === "saved")
         }
         className={styles.fields}
       >
@@ -316,7 +344,10 @@ export function DraftForm({
           allowImageUpload={status === "draft"}
           onMediaDirtyChange={setBodyMediaDirty}
           disabled={
-            !ready || lifecycleBusy || (!article && command.phase === "saved")
+            !ready ||
+            lifecycleBusy ||
+            cleanupBusy ||
+            (!article && command.phase === "saved")
           }
           onError={reportEditorFailure}
           onChange={(content) => {
@@ -334,7 +365,8 @@ export function DraftForm({
             Boolean(command.pending) ||
             command.phase === "saving" ||
             command.phase === "conflict" ||
-            lifecycleBusy
+            lifecycleBusy ||
+            cleanupBusy
           }
           onCommit={(result) => {
             command.acknowledgeArticle({
@@ -345,6 +377,26 @@ export function DraftForm({
           }}
           onBusyChange={setMediaBusy}
           onDirtyChange={setMediaDirty}
+        />
+      )}
+      {command.article && (
+        <UnusedArticleUploads
+          articleId={command.article.id}
+          refreshKey={`${command.article.version}:${mediaDirty}:${bodyMediaDirty}`}
+          localAssetIds={localAssetIds}
+          disabled={
+            !ready ||
+            lifecycleBusy ||
+            Boolean(command.pending) ||
+            command.phase === "saving" ||
+            command.phase === "uncertain" ||
+            command.phase === "conflict" ||
+            Boolean(editorFailure) ||
+            mediaDirty ||
+            bodyMediaDirty ||
+            recoveryBlocked
+          }
+          onBusyChange={setCleanupBusy}
         />
       )}
       <p>
@@ -358,6 +410,7 @@ export function DraftForm({
           disabled={
             !ready ||
             lifecycleBusy ||
+            cleanupBusy ||
             mediaBusy ||
             command.phase === "saving" ||
             command.phase === "saved" ||
@@ -389,6 +442,7 @@ export function DraftForm({
           onBusyChange={setLifecycleBusy}
           disabled={
             !ready ||
+            cleanupBusy ||
             command.dirty ||
             Boolean(command.pending) ||
             Boolean(editorFailure) ||

@@ -1,3 +1,4 @@
+import { contactMailto } from "@/shared/reader/contact-link/contact-link";
 import Link from "next/link";
 import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
 import type {
@@ -49,9 +50,7 @@ export function SiteFooter({
             <ul>
               {information.contactEmail && (
                 <li>
-                  <a
-                    href={`mailto:${encodeURIComponent(information.contactEmail)}`}
-                  >
+                  <a href={contactMailto(information.contactEmail)}>
                     {information.contactEmail}
                   </a>
                 </li>
