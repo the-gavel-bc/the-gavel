@@ -417,3 +417,9 @@ The six ordered tasks in the [easy-first plan](../superpowers/plans/2026-11-10-r
 Verification after all implementations: 885 unit/component tests, 217 read-only TS/SQL parity cases and 30 desktop/mobile browser cases passed. TypeScript, lint, formatting and the browser suite's production build passed. The plan records exact commands, independent review and initial failures/corrections. The query optimization proves removal of four duplicate catalog requests in the normal case, without shared caching; latency was not benchmarked.
 
 Final type checking also uncovered a pre-existing merged #71 typo calling undefined `letters(section)` in public archive resolution. It now uses the existing `isLettersSection(section)` predicate; existing archive and full unit checks pass. Other findings, especially administrator eligibility (24), cleanup fairness (28) and the known no-JavaScript matched-resource 404 release blocker, remain outside this six-task slice.
+
+## Second-batch local implementation follow-up
+
+Findings **13, 18, 20** and optimization **O5** are implemented locally on `fix/review-second-batch`, stacked on PR #77 head `ef21147`. The [second-batch plan](../superpowers/plans/2026-11-10-review-fixes-second-batch.md) records the exact changes, official CI-reference resolutions and verification.
+
+Focused validation after implementation passed 70 unit/component/boundary cases, the new recovery browser scenario on desktop and mobile (2 cases, including production build/start), types and targeted source formatting/lint. The workflow parsed successfully and all existing gates/settings except the duplicate standalone build were preserved. Independent review's missing-image test-fixture finding was corrected before the passing browser run. No hosted CI result, merge, deployment or measured speedup is claimed; broader checks are left to CI as requested. The earlier findings tables remain historical review snapshots.

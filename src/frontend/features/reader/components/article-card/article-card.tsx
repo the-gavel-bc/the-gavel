@@ -1,3 +1,4 @@
+import { sectionHref } from "@/shared/reader/section-link/section-link";
 import Link from "next/link";
 import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
 import { StoryMeta } from "../story-meta/story-meta";
@@ -13,10 +14,7 @@ export function ArticleCard({
   const Heading = headingLevel === 2 ? "h2" : "h3";
   return (
     <article className={styles.card}>
-      <Link
-        className={styles.section}
-        href={`/sections/${encodeURIComponent(article.section.slug)}`}
-      >
+      <Link className={styles.section} href={sectionHref(article.section)}>
         {article.section.name}
       </Link>
       <Link

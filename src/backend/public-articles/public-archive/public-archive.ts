@@ -1,6 +1,11 @@
 import "server-only";
 import { cache } from "react";
 import {
+  isLettersSection,
+  sectionHref,
+} from "@/shared/reader/section-link/section-link";
+export { isLettersSection } from "@/shared/reader/section-link/section-link";
+import {
   getPublicSiteNavigationForRequest,
   type PublicSiteNavigation,
 } from "@/backend/public-site/public-site-navigation/public-site-navigation";
@@ -31,11 +36,6 @@ export type PublicArchiveResult =
       continuation: boolean;
     };
 
-// Taxonomy has no approved stable letters identifier. Resolve the approved
-// label rather than guessing a slug or importing the demo's category model.
-export const isLettersSection = (section: Pick<Section, "name">) =>
-  section.name.toLowerCase() === "letter to the editor";
-
 export async function getPublicArchive(
   kind: "section" | "category" | "letters",
   sectionSlug: string,
@@ -57,10 +57,9 @@ export async function getPublicArchive(
   if (kind === "category" && !category) return { kind: "notFound" };
   // The letters section also resolves at /sections/<slug>; keep one canonical
   // archive identity (and its pagination) at the approved /letters route.
-  const href =
-    kind === "letters" || (kind === "section" && isLettersSection(section))
-      ? "/letters"
-      : `/sections/${section.slug}${category ? `/categories/${category.slug}` : ""}`;
+  const href = category
+    ? `/sections/${section.slug}/categories/${category.slug}`
+    : sectionHref(section);
   const archive: PublicArchiveContext = {
     title: category?.name ?? section.name,
     section,

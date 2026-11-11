@@ -1,4 +1,5 @@
 "use client";
+import { sectionHref } from "@/shared/reader/section-link/section-link";
 import { useEffect, useRef } from "react";
 import { SearchForm } from "@/frontend/features/reader/components/search-form/search-form";
 import { usePathname } from "next/navigation";
@@ -62,14 +63,17 @@ export function ReaderNavigation({ sections }: { sections: PublicSection[] }) {
                 </Link>
               </li>
               {sections.map((section) => {
-                const href = `/sections/${encodeURIComponent(section.slug)}`;
+                const href = sectionHref(section);
+                const sectionPath = `/sections/${encodeURIComponent(section.slug)}`;
                 return (
                   <li key={section.slug} className={styles.section}>
                     <Link
                       href={href}
                       aria-current={current(href)}
                       data-active={
-                        pathname?.startsWith(href + "/") || undefined
+                        pathname?.startsWith(sectionPath + "/") ||
+                        pathname?.startsWith(href + "/") ||
+                        undefined
                       }
                     >
                       {section.name}
@@ -85,7 +89,7 @@ export function ReaderNavigation({ sections }: { sections: PublicSection[] }) {
                         </summary>
                         <ul>
                           {section.categories.map((category) => {
-                            const path = `${href}/categories/${encodeURIComponent(category.slug)}`;
+                            const path = `${sectionPath}/categories/${encodeURIComponent(category.slug)}`;
                             return (
                               <li key={category.slug}>
                                 <Link href={path} aria-current={current(path)}>

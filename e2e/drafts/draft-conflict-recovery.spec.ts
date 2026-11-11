@@ -232,3 +232,79 @@ test("credited non-owner and signed-out callers cannot recover a private snapsho
   expect(denied).not.toContain(before.article.title);
   expect(fixture.article(21)).toEqual(before);
 });
+
+test("status-changing recovery retains local edits until a deliberate reload", async ({
+  context,
+  page,
+  browser,
+}) => {
+  await setLocalSession(context, fixture.users.author);
+  fixture.prepareRecoveryPublication();
+  const path = `/dashboard/articles/${fixture.id(17)}`;
+  await page.goto(path);
+  await page.getByLabel("Title (required)").fill("Local status recovery title");
+  await page
+    .getByRole("textbox", { name: "Article body" })
+    .fill("Local body stays here.");
+  const other = await browser.newContext({ baseURL: "http://127.0.0.1:3100" });
+  try {
+    await setLocalSession(other, fixture.users.admin);
+    const admin = await other.newPage();
+    await admin.goto(path);
+    await admin
+      .getByRole("textbox", { name: "Article body" })
+      .fill("Published body.");
+    await admin.getByRole("button", { name: "Save draft" }).click();
+    await expect(
+      admin.getByRole("status").filter({ hasText: "Draft saved" }),
+    ).toBeVisible();
+    admin.once("dialog", (dialog) => dialog.accept());
+    await admin.getByRole("button", { name: "Publish article" }).click();
+    await expect(
+      admin.getByRole("heading", { name: "Edit published article" }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Save draft" }).click();
+    await page
+      .getByRole("button", { name: "Review latest saved version" })
+      .click();
+    page.once("dialog", (dialog) => dialog.accept());
+    await page
+      .getByRole("button", { name: "Load latest saved version" })
+      .click();
+    await expect(
+      page.getByRole("region", { name: "Article status changed" }),
+    ).toContainText("now published");
+    await expect(page.getByLabel("Title (required)")).toHaveValue(
+      "Local status recovery title",
+    );
+    await expect(
+      page.getByRole("textbox", { name: "Article body" }),
+    ).toHaveText("Local body stays here.");
+    await expect(
+      page.getByRole("button", { name: "Save draft" }),
+    ).toBeDisabled();
+    page.once("dialog", (dialog) => dialog.dismiss());
+    await page.getByRole("button", { name: "Reload article" }).click();
+    await expect(page.getByLabel("Title (required)")).toHaveValue(
+      "Local status recovery title",
+    );
+    page.once("dialog", (dialog) => dialog.accept());
+    await page.getByRole("button", { name: "Reload article" }).click();
+    await expect(
+      page.getByRole("heading", { name: "Edit published article" }),
+    ).toBeVisible();
+    await page
+      .getByLabel("Title (required)")
+      .fill("Saved through published mode");
+    await page.getByRole("button", { name: "Save article" }).click();
+    await expect(
+      page.getByRole("status").filter({ hasText: "Article saved" }),
+    ).toBeVisible();
+    expect(fixture.article(17).article).toMatchObject({
+      status: "published",
+      title: "Saved through published mode",
+    });
+  } finally {
+    await other.close();
+  }
+});

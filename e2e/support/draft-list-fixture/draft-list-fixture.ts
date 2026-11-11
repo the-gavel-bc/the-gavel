@@ -292,6 +292,16 @@ export function draftListFixture(
           `delete from public.articles where id='${id(24)}'; delete from private.article_id_registry where article_id='${id(24)}';`,
         );
     },
+    prepareRecoveryPublication() {
+      if (!installed || suite !== "recover")
+        throw new Error("Not a recovery fixture.");
+      // Match the existing lifecycle fixture's finalized metadata. This test
+      // exercises publication/recovery rather than Storage delivery.
+      sql(`insert into public.media_assets(id,article_id,uploader_user_id,request_id,object_key,status,byte_size,width,height,sha256,finalized_at)
+        values('${id(90)}','${id(17)}','${uuid(users.author)}','${id(89)}','${id(17)}/${id(90)}.webp','finalized',120,12,8,repeat('a',64),now());
+        insert into public.article_main_images(article_id,asset_id,alt_text,credit)
+        values('${id(17)}','${id(90)}','Synthetic recovery image','The Gavel');`);
+    },
     article(number: number) {
       if (!installed || !Number.isInteger(number) || number < 1 || number > 24)
         throw new Error("Invalid fixture article.");
@@ -388,6 +398,7 @@ export function draftListFixture(
           delete from auth.users where id='${uuid(base + 5)}';`);
       sql(`${
         suite === "media" ||
+        suite === "recover" ||
         suite === "bodyMedia" ||
         suite === "published" ||
         suite === "lifecycle" ||

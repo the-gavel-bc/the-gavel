@@ -1,9 +1,8 @@
 # Current work
 
-- Phase: easy-first review fixes completed locally. [Plan and verification](docs/superpowers/plans/2026-11-10-review-fixes-easy-first.md).
-- Workspace: managed worktree `/Users/dylandrozario/.codex/worktrees/cc50/the-gavel`, branch `fix/review-easy-wins`, base `895bd98`. PR preparation is authorized against `main`; no merge performed. Original checkout, its uncommitted review artifacts and `screenshots/` are preserved.
-- Completed: findings 12, 14, 17, 27, 29 and O1. Also corrected an undefined archive predicate found during final TypeScript validation. [Review record](docs/reviews/phase-1-5-pr-review.md).
-- Verification after all fixes: 885 unit/component tests, 217 read-only contract-parity cases, 30 desktop/mobile browser cases, production build, types, lint and formatting passed. Browser checks used fixed synthetic local fixtures; no database reset or migration ran. Independent review found no blocking implementation defect.
-- Stack position: PRs #70–#76 merged into the base; this branch follows them. Hosted CI was not checked for this working tree.
-- Remaining review priorities: identity/last-admin consistency (24), cleanup fairness (28), then deferred editor/media recovery work. These are not fixed by the easy-first slice.
-- Product work remains Phase 5 Tasks 22–23 and the existing matched-resource no-JavaScript 404 release blocker. Preserve approved sitemap/robots decisions in the Task 21 plan; this slice changes no public URLs, lifecycle or access model.
+- Phase: second review-fix batch implemented and focused verification passed. [Plan and evidence](docs/superpowers/plans/2026-11-10-review-fixes-second-batch.md).
+- Workspace: managed worktree `/Users/dylandrozario/.codex/worktrees/cc50/the-gavel`, branch `fix/review-second-batch`, local stack on PR #77 head `ef21147` (`fix/review-easy-wins`). Changes are uncommitted; no new PR, push or merge performed. Original checkout and unrelated review artifacts/screenshots are preserved.
+- Completed locally: findings 13 (status recovery), 18 (canonical letters links), 20 (immutable CI references), O5 (single CI production build).
+- Focused end-only checks: 70 unit/component/boundary tests, 2 desktop/mobile recovery browser cases including production build/start, types, targeted lint/format and workflow gate-preservation checks passed. Review's publication-image fixture omission was corrected and tested. Full suites and hosted action/image execution remain with CI per user direction; no CI pass claimed.
+- PR #77 remains open and unchanged at the last status check; its first-batch fixes are the parent, not duplicated second-batch work. Recheck merge state before preparing a new PR base.
+- Remaining production priorities: identity/last-admin consistency (24), cleanup fairness (28), deferred media/retry work and the matched-resource no-JavaScript 404 release blocker. No auth, SQL, content-lifecycle or public-route contract was changed in this slice.

@@ -270,6 +270,7 @@ it("preserves conflict input until confirmed reload and then uses the reviewed v
     ok: true,
     detail: {
       kind: "editable",
+      status: "draft",
       articleId: baseDraft.sectionId,
       version: 2,
       updatedAt: "2026-10-28T12:00:00Z",
@@ -341,4 +342,113 @@ it("toolbar correction does not clear an independent invalid native body", async
   await userEvent.clear(input);
   expect(screen.getByRole("button", { name: "Create draft" })).toBeDisabled();
   expect(mocks.create).not.toHaveBeenCalled();
+});
+
+it("retains input and blocks stale save mode when recovery finds a published article", async () => {
+  mocks.save.mockResolvedValue({ ok: false, code: "conflict" });
+  mocks.review.mockResolvedValue({
+    ok: true,
+    detail: {
+      kind: "editable",
+      status: "published",
+      articleId: baseDraft.sectionId,
+      version: 3,
+      updatedAt: "2026-11-11T12:00:00Z",
+      draft: { ...baseDraft, title: "Published elsewhere" },
+      unavailableSelections: {
+        sectionId: null,
+        categoryIds: [],
+        tagIds: [],
+        contributorIds: [],
+      },
+    },
+    options,
+  });
+  const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+  try {
+    const view = render(
+      <DraftForm
+        initialDraft={{
+          ...baseDraft,
+          content: {
+            format: "gavel-draft",
+            version: 1,
+            document: {
+              type: "doc",
+              content: [
+                {
+                  type: "paragraph",
+                  content: [{ type: "text", text: "Local body retained" }],
+                },
+              ],
+            },
+          },
+        }}
+        options={options}
+        article={{
+          id: baseDraft.sectionId,
+          version: 1,
+          updatedAt: "2026-11-10T12:00:00Z",
+        }}
+      />,
+    );
+    await screen.findByRole("textbox", { name: "Article body" });
+    await userEvent.type(screen.getByLabelText(/Title/), " local");
+    await userEvent.click(screen.getByRole("button", { name: "Save draft" }));
+    await userEvent.click(
+      await screen.findByRole("button", {
+        name: "Review latest saved version",
+      }),
+    );
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Load latest saved version" }),
+    );
+    expect(
+      screen.getByRole("region", { name: "Article status changed" }),
+    ).toHaveTextContent("now published");
+    expect(screen.getByLabelText(/Title/)).toHaveValue(
+      `${baseDraft.title} local`,
+    );
+    expect(
+      screen.getByRole("textbox", { name: "Article body" }),
+    ).toHaveTextContent("Local body retained");
+    expect(
+      screen.getByRole("button", { name: "Reload article" }),
+    ).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
+    fireEvent.submit(view.container.querySelector("form")!);
+    expect(mocks.save).toHaveBeenCalledOnce();
+    expect(mocks.refresh).not.toHaveBeenCalled();
+    const leaving = new Event("beforeunload", { cancelable: true });
+    window.dispatchEvent(leaving);
+    expect(leaving.defaultPrevented).toBe(true);
+  } finally {
+    confirm.mockRestore();
+  }
+});
+it("does not offer snapshot adoption while a save is uncertain", async () => {
+  mocks.save.mockResolvedValue({ ok: false, code: "unavailable" });
+  render(
+    <DraftForm
+      initialDraft={baseDraft}
+      options={options}
+      article={{
+        id: baseDraft.sectionId,
+        version: 1,
+        updatedAt: "2026-11-10T12:00:00Z",
+      }}
+    />,
+  );
+  await userEvent.type(screen.getByLabelText(/Title/), " pending");
+  await userEvent.click(screen.getByRole("button", { name: "Save draft" }));
+  expect(
+    await screen.findByRole("button", { name: "Retry original save" }),
+  ).toBeEnabled();
+  expect(
+    screen.queryByRole("button", { name: "Review latest saved version" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Reload article" }),
+  ).not.toBeInTheDocument();
+  expect(mocks.review).not.toHaveBeenCalled();
 });
