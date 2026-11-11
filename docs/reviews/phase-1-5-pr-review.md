@@ -272,7 +272,7 @@ Acceptance criteria were: account for every inventory PR; check current replacem
 - **Evidence:** the actual proposed worker was transpiled and executed with mocked RPC/Storage and a controlled clock. One prefix listing advances the clock by 41 seconds. Two runs produced `prefixCalls:1,keyCalls:0` and `prefixCalls:2,keyCalls:0`; both returned `{ok:false}`. No live Storage or database was involved. The lead reran the reproduction.
 - **Fix:** interleave prefix and key batches or reserve separate bounded progress budgets. Preserve claim fencing, permanent tombstones, failure reporting and authorization.
 - **Required validation:** use enough normal-latency batches to exhaust the prefix allocation and prove at least one key batch progresses in each run. Repeat across runs and test failed claims, expired leases and late recreated objects. Hosted capacity remains unmeasured.
-- **Reproduction:** from the repository under Node 22, run `node docs/reviews/reproductions/cleanup-budget.cjs`. It reads exact PR #74 source from Git and asserts the failure; it requires that Git object and installed project dependencies.
+- **Reproduction:** from the repository under Node 22, run `node docs/reviews/reproductions/cleanup-budget.mjs`. It reads exact PR #74 source from Git and asserts the failure; it requires that Git object and installed project dependencies.
 
 ### 29. #39 / #40 — unchanged contributor save disables controls until a full reload (Low)
 
@@ -282,7 +282,7 @@ Acceptance criteria were: account for every inventory PR; check current replacem
 - **Evidence:** a JSDOM/React reproduction executed the actual component with a mocked no-op action and refresh. Output was `beforeDisabled:false,afterSameVersionRefreshDisabled:true,refreshes:1`. The lead independently ran it; no browser, database or network was involved.
 - **Fix:** clear the success latch when `changed:false`, following `TaxonomyControls`, or reconcile the acknowledged state without blocking every successful result.
 - **Required validation:** save unchanged fields, rerender with refreshed same-version props, then change and save again. Controls must stay usable; changed saves must still adopt fresh versions, and role/ownership denials must retain input.
-- **Reproduction:** from the repository under Node 22, run `node docs/reviews/reproductions/contributor-noop.cjs`. It asserts the current failure, using installed React, JSDOM and TypeScript dependencies.
+- **Reproduction:** from the repository under Node 22, run `node docs/reviews/reproductions/contributor-noop.mjs`. It asserts the historical failure against the current component, using installed React, JSDOM and TypeScript dependencies. After the no-op fix it exits nonzero because the formerly stuck controls are enabled; normal regression coverage verifies the corrected behavior.
 
 ### Performance opportunities, separate from bugs
 

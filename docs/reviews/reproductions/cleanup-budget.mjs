@@ -1,10 +1,11 @@
 // Reproduces a reviewed failure with local mocks; no external service is contacted.
 // A successful exit confirms the documented failure, not that the application is fixed.
-const { resolve } = require("node:path");
-const repoRoot = resolve(__dirname, "../../..");
-const { createRequire } = require("node:module");
-const { execFileSync } = require("node:child_process");
-const vm = require("node:vm");
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
+const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
+import { execFileSync } from "node:child_process";
+import vm from "node:vm";
 const req = createRequire(resolve(repoRoot, "package.json"));
 const ts = req("typescript");
 const src = execFileSync(
@@ -26,7 +27,7 @@ let now = 0,
   keyCalls = 0;
 const id = "85000000-0000-4000-8000-000000000001";
 const client = {
-  rpc: async (name, args) => {
+  rpc: async (name) => {
     if (name === "start_media_cleanup_run") return { data: id, error: null };
     if (name === "get_media_cleanup_probe")
       return {

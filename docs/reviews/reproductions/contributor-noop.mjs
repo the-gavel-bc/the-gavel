@@ -1,10 +1,11 @@
 // Reproduces a reviewed failure with local mocks; no external service is contacted.
 // A successful exit confirms the documented failure, not that the application is fixed.
-const { resolve } = require("node:path");
-const repoRoot = resolve(__dirname, "../../..");
-const { createRequire } = require("node:module");
-const { readFileSync } = require("node:fs");
-const vm = require("node:vm");
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
+const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
+import { readFileSync } from "node:fs";
+import vm from "node:vm";
 const req = createRequire(resolve(repoRoot, "package.json"));
 const { JSDOM } = req("jsdom");
 const dom = new JSDOM("<!doctype html><html><body></body></html>", {
