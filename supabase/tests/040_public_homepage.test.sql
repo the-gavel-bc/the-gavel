@@ -59,9 +59,37 @@ select throws_ok($$insert into public.homepage_selections values('read_this',2,'
 set local role anon;
 select is(jsonb_array_length(public.get_public_homepage()->'readThis'),4,'read-this remains filled after rejected duplicate');
 reset role;
+-- Picks the card map cannot render fall through instead of failing the page.
+insert into public.sections(id,name,slug,active) values('28000000-0000-0000-0000-000000000041','Home hidden','home-hidden',false);
+update public.articles set section_id='28000000-0000-0000-0000-000000000041' where slug='home-story-1';
+set local role anon;
+select is(public.get_public_homepage()->>'kind','ok','inactive-section saved lead does not fail the homepage');
+select is(public.get_public_homepage()#>>'{lead,slug}','home-story-11','inactive-section saved lead falls back');
+reset role;
+update public.articles set section_id='28000000-0000-0000-0000-000000000040' where slug='home-story-1';
+update public.articles set section_id='28000000-0000-0000-0000-000000000041' where slug='home-story-11';
+delete from public.homepage_selections where group_name='lead';
+set local role anon;
+select is(public.get_public_homepage()#>>'{lead,slug}','home-story-10','inactive-section newest story is skipped as fallback');
+reset role;
+update public.articles set section_id='28000000-0000-0000-0000-000000000040' where slug='home-story-11';
+insert into public.homepage_selections values('lead',1,'58000000-0000-0000-0000-000000000001');
+insert into public.media_assets(id,article_id,uploader_user_id,request_id,object_key)
+values('68000000-0000-0000-0000-000000000040','58000000-0000-0000-0000-000000000001',
+ '00000000-0000-0000-0000-000000000002','88000000-0000-0000-0000-000000000040','home/pending-040.webp');
+insert into public.article_main_images(article_id,asset_id,alt_text,credit)
+values('58000000-0000-0000-0000-000000000001','68000000-0000-0000-0000-000000000040','Pending image','Proof');
+set local role anon;
+select is(public.get_public_homepage()->>'kind','ok','unfinalized main image pick does not fail the homepage');
+select is(public.get_public_homepage()#>>'{lead,slug}','home-story-11','unfinalized main image pick falls back');
+reset role;
+delete from public.article_main_images where article_id='58000000-0000-0000-0000-000000000001';
+delete from public.media_assets where id='68000000-0000-0000-0000-000000000040';
 update public.profiles set active=false where id='10000000-0000-0000-0000-000000000002';
 set local role anon;
-select is(public.get_public_homepage()->>'kind','unavailable','inactive required owner fails safely without private metadata');
+select is(public.get_public_homepage()->>'kind','ok','inactive sole owner leaves an empty homepage, not an outage');
+select is(public.get_public_homepage()->'lead','null'::jsonb,'inactive owner articles never fill slots');
+select is(jsonb_array_length(public.get_public_homepage()->'readThis'),0,'inactive owner articles never fill read-this');
 reset role;
 update public.profiles set active=true where id='10000000-0000-0000-0000-000000000002';
 insert into public.sections(name,slug) select 'Home overflow '||n,'home-overflow-'||n from generate_series(1,99) n;
