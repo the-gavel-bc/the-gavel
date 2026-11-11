@@ -195,10 +195,10 @@ export function isValidDraftDocument(
         !isDraftUuid(node.attrs.assetId) ||
         !scalar(node.attrs.alt, 240) ||
         !(node.attrs.caption === null || scalar(node.attrs.caption, 500)) ||
-        imageIds.has(node.attrs.assetId)
+        imageIds.has(node.attrs.assetId.toLowerCase())
       )
         return false;
-      imageIds.add(node.attrs.assetId);
+      imageIds.add(node.attrs.assetId.toLowerCase());
       continue;
     }
     if (type === "text") {

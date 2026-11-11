@@ -2911,6 +2911,88 @@
       "target": "link",
       "value": "https://example.test/bücher/xn--bcher-kva?q=é",
       "want": "ok"
+    },
+    {
+      "name": "mixed-case duplicate body image IDs",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 2,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "image",
+              "attrs": {
+                "assetId": "a0000000-0000-4000-8000-000000000001",
+                "alt": "Photo",
+                "caption": null
+              }
+            },
+            {
+              "type": "image",
+              "attrs": {
+                "assetId": "A0000000-0000-4000-8000-000000000001",
+                "alt": "Photo",
+                "caption": null
+              }
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "single uppercase body image ID",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 2,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "image",
+              "attrs": {
+                "assetId": "A0000000-0000-4000-8000-000000000001",
+                "alt": "Photo",
+                "caption": null
+              }
+            }
+          ]
+        }
+      },
+      "want": "ok"
+    },
+    {
+      "name": "distinct mixed-case body image IDs",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 2,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "image",
+              "attrs": {
+                "assetId": "a0000000-0000-4000-8000-000000000001",
+                "alt": "Photo",
+                "caption": null
+              }
+            },
+            {
+              "type": "image",
+              "attrs": {
+                "assetId": "A0000000-0000-4000-8000-000000000002",
+                "alt": "Photo",
+                "caption": null
+              }
+            }
+          ]
+        }
+      },
+      "want": "ok"
     }
   ]
 }
