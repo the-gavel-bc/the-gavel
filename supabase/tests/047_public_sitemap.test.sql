@@ -1,9 +1,12 @@
 begin;
 select no_plan();
 select has_function('public','list_public_sitemap_articles',array['timestamp with time zone','uuid','integer'],'sitemap article projection exists');
-select has_function('public','list_public_sitemap_archives','sitemap archive projection exists');
+select hasnt_function('public','list_public_sitemap_archives','archive sets derive from listed articles, not a separate scan');
 select ok(has_function_privilege('anon','public.list_public_sitemap_articles(timestamptz,uuid,integer)','execute'),'anonymous can list sitemap articles');
-select ok(has_function_privilege('authenticated','public.list_public_sitemap_archives()','execute'),'authenticated can list sitemap archives');
+select ok(has_function_privilege('authenticated','public.list_public_sitemap_articles(timestamptz,uuid,integer)','execute'),'authenticated can list sitemap articles');
+select ok(not has_function_privilege('anon','private.claim_public_sitemap_budget()','execute'),'private admission cannot be called directly');
+select ok(not has_sequence_privilege('anon','private.public_sitemap_budget','usage'),'anonymous cannot obtain sitemap tickets');
+create temp table budget_before as select last_value,is_called from private.public_sitemap_budget;
 select ok(not has_table_privilege('anon','public.articles','select'),'anonymous direct article reads remain denied');
 
 insert into public.sections(id,name,slug,active) values
@@ -62,7 +65,6 @@ create temporary table sitemap_proof(label text primary key,value jsonb);
 grant select,insert on sitemap_proof to anon,authenticated;
 set local role anon;
 insert into sitemap_proof values
- ('archives',public.list_public_sitemap_archives()),
  ('page1',public.list_public_sitemap_articles(null,null,2)),
  ('all',public.list_public_sitemap_articles(null,null,1000));
 insert into sitemap_proof select 'page2',public.list_public_sitemap_articles(
@@ -81,36 +83,46 @@ select is((select array_agg(i->>'slug' order by i->>'slug') from sitemap_proof,j
    where label='all' and i->>'slug' like 'sm-%'),array['sm-one','sm-three','sm-two'],
  'draft, archived, inactive-section, inactive-owner and NULL-body articles are absent');
 select is((select count(*)::int from sitemap_proof,jsonb_array_elements(value->'items') i,jsonb_object_keys(i) k
-   where label='page1' and k not in ('id','slug','publishedAt')),0,'no extra article fields');
+   where label='page1' and k not in ('id','slug','publishedAt','section','categories','tags','authors')),0,'no extra article fields');
 select is(public.list_public_sitemap_articles(null,null,0)->>'kind','invalid','zero page rejected');
 select is(public.list_public_sitemap_articles(null,null,1001)->>'kind','invalid','oversized page rejected');
 select is(public.list_public_sitemap_articles(now(),null,10)->>'kind','invalid','partial cursor rejected');
 select is(public.list_public_sitemap_articles(null,'54000000-0000-0000-0000-000000000001',10)->>'kind','invalid','partial cursor id rejected');
 
--- Archives: only active, non-empty and visible scopes.
-select is((select value->>'kind' from sitemap_proof where label='archives'),'ok','archive sets are available');
-select ok((select (value->'sections') ? 'sm-news' from sitemap_proof where label='archives'),'non-empty section listed');
-select ok((select not (value->'sections') ?| array['sm-empty','sm-hidden'] from sitemap_proof where label='archives'),'empty and inactive sections absent');
-select ok((select (value->'categories') @> '[{"section":"sm-news","slug":"sm-cat"}]' from sitemap_proof where label='archives'),'non-empty category listed with its section');
-select is((select count(*)::int from sitemap_proof,jsonb_array_elements(value->'categories') c
-   where label='archives' and c->>'slug' in ('sm-empty-cat','sm-inactive-cat','sm-hidden-cat')),0,
- 'empty, inactive and hidden-section categories absent');
-select ok((select (value->'tags') ? 'sm-tag' from sitemap_proof where label='archives'),'tag with visible article listed');
-select ok((select not (value->'tags') ?| array['sm-tag-private','sm-tag-hidden-section','sm-tag-inactive-owner'] from sitemap_proof where label='archives'),
- 'tags on only private or hidden articles absent');
-select ok((select (value->'authors') ?& array['sm-owner','sm-guest'] from sitemap_proof where label='archives'),'owner and credited guest listed');
-select ok((select not (value->'authors') ?| array['sm-draft-credit','sm-inactive'] from sitemap_proof where label='archives'),
- 'draft-only credit and inactive profile absent');
-select is((select count(*)::int from sitemap_proof,jsonb_array_elements_text(value->'authors') a
-   where label='archives' and a in ('sm-owner','sm-guest')),2,'repeated credits do not duplicate authors');
-select is((select count(*)::int from sitemap_proof,jsonb_array_elements_text(value->'tags') t
-   where label='archives' and t='sm-tag'),1,'repeated tag links do not duplicate tags');
+-- Archive slugs travel with each listed article.
+create temp view sitemap_items as
+ select i from sitemap_proof,jsonb_array_elements(value->'items') i where label='all' and i->>'slug' like 'sm-%';
+grant select on sitemap_items to anon,authenticated;
+select is((select i from sitemap_items where i->>'slug'='sm-one') - 'id' - 'publishedAt',
+ '{"slug":"sm-one","section":"sm-news","categories":["sm-cat"],"tags":["sm-tag"],"authors":["sm-guest","sm-owner"]}'::jsonb,
+ 'article carries active category, tag and deduplicated owner/credited authors');
+select is((select i->'authors' from sitemap_items where i->>'slug'='sm-two'),'["sm-guest","sm-owner"]'::jsonb,'credited guest and owner listed once');
+select is((select count(*)::int from sitemap_items,jsonb_array_elements_text(i->'categories') c where c in ('sm-empty-cat','sm-inactive-cat','sm-hidden-cat')),0,
+ 'inactive and hidden-section categories never travel with listed articles');
+select is((select count(*)::int from sitemap_items,jsonb_array_elements_text(i->'tags') t where t<>'sm-tag'),0,
+ 'tags on only private or hidden articles never appear');
+select is((select count(*)::int from sitemap_items,jsonb_array_elements_text(i->'authors') a where a in ('sm-draft-credit','sm-inactive')),0,
+ 'draft-only credit and inactive profile never appear');
+select is((select count(*)::int from sitemap_items where i->>'section'<>'sm-news'),0,'hidden and empty sections never appear');
 
 -- Signed-in callers see the same public projection.
 set local role authenticated;
-select is(public.list_public_sitemap_archives(),(select value from sitemap_proof where label='archives'),'authenticated archives match anonymous');
 select is(public.list_public_sitemap_articles(null,null,1000),(select value from sitemap_proof where label='all'),'authenticated articles match anonymous');
 reset role;
+
+-- Shared budget: avoid straddling a real window boundary, as in search tests.
+select pg_sleep(case when extract(second from clock_timestamp())>45 then 61-extract(second from clock_timestamp()) else 0 end);
+select setval('private.public_sitemap_budget',floor(extract(epoch from clock_timestamp())/60)::bigint*512,true);
+create temp table quota_base as select last_value from private.public_sitemap_budget;
+select is(public.list_public_sitemap_articles(null,null,0)->>'kind','invalid','invalid page still rejected');
+select is((select last_value from private.public_sitemap_budget),(select last_value from quota_base),'invalid requests spend no tickets');
+select is((select count(*)::int from generate_series(1,300) n where public.list_public_sitemap_articles(null,null,1)->>'kind'='ok'),300,'exactly 300 pages admitted in window');
+select is(public.list_public_sitemap_articles(null,null,1)->>'kind','rate_limited','page 301 is denied');
+select ok((public.list_public_sitemap_articles(null,null,1)->>'retryAfter')::int between 1 and 60,'retry duration is bounded server time');
+select is((select last_value from private.public_sitemap_budget),(select last_value+300 from quota_base),'rejected pages do not increment saturated sequence');
+select setval('private.public_sitemap_budget',(select last_value-512+300 from quota_base),true);
+select is(public.list_public_sitemap_articles(null,null,1)->>'kind','ok','expired full window rolls over');
+select setval('private.public_sitemap_budget',(select last_value from budget_before),(select is_called from budget_before));
 
 select * from finish();
 rollback;

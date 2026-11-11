@@ -924,10 +924,6 @@ export type Database = {
         };
         Returns: Json;
       };
-      list_public_sitemap_archives: {
-        Args: Record<PropertyKey, never>;
-        Returns: Json;
-      };
       list_public_sitemap_articles: {
         Args: {
           p_after_id: string;
