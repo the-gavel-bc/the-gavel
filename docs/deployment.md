@@ -34,7 +34,7 @@ Configure Google OAuth in the environment-specific Supabase/Google projects, usi
 
 Use HTTPS `SITE_URL` values in staging/production so session cookies are Secure. Browser sessions use HttpOnly cookies; foundation authentication and authenticated reads run on the server. Preview protection and hosted OAuth smoke checks remain launch gates.
 
-`SITE_URL` must be the final production origin at build time: `/robots.txt` is prerendered with its sitemap URL, while `/sitemap.xml` reads it per request. Previews serve the same robots file and rely on Vercel protection rather than a disallow-all rule. Confirm both routes on the production origin as a release check.
+`/robots.txt` and `/sitemap.xml` read `SITE_URL` per request, so it must be the final production origin in the production runtime environment. Previews serve the same robots file and rely on Vercel protection rather than a disallow-all rule. Confirm both routes on the production origin as a release check.
 
 ## Release requirements
 

@@ -1,7 +1,7 @@
 # Current work
 
 - Phase: 5, public reader experience. The accepted plan is [Phase 5 public reader](docs/superpowers/plans/2026-11-09-phase-five-public-reader.md).
-- Active task: Task 21, sitemap and robots, on branch `feat/public-sitemap-robots` from main `9269c86`. Implemented and verified locally; not pushed, no PR yet. See the [Task 21 plan](docs/superpowers/plans/2026-11-11-public-sitemap-robots.md).
+- Active task: Task 21, sitemap and robots, on branch `feat/public-sitemap-robots` from main `9269c86`. Implemented, reviewed once, and verified locally; PR open against main. See the [Task 21 plan](docs/superpowers/plans/2026-11-11-public-sitemap-robots.md).
 - Approved decisions (2026-11-11): the sitemap lists only non-empty archives; robots disallows `/search`; article lastmod uses `published_at`; one robots file for every environment, with previews relying on Vercel protection.
 - Next planned tasks: Task 22 (screenshot/accessibility reconciliation; the owner screenshots are in the untracked `screenshots/` directory, so preserve it) and Task 23 (integrated verification).
 - GitHub: PRs #65–#69 are merged and main CI is green at `9269c86`. Earlier red runs were the gitleaks false positive fixed in `5831aea`. Cancelled runs come from `cancel-in-progress` concurrency.

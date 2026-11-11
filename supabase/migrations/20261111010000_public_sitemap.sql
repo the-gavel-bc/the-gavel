@@ -18,7 +18,9 @@ begin
     from public.articles a
     join public.sections s on s.id=a.section_id and s.active
     join public.profiles p on p.id=a.owner_profile_id and p.active
-    where a.status='published'
+    -- Legacy NULL bodies render as unavailable/noindex. Writes validate
+    -- non-null bodies, so a full document check is not repeated per row.
+    where a.status='published' and a.content is not null
       and (p_after_id is null or (a.published_at,a.id)<(p_after_published_at,p_after_id))
     order by a.published_at desc,a.id desc
     limit p_limit+1
@@ -53,28 +55,27 @@ begin
     join public.profiles p on p.id=a.owner_profile_id and p.active
     where a.status='published'
   ), sections as (
-    select s.slug from public.sections s
-    where s.active and exists(select 1 from visible v where v.section_id=s.id)
+    -- Joins from visible articles read each article once; correlated probes
+    -- of the unindexed CTE would cost entities x articles.
+    select distinct s.slug from visible v join public.sections s on s.id=v.section_id
     order by s.slug limit 5001
   ), categories as (
-    select s.slug section_slug,c.slug from public.categories c
-    join public.sections s on s.id=c.section_id and s.active
-    where c.active and exists(
-      select 1 from public.article_categories ac join visible v on v.id=ac.article_id
-      where ac.category_id=c.id and v.section_id=c.section_id)
+    select distinct s.slug section_slug,c.slug from visible v
+    join public.article_categories ac on ac.article_id=v.id
+    join public.categories c on c.id=ac.category_id and c.active and c.section_id=v.section_id
+    join public.sections s on s.id=c.section_id
     order by s.slug,c.slug limit 5001
   ), tags as (
-    select t.slug from public.tags t
-    where exists(
-      select 1 from public.article_tags atg join visible v on v.id=atg.article_id
-      where atg.tag_id=t.id)
+    select distinct t.slug from visible v
+    join public.article_tags atg on atg.article_id=v.id
+    join public.tags t on t.id=atg.tag_id
     order by t.slug limit 5001
   ), authors as (
-    select p.slug from public.profiles p
-    where p.active and (
-      exists(select 1 from visible v where v.owner_profile_id=p.id)
-      or exists(select 1 from public.article_contributors ac join visible v on v.id=ac.article_id
-        where ac.profile_id=p.id))
+    select distinct p.slug from (
+      select v.owner_profile_id profile_id from visible v
+      union
+      select ac.profile_id from visible v join public.article_contributors ac on ac.article_id=v.id
+    ) x join public.profiles p on p.id=x.profile_id and p.active
     order by p.slug limit 5001
   )
   select case when (select count(*) from sections)>5000 or (select count(*) from categories)>5000

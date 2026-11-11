@@ -46,3 +46,7 @@ it.each([
 it("names the sitemap on the validated site origin", () => {
   expect(robots().sitemap).toBe("https://gavel.example/sitemap.xml");
 });
+
+it("renders per request so the sitemap origin is never fixed at build time", async () => {
+  expect((await import("./robots")).dynamic).toBe("force-dynamic");
+});

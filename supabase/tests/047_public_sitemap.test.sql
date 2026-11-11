@@ -33,7 +33,11 @@ insert into public.articles(id,owner_profile_id,section_id,title,slug,status,pub
  ('54000000-0000-0000-0000-000000000004','14000000-0000-0000-0000-000000000001','24000000-0000-0000-0000-000000000001','Draft','sm-draft','draft',null,null),
  ('54000000-0000-0000-0000-000000000005','14000000-0000-0000-0000-000000000001','24000000-0000-0000-0000-000000000001','Archived','sm-archived','archived','2099-01-01T00:00:00Z',now()),
  ('54000000-0000-0000-0000-000000000006','14000000-0000-0000-0000-000000000001','24000000-0000-0000-0000-000000000003','Hidden section','sm-hidden-story','published','2099-01-01T00:00:00Z',null),
- ('54000000-0000-0000-0000-000000000007','14000000-0000-0000-0000-000000000004','24000000-0000-0000-0000-000000000001','Inactive owner','sm-inactive-story','published','2099-01-01T00:00:00Z',null);
+ ('54000000-0000-0000-0000-000000000007','14000000-0000-0000-0000-000000000004','24000000-0000-0000-0000-000000000001','Inactive owner','sm-inactive-story','published','2099-01-01T00:00:00Z',null),
+ ('54000000-0000-0000-0000-000000000008','14000000-0000-0000-0000-000000000001','24000000-0000-0000-0000-000000000001','Legacy null body','sm-null-body','published','2099-01-02T00:00:00Z',null);
+-- Readable articles carry a valid body; sm-null-body models a legacy unavailable page.
+update public.articles set content='{"format":"gavel-draft","version":1,"document":{"type":"doc","content":[{"type":"paragraph"}]}}'
+where slug like 'sm-%' and slug<>'sm-null-body';
 insert into public.article_categories(article_id,category_id,section_id) values
  ('54000000-0000-0000-0000-000000000001','34000000-0000-0000-0000-000000000001','24000000-0000-0000-0000-000000000001'),
  ('54000000-0000-0000-0000-000000000002','34000000-0000-0000-0000-000000000001','24000000-0000-0000-0000-000000000001'),
@@ -75,7 +79,7 @@ select ok((select (value->>'hasMore')::boolean from sitemap_proof where label='p
 select is((select value#>>'{items,0,slug}' from sitemap_proof where label='page2'),'sm-one','continuation neither skips nor repeats ties');
 select is((select array_agg(i->>'slug' order by i->>'slug') from sitemap_proof,jsonb_array_elements(value->'items') i
    where label='all' and i->>'slug' like 'sm-%'),array['sm-one','sm-three','sm-two'],
- 'draft, archived, inactive-section and inactive-owner articles are absent');
+ 'draft, archived, inactive-section, inactive-owner and NULL-body articles are absent');
 select is((select count(*)::int from sitemap_proof,jsonb_array_elements(value->'items') i,jsonb_object_keys(i) k
    where label='page1' and k not in ('id','slug','publishedAt')),0,'no extra article fields');
 select is(public.list_public_sitemap_articles(null,null,0)->>'kind','invalid','zero page rejected');
