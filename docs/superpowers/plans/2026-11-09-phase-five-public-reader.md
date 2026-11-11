@@ -248,11 +248,13 @@ Implemented on `feat/bounded-public-search`; see the [focused plan and verificat
 
 ## Task 18 — search page and custom not-found recovery
 
+Implemented on `feat/public-search-page`; see the [focused plan and verification](2026-11-10-search-page-and-recovery.md). Owner-approved exception: matched-resource 404 recovery without JavaScript remains a public-release blocker because of Next.js #100596. Correct status, hydrated resource recovery, unmatched-URL initial recovery and native search are verified; no framework patch is introduced.
+
 **Files:** `src/app/(public)/search/page.tsx`; appropriate app/public not-found boundaries; reader search/results components and shared search form.
 
-- [ ] Use native GET `q` submission, a persistent label, meaningful query/result/empty/error/throttled states with the accepted retry behavior, and accessible pagination. Work without JavaScript.
-- [ ] Build demo-informed custom 404 recovery with search and a home link; unknown slugs remain real 404s rather than redirects or soft-200 placeholders.
-- [ ] Test keyboard/mobile use, query retention/escaping, changed-query cursors, no-result terms and private/deleted article URLs. Live suggestions are not required.
+- [x] Use native GET `q` submission, a persistent label, meaningful query/result/empty/error/throttled states with the accepted retry behavior, and accessible pagination. Work without JavaScript.
+- [x] Build demo-informed custom 404 recovery with search and a home link; unknown slugs remain real 404s rather than redirects or soft-200 placeholders.
+- [x] Test keyboard/mobile use, query retention/escaping, changed-query cursors, no-result terms and private/deleted article URLs. Live suggestions are not required.
 
 **Acceptance/validation:** Search and recovery share existing primitives; no client full-corpus search or invented endpoint. Route/component/browser checks pass.
 
