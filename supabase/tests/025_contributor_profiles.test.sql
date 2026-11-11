@@ -116,8 +116,16 @@ update auth.users set email='ineligible@example.test'
 set local role authenticated;
 select is((public.deactivate_contributor_profile(
   '10000000-0000-0000-0000-000000000002',1,
-  '80000000-0000-0000-0000-000000000969')->>'ok'),
-  'true','ineligible administrator profile is not the last eligible admin');
+  '80000000-0000-0000-0000-000000000969')->>'code'),
+  'conflict','any active member profile is refused, eligible or not');
+reset role;
+update public.memberships set active=false,revoked_at=now()
+  where user_id='00000000-0000-0000-0000-000000000002';
+set local role authenticated;
+select is((public.deactivate_contributor_profile(
+  '10000000-0000-0000-0000-000000000002',1,
+  '80000000-0000-0000-0000-000000000970')->>'ok'),
+  'true','profile of a deactivated membership can be deactivated');
 reset role;
 update auth.users set email='task10-author@bc.edu',email_confirmed_at=now(),
   raw_app_meta_data='{"provider":"google"}'::jsonb
