@@ -258,3 +258,9 @@ Valid archive continuations are noindex/follow without canonical/social cards. I
 ## Combined private editor read
 
 `getDraftEditorData(articleId) -> {detail: DraftDetailResult, options: DraftOptions | null}` in `backend/articles/draft-queries/` loads detail and the eligible catalogs once for the edit page and conflict recovery. Editable results carry the same catalogs used to calculate unavailable selections; noneditable results return null options without a catalog read. Each invocation independently verifies active membership, keeps the explicit owner filter for authors, and uses its own no-store client. No catalog is cached across users or requests. `getDraftDetail` keeps its original result shape as a compatibility wrapper; standalone `getDraftOptions` remains available for new drafts. The browser recovery action retains its existing `{ok,detail,options}` envelope.
+
+## Main-image command recovery
+
+The main-image UI retains article ID, expected version, request ID and payload for an uncertain write. Its explicit retry submits that original command independently of newer alt/credit input or draft edits. Successful receipt recovery preserves newer metadata input and advances the form's article version without replacing its current or acknowledged text. Saving draft content and lifecycle changes remain blocked while an image operation or unresolved image command is pending; title/body editing remains available.
+
+Authorization and missing-resource denials that precede receipt lookup cannot prove an uncertain command did not commit. They retain its retry handle. A definitive conflict offers existing reload recovery. Database authorization remains authoritative, including when the UI retries a stored command while newer draft input disables fresh image operations. See the [medium fix plan](superpowers/plans/2026-11-11-medium-easy-fixes.md).

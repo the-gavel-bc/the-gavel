@@ -423,3 +423,9 @@ Final type checking also uncovered a pre-existing merged #71 typo calling undefi
 Findings **13, 18, 20** and optimization **O5** are implemented locally on `fix/review-second-batch`, stacked on PR #77 head `ef21147`. The [second-batch plan](../superpowers/plans/2026-11-10-review-fixes-second-batch.md) records the exact changes, official CI-reference resolutions and verification.
 
 Focused validation after implementation passed 70 unit/component/boundary cases, the new recovery browser scenario on desktop and mobile (2 cases, including production build/start), types and targeted source formatting/lint. The workflow parsed successfully and all existing gates/settings except the duplicate standalone build were preserved. Independent review's missing-image test-fixture finding was corrected before the passing browser run. No hosted CI result, merge, deployment or measured speedup is claimed; broader checks are left to CI as requested. The earlier findings tables remain historical review snapshots.
+
+## Easiest medium implementation follow-up
+
+Findings **7, 26 and 25** are implemented and locally verified in `fix/review-medium-easy`, based on corrected PR #77 head `1dfa5bd`. Image writes preserve newer form content; explicit retries retain the complete original command and newer metadata; finalization uses the common article-before-asset lock order. Later access/missing-resource denials preserve an uncertain image command until its receipt can be recovered.
+
+The [medium fix plan](../superpowers/plans/2026-11-11-medium-easy-fixes.md) records scope, independent review, 46 distinct unit/component cases, 68 SQL assertions, 14 independent-session races, strict types, lint and formatting. Full suites/build/browser/clean-install and hosted checks remain CI work. These changes are uncommitted; no merge or deployment is claimed. Historical tables above retain their original review status. Findings 5/6/24/28 remain outside this batch.

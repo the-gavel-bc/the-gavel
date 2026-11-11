@@ -156,3 +156,9 @@ Independent final review found one important test-fixture omission (publication 
 ### PR preparation update — 2026-11-11
 
 PR #77 merged into main at `6789a35`. This batch was reapplied to that merge, preserving the original implementation and verification evidence. The commit and PR are being prepared from the updated base.
+
+### PR 80 integration after PR 78
+
+Merged main at `fc43967` into this branch without rewriting history. PR 79 remains separate and unmerged. The form retains status-mismatch recovery alongside main's image busy guards and version-only acknowledgements. Resolved the shared test insertion by retaining both recovery and media acknowledgement regressions; retained both review follow-up sections and updated STATUS.md.
+
+Validation: 62 focused tests across nine form, conflict, media and save-state files passed. TypeScript, targeted ESLint and full formatting checks passed. Both desktop/mobile status-changing recovery browser cases passed, including a production build/start. Hosted CI remains required.
