@@ -11,7 +11,6 @@ import styles from "./draft-toolbar.module.css";
 export function DraftToolbar({
   editor,
   disabled,
-  onError,
 }: {
   editor: Editor | null;
   disabled: boolean;
@@ -41,14 +40,6 @@ export function DraftToolbar({
   function applyLink() {
     if (!isValidDraftLink(href)) {
       setInvalid(true);
-      onError({
-        ok: false,
-        code: "invalid_input",
-        fieldErrors: {
-          content:
-            "Use an absolute http:// or https:// link with an allowed ASCII hostname. Correct the URL and apply it to continue.",
-        },
-      });
       return;
     }
     setInvalid(false);
@@ -119,7 +110,7 @@ export function DraftToolbar({
         value={href}
         disabled={disabled || !editor}
         aria-invalid={invalid}
-        aria-describedby={invalid ? "draft-content-error" : undefined}
+        aria-describedby={invalid ? "draft-link-error" : undefined}
         onChange={(event) => {
           setHref(event.target.value);
           setInvalid(false);
@@ -131,6 +122,12 @@ export function DraftToolbar({
           }
         }}
       />
+      {invalid && (
+        <p id="draft-link-error" role="alert">
+          Use an absolute http:// or https:// link with an allowed ASCII
+          hostname.
+        </p>
+      )}
       <div className={styles.buttons}>
         <Button
           disabled={disabled || !editor}

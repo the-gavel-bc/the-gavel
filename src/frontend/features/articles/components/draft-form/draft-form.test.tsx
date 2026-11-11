@@ -321,3 +321,24 @@ it("preserves conflict input until confirmed reload and then uses the reviewed v
   });
   confirm.mockRestore();
 });
+
+it("toolbar correction does not clear an independent invalid native body", async () => {
+  render(<DraftForm initialDraft={baseDraft} options={options} />);
+  const body = await screen.findByRole("textbox", { name: "Article body" });
+  const paste = new Event("paste", { bubbles: true, cancelable: true });
+  Object.defineProperty(paste, "clipboardData", {
+    value: {
+      files: [],
+      types: ["text/html"],
+      getData: () => "<b>Rejected</b>",
+    },
+  });
+  fireEvent(body, paste);
+  expect(screen.getByRole("button", { name: "Create draft" })).toBeDisabled();
+  const input = screen.getByLabelText("Link URL");
+  await userEvent.type(input, "javascript:bad");
+  await userEvent.click(screen.getByRole("button", { name: "Apply link" }));
+  await userEvent.clear(input);
+  expect(screen.getByRole("button", { name: "Create draft" })).toBeDisabled();
+  expect(mocks.create).not.toHaveBeenCalled();
+});
