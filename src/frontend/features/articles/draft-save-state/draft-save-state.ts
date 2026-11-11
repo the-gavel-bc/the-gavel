@@ -36,6 +36,7 @@ export type DraftSaveEvent =
       requestId: string;
       result: DraftWriteResult;
     }
+  | { type: "acknowledgeArticle"; article: DraftArticle }
   | { type: "reload"; article: DraftArticle; input: DraftInput }
   | { type: "reject"; failure: DraftFailure };
 export function createDraftSaveState(
@@ -172,6 +173,17 @@ export function reduceDraftSave(
         phase: newer ? "idle" : "saved",
       };
     }
+    case "acknowledgeArticle":
+      // A media write changes the article version, not the saved text snapshot.
+      // Read current reducer state so edits made during that write remain dirty.
+      if (
+        state.pending ||
+        !state.article ||
+        state.article.id !== event.article.id ||
+        event.article.version < state.article.version
+      )
+        return state;
+      return { ...state, article: event.article };
     case "reload":
       // A read cannot resolve an uncertain write or roll back a known article version.
       if (

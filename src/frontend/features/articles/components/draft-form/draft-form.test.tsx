@@ -16,6 +16,7 @@ const mocks = vi.hoisted(() => ({
   review: vi.fn(),
   unused: vi.fn(),
   removeUnused: vi.fn(),
+  finishMedia: null as (() => void) | null,
 }));
 vi.mock("@/backend/articles/draft-actions/draft-actions", () => ({
   createDraftAction: mocks.create,
@@ -28,7 +29,40 @@ vi.mock("@/backend/articles/draft-reload-action/draft-reload-action", () => ({
   reviewDraftAction: mocks.review,
 }));
 vi.mock("../article-media/article-media", () => ({
-  ArticleMedia: () => <section aria-label="Main image" />,
+  ArticleMedia: ({
+    onCommit,
+    onBusyChange,
+  }: {
+    onCommit: (result: {
+      ok: true;
+      articleId: string;
+      version: number;
+      updatedAt: string;
+      replayed: boolean;
+      changed: boolean;
+    }) => void;
+    onBusyChange: (busy: boolean) => void;
+  }) => (
+    <button
+      type="button"
+      onClick={() => {
+        onBusyChange(true);
+        mocks.finishMedia = () => {
+          onCommit({
+            ok: true,
+            articleId: baseDraft.sectionId,
+            version: 2,
+            updatedAt: "2026-11-11T12:00:00Z",
+            replayed: false,
+            changed: true,
+          });
+          onBusyChange(false);
+        };
+      }}
+    >
+      Start deferred image write
+    </button>
+  ),
 }));
 vi.mock("@/backend/media/media-actions/media-actions", () => ({
   requestArticleImageUpload: vi.fn(),
@@ -466,4 +500,48 @@ it("keeps lifecycle, save and navigation guarded across uncertain cleanup until 
     await screen.findByText(/This does not confirm deletion/),
   ).toBeVisible();
   expect(screen.getByRole("button", { name: "Publish article" })).toBeEnabled();
+});
+
+it("keeps title edits while an image write completes and saves using its new version", async () => {
+  mocks.save.mockResolvedValue({
+    ok: true,
+    articleId: baseDraft.sectionId,
+    version: 3,
+    updatedAt: "2026-11-11T12:01:00Z",
+    replayed: false,
+    changed: true,
+  });
+  render(
+    <DraftForm
+      initialDraft={baseDraft}
+      article={{
+        id: baseDraft.sectionId,
+        version: 1,
+        updatedAt: "2026-11-11T11:00:00Z",
+      }}
+      options={options}
+    />,
+  );
+  await userEvent.click(
+    screen.getByRole("button", { name: "Start deferred image write" }),
+  );
+  const title = screen.getByLabelText(/Title/);
+  await userEvent.clear(title);
+  await userEvent.type(title, "Typed while image saves");
+  expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
+  fireEvent.submit(
+    screen.getByRole("button", { name: "Save draft" }).closest("form")!,
+  );
+  expect(mocks.save).not.toHaveBeenCalled();
+  act(() => mocks.finishMedia?.());
+  expect(title).toHaveValue("Typed while image saves");
+  await userEvent.click(screen.getByRole("button", { name: "Save draft" }));
+  await waitFor(() =>
+    expect(mocks.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        expectedVersion: 2,
+        draft: expect.objectContaining({ title: "Typed while image saves" }),
+      }),
+    ),
+  );
 });

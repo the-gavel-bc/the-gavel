@@ -251,3 +251,27 @@ it("preserves newer input through a delayed success and saves it with the acknow
   });
   expect(result.current.dirty).toBe(false);
 });
+
+it("a captured image callback advances version without discarding current edits", async () => {
+  const article = {
+    id: baseDraft.sectionId,
+    version: 1,
+    updatedAt: success.updatedAt,
+  };
+  const { result } = renderHook(() => useDraftCommand(baseDraft, article));
+  const completeImage = result.current.acknowledgeArticle;
+  act(() => result.current.update({ ...baseDraft, title: "Newer title" }));
+  act(() => completeImage({ ...article, version: 2 }));
+  expect(result.current.draft.title).toBe("Newer title");
+  expect(result.current.dirty).toBe(true);
+  actions.save.mockResolvedValue({ ...success, version: 3 });
+  await act(async () => {
+    await result.current.submit();
+  });
+  expect(actions.save).toHaveBeenCalledWith(
+    expect.objectContaining({
+      expectedVersion: 2,
+      draft: expect.objectContaining({ title: "Newer title" }),
+    }),
+  );
+});

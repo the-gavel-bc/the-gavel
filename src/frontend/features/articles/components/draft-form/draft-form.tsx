@@ -74,6 +74,7 @@ export function DraftForm({
   const command = useDraftCommand(initialDraft, article, status);
   const [editorFailure, setEditorFailure] = useState<DraftFailure | null>(null);
   const [mediaDirty, setMediaDirty] = useState(false);
+  const [mediaBusy, setMediaBusy] = useState(false);
   const [bodyMediaDirty, setBodyMediaDirty] = useState(false);
   const [lifecycleBusy, setLifecycleBusy] = useState(false);
   const [cleanupBusy, setCleanupBusy] = useState(false);
@@ -147,13 +148,19 @@ export function DraftForm({
       Boolean(command.pending) ||
       Boolean(editorFailure) ||
       mediaDirty ||
+      mediaBusy ||
       bodyMediaDirty ||
       lifecycleBusy ||
       cleanupBusy,
   );
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (cleanupBusy || lifecycleBusy || (recoveryBlocked && !command.pending))
+    if (
+      cleanupBusy ||
+      mediaBusy ||
+      lifecycleBusy ||
+      (recoveryBlocked && !command.pending)
+    )
       return;
     if (
       !ready ||
@@ -361,12 +368,13 @@ export function DraftForm({
             cleanupBusy
           }
           onCommit={(result) => {
-            command.reload(command.draft, {
+            command.acknowledgeArticle({
               id: result.articleId,
               version: result.version,
               updatedAt: result.updatedAt,
             });
           }}
+          onBusyChange={setMediaBusy}
           onDirtyChange={setMediaDirty}
         />
       )}
@@ -402,6 +410,7 @@ export function DraftForm({
             !ready ||
             lifecycleBusy ||
             cleanupBusy ||
+            mediaBusy ||
             command.phase === "saving" ||
             command.phase === "saved" ||
             command.phase === "conflict" ||
@@ -437,6 +446,7 @@ export function DraftForm({
             Boolean(command.pending) ||
             Boolean(editorFailure) ||
             mediaDirty ||
+            mediaBusy ||
             bodyMediaDirty ||
             recoveryBlocked ||
             categories.loading ||

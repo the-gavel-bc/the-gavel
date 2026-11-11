@@ -96,3 +96,7 @@ CI exposed strict JSON validation rejecting the editor's non-enumerable Symbol o
 The new unused-upload list action also contaminated two browser fixtures that captured every server action. Capture now filters the create route or the versioned save payload. The keyboard create flow waits for the submit button to become enabled before traversing tab stops. No authorization or schema contract changed.
 
 Validation: the original owner edit failure reproduced before the patch; six editor tests, targeted ESLint, formatting, and TypeScript passed after the patch. All 24 desktop/mobile create and edit browser cases passed (`pnpm test:e2e e2e/drafts/edit-drafts.spec.ts e2e/drafts/create-drafts.spec.ts --workers=1`), including role denials, lost-response retries and near-limit saves. The existing local Supabase schema was not changed; cleanup browser coverage still requires CI’s migrated database. Full CI remains the merge gate.
+
+## Main integration after PR 78
+
+Merged `origin/main` at `fc43967` into the PR branch without rewriting history. Resolved overlapping image form guards by retaining both cleanup and media busy checks, preserving main's version acknowledgement and exact retry behavior. Retained both branches' regression tests and authoritative documentation additions. Updated STATUS.md to reflect integration. Validation: 66 tests across seven media/form/save-state files, TypeScript, targeted ESLint, full formatting check and diff checks passed. Hosted CI remains required.

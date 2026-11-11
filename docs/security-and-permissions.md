@@ -307,3 +307,7 @@ Task 21 adds one identifier-only sitemap projection using the published/active-s
 ## Upload processing resource bounds
 
 Processing admission checks the caller through the existing actor locks, locks the authorized article and serializes a separate private per-actor quota before buffering/decoding. Application roles cannot read or write the quota table. Invalid processed images consume an admitted attempt; finalized replays do not. A process-local two-job gate limits concurrent application buffers/Sharp jobs and has no waiting queue. This does not bound platform-level request buffering or total deployment concurrency. Existing trusted finalization independently rechecks authority after processing. See the [admission contract](api-contracts.md#image-processing-admission) and [focused optimization plan](superpowers/plans/2026-11-11-low-priority-optimizations.md).
+
+## Trusted media lock ordering correction
+
+`20261111060400_media_finalize_lock_order.sql` preserves trusted finalization's current actor eligibility and owner/uploader/administrator checks, while acquiring article before asset locks. An unlocked locator read supplies only the article ID; missing rows are rechecked after each lock wait. Existing Storage attestation, dimensions, hash, status and replay checks remain. No table grant, RPC signature, direct write permission or identity eligibility rule changes. The separate mixed-provider eligibility finding remains unresolved. See the [medium fix plan](superpowers/plans/2026-11-11-medium-easy-fixes.md) for race and denial coverage.

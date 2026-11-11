@@ -13,11 +13,18 @@ import { removeUnusedArticleImage } from "@/backend/media/media-removal/media-re
 import styles from "./article-media.module.css";
 
 type Confirmed = Extract<DraftWriteResult, { ok: true }>;
-type PendingWrite = {
+type ImageCommand = {
+  articleId: string;
+  expectedVersion: number;
   requestId: string;
   assetId: string | null;
   altText: string | null;
   credit: string | null;
+};
+type PendingWrite = {
+  command: ImageCommand;
+  input: { altText: string; credit: string };
+  uncertain: boolean;
 };
 
 export function ArticleMedia({
@@ -26,12 +33,14 @@ export function ArticleMedia({
   disabled,
   onCommit,
   onDirtyChange,
+  onBusyChange,
 }: {
   article: DraftArticle;
   initialImage: MainImage | null;
   disabled: boolean;
   onCommit: (result: Confirmed) => void;
   onDirtyChange?: (dirty: boolean) => void;
+  onBusyChange?: (busy: boolean) => void;
 }) {
   const [image, setImage] = useState(initialImage);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -47,6 +56,7 @@ export function ArticleMedia({
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const locked = disabled || busy || conflict || Boolean(cleanupAssetId);
+  const mutationLocked = locked || Boolean(pendingWrite);
   const metadataChanged = image
     ? altText !== image.altText || credit !== image.credit
     : Boolean(altText || credit);
@@ -54,9 +64,13 @@ export function ArticleMedia({
     file || assetId || cleanupAssetId || pendingWrite || metadataChanged,
   );
   useEffect(() => onDirtyChange?.(dirty), [dirty, onDirtyChange]);
+  useEffect(
+    () => onBusyChange?.(busy || Boolean(pendingWrite)),
+    [busy, pendingWrite, onBusyChange],
+  );
 
   async function upload() {
-    if (!file || locked) return;
+    if (!file || mutationLocked) return;
     setBusy(true);
     setError("");
     setStatus("Uploading image…");
@@ -123,37 +137,53 @@ export function ArticleMedia({
     }
   }
 
-  async function commit(next: Omit<PendingWrite, "requestId">) {
-    if (locked) return;
-    const retry = pendingWrite;
-    if (
-      retry &&
-      (retry.assetId !== next.assetId ||
-        retry.altText !== next.altText ||
-        retry.credit !== next.credit)
-    ) {
-      setError("Retry the original image change before making another change.");
-      return;
-    }
-    const command = retry ?? { ...next, requestId: crypto.randomUUID() };
-    setPendingWrite(command);
+  function commit(next: Pick<ImageCommand, "assetId" | "altText" | "credit">) {
+    if (mutationLocked) return;
+    const write = {
+      command: {
+        articleId: article.id,
+        expectedVersion: article.version,
+        requestId: crypto.randomUUID(),
+        ...next,
+      },
+      input: { altText, credit },
+      uncertain: false,
+    };
+    setPendingWrite(write);
+    void sendWrite(write);
+  }
+
+  async function sendWrite(write: PendingWrite) {
+    if (busy || conflict) return;
+    const { command, input } = write;
     setBusy(true);
     setError("");
     setStatus("Saving image…");
     try {
-      const result = await setArticleMainImage({
-        articleId: article.id,
-        expectedVersion: article.version,
-        ...command,
-      });
+      // An uncertain write must replay its original version and payload, even
+      // after newer draft props or image metadata arrive.
+      const result = await setArticleMainImage(command);
       if (!result.ok) {
+        // Access and ownership checks precede receipt lookup. Their denials
+        // cannot resolve an earlier uncertain write; preserve its exact retry.
+        if (
+          result.code === "unavailable" ||
+          (write.uncertain &&
+            (result.code === "forbidden" || result.code === "not_found"))
+        ) {
+          setPendingWrite({ ...write, uncertain: true });
+          setError(
+            `Original image change is still unconfirmed (${result.code}). Retry the same change.`,
+          );
+          return;
+        }
         if (result.code === "conflict") {
           setConflict(true);
           setError(
             "This draft changed elsewhere. Reload to review its current version.",
           );
         } else setError(`Image change was not saved (${result.code}). Retry.`);
-        if (result.code !== "unavailable") setPendingWrite(null);
+        setPendingWrite(null);
         return;
       }
       setPendingWrite(null);
@@ -166,14 +196,19 @@ export function ArticleMedia({
             }
           : null,
       );
-      setAltText(command.altText ?? "");
-      setCredit(command.credit ?? "");
+      setAltText((current) =>
+        current === input.altText ? (command.altText ?? "") : current,
+      );
+      setCredit((current) =>
+        current === input.credit ? (command.credit ?? "") : current,
+      );
       setAssetId(null);
       setFile(null);
       if (fileInput.current) fileInput.current.value = "";
       setStatus(command.assetId ? "Image attached." : "Image removed.");
       onCommit(result);
     } catch {
+      setPendingWrite({ ...write, uncertain: true });
       setError("Image change could not be confirmed. Retry the same change.");
     } finally {
       setBusy(false);
@@ -194,7 +229,7 @@ export function ArticleMedia({
 
   async function discardUpload() {
     const target = cleanupAssetId ?? assetId;
-    if (!target || disabled || busy || conflict) return;
+    if (!target || disabled || busy || conflict || pendingWrite) return;
     setBusy(true);
     setError("");
     setStatus("Discarding unused upload…");
@@ -245,8 +280,7 @@ export function ArticleMedia({
           type="file"
           accept="image/jpeg,image/png,image/webp"
           disabled={
-            locked ||
-            Boolean(pendingWrite) ||
+            mutationLocked ||
             Boolean(assetId) ||
             Boolean(uploadRequestId) ||
             Boolean(cleanupAssetId)
@@ -261,7 +295,7 @@ export function ArticleMedia({
         />
         <Button
           type="button"
-          disabled={locked || !file || Boolean(assetId)}
+          disabled={mutationLocked || !file || Boolean(assetId)}
           onClick={() => void upload()}
         >
           {uploadRequestId ? "Retry upload" : "Upload image"}
@@ -286,7 +320,7 @@ export function ArticleMedia({
       <div className={styles.actions}>
         <Button
           type="button"
-          disabled={locked || (!assetId && !metadataChanged)}
+          disabled={mutationLocked || (!assetId && !metadataChanged)}
           onClick={attach}
         >
           {assetId ? "Attach image" : "Update image details"}
@@ -294,7 +328,7 @@ export function ArticleMedia({
         {assetId && (
           <Button
             type="button"
-            disabled={locked}
+            disabled={mutationLocked}
             onClick={() => void discardUpload()}
           >
             Discard unused upload
@@ -303,10 +337,19 @@ export function ArticleMedia({
         {cleanupAssetId && (
           <Button
             type="button"
-            disabled={disabled || busy}
+            disabled={disabled || busy || Boolean(pendingWrite)}
             onClick={() => void discardUpload()}
           >
             Retry cleanup
+          </Button>
+        )}
+        {pendingWrite && (
+          <Button
+            type="button"
+            disabled={busy || conflict}
+            onClick={() => void sendWrite(pendingWrite)}
+          >
+            Retry image change
           </Button>
         )}
         {conflict && (
@@ -321,7 +364,7 @@ export function ArticleMedia({
         {image && (
           <Button
             type="button"
-            disabled={locked}
+            disabled={mutationLocked}
             onClick={() =>
               void commit({ assetId: null, altText: null, credit: null })
             }
