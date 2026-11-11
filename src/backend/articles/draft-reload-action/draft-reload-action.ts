@@ -2,8 +2,7 @@
 import { getCurrentAccess } from "@/backend/auth/access/access";
 import { isDraftUuid } from "../../../shared/articles/draft-contract/draft-contract";
 import {
-  getDraftDetail,
-  getDraftOptions,
+  getDraftEditorData,
   type DraftDetailResult,
 } from "../draft-queries/draft-queries";
 import type { DraftOptions } from "../draft-options/draft-options";
@@ -17,15 +16,8 @@ export async function reviewDraftAction(
   try {
     const access = await getCurrentAccess();
     if (access.status !== "active") return { ok: false, code: "forbidden" };
-    const detail = await getDraftDetail(articleId);
-    return {
-      ok: true,
-      detail,
-      options:
-        detail.kind === "editable"
-          ? await getDraftOptions(detail.draft.sectionId)
-          : null,
-    };
+    const { detail, options } = await getDraftEditorData(articleId);
+    return { ok: true, detail, options };
   } catch {
     // A read/access failure must not navigate away from uncommitted local input.
     return { ok: false, code: "unavailable" };

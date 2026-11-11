@@ -1,10 +1,7 @@
 import Link from "next/link";
 import { notFound, unstable_rethrow } from "next/navigation";
 import { requireActiveMembership } from "@/backend/auth/access/access";
-import {
-  getDraftDetail,
-  getDraftOptions,
-} from "@/backend/articles/draft-queries/draft-queries";
+import { getDraftEditorData } from "@/backend/articles/draft-queries/draft-queries";
 import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
 import { DraftForm } from "@/frontend/features/articles/components/draft-form/draft-form";
 import { getArticleMainImage } from "@/backend/media/media-queries/media-queries";
@@ -27,8 +24,9 @@ export default async function EditDraftPage({
     </>
   );
   let detail;
+  let options;
   try {
-    detail = await getDraftDetail(id);
+    ({ detail, options } = await getDraftEditorData(id));
   } catch (error) {
     unstable_rethrow(error);
     return recovery;
@@ -62,10 +60,9 @@ export default async function EditDraftPage({
         <Link href="/dashboard">My articles</Link>
       </>
     );
-  let options;
+  if (!options) return recovery;
   let mainImage;
   try {
-    options = await getDraftOptions(detail.draft.sectionId);
     mainImage = await getArticleMainImage(detail.articleId);
   } catch (error) {
     unstable_rethrow(error);

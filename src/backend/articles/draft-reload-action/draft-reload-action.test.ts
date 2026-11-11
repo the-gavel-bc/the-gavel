@@ -3,14 +3,12 @@ import { baseDraft } from "../../../shared/articles/draft-contract/draft-test-ca
 const mocks = vi.hoisted(() => ({
   access: vi.fn(),
   detail: vi.fn(),
-  options: vi.fn(),
 }));
 vi.mock("@/backend/auth/access/access", () => ({
   getCurrentAccess: mocks.access,
 }));
 vi.mock("../draft-queries/draft-queries", () => ({
-  getDraftDetail: mocks.detail,
-  getDraftOptions: mocks.options,
+  getDraftEditorData: mocks.detail,
 }));
 import { reviewDraftAction } from "./draft-reload-action";
 const detail = {
@@ -30,8 +28,7 @@ const options = { sections: [], categories: [], tags: [], contributors: [] };
 beforeEach(() => {
   vi.resetAllMocks();
   mocks.access.mockResolvedValue({ status: "active" });
-  mocks.detail.mockResolvedValue(detail);
-  mocks.options.mockResolvedValue(options);
+  mocks.detail.mockResolvedValue({ detail, options });
 });
 it("checks current access and rejects malformed IDs before reading private records", async () => {
   expect(await reviewDraftAction("bad")).toEqual({
@@ -52,20 +49,20 @@ it("returns checked private detail and eligible choices", async () => {
     options,
   });
   expect(mocks.detail).toHaveBeenCalledWith(baseDraft.sectionId);
-  expect(mocks.options).toHaveBeenCalledWith(baseDraft.sectionId);
+  expect(mocks.detail).toHaveBeenCalledTimes(1);
 });
 it.each([
   { kind: "notFound" },
   { kind: "readOnly", status: "published" },
   { kind: "unsupportedContent" },
 ])("preserves non-editable $kind without returning catalogs", async (value) => {
-  mocks.detail.mockResolvedValue(value);
+  mocks.detail.mockResolvedValue({ detail: value, options: null });
   expect(await reviewDraftAction(baseDraft.sectionId)).toEqual({
     ok: true,
     detail: value,
     options: null,
   });
-  expect(mocks.options).not.toHaveBeenCalled();
+  expect(mocks.detail).toHaveBeenCalledTimes(1);
 });
 it("keeps read failures and access loss safe without navigating the editor away", async () => {
   mocks.detail.mockRejectedValue(new Error("private SQL or access redirect"));
