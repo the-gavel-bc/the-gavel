@@ -1,3 +1,6 @@
+vi.mock("@/backend/infrastructure/env/server/server", () => ({
+  getServerEnv: () => ({ SITE_URL: "https://gavel.example" }),
+}));
 import { render, screen } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ read: vi.fn() }));
@@ -27,7 +30,7 @@ const empty = {
 beforeEach(() => vi.resetAllMocks());
 it("keeps unavailable homepage responses out of indexing", async () => {
   mocks.read.mockResolvedValue({ kind: "unavailable" });
-  expect(await generateMetadata()).toEqual({
+  expect(await generateMetadata()).toMatchObject({
     robots: { index: false, follow: false },
   });
 });

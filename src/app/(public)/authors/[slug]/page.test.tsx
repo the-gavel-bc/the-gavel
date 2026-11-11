@@ -1,3 +1,6 @@
+vi.mock("@/backend/infrastructure/env/server/server", () => ({
+  getServerEnv: () => ({ SITE_URL: "https://gavel.example" }),
+}));
 import { render, screen } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
@@ -44,7 +47,9 @@ it("passes slug and opaque cursor through the request-cached boundary", async ()
     "Guest Writer",
   );
   expect(mocks.read).toHaveBeenCalledWith("guest-writer", "token");
-  expect(await generateMetadata(props)).toEqual({ title: "Guest Writer" });
+  expect(await generateMetadata(props)).toMatchObject({
+    title: "Guest Writer",
+  });
 });
 it("resolves real notFound before rendering either page or metadata", async () => {
   mocks.read.mockResolvedValue({ kind: "notFound" });

@@ -1,3 +1,7 @@
+import {
+  publicPageMetadata,
+  excludedMetadata,
+} from "@/backend/reader/public-metadata/public-metadata";
 import { getPublicHomepageForRequest } from "@/backend/public-homepage/public-homepage";
 import { HomeHero } from "@/frontend/features/reader/components/home-hero/home-hero";
 import { HomeLatest } from "@/frontend/features/reader/components/home-latest/home-latest";
@@ -9,9 +13,15 @@ import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
   const homepage = await getPublicHomepageForRequest();
-  return homepage.kind === "unavailable"
-    ? { robots: { index: false, follow: false } }
-    : {};
+  if (homepage.kind === "unavailable") return excludedMetadata("The Gavel");
+  const lead = homepage.lead;
+  return publicPageMetadata({
+    title: "The Gavel",
+    path: "/",
+    image: lead?.mainImage
+      ? { articleId: lead.id, ...lead.mainImage }
+      : undefined,
+  });
 }
 
 export default async function Home() {

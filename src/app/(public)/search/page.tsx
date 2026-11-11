@@ -1,13 +1,11 @@
+import { excludedMetadata } from "@/backend/reader/public-metadata/public-metadata";
 import type { Metadata } from "next";
 import { searchPublicArticles } from "@/backend/public-articles/public-search/public-search";
 import { normalizePublicSearchQuery } from "@/shared/reader/public-search/public-search";
 import { SearchResults } from "@/frontend/features/reader/components/search-results/search-results";
 export const dynamic = "force-dynamic";
 // Static metadata avoids a second quota-bearing read and never indexes queries.
-export const metadata: Metadata = {
-  title: "Search articles",
-  robots: { index: false, follow: false },
-};
+export const metadata: Metadata = excludedMetadata("Search articles");
 export default async function SearchPage({
   searchParams,
 }: {

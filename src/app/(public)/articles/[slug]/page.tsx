@@ -1,3 +1,7 @@
+import {
+  publicArticleMetadata,
+  excludedMetadata,
+} from "@/backend/reader/public-metadata/public-metadata";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -15,15 +19,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const result = await getPublicArticleForRequest(slug);
   if (result.kind === "notFound") notFound();
   if (result.kind === "unavailable")
-    return {
-      title: "Article temporarily unavailable",
-      robots: { index: false, follow: false },
-    };
-  return {
-    title: result.article.title,
-    description:
-      result.article.metaDescription ?? result.article.excerpt ?? undefined,
-  };
+    return excludedMetadata("Article temporarily unavailable");
+  return publicArticleMetadata(result.article);
 }
 
 export default async function ArticlePage({ params }: Props) {

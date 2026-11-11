@@ -1,3 +1,6 @@
+vi.mock("@/backend/infrastructure/env/server/server", () => ({
+  getServerEnv: () => ({ SITE_URL: "https://gavel.example" }),
+}));
 import { render, screen } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
@@ -142,7 +145,7 @@ it("renders semantic article, attribution, authorized media, safe body and scope
     "datetime",
     article.publishedAt,
   );
-  expect(await generateMetadata({ params })).toEqual({
+  expect(await generateMetadata({ params })).toMatchObject({
     title: article.title,
     description: article.metaDescription,
   });
@@ -218,8 +221,23 @@ it("shows bounded related links independently from the article and uses excerpt 
     "href",
     "/articles/related-story",
   );
-  expect(await generateMetadata({ params })).toEqual({
+  expect(await generateMetadata({ params })).toMatchObject({
     title: article.title,
     description: article.excerpt,
+  });
+});
+
+it("canonical metadata uses the stored public slug and authorized media route", async () => {
+  const result = await generateMetadata({ params });
+  expect(result.alternates?.canonical).toBe(
+    "https://gavel.example/articles/public-story",
+  );
+  expect(result.openGraph).toMatchObject({
+    type: "article",
+    images: [
+      {
+        url: `https://gavel.example/api/public/articles/${article.id}/media/${article.mainImage.id}`,
+      },
+    ],
   });
 });

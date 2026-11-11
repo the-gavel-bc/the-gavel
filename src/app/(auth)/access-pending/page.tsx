@@ -1,8 +1,10 @@
+import { excludedMetadata } from "@/backend/reader/public-metadata/public-metadata";
 import { redirect } from "next/navigation";
 import { PublicShell } from "@/frontend/components/site/public-shell/public-shell";
 import { Button } from "@/frontend/components/ui/button/button";
 import { getCurrentAccess } from "@/backend/auth/access/access";
 import { signOut } from "@/backend/auth/actions/actions";
+export const metadata = excludedMetadata("Access pending");
 export default async function AccessPendingPage() {
   const access = await getCurrentAccess();
   if (access.status === "signedOut") redirect("/sign-in");
