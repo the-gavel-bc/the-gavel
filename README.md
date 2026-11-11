@@ -96,6 +96,7 @@ Next.js routes stay in `src/app`. Presentation lives in `src/frontend`, server o
 | [Security and permissions](docs/security-and-permissions.md)                                | Authentication, roles, RLS, uploads, and incident preparation                   |
 | [Testing](docs/testing.md)                                                                  | Required verification and future commands                                       |
 | [Phase 5 reader plan](docs/superpowers/plans/2026-11-09-phase-five-public-reader.md)        | Proposed public-reader tasks and demo UI adaptation map                         |
+| [Phase 1–5 PR review](docs/reviews/phase-1-5-pr-review.md)                                  | Post-merge review findings and proposed fixes for PRs #1–#71                    |
 | [Phase 4 verification](docs/reviews/phase-4-editorial-workflow.md)                          | Integrated editorial workflow evidence and remaining launch gates               |
 | [Phase 1 review](docs/reviews/phase-1-foundation.md)                                        | Review evidence, remaining session coverage, and maintainer checklist           |
 | [Development workflow](docs/development-workflow.md)                                        | Task process and definition of done                                             |
