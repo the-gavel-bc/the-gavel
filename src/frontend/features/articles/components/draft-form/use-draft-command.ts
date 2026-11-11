@@ -120,6 +120,9 @@ export function useDraftCommand(
     (failure?.code === "invalid_input"
       ? draftMetadataErrors(state.current)
       : {});
+  function acknowledgeArticle(resource: DraftArticle) {
+    dispatch({ type: "acknowledgeArticle", article: resource });
+  }
   function reload(input: DraftInput, resource: DraftArticle) {
     const before = current.current;
     return dispatch({ type: "reload", input, article: resource }) !== before;
@@ -138,6 +141,7 @@ export function useDraftCommand(
     nativeInvalid: state.nativeInvalid,
     editorInvalid,
     reload,
+    acknowledgeArticle,
     hasUncommitted: () =>
       isDraftSaveDirty(current.current) || Boolean(current.current.pending),
   };

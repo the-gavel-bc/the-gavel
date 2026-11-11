@@ -134,3 +134,61 @@ it("create success adopts the created resource while retaining newer input", () 
   expect(state.current.title).toBe("Keep newest");
   expect(state.phase).toBe("idle");
 });
+
+it("media acknowledgement preserves newer metadata, body and invalid-native state", () => {
+  const start = createDraftSaveState(baseDraft, article);
+  const input = {
+    ...baseDraft,
+    title: "Typed during image save",
+    content: {
+      format: "gavel-draft" as const,
+      version: 1 as const,
+      document: {
+        type: "doc" as const,
+        content: [
+          {
+            type: "paragraph" as const,
+            content: [{ type: "text" as const, text: "New body" }],
+          },
+        ],
+      },
+    },
+  };
+  const edited = reduceDraftSave(start, {
+    type: "edit",
+    input,
+    nativeInvalid: true,
+  });
+  const next = reduceDraftSave(edited, {
+    type: "acknowledgeArticle",
+    article: { ...article, version: 2 },
+  });
+  expect(next.current).toBe(input);
+  expect(next.acknowledged).toBe(start.acknowledged);
+  expect(next.nativeInvalid).toBe(true);
+  expect(next.article?.version).toBe(2);
+  expect(isDraftSaveDirty(next)).toBe(true);
+  expect(
+    reduceDraftSave(start, {
+      type: "acknowledgeArticle",
+      article: { ...article, version: 2 },
+    }).current,
+  ).toBe(start.current);
+});
+it("rejects media acknowledgements for a pending save, another article or older version", () => {
+  const state = createDraftSaveState(baseDraft, { ...article, version: 3 });
+  for (const resource of [
+    { ...article, version: 2 },
+    { ...article, id: "other", version: 4 },
+  ])
+    expect(
+      reduceDraftSave(state, { type: "acknowledgeArticle", article: resource }),
+    ).toBe(state);
+  const pendingState = submitted();
+  expect(
+    reduceDraftSave(pendingState, {
+      type: "acknowledgeArticle",
+      article: { ...article, version: 2 },
+    }),
+  ).toBe(pendingState);
+});
