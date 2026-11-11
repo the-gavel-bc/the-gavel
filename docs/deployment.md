@@ -30,7 +30,7 @@ Use `.env.example` only as a safe local template. Store real local values in the
 
 ## Google provider setup (manual, not verified on hosted services)
 
-Configure Google OAuth in the environment-specific Supabase/Google projects, using the provider callback URL shown by Supabase. Configure the canonical application origin and exact `/auth/callback` URL in the Supabase redirect allowlist. Restrict hosted identity creation to the approved `bc.edu` Google domain; the application independently denies non-Google, unconfirmed, non-`bc.edu`, and inactive/unapproved sessions. Keep provider secrets in managed configuration. Local tests do not enable a real Google provider.
+Configure Google OAuth in the environment-specific Supabase/Google projects, using the provider callback URL shown by Supabase. Configure the canonical application origin and exact `/auth/callback` URL in the Supabase redirect allowlist. Restrict hosted identity creation to the approved `bc.edu` Google domain, and disable email/password signup (Authentication → Providers → Email) in every hosted project to match `supabase/config.toml`; the application independently denies non-Google, unconfirmed, non-`bc.edu`, and inactive/unapproved sessions, and any account whose linked providers include anything other than Google. Keep provider secrets in managed configuration. Local tests do not enable a real Google provider.
 
 Use HTTPS `SITE_URL` values in staging/production so session cookies are Secure. Browser sessions use HttpOnly cookies; foundation authentication and authenticated reads run on the server. Preview protection and hosted OAuth smoke checks remain launch gates.
 

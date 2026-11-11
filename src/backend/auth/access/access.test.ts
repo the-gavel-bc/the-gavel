@@ -123,6 +123,28 @@ describe("membership access", () => {
     });
     expect(await getCurrentAccess()).toEqual({ status: "pending" });
   });
+  it.each([
+    [{ provider: "email", providers: ["email", "google"] }],
+    [{ provider: "google", providers: ["google", "email"] }],
+    [{ provider: "google", providers: "google" }],
+  ])(
+    "denies an account with a linked non-Google identity: %j",
+    async (app_metadata) => {
+      mocks.getUser.mockResolvedValue({
+        data: {
+          user: {
+            id: "user-a",
+            email: "synthetic@bc.edu",
+            email_confirmed_at: "2026-01-01",
+            app_metadata,
+          },
+        },
+        error: null,
+      });
+      expect(await getCurrentAccess()).toEqual({ status: "pending" });
+      expect(mocks.membership).not.toHaveBeenCalled();
+    },
+  );
   it("fails closed when the linked profile is missing", async () => {
     mocks.rpc.mockResolvedValue({ data: [], error: null });
     expect(await getCurrentAccess()).toEqual({ status: "pending" });

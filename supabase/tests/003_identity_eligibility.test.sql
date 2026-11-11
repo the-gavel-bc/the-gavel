@@ -1,5 +1,5 @@
 begin;
-select plan(17);
+select plan(21);
 
 -- Synthetic eligible Auth metadata for this transaction only.
 update auth.users set email = 'gavel-pgtap-' || right(id::text, 1) || '@bc.edu',
@@ -13,6 +13,21 @@ select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000002
 
 select throws_ok($$ update public.profiles set display_name = 'Forbidden edit' where id = '10000000-0000-0000-0000-000000000002' returning 1 $$, '42501', null, 'non-Google active author cannot edit profile directly');
 select is_empty($$ select * from public.current_profile() $$, 'non-Google active author receives no access profile');
+
+-- A linked email identity (pre-registration takeover) is never eligible, in either order.
+set local role postgres;
+update auth.users set email = 'synthetic-author@bc.edu', email_confirmed_at = now(), raw_app_meta_data = '{"provider":"email","providers":["email","google"]}'::jsonb where id = '00000000-0000-0000-0000-000000000002';
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000002', true);
+select is_empty($$ select * from public.current_profile() $$, 'email-first account with linked Google receives no access profile');
+select throws_ok($$ update public.profiles set display_name = 'Forbidden edit' where id = '10000000-0000-0000-0000-000000000002' returning 1 $$, '42501', null, 'email-first account with linked Google cannot edit profile directly');
+
+set local role postgres;
+update auth.users set email = 'synthetic-author@bc.edu', email_confirmed_at = now(), raw_app_meta_data = '{"provider":"google","providers":["google","email"]}'::jsonb where id = '00000000-0000-0000-0000-000000000002';
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000002', true);
+select is_empty($$ select * from public.current_profile() $$, 'Google-first account with a linked email identity receives no access profile');
+select throws_ok($$ update public.profiles set display_name = 'Forbidden edit' where id = '10000000-0000-0000-0000-000000000002' returning 1 $$, '42501', null, 'Google-first account with a linked email identity cannot edit profile directly');
 
 set local role postgres;
 update auth.users set email = 'synthetic-author@bc.edu', email_confirmed_at = null, raw_app_meta_data = '{"provider":"google","providers":["google"]}'::jsonb where id = '00000000-0000-0000-0000-000000000002';
