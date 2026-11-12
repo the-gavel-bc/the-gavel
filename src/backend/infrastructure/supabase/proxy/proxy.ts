@@ -5,9 +5,20 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getServerEnv } from "@/backend/infrastructure/env/server/server";
 import type { Database } from "../../../../shared/database/database.types";
 
-export async function refreshSession(request: NextRequest) {
+export async function refreshSession(
+  request: NextRequest,
+  extraRequestHeaders: Record<string, string> = {},
+) {
   const env = getServerEnv();
-  let response = NextResponse.next({ request });
+  // Rebuild from the live request each time so refreshed cookies and the
+  // proxy's request headers (such as the CSP nonce) both reach rendering.
+  const forward = () => {
+    const headers = new Headers(request.headers);
+    for (const [name, value] of Object.entries(extraRequestHeaders))
+      headers.set(name, value);
+    return NextResponse.next({ request: { headers } });
+  };
+  let response = forward();
   const client = createServerClient<Database>(
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
@@ -23,7 +34,7 @@ export async function refreshSession(request: NextRequest) {
           // Update this request for downstream Server Components, then the response
           // for the browser's next request; either side alone leaves stale sessions.
           values.forEach(({ name, value }) => request.cookies.set(name, value));
-          response = NextResponse.next({ request });
+          response = forward();
           values.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options),
           );
