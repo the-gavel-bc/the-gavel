@@ -36,6 +36,8 @@ Use HTTPS `SITE_URL` values in staging/production so session cookies are Secure.
 
 `/robots.txt` and `/sitemap.xml` read `SITE_URL` per request, so it must be the final production origin in the production runtime environment. Previews serve the same robots file and rely on Vercel protection rather than a disallow-all rule. Confirm both routes on the production origin as a release check.
 
+Browser security headers ship with the application (see [security](security-and-permissions.md)). HSTS is `max-age=31536000` without `includeSubDomains` or preload; extend it once the final production domain is chosen. Confirm the headers and a violation-free console on the production origin as a release check.
+
 ## Release requirements
 
 - Approved change and required review.

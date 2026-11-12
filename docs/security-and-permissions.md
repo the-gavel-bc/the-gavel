@@ -143,6 +143,9 @@ Phase 4 Task 3's additive migrations reserve article media through a checked own
 - Secure, HttpOnly, appropriately scoped session cookies.
 - Content Security Policy tailored to the application and approved integrations.
 - HSTS, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, and CSP frame protection.
+
+Implemented: `src/proxy.ts` sends an enforced, per-request nonce Content Security Policy on every HTML document (`script-src`/`style-src` nonce with `'strict-dynamic'`, `object-src 'none'`, `base-uri 'self'`, `frame-ancestors 'none'`, `connect-src 'self'`, and `form-action` limited to this origin, the Supabase origin and `accounts.google.com` for the no-JavaScript sign-in redirect). `next.config.ts` adds `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, `Cross-Origin-Opener-Policy`, `Permissions-Policy` and HSTS to every response. Any new third-party script, embed, font or connection needs a policy change. See the [browser security headers plan](superpowers/plans/2026-11-11-browser-security-headers.md).
+
 - CSRF protection for cookie-authenticated mutations.
 - Rate limits for authentication, search, uploads, and mutations.
 - Vercel firewall/bot controls and protected preview deployments.
