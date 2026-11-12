@@ -2,6 +2,9 @@
   --reader-ink: #14161c;
   --reader-muted: #5d6470;
   --reader-blue: #1e4aa8;
+  /* Live-site band blue, darkened from #6b8bd9 to keep white text at 4.57:1. */
+  --reader-band: #4a72cf;
+  --reader-night: #111111;
   --reader-paper: #fff;
   --reader-soft: #eef2fc;
   --reader-line: #e3e6ee;
@@ -9,11 +12,15 @@
   --reader-space-medium: 1rem;
   --reader-space-large: 2rem;
   --reader-radius: 0.625rem;
-  --reader-serif: Georgia, "Times New Roman", serif;
+  --reader-serif: var(--font-body, Georgia), Georgia, "Times New Roman", serif;
+  --reader-display: var(--font-display, Georgia), Georgia, serif;
   --reader-sans: system-ui, sans-serif;
   color: var(--reader-ink);
   background: var(--reader-paper);
   font-family: var(--reader-serif);
+  /* Full-bleed bands use 100vw; clip the scrollbar-width overhang without
+     creating a scroll container. */
+  overflow-x: clip;
 }
 .surface a:focus-visible {
   outline: 3px solid var(--reader-blue);
@@ -33,4 +40,8 @@
   .grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
+}
+
+.surface :is(h1, h2, h3) {
+  font-family: var(--reader-display);
 }
