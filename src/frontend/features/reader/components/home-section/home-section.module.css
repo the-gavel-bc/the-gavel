@@ -12,14 +12,24 @@
   margin-bottom: 1.5rem;
 }
 .heading h2 {
-  font: 700 clamp(1.75rem, 3vw, 2.5rem)/1.2 var(--reader-serif);
+  font: 700 clamp(2rem, 4vw, 3.25rem)/1.15 var(--reader-display);
   margin: 0;
   overflow-wrap: anywhere;
 }
 .heading a {
   display: inline-flex;
   align-items: center;
+  gap: 0.5rem;
   min-height: 2.75rem;
-  color: var(--reader-blue);
-  font: 600 0.875rem/1.4 var(--reader-sans);
+  color: var(--reader-ink);
+  font: 1rem/1.4 var(--reader-serif);
+  text-decoration: none;
+}
+.heading a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.heading a svg {
+  width: 1.25em;
+  height: 1.25em;
 }

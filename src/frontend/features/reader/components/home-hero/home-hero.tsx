@@ -1,41 +1,29 @@
-import { sectionHref } from "@/shared/reader/section-link/section-link";
 import Link from "next/link";
 import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
-import { StoryMeta } from "../story-meta/story-meta";
+import { StoryDate } from "../story-meta/story-meta";
+import { StoryImage } from "../story-image/story-image";
 import styles from "./home-hero.module.css";
+// Lead story: image with the headline and date overlaid, as on the live site.
 export function HomeHero({ article }: { article: PublicArticleCard }) {
   return (
     <article className={styles.hero}>
-      <Link className={styles.section} href={sectionHref(article.section)}>
-        {article.section.name}
-      </Link>
       <Link
         className={styles.story}
         href={`/articles/${encodeURIComponent(article.slug)}`}
         aria-label={article.title}
       >
-        {article.mainImage && (
-          <div className={styles.image}>
-            {/* Authorized route stays outside image optimization to preserve cache expiry. */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={`/api/public/articles/${article.id}/media/${article.mainImage.id}`}
-              alt={article.mainImage.alt}
-              width={article.mainImage.width}
-              height={article.mainImage.height}
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-            />
-          </div>
-        )}
-        <h2>{article.title}</h2>
+        <StoryImage article={article} eager className={styles.image} />
+        <div className={styles.overlay}>
+          <h2 className={styles.title}>{article.title}</h2>
+          <StoryDate
+            publishedAt={article.publishedAt}
+            className={styles.date}
+          />
+        </div>
       </Link>
       {article.mainImage && (
         <p className={styles.credit}>Photo: {article.mainImage.credit}</p>
       )}
-      <StoryMeta article={article} />
-      {article.excerpt && <p className={styles.excerpt}>{article.excerpt}</p>}
     </article>
   );
 }
