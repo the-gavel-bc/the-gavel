@@ -40,6 +40,9 @@ test("owner uploads, describes, attaches and unlinks a private main image", asyn
     .getByLabel("Alt text", { exact: true })
     .fill("Red newsroom graphic");
   await page.getByLabel("Image credit").fill("The Gavel");
+  await page
+    .getByLabel("Caption", { exact: true })
+    .fill("A synthetic newsroom graphic.");
   await page.getByRole("button", { name: "Attach image" }).click();
   await expect(page.getByText("Image attached.")).toBeVisible();
   await expect(
@@ -53,6 +56,14 @@ test("owner uploads, describes, attaches and unlinks a private main image", asyn
   await expect(
     page.getByText("Attached image: Red newsroom graphic — The Gavel"),
   ).toBeVisible();
+  await expect(page.getByLabel("Caption", { exact: true })).toHaveValue(
+    "A synthetic newsroom graphic.",
+  );
+  await page.getByLabel("Caption", { exact: true }).fill("");
+  await page.getByRole("button", { name: "Update image details" }).click();
+  await expect(page.getByText("Image attached.")).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel("Caption", { exact: true })).toHaveValue("");
   await page.getByRole("button", { name: "Remove image" }).click();
   await expect(page.getByText("Image removed.")).toBeVisible();
   await page.reload();

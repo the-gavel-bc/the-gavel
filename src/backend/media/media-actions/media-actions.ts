@@ -81,16 +81,25 @@ const imageText = z
   .min(1)
   .max(240)
   .refine((value) => value.trim() === value && value.trim().length > 0);
+const caption = z
+  .string()
+  .transform((value) => value.trim() || null)
+  .pipe(z.string().max(400).nullable())
+  .nullable()
+  .optional()
+  .transform((value) => value ?? null);
 const imageCommand = z.union([
   imageCommandBase.extend({
     assetId: uuid,
     altText: imageText,
     credit: imageText,
+    caption,
   }),
   imageCommandBase.extend({
     assetId: z.null(),
     altText: z.null(),
     credit: z.null(),
+    caption: z.null().optional(),
   }),
 ]);
 
@@ -112,6 +121,7 @@ export async function setArticleMainImage(
       p_asset_id: value.assetId as string,
       p_alt_text: value.altText as string,
       p_credit: value.credit as string,
+      p_caption: (value.caption ?? null) as string,
     });
     if (error) return { ok: false, code: "unavailable" };
     const result = parseDraftWriteResult(data);

@@ -99,6 +99,7 @@ it("attaches a validated image through the user-scoped versioned RPC", async () 
     p_asset_id: assetId,
     p_alt_text: "Newsroom graphic",
     p_credit: "The Gavel",
+    p_caption: null,
   });
   expect(mocks.revalidate).toHaveBeenCalledWith(
     `/dashboard/articles/${articleId}`,
@@ -126,4 +127,29 @@ it("maps a transport failure to an uncertain result without retrying", async () 
     code: "unavailable",
   });
   expect(mocks.rpc).toHaveBeenCalledOnce();
+});
+
+it("normalizes an optional caption and sends it with the receipt payload", async () => {
+  mocks.rpc.mockResolvedValue({ data: imageReceipt, error: null });
+  expect(
+    await setArticleMainImage({
+      ...imageCommand,
+      caption: "  A newsroom scene  ",
+    }),
+  ).toEqual(imageReceipt);
+  expect(mocks.rpc).toHaveBeenCalledWith(
+    "set_article_main_image",
+    expect.objectContaining({ p_caption: "A newsroom scene" }),
+  );
+  await setArticleMainImage({ ...imageCommand, caption: "  " });
+  expect(mocks.rpc).toHaveBeenLastCalledWith(
+    "set_article_main_image",
+    expect.objectContaining({ p_caption: null }),
+  );
+});
+it("rejects captions over 400 characters before checking access", async () => {
+  expect(
+    await setArticleMainImage({ ...imageCommand, caption: "x".repeat(401) }),
+  ).toEqual({ ok: false, code: "invalid_input" });
+  expect(mocks.access).not.toHaveBeenCalled();
 });

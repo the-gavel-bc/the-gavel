@@ -23,6 +23,7 @@ beforeEach(() => {
       asset_id: assetId,
       alt_text: "Newsroom graphic",
       credit: "The Gavel",
+      caption: null,
     },
     error: null,
   });
@@ -38,6 +39,7 @@ it("returns only an article's private main-image metadata", async () => {
     assetId,
     altText: "Newsroom graphic",
     credit: "The Gavel",
+    caption: null,
   });
 });
 

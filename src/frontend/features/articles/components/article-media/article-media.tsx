@@ -20,10 +20,11 @@ type ImageCommand = {
   assetId: string | null;
   altText: string | null;
   credit: string | null;
+  caption: string | null;
 };
 type PendingWrite = {
   command: ImageCommand;
-  input: { altText: string; credit: string };
+  input: { altText: string; credit: string; caption: string };
   uncertain: boolean;
 };
 
@@ -55,14 +56,17 @@ export function ArticleMedia({
   const [pendingWrite, setPendingWrite] = useState<PendingWrite | null>(null);
   const [altText, setAltText] = useState(initialImage?.altText ?? "");
   const [credit, setCredit] = useState(initialImage?.credit ?? "");
+  const [caption, setCaption] = useState(initialImage?.caption ?? "");
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const locked = disabled || busy || conflict || Boolean(cleanupAssetId);
   const mutationLocked = locked || Boolean(pendingWrite);
   const metadataChanged = image
-    ? altText !== image.altText || credit !== image.credit
-    : Boolean(altText || credit);
+    ? altText !== image.altText ||
+      credit !== image.credit ||
+      caption !== (image.caption ?? "")
+    : Boolean(altText || credit || caption);
   const dirty = Boolean(
     file || assetId || cleanupAssetId || pendingWrite || metadataChanged,
   );
@@ -159,7 +163,9 @@ export function ArticleMedia({
     }
   }
 
-  function commit(next: Pick<ImageCommand, "assetId" | "altText" | "credit">) {
+  function commit(
+    next: Pick<ImageCommand, "assetId" | "altText" | "credit" | "caption">,
+  ) {
     if (mutationLocked) return;
     const write = {
       command: {
@@ -168,7 +174,7 @@ export function ArticleMedia({
         requestId: crypto.randomUUID(),
         ...next,
       },
-      input: { altText, credit },
+      input: { altText, credit, caption },
       uncertain: false,
     };
     setPendingWrite(write);
@@ -215,6 +221,7 @@ export function ArticleMedia({
               assetId: command.assetId,
               altText: command.altText,
               credit: command.credit,
+              caption: command.caption,
             }
           : null,
       );
@@ -223,6 +230,9 @@ export function ArticleMedia({
       );
       setCredit((current) =>
         current === input.credit ? (command.credit ?? "") : current,
+      );
+      setCaption((current) =>
+        current === input.caption ? (command.caption ?? "") : current,
       );
       setAssetId(null);
       setFile(null);
@@ -246,7 +256,17 @@ export function ArticleMedia({
       setError("Alt text and credit are required.");
       return;
     }
-    void commit({ assetId: targetAssetId, altText: alt, credit: by });
+    const description = caption.trim();
+    if (Array.from(description).length > 400) {
+      setError("Caption must be 400 characters or fewer.");
+      return;
+    }
+    void commit({
+      assetId: targetAssetId,
+      altText: alt,
+      credit: by,
+      caption: description || null,
+    });
   }
 
   async function discardUpload() {
@@ -269,6 +289,7 @@ export function ArticleMedia({
       if (!image) {
         setAltText("");
         setCredit("");
+        setCaption("");
       }
       setStatus("Unused upload removed.");
     } catch {
@@ -347,6 +368,18 @@ export function ArticleMedia({
           disabled={locked}
           onChange={(event) => setCredit(event.target.value)}
         />
+        <label htmlFor="article-image-caption">Caption</label>
+        <textarea
+          id="article-image-caption"
+          value={caption}
+          maxLength={400}
+          disabled={locked}
+          aria-describedby="article-image-caption-hint"
+          onChange={(event) => setCaption(event.target.value)}
+        />
+        <p id="article-image-caption-hint">
+          Optional. Up to 400 characters, shown under the photo.
+        </p>
       </div>
       <div className={styles.actions}>
         <Button
@@ -397,7 +430,12 @@ export function ArticleMedia({
             type="button"
             disabled={mutationLocked}
             onClick={() =>
-              void commit({ assetId: null, altText: null, credit: null })
+              void commit({
+                assetId: null,
+                altText: null,
+                credit: null,
+                caption: null,
+              })
             }
           >
             Remove image

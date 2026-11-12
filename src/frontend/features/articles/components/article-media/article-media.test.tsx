@@ -135,7 +135,12 @@ it("offers reload after a version conflict instead of a stale retry", async () =
   render(
     <ArticleMedia
       article={article}
-      initialImage={{ assetId, altText: "Current", credit: "The Gavel" }}
+      initialImage={{
+        assetId,
+        altText: "Current",
+        credit: "The Gavel",
+        caption: null,
+      }}
       disabled={false}
       onCommit={vi.fn()}
     />,
@@ -186,6 +191,7 @@ it("uploads a file, requires alt and credit, then attaches the finalized asset",
       assetId,
       altText: "Newsroom graphic",
       credit: "The Gavel",
+      caption: null,
     }),
   );
 });
@@ -194,7 +200,12 @@ it("blocks image mutations while the draft has unsaved changes", async () => {
   render(
     <ArticleMedia
       article={article}
-      initialImage={{ assetId, altText: "Current", credit: "The Gavel" }}
+      initialImage={{
+        assetId,
+        altText: "Current",
+        credit: "The Gavel",
+        caption: null,
+      }}
       disabled
       onCommit={vi.fn()}
     />,
@@ -213,7 +224,12 @@ it("clears the media navigation guard after a confirmed unlink", async () => {
   render(
     <ArticleMedia
       article={article}
-      initialImage={{ assetId, altText: "Current", credit: "The Gavel" }}
+      initialImage={{
+        assetId,
+        altText: "Current",
+        credit: "The Gavel",
+        caption: null,
+      }}
       disabled={false}
       onCommit={vi.fn()}
       onDirtyChange={onDirtyChange}
@@ -240,7 +256,12 @@ it("replays the full image command despite changed metadata, props and disabled 
   const onDirtyChange = vi.fn();
   const props = {
     article,
-    initialImage: { assetId, altText: "Current", credit: "The Gavel" },
+    initialImage: {
+      assetId,
+      altText: "Current",
+      credit: "The Gavel",
+      caption: null,
+    },
     disabled: false,
     onCommit,
     onBusyChange,
@@ -266,6 +287,7 @@ it("replays the full image command despite changed metadata, props and disabled 
     assetId,
     altText: "Submitted alt",
     credit: "The Gavel",
+    caption: null,
   });
   fireEvent.change(screen.getByLabelText("Alt text"), {
     target: { value: "Newer alt" },
@@ -343,7 +365,12 @@ it("retries an unlink independently of newer image metadata and keeps those edit
   const user = userEvent.setup();
   const props = {
     article,
-    initialImage: { assetId, altText: "Current", credit: "The Gavel" },
+    initialImage: {
+      assetId,
+      altText: "Current",
+      credit: "The Gavel",
+      caption: null,
+    },
     disabled: false,
     onCommit: vi.fn(),
     onDirtyChange,
@@ -359,6 +386,7 @@ it("retries an unlink independently of newer image metadata and keeps those edit
     assetId: null,
     altText: null,
     credit: null,
+    caption: null,
   });
   fireEvent.change(screen.getByLabelText("Image credit"), {
     target: { value: "New credit" },
@@ -394,7 +422,12 @@ it.each(["forbidden", "not_found"] as const)(
     render(
       <ArticleMedia
         article={article}
-        initialImage={{ assetId, altText: "Current", credit: "The Gavel" }}
+        initialImage={{
+          assetId,
+          altText: "Current",
+          credit: "The Gavel",
+          caption: null,
+        }}
         disabled={false}
         onCommit={onCommit}
         onBusyChange={onBusyChange}
@@ -438,7 +471,12 @@ it("clears a first-attempt access denial without claiming a commit", async () =>
   render(
     <ArticleMedia
       article={article}
-      initialImage={{ assetId, altText: "Current", credit: "The Gavel" }}
+      initialImage={{
+        assetId,
+        altText: "Current",
+        credit: "The Gavel",
+        caption: null,
+      }}
       disabled={false}
       onCommit={onCommit}
       onBusyChange={onBusyChange}
@@ -463,7 +501,12 @@ it("offers reload when an uncertain retry reaches the definitive version conflic
   render(
     <ArticleMedia
       article={article}
-      initialImage={{ assetId, altText: "Current", credit: "The Gavel" }}
+      initialImage={{
+        assetId,
+        altText: "Current",
+        credit: "The Gavel",
+        caption: null,
+      }}
       disabled={false}
       onCommit={onCommit}
       onBusyChange={onBusyChange}
@@ -533,4 +576,70 @@ it("uploads a file handed over at creation once, without a click", async () => {
   expect(await screen.findByText("Image ready to attach.")).toBeVisible();
   expect(mocks.request).toHaveBeenCalledTimes(1);
   expect(mocks.request).toHaveBeenCalledWith(article.id, expect.any(String));
+});
+
+it("updates and clears an optional caption without replacing the image", async () => {
+  const user = userEvent.setup();
+  render(
+    <ArticleMedia
+      article={article}
+      initialImage={{
+        assetId,
+        altText: "Newsroom",
+        credit: "The Gavel",
+        caption: null,
+      }}
+      disabled={false}
+      onCommit={vi.fn()}
+    />,
+  );
+  await user.type(screen.getByLabelText("Caption"), "  Student newsroom  ");
+  await user.click(
+    screen.getByRole("button", { name: "Update image details" }),
+  );
+  await screen.findByText("Image attached.");
+  expect(mocks.setImage).toHaveBeenLastCalledWith(
+    expect.objectContaining({ assetId, caption: "Student newsroom" }),
+  );
+  expect(screen.getByLabelText("Caption")).toHaveValue("Student newsroom");
+  await user.clear(screen.getByLabelText("Caption"));
+  await user.click(
+    screen.getByRole("button", { name: "Update image details" }),
+  );
+  await waitFor(() =>
+    expect(mocks.setImage).toHaveBeenLastCalledWith(
+      expect.objectContaining({ caption: null }),
+    ),
+  );
+});
+
+it("retries the original caption and retains newer caption input", async () => {
+  mocks.setImage.mockRejectedValueOnce(new Error("Lost response"));
+  const user = userEvent.setup();
+  render(
+    <ArticleMedia
+      article={article}
+      initialImage={{
+        assetId,
+        altText: "Newsroom",
+        credit: "The Gavel",
+        caption: null,
+      }}
+      disabled={false}
+      onCommit={vi.fn()}
+    />,
+  );
+  await user.type(screen.getByLabelText("Caption"), "Submitted caption");
+  await user.click(
+    screen.getByRole("button", { name: "Update image details" }),
+  );
+  await screen.findByRole("alert");
+  const command = mocks.setImage.mock.calls[0][0];
+  expect(command.caption).toBe("Submitted caption");
+  await user.clear(screen.getByLabelText("Caption"));
+  await user.type(screen.getByLabelText("Caption"), "Newer caption");
+  await user.click(screen.getByRole("button", { name: "Retry image change" }));
+  await screen.findByText("Image attached.");
+  expect(mocks.setImage).toHaveBeenNthCalledWith(2, command);
+  expect(screen.getByLabelText("Caption")).toHaveValue("Newer caption");
 });

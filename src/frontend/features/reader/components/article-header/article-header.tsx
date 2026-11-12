@@ -30,7 +30,10 @@ export function ArticleHeader({ article }: { article: PublicArticle }) {
             fetchPriority="high"
             decoding="async"
           />
-          <figcaption>Photo: {article.mainImage.credit}</figcaption>
+          <figcaption>
+            {article.mainImage.caption && <>{article.mainImage.caption} </>}
+            Photo: {article.mainImage.credit}
+          </figcaption>
         </figure>
       )}
     </header>
