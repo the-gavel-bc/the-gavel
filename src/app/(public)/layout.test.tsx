@@ -27,6 +27,9 @@ it("loads only narrow footer data and renders a single shell", async () => {
       mission: "Mission",
       contactEmail: null,
       instagramUrl: null,
+      spotifyUrl: null,
+      linkedinUrl: null,
+      facebookUrl: null,
       submissionInstructions: null,
     },
   });

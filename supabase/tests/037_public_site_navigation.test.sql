@@ -28,7 +28,9 @@ insert into public.categories(id,section_id,name,slug,navigation_order,active) v
  ('34000000-0000-0000-0000-000000000003','24000000-0000-0000-0000-000000000001','Category Hidden','category-hidden',0,false),
  ('34000000-0000-0000-0000-000000000004','24000000-0000-0000-0000-000000000003','Inactive Parent Child','hidden-parent-child',0,true);
 update public.site_information set mission=E'Our mission\n\nSecond paragraph',contact_email='editor@bc.edu',
- instagram_url='https://www.instagram.com/thegavel/',submission_instructions='Send a letter';
+ instagram_url='https://www.instagram.com/thegavel/',submission_instructions='Send a letter',
+ spotify_url='https://open.spotify.com/show/2abc',linkedin_url='https://www.linkedin.com/company/the-gavel/',
+ facebook_url='https://facebook.com.evil.test/bcgavel';
 create temporary table public_site_proof(value jsonb);
 grant select,insert on public_site_proof to anon,authenticated;
 set local role anon;
@@ -41,6 +43,9 @@ select is((select jsonb_array_length(value#>'{sections,0,categories}') from publ
 select ok((select value::text from public_site_proof) !~ 'hidden-parent-child|nav-hidden|edit_version|receipts','hidden taxonomy and private settings excluded');
 select is((select value#>>'{information,contactEmail}' from public_site_proof),'editor@bc.edu','valid email returned');
 select is((select value#>>'{information,instagramUrl}' from public_site_proof),'https://www.instagram.com/thegavel/','valid Instagram link returned');
+select is((select value#>>'{information,spotifyUrl}' from public_site_proof),'https://open.spotify.com/show/2abc','valid Spotify link returned');
+select is((select value#>>'{information,linkedinUrl}' from public_site_proof),'https://www.linkedin.com/company/the-gavel/','valid LinkedIn link returned');
+select is((select value#>'{information,facebookUrl}' from public_site_proof),'null'::jsonb,'unsafe stored Facebook link is hidden');
 reset role;
 set local role authenticated;
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);

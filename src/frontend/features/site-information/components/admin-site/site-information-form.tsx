@@ -11,7 +11,7 @@ import {
 import type { SiteInformation } from "@/backend/site-information/site-information/site-information";
 const messages = {
   invalid_input:
-    "Check the field lengths, email and Instagram URL. Plain text only.",
+    "Check the field lengths, email and social links. Plain text only.",
   forbidden: "Your administrator access no longer permits this change.",
   conflict:
     "Site information changed elsewhere. Reload to review the latest version.",
@@ -32,6 +32,9 @@ export function SiteInformationForm({
   const [instagramUrl, setInstagramUrl] = useState(
     information.instagramUrl ?? "",
   );
+  const [spotifyUrl, setSpotifyUrl] = useState(information.spotifyUrl ?? "");
+  const [linkedinUrl, setLinkedinUrl] = useState(information.linkedinUrl ?? "");
+  const [facebookUrl, setFacebookUrl] = useState(information.facebookUrl ?? "");
   const [submissionInstructions, setSubmissionInstructions] = useState(
     information.submissionInstructions ?? "",
   );
@@ -43,6 +46,9 @@ export function SiteInformationForm({
     mission,
     contactEmail,
     instagramUrl,
+    spotifyUrl,
+    linkedinUrl,
+    facebookUrl,
     submissionInstructions,
   ]);
   const [acknowledged, setAcknowledged] = useState(values);
@@ -75,6 +81,9 @@ export function SiteInformationForm({
           command.mission ?? "",
           command.contactEmail ?? "",
           command.instagramUrl ?? "",
+          command.spotifyUrl ?? "",
+          command.linkedinUrl ?? "",
+          command.facebookUrl ?? "",
           command.submissionInstructions ?? "",
         ]),
       );
@@ -90,6 +99,9 @@ export function SiteInformationForm({
       mission: mission || null,
       contactEmail: contactEmail || null,
       instagramUrl: instagramUrl || null,
+      spotifyUrl: spotifyUrl || null,
+      linkedinUrl: linkedinUrl || null,
+      facebookUrl: facebookUrl || null,
       submissionInstructions: submissionInstructions || null,
     };
     const parsed = siteInformationCommandSchema.safeParse(command);
@@ -134,6 +146,39 @@ export function SiteInformationForm({
           placeholder="https://www.instagram.com/your-account/"
           disabled={blocked}
           onChange={(e) => setInstagramUrl(e.target.value)}
+        />
+      </label>
+      <label>
+        Spotify URL
+        <input
+          type="url"
+          value={spotifyUrl}
+          maxLength={255}
+          placeholder="https://open.spotify.com/show/your-show"
+          disabled={blocked}
+          onChange={(e) => setSpotifyUrl(e.target.value)}
+        />
+      </label>
+      <label>
+        LinkedIn URL
+        <input
+          type="url"
+          value={linkedinUrl}
+          maxLength={255}
+          placeholder="https://www.linkedin.com/company/your-page/"
+          disabled={blocked}
+          onChange={(e) => setLinkedinUrl(e.target.value)}
+        />
+      </label>
+      <label>
+        Facebook URL
+        <input
+          type="url"
+          value={facebookUrl}
+          maxLength={255}
+          placeholder="https://www.facebook.com/your-page"
+          disabled={blocked}
+          onChange={(e) => setFacebookUrl(e.target.value)}
         />
       </label>
       <label>

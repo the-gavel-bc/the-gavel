@@ -18,6 +18,9 @@ const command = {
   mission: "Mission",
   contactEmail: null,
   instagramUrl: null,
+  spotifyUrl: null,
+  linkedinUrl: null,
+  facebookUrl: null,
   submissionInstructions: null,
 };
 describe("site information save", () => {
@@ -43,6 +46,27 @@ describe("site information save", () => {
       replayed: false,
     });
     expect(mocks.revalidate).toHaveBeenCalledWith("/dashboard/admin/site");
+  });
+  it("forwards the social links to the save RPC", async () => {
+    mocks.access.mockResolvedValue({ status: "active", role: "administrator" });
+    mocks.rpc.mockResolvedValue({
+      data: { ok: true, version: 2, changed: true, replayed: false },
+      error: null,
+    });
+    await saveSiteInformationAction({
+      ...command,
+      spotifyUrl: "https://open.spotify.com/show/2abc",
+      linkedinUrl: "https://www.linkedin.com/company/the-gavel/",
+      facebookUrl: "https://www.facebook.com/bcgavel",
+    });
+    expect(mocks.rpc).toHaveBeenCalledWith(
+      "save_site_information",
+      expect.objectContaining({
+        p_spotify_url: "https://open.spotify.com/show/2abc",
+        p_linkedin_url: "https://www.linkedin.com/company/the-gavel/",
+        p_facebook_url: "https://www.facebook.com/bcgavel",
+      }),
+    );
   });
   it("reports uncertain database failures without leaking details", async () => {
     mocks.access.mockResolvedValue({ status: "active", role: "administrator" });

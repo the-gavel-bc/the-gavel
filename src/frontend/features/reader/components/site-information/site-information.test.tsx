@@ -7,6 +7,9 @@ const information = {
   submissionInstructions: "Send your letter.\n\nInclude your name.",
   contactEmail: "desk?letters@bc.edu",
   instagramUrl: "https://www.instagram.com/thegavel/",
+  spotifyUrl: null,
+  linkedinUrl: null,
+  facebookUrl: null,
 };
 it("renders mission as escaped paragraphs and preserves single line breaks", () => {
   render(<SiteInformationPage page="about" information={information} />);
@@ -43,6 +46,9 @@ it.each(["about", "submission"] as const)(
           submissionInstructions: null,
           contactEmail: null,
           instagramUrl: null,
+          spotifyUrl: null,
+          linkedinUrl: null,
+          facebookUrl: null,
         }}
       />,
     );

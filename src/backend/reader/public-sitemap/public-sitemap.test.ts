@@ -39,6 +39,9 @@ const site = (mission: string | null, instructions: string | null) => ({
     mission,
     contactEmail: null,
     instagramUrl: null,
+    spotifyUrl: null,
+    linkedinUrl: null,
+    facebookUrl: null,
     submissionInstructions: instructions,
   },
 });

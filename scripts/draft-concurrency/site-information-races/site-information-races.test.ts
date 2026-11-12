@@ -20,12 +20,12 @@ it("concurrent administrator saves serialize and reject the stale version", asyn
       await beginAsAdmin(a);
       expect(
         await a.json(
-          `public.save_site_information(1,'${randomUUID()}'::uuid,'Synthetic site race',null,null,null)`,
+          `public.save_site_information(1,'${randomUUID()}'::uuid,'Synthetic site race',null,null,null,null,null,null)`,
         ),
       ).toMatchObject({ ok: true, version: 2 });
       await beginAsAdmin(b);
       const stale = b.json(
-        `public.save_site_information(1,'${randomUUID()}'::uuid,'Stale site race',null,null,null)`,
+        `public.save_site_information(1,'${randomUUID()}'::uuid,'Stale site race',null,null,null,null,null,null)`,
       );
       await waitForLock(observer, b);
       await a.execute("commit;");

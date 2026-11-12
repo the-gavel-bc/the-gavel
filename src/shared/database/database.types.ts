@@ -595,26 +595,35 @@ export type Database = {
         Row: {
           contact_email: string | null;
           edit_version: number;
+          facebook_url: string | null;
           id: string;
           instagram_url: string | null;
+          linkedin_url: string | null;
           mission: string | null;
+          spotify_url: string | null;
           submission_instructions: string | null;
         };
         ComputedFields: never;
         Insert: {
           contact_email?: string | null;
           edit_version?: number;
+          facebook_url?: string | null;
           id?: string;
           instagram_url?: string | null;
+          linkedin_url?: string | null;
           mission?: string | null;
+          spotify_url?: string | null;
           submission_instructions?: string | null;
         };
         Update: {
           contact_email?: string | null;
           edit_version?: number;
+          facebook_url?: string | null;
           id?: string;
           instagram_url?: string | null;
+          linkedin_url?: string | null;
           mission?: string | null;
+          spotify_url?: string | null;
           submission_instructions?: string | null;
         };
         Relationships: [];
@@ -838,8 +847,11 @@ export type Database = {
         Returns: {
           contact_email: string;
           edit_version: number;
+          facebook_url: string;
           instagram_url: string;
+          linkedin_url: string;
           mission: string;
+          spotify_url: string;
           submission_instructions: string;
         }[];
       };
@@ -1036,9 +1048,12 @@ export type Database = {
         Args: {
           p_contact_email: string;
           p_expected_version: number;
+          p_facebook_url: string;
           p_instagram_url: string;
+          p_linkedin_url: string;
           p_mission: string;
           p_request_id: string;
+          p_spotify_url: string;
           p_submission_instructions: string;
         };
         Returns: Json;

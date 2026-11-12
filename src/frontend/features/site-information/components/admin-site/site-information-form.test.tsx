@@ -14,6 +14,9 @@ const information = {
   mission: null,
   contactEmail: null,
   instagramUrl: null,
+  spotifyUrl: null,
+  linkedinUrl: null,
+  facebookUrl: null,
   submissionInstructions: null,
 };
 describe("site information form", () => {
@@ -29,6 +32,9 @@ describe("site information form", () => {
     fireEvent.change(screen.getByLabelText("Mission"), {
       target: { value: "Our mission" },
     });
+    fireEvent.change(screen.getByLabelText("Spotify URL"), {
+      target: { value: "https://open.spotify.com/show/2abc" },
+    });
     fireEvent.click(
       screen.getByRole("button", { name: "Save site information" }),
     );
@@ -36,7 +42,13 @@ describe("site information form", () => {
       expect(screen.getByText("Site information saved.")).toBeInTheDocument(),
     );
     expect(mocks.save).toHaveBeenCalledWith(
-      expect.objectContaining({ mission: "Our mission", contactEmail: null }),
+      expect.objectContaining({
+        mission: "Our mission",
+        contactEmail: null,
+        spotifyUrl: "https://open.spotify.com/show/2abc",
+        linkedinUrl: null,
+        facebookUrl: null,
+      }),
     );
   });
   it("protects unsaved input and offers conflict recovery", async () => {

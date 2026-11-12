@@ -17,6 +17,9 @@ const information = {
   submissionInstructions: "Approved instructions",
   contactEmail: null,
   instagramUrl: null,
+  spotifyUrl: null,
+  linkedinUrl: null,
+  facebookUrl: null,
 };
 beforeEach(() => {
   vi.clearAllMocks();
