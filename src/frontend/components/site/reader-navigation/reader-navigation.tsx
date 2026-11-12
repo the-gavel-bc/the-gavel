@@ -1,5 +1,8 @@
 "use client";
-import { sectionHref } from "@/shared/reader/section-link/section-link";
+import {
+  isLettersSection,
+  sectionHref,
+} from "@/shared/reader/section-link/section-link";
 import { useEffect, useRef } from "react";
 import { SearchForm } from "@/frontend/features/reader/components/search-form/search-form";
 import { usePathname } from "next/navigation";
@@ -65,6 +68,24 @@ export function ReaderNavigation({ sections }: { sections: PublicSection[] }) {
               {sections.map((section) => {
                 const href = sectionHref(section);
                 const sectionPath = `/sections/${encodeURIComponent(section.slug)}`;
+                // Dropdown entries: the section's categories, plus the
+                // submission page under Letter to the Editor (as on the live site).
+                const items = [
+                  ...section.categories.map((category) => ({
+                    key: category.slug,
+                    name: category.name,
+                    path: `${sectionPath}/categories/${encodeURIComponent(category.slug)}`,
+                  })),
+                  ...(isLettersSection(section)
+                    ? [
+                        {
+                          key: "how-to-submit",
+                          name: "How to Submit",
+                          path: "/letters/how-to-submit",
+                        },
+                      ]
+                    : []),
+                ];
                 return (
                   <li key={section.slug} className={styles.section}>
                     <Link
@@ -78,25 +99,29 @@ export function ReaderNavigation({ sections }: { sections: PublicSection[] }) {
                     >
                       {section.name}
                     </Link>
-                    {section.categories.length > 0 && (
+                    {items.length > 0 && (
                       <details className={styles.categories}>
                         <summary>
                           <span aria-hidden="true" className={styles.caret} />
                           <span className={styles.srOnly}>
-                            Categories for {section.name}
+                            {isLettersSection(section) &&
+                            !section.categories.length
+                              ? "Links"
+                              : "Categories"}{" "}
+                            for {section.name}
                           </span>
                         </summary>
                         <ul>
-                          {section.categories.map((category) => {
-                            const path = `${sectionPath}/categories/${encodeURIComponent(category.slug)}`;
-                            return (
-                              <li key={category.slug}>
-                                <Link href={path} aria-current={current(path)}>
-                                  {category.name}
-                                </Link>
-                              </li>
-                            );
-                          })}
+                          {items.map((item) => (
+                            <li key={item.key}>
+                              <Link
+                                href={item.path}
+                                aria-current={current(item.path)}
+                              >
+                                {item.name}
+                              </Link>
+                            </li>
+                          ))}
                         </ul>
                       </details>
                     )}

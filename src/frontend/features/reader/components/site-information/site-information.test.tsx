@@ -20,19 +20,23 @@ it("renders mission as escaped paragraphs and preserves single line breaks", () 
   expect(section.textContent).toContain("<script>alert(1)</script>");
   expect(screen.queryByText(/Send your letter/)).toBeNull();
 });
-it("shows submission copy and configured safe contact destinations only", () => {
+it("shows the live letters page: banner title, illustration, heading and instructions only", () => {
   render(<SiteInformationPage page="submission" information={information} />);
   expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-    "How to submit a letter",
+    "How to Submit",
   );
-  expect(screen.getByText("Include your name.")).toBeVisible();
   expect(
-    screen.getByRole("link", { name: "desk?letters@bc.edu" }),
-  ).toHaveAttribute("href", "mailto:desk%3Fletters@bc.edu");
-  expect(screen.getByRole("link", { name: "Instagram" })).toHaveAttribute(
-    "href",
-    information.instagramUrl,
-  );
+    screen.getByRole("heading", {
+      level: 2,
+      name: "How to Submit to The Gavel’s Letter to the Editor",
+    }),
+  ).toBeVisible();
+  expect(
+    screen.getByRole("img", { name: /Dear @BCgavel/ }),
+  ).toBeInTheDocument();
+  expect(screen.getByText("Include your name.")).toBeVisible();
+  // Contact links live in the footer; the live letters page has none here.
+  expect(screen.queryByRole("region", { name: "Contact" })).toBeNull();
   expect(screen.queryByRole("form")).toBeNull();
 });
 it.each(["about", "submission"] as const)(
@@ -81,4 +85,14 @@ it("retains long Unicode copy without truncation", () => {
     />,
   );
   expect(screen.getByText(mission).textContent).toBe(mission);
+});
+it("keeps configured safe contact destinations on the About page", () => {
+  render(<SiteInformationPage page="about" information={information} />);
+  expect(
+    screen.getByRole("link", { name: "desk?letters@bc.edu" }),
+  ).toHaveAttribute("href", "mailto:desk%3Fletters@bc.edu");
+  expect(screen.getByRole("link", { name: "Instagram" })).toHaveAttribute(
+    "href",
+    information.instagramUrl,
+  );
 });

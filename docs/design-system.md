@@ -86,3 +86,5 @@ Owner-approved on 2026-11-11 and implemented against the nine desktop homepage s
 - **CSP:** logo and mark use plain `<img>` with statically imported files, because `next/image` adds an inline `style` attribute the nonce policy blocks.
 
 Verified at 1440px and 375px in a production build: one `h1`, no heading-level jumps, all images with alt text (decorative ones empty), no unnamed links, single main/footer landmarks, keyboard-operable category dropdown with visible focus, no horizontal scroll, both fonts served from this origin and no CSP violations on the homepage, archives and search. Article, archive, author, search and About pages had no screenshots and keep the earlier treatment with the new fonts.
+
+Navigation follow-up (2026-11-12): the menu follows the live taxonomy (no top-level News). Dropdowns use a 5px navy (`#1f2380`) top rule, a square white panel and 17px bold items; the Letter to the Editor dropdown links How to Submit. The How to Submit page has a full-width dark banner, the live illustration and the live heading.

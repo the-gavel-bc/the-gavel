@@ -50,3 +50,16 @@
 - Task 23: the archive/restore lifecycle across article, homepage, section, search, author and sitemap, and a draft-slug 404, were checked on the production build. The handoff is in [Phase 5 evidence](../../reviews/phase-5-public-reader.md).
 - No scratch artifacts are committed; nothing ran against the primary local project.
 - CI follow-up: the hosted production build failed inside `next/font/google` (Turbopack import-map error) though local builds passed. With owner approval the two variable latin WOFF2 files and their OFL licenses were downloaded from Google Fonts and committed, and the layout switched to `next/font/local`. A `CI=true` production build passed with both fonts bundled as same-origin assets and no Google references; fonts loaded with no external requests or console errors; unit (1,004), typecheck and lint passed. A committed `src/types/static-images.d.ts` also fixes CI typecheck, which runs before `next-env.d.ts` exists.
+
+## Navigation and letters page follow-up (2026-11-12)
+
+The owner supplied live dropdown and How to Submit screenshots and decided:
+
+- **Taxonomy seeded by migration** (`20261112020000_live_site_taxonomy.sql`, idempotent, existing names untouched): Features (On Campus, Outside of BC, Authentic Eagles), Opinions (Beyond Campus, Campus POV), Culture (Politics and Activism, Arts and Entertainment), Sports (Football, Hockey, Basketball, Press Pass), Allston-Brighton (News, Culture and Community), Letter to the Editor. Admins have no create operation, so this is the only path for initial taxonomy.
+- **No top-level News section**, matching the live menu (supersedes the 2026-11-09 decision). The homepage News row disappears because no News section exists.
+- **Letter to the Editor dropdown** shows "How to Submit" (a page, not a category).
+- **How to Submit page:** dark banner titled "How to Submit", the live illustration (cropped from the owner's screenshot into `src/frontend/assets/brand/letters-illustration.jpg`), heading "How to Submit to The Gavel’s Letter to the Editor" and the configured instructions. The Contact block is omitted there, as on the live page; About keeps it.
+
+Dropdowns now use the live navy top rule, square panel and larger bold items. The navigation search is compact (icon button, name still "Search") so the whole menu fits on one line at 1440px.
+
+Verification: SQL suite 70 files / 2,092 assertions passed with the seeded taxonomy, including a new `056_live_site_taxonomy` test of section order, categories, no News and public projection order. Unit 145 files / 1,006 tests, typecheck, lint and format passed (one existing navigation test file had been overwritten during editing and was restored with its three tests). Production build checks at 1440px and 375px: one-line desktop menu, live-style dropdowns, How to Submit item, page headings and illustration alt text, no horizontal scroll and no CSP violations.

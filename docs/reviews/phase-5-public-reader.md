@@ -56,7 +56,6 @@ Not run locally in Tasks 22/23: the full browser suite (its fixtures target the 
 
 - **Owner inputs:**
   - Production mission, contact, submission and history copy.
-  - Real section/category taxonomy, including News categories and the protected "Outside of BC" label.
   - Spotify/LinkedIn/Facebook URLs.
   - Mobile and non-homepage screenshots for visual signoff.
 - **Unresolved MVP contracts:** profile-image upload/editing and approved video providers. The owner must scope or explicitly defer them.

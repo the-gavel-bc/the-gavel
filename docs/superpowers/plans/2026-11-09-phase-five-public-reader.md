@@ -12,7 +12,7 @@
 
 ## Decisions and boundaries
 
-- Owner confirmed on 2026-11-09: include **News** in main navigation.
+- Owner confirmed on 2026-11-09: include **News** in main navigation. **Superseded on 2026-11-12:** match the live site, which has no top-level News section (News is an Allston-Brighton category); the seeded taxonomy follows the live menu.
 - Owner confirmed on 2026-11-09: category URLs are **`/sections/[sectionSlug]/categories/[categorySlug]`**, matching section-scoped category uniqueness. Replace the earlier proposed `/categories/[slug]`; no old public category implementation or redirect migration exists.
 - Keep `/articles/[slug]`, `/sections/[slug]`, `/tags/[slug]`, `/authors/[slug]`, `/search`, `/about`, `/letters`, and `/letters/how-to-submit`. Slugs remain generated, noneditable and frozen after publication under Phase 4 rules.
 - Use the demo as a visual/component reference. It does not authorize importing its authentication, database schema, taxonomy changes, article content, policies or editorial workflow.
