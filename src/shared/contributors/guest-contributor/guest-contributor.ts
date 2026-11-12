@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/shared/validation/zod/zod";
 import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
 const uuid = z.custom<string>(isDraftUuid);
 export const contributorNameSchema = z
