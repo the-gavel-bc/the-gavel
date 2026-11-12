@@ -1,5 +1,7 @@
 # Phase 5 Task 18 — search page and not-found recovery
 
+**Current decision:** The owner accepted the [bounded resource-404 deferral](2026-11-11-resource-404-framework-fix.md#accepted-deferral--owner-decision-2026-11-11) after the stable-upgrade experiment. It supersedes the release-blocker classification in the historical implementation/investigation record below. The defect and expected-failure assertion remain; all other launch gates still apply.
+
 > **For agentic workers:** Use superpowers:executing-plans. Keep this task's decisions and verification here.
 
 **Goal:** Let readers search published stories and recover from missing URLs with native forms and links, including without JavaScript.
@@ -48,7 +50,6 @@ Browser proof found that matched missing-resource routes return HTTP 404 but an 
 
 Installed Next 16.4.2's `getErrorRSCPayload` builds the empty shell on SSR error recovery. This matches the primary upstream report [#100596](https://github.com/vercel/next.js/issues/100596), whose proposed framework fixes remain open. The owner chose to keep the framework unchanged and document matched-resource no-JavaScript recovery as a release blocker. No dependency patch or extra routing/database precheck is authorized. Retain the actual assertion as an explicitly expected failure, linked to the upstream issue; a framework fix must become an unexpected pass. A separate positive test asserts real 404 status and hydrated recovery for missing taxonomy, private, archived and deleted article URLs. Never claim no-JavaScript matched-resource recovery passes.
 
-
 - Focused baseline: 13 tests passed. New presentation and route tests failed before implementation, then passed. The first build caught a displaced client directive from form extraction; it was restored before successful production runs.
 - `pnpm exec vitest run --maxWorkers=2`: 774 passed, one unchanged import-boundary test exceeded its five-second timeout while build checks were running. No timeout was relaxed. The focused final rerun is recorded separately after completion; no clean full-unit invocation is claimed.
 - `SEARCH_BROWSER_WORKDIR=/private/tmp/gavel-task18-browser pnpm exec playwright test --config playwright.task18.config.ts`: production build succeeded. Desktop/mobile native GET, no-JavaScript 12+1 pagination, query retention/reset, escaping, duplicate-parameter rejection and 320px overflow checks passed (four cases). Matched resource no-JavaScript recovery failed on both projects; the relevant assertions are retained. Unmatched-root initial HTML and HTTP 404 were independently verified by direct HTTP/browser inspection.
@@ -57,9 +58,7 @@ Installed Next 16.4.2's `getErrorRSCPayload` builds the empty shell on SSR error
 - No database migration, grant, source-data change, dependency update, framework patch or persistent cache was added. No SQL/concurrency suite was repeated. Human visual/screen-reader and hosted operational checks remain pending.
 - Scratch browser setup used current migrations under `/private/tmp/gavel-task18-browser` (API57321/DB57322), one worker and production Next build/start. Its temporary Playwright configuration is retained outside the repository at `/private/tmp/gavel-task18-playwright.config.ts`; copy it into the worktree as `playwright.task18.config.ts` only for the dedicated local run. Normal CI uses `pnpm exec playwright test e2e/public-search` against its usual isolated test database and never runs the scratch-only quota reset case.
 
-
 Final focused Vitest rerun passed all 52 tests across ten files, including the unchanged import-boundary suite and all affected public route/form/recovery cases. Strict types passed again. The broad unit invocation remains recorded above with its isolated timeout. The approved limitation is also listed in deployment's release gates; it is not treated as a successful no-JavaScript resource-recovery check.
-
 
 Approved recovery verification (`--grep 'unmatched|missing,|resource 404'`, reusing the unchanged production build) completed successfully: four positive desktop/mobile cases passed, and two explicitly expected failures reproduced the upstream no-JavaScript resource bug. Positive checks separately cover unmatched-URL native recovery, actual 404 statuses, article/archive headings and hydrated forms across missing taxonomy, private, archived and deleted articles. Playwright labels the run six passed because the two failures are expected; they are not counted here as recovery successes. Together with the earlier four search and two quota cases, ten positive browser cases passed across the focused runs. No clean all-scenarios no-JavaScript recovery claim is made.
 

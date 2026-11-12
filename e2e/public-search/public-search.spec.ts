@@ -170,12 +170,12 @@ test("missing, private, archived and deleted resources retain 404 status and rec
 test("resource 404 recovery renders in initial HTML without JavaScript", async ({
   browser,
 }, info) => {
-  // Owner-approved release blocker, not a relaxed assertion. An upstream fix
-  // becomes an unexpected pass, requiring this marker and blocker to be removed.
+  // Owner-approved deferred limitation. Keep the assertion active. An upstream fix
+  // becomes an unexpected pass, requiring review of this marker and the deferral.
   // The separate passing test above protects real HTTP status and hydrated UI.
   test.fail(
     true,
-    "Next.js #100596: matched-resource 404 HTML is empty; blocks public release",
+    "Next.js #100596: matched-resource 404 HTML is empty; owner-approved deferral",
   );
   const context = await browser.newContext({
     ...info.project.use,

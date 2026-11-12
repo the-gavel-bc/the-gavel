@@ -2,11 +2,11 @@
 
 > **For agentic workers:** After implementation is authorized, use `superpowers:executing-plans` task by task. Keep the prior no-patch decision until a replacement is explicitly selected.
 
-**Status:** Stable-upgrade experiment completed; 16.4.6 does not fix the regression. Dependency/test changes were reverted. Framework backport remains unapproved.
+**Status:** Owner-approved deferral on 2026-11-11. The framework defect remains unresolved, but this specific limitation no longer blocks release. The stable-upgrade experiment failed and was reverted; no backport is authorized.
 
 **Goal:** Render the existing recovery heading, search form and Home link in initial HTML for missing public resources, with JavaScript disabled and a real HTTP 404.
 
-**Architecture:** Prefer a verified stable Next.js patch release. If stable releases still reproduce the failure, prepare a separately reviewed, version-pinned upstream backport proposal; retain the release blocker until an implementation passes. Reuse existing anonymous reads and not-found components.
+**Architecture:** Prefer a verified stable Next.js patch release. If stable releases still reproduce the failure, prepare a separately reviewed, version-pinned upstream backport proposal; retain the accepted limitation until an implementation passes. Reuse existing anonymous reads and not-found components.
 
 **Tech stack:** Next.js 16.4.2, React 19.3.0, Node 22, pnpm 11.25.0, existing Vitest and Playwright desktop/mobile projects.
 
@@ -25,7 +25,7 @@ Upstream checked on 2026-11-11:
 
 **Preferred approach:** Reproduce on 16.4.2, test 16.4.6 in isolation, and use a stable upgrade only if the actual regression passes. Recheck release/fix status when execution starts.
 
-**Fallback proposal:** If no stable release passes, assess a narrow upstream backport in an isolated experiment. The prior owner decision explicitly excluded framework patches and extra routing/database prechecks. This plan does not override that decision: present the exact patch, risks and regression results for an implementation decision before retaining it. If a safe backport cannot be demonstrated, keep the blocker and wait for an upstream release.
+**Fallback proposal:** If no stable release passes, assess a narrow upstream backport in an isolated experiment. The prior owner decision explicitly excluded framework patches and extra routing/database prechecks. This plan does not override that decision: present the exact patch, risks and regression results for an implementation decision before retaining it. The owner subsequently chose to defer a backport and wait for an upstream fix; the accepted decision below supersedes this fallback proposal.
 
 An application routing workaround is not selected: redirecting to a recovery route changes public URL behavior; returning recovery JSX can produce soft 200s; proxy visibility checks duplicate reads and introduce races. Any such redesign would require a separate contract discussion.
 
@@ -46,7 +46,7 @@ An application routing workaround is not selected: redirecting to a recovery rou
 - [ ] Replace the single draft-only probe with independent missing-resource cases covering unknown article, draft (fixture 14), archived (15), deleted (16), missing section/category/tag/author, and unmatched root URL. Test desktop/mobile with JavaScript disabled. A failure in one case must not prevent the remaining cases from running.
 - [ ] Assert response status is 404 and the parsed visible body contains one main landmark, the correct Article/Archive recovery heading, labeled GET search and Home link. Searching raw response text is insufficient: Flight scripts already contain the missing UI.
 - [ ] Check initial robots metadata and dynamic-resource privacy/cache behavior. Verify native recovery search and Home navigation, not only element presence. Retain a small hydrated equivalent and valid published/empty-archive controls.
-- [ ] In the isolated candidate branch, run the actual assertions without `test.fail`. Record the failing cases on 16.4.2 before dependency changes. Keep the current release-blocker exception until a passing implementation is ready; do not merge a red test-only change alone.
+- [ ] In the isolated candidate branch, run the actual assertions without `test.fail`. Record the failing cases on 16.4.2 before dependency changes. Keep the accepted expected-failure classification until a passing implementation is ready; do not merge a red test-only change alone.
 
 Focused production command: `pnpm exec playwright test e2e/public-search/public-search.spec.ts --grep 'unmatched URLs|missing, private|resource 404'`. Keep these test names or update this command alongside their replacement. Do not spend/reset the global search quota to hide failures.
 
@@ -57,30 +57,30 @@ Focused production command: `pnpm exec playwright test e2e/public-search/public-
 - [x] Recheck official issue, fix PRs and stable release notes. Test 16.4.6 first unless a newer verified stable fix has appeared; record the exact version and source. Do not infer inclusion from issue closure or release recency alone.
 - [x] Change only the Next.js and matching ESLint package versions in the experiment, regenerate the lockfile, and build from a clean artifact state. Keep React and other dependencies unchanged unless their required compatibility would need a separate decision.
 - [ ] Rerun Task 1 without expected-failure markers. If it still fails, discard this experiment's dependency/lockfile changes and record the result. Do not describe an unrelated upgrade as fixing the blocker.
-- [ ] If it passes, retain the smallest upgrade diff and proceed to Task 4. Record a rollback to the original exact package/lockfile versions; rollback reopens the release blocker.
+- [ ] If it passes, retain the smallest upgrade diff and proceed to Task 4. Record a rollback to the original exact package/lockfile versions; rollback restores the documented limitation and requires its deferral/test classification to be revisited.
 
-## Task 3 — backport assessment, only if Task 2 fails
+## Task 3 — deferred backport assessment; requires new owner authorization
 
 **Files for a later proposal:** an exact-version `patches/next@<tested-version>.patch`, pnpm patch registration and lockfile, plus regression tests. The precise package target and diff must come from the experiment, not from an invented patch in this plan.
 
 - [ ] Review both upstream candidates against the tested stable renderer. Account for nearest-boundary selection, nested layouts, root/document construction, metadata, retained Flight transport and existing client-navigation behavior. Their source targets canary; do not apply either blindly to a compiled distribution.
 - [ ] Present a short backport proposal with the exact target/version, immutable upstream source, expected changed runtime paths and removal trigger. Obtain a new decision about retaining a framework patch; the earlier no-patch decision remains in effect.
 - [ ] If that experiment is authorized, use pnpm's tracked package-patch mechanism. Never rely on an untracked `node_modules` edit. Cover every runtime variant actually used by production and prove frozen-lockfile installation applies the patch from scratch.
-- [ ] Reject a backport that requires a broad renderer rewrite, loses segment-specific recovery, changes authorization/error semantics or fails the regression matrix. Do not weaken tests or replace the blocker with an assumed workaround.
+- [ ] Reject a backport that requires a broad renderer rewrite, loses segment-specific recovery, changes authorization/error semantics or fails the regression matrix. Do not weaken tests or call an assumed workaround a fix.
 
-## Task 4 — verify and hand off the selected fix
+## Task 4 — future verification if fix work resumes
 
 - [ ] Run Task 1's full 404 matrix with JavaScript off/on on desktop/mobile. Include anonymous and signed-in public requests, private/archived/deleted denial cases, valid pages, metadata, native search and unavailable recovery.
 - [ ] Run targeted existing public recovery/route/metadata tests and dashboard auth/draft Server Action smoke cases. Run `pnpm typecheck`, `pnpm lint`, `pnpm format:check` and `git diff --check`. Because the framework changes, run the full browser/production build gate once before the PR; record counts and expected failures honestly. CI retains all database/security gates. The production build belongs to the Playwright gate; do not add a second redundant build.
       Focused component/route command: `pnpm exec vitest run src/frontend/features/reader/components/not-found-recovery src/frontend/features/reader/components/search-form 'src/app/(public)/articles/[slug]' src/backend/reader/public-metadata --maxWorkers=2`. Browser smoke command: `pnpm exec playwright test e2e/access-boundary/access-boundary.spec.ts e2e/drafts/edit-drafts.spec.ts e2e/public-metadata/public-metadata.spec.ts`. Run the complete `pnpm test:e2e` once for the selected framework change; these focused cases do not substitute for that gate.
 
 - [ ] Obtain one independent code/security review of the actual dependency/patch diff and test matrix. Rerun only affected checks after corrections. No screenshots unless a demonstrated UI defect needs evidence.
-- [ ] Only after positive proof, remove the expected-failure classification and update the authoritative Task 18/Phase 5 blocker records. Link evidence here; avoid duplicating contracts. If a retained framework patch creates a lasting maintenance decision, document it in an ADR with removal/version-update instructions.
+- [ ] Only after positive proof, remove the expected-failure classification and update the authoritative Task 18/Phase 5 limitation records. Link evidence here; avoid duplicating contracts. If a retained framework patch creates a lasting maintenance decision, document it in an ADR with removal/version-update instructions.
 - [ ] Open a focused PR to main with baseline failure, candidate version/patch provenance, passing proof and rollback. Do not merge, deploy or claim launch readiness without hosted checks and the remaining human/operational gates.
 
 ## Planning validation
 
-Read the original investigation, current error boundaries, proxy matcher, production Playwright configuration, synthetic search fixture and installed 16.4.2 error-shell source. Checked official upstream issue/PR state and latest stable release notes. No runtime reproduction, candidate install, build, dependency patch, migration or browser suite was run in this planning session. The framework failure remains recorded as unresolved.
+Read the original investigation, current error boundaries, proxy matcher, production Playwright configuration, synthetic search fixture and installed 16.4.2 error-shell source. Checked official upstream issue/PR state and latest stable release notes. No runtime reproduction, candidate install, build, dependency patch, migration or browser suite was run in this planning session. The framework failure remains recorded as unresolved; the owner later accepted the bounded deferral below.
 
 ## Stable-upgrade experiment
 
@@ -97,4 +97,20 @@ Identical focused command for both candidates: `pnpm exec playwright test e2e/pu
 
 The initial baseline command also selected `unmatched URLs`. Its initial recovery shell rendered, but native search returned **Search temporarily unavailable** and zero articles instead of twelve on both projects. The serial suite then skipped the resource probes. Reran the narrower command above to isolate the actual renderer defect. This separate local search failure was not fixed or attributed to the upgrade; no full search-suite pass is claimed.
 
-Restored `package.json`, `pnpm-lock.yaml`, the original expected-failure test, and the installed 16.4.2 dependencies. Removed the experiment’s ignored production build artifact to avoid reusing a 16.4.6 build with restored dependencies. Only documentation of the experiment is retained. The stable-upgrade stage is complete with a negative result. The blocker remains; no backport, route workaround, PR, merge or deployment was attempted.
+Restored `package.json`, `pnpm-lock.yaml`, the original expected-failure test, and the installed 16.4.2 dependencies. Removed the experiment’s ignored production build artifact to avoid reusing a 16.4.6 build with restored dependencies. Only documentation of the experiment is retained. The stable-upgrade stage is complete with a negative result. The defect remains unresolved; no backport, route workaround, PR, merge or deployment was attempted during the experiment.
+
+## Accepted deferral — owner decision, 2026-11-11
+
+After the stable-upgrade experiment failed, the owner explicitly authorized deferring this framework defect. This supersedes Task 18's earlier decision to treat it as a public-release blocker. Release may proceed with this specific known limitation; all other security, accessibility, functional and operational launch gates remain unchanged.
+
+**Bounded scope:** For a matched public resource URL that is missing, draft, archived or deleted, JavaScript-disabled visitors may receive a blank initial body despite the correct HTTP 404. They lose the recovery heading, search and Home link. Hydrated recovery and unmatched-URL initial recovery remain required. This exception does not waive real 404 status, publication/ownership denials, private-data protection or general no-JavaScript support on valid pages.
+
+**Implementation decision:** Retain the current dependency versions and existing renderer. No framework fork/backport, visibility precheck or routing workaround is authorized. The failed 16.4.6 upgrade has been reverted.
+
+**Regression visibility:** Keep the narrowly scoped `test.fail` case in `e2e/public-search/public-search.spec.ts`, linked to upstream #100596. It must execute its original assertion; do not skip it or classify unrelated tests as expected failures. An unexpected pass still fails CI and triggers review. Report these as expected failures, never successful no-JavaScript recovery cases.
+
+**Revisit triggers:** Recheck this limitation when upgrading Next.js, when a compatible upstream fix is released, and during the next pre-release review. Reproduce using the same production build/start checks; issue closure or release notes alone do not prove a fix. There is no automatic upstream watcher or promised fix date.
+
+**Retirement:** Once the actual no-JavaScript 404 matrix passes on desktop/mobile, remove the expected-failure marker and this exception, update the linked requirement/release summaries, and retain the regression as an ordinary passing test. The owner may also revoke the deferral earlier.
+
+The separate local search-control failure (`Search temporarily unavailable`) is outside this exception and remains uninvestigated. Accepting the framework limitation does not mark the broader search suite as passing.

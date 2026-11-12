@@ -108,6 +108,10 @@ The Supabase startup step keeps successful output private and prints the last 80
 
 The former CI exception for [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) was retired on 2026-10-23 after upstream withdrew the advisory and unfiltered production/full audits reported zero findings. CI now runs `pnpm audit --prod --audit-level=high` and `pnpm audit --audit-level=high` without any ignore. All high/critical findings remain blocking. [ADR 0005](decisions/0005-temporary-ci-audit-exception.md) retains the historical approval and retirement evidence.
 
+## Accepted resource 404 test exception
+
+The owner-approved [resource-404 deferral](superpowers/plans/2026-11-11-resource-404-framework-fix.md#accepted-deferral--owner-decision-2026-11-11) retains one narrowly classified Playwright expected-failure case per desktop/mobile project. It still executes the no-JavaScript recovery assertion; an unexpected pass fails CI and requires review. Report these cases separately from positive passes. All other status, access, recovery and security assertions remain required.
+
 ## Required broader MVP coverage
 
 ### Critical journeys

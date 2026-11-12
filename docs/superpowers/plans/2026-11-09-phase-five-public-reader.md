@@ -248,7 +248,7 @@ Implemented on `feat/bounded-public-search`; see the [focused plan and verificat
 
 ## Task 18 — search page and custom not-found recovery
 
-Implemented on `feat/public-search-page`; see the [focused plan and verification](2026-11-10-search-page-and-recovery.md). Owner-approved exception: matched-resource 404 recovery without JavaScript remains a public-release blocker because of Next.js #100596. Correct status, hydrated resource recovery, unmatched-URL initial recovery and native search are verified; no framework patch is introduced.
+Implemented on `feat/public-search-page`; see the [focused plan and verification](2026-11-10-search-page-and-recovery.md). Current owner-approved exception: matched-resource 404 recovery without JavaScript is [deferred as an accepted release limitation](2026-11-11-resource-404-framework-fix.md#accepted-deferral--owner-decision-2026-11-11) after the stable-upgrade experiment; Next.js #100596 remains unresolved. Correct status, hydrated resource recovery, unmatched-URL initial recovery and native search are verified; no framework patch is introduced.
 
 **Files:** `src/app/(public)/search/page.tsx`; appropriate app/public not-found boundaries; reader search/results components and shared search form.
 
@@ -272,7 +272,7 @@ Implemented on `feat/public-information-pages`; see the [focused plan and verifi
 
 ## Task 20 — public page metadata and canonical identity
 
-Implemented on `feat/public-page-metadata`; see the [focused plan and verification](2026-11-10-public-page-metadata.md). Existing anonymous readers supply all data; no metadata query/RPC is added. Initial-head and privacy proof passed; the owner-approved Task 18 resource-404 body blocker and hosted/human gates remain separate.
+Implemented on `feat/public-page-metadata`; see the [focused plan and verification](2026-11-10-public-page-metadata.md). Existing anonymous readers supply all data; no metadata query/RPC is added. Initial-head and privacy proof passed; the owner-approved Task 18 resource-404 deferral and remaining hosted/human gates remain separate.
 
 **Files:** Public route metadata helpers; `src/backend/reader/metadata-query/` only if existing detail/list readers cannot supply it; private/auth metadata settings; relevant tests.
 

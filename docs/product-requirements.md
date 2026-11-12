@@ -105,7 +105,7 @@ Draft -> Published -> Archived -> Permanently deleted
 - Administrators can manage all content and memberships.
 - Section/category/tag relationships remain valid and navigable.
 - Unsanitized scripts, arbitrary HTML, unsafe embeds, and disallowed uploads cannot execute or be served as trusted content.
-- Listings paginate and provide useful loading, empty, error, and not-found states.
+- Listings paginate and provide useful loading, empty, error, and not-found states. The owner-approved [resource-404 initial-HTML deferral](superpowers/plans/2026-11-11-resource-404-framework-fix.md#accepted-deferral--owner-decision-2026-11-11) is the sole exception for missing-resource recovery without JavaScript.
 - Public pages work across supported mobile, tablet, and desktop layouts and meet the accessibility target in `design-system.md`.
 - Important authentication, membership, publication, archive, restore, and deletion actions are auditable.
 
