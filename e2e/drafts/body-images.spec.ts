@@ -119,7 +119,6 @@ test("unused uploads survive reload and can be explicitly discarded after public
   await page
     .getByLabel("Image file", { exact: true })
     .setInputFiles({ name: "main.png", mimeType: "image/png", buffer: png });
-  await page.getByRole("button", { name: "Upload image", exact: true }).click();
   await expect(page.getByText("Image ready to attach.")).toBeVisible();
   await page
     .getByLabel("Alt text", { exact: true })

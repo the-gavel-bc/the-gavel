@@ -22,7 +22,6 @@ test("owner uploads, describes, attaches and unlinks a private main image", asyn
     mimeType: "image/png",
     buffer: Buffer.from("not a PNG"),
   });
-  await page.getByRole("button", { name: "Upload image" }).click();
   await expect(
     page.getByRole("alert").filter({ hasText: "Choose a valid JPEG" }),
   ).toBeVisible();
@@ -36,7 +35,6 @@ test("owner uploads, describes, attaches and unlinks a private main image", asyn
     mimeType: "image/png",
     buffer: png,
   });
-  await page.getByRole("button", { name: "Upload image" }).click();
   await expect(page.getByText("Image ready to attach.")).toBeVisible();
   await page
     .getByLabel("Alt text", { exact: true })

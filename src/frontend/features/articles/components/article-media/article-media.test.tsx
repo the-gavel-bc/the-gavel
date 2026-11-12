@@ -61,7 +61,6 @@ it("discards a finalized upload that was never attached", async () => {
     screen.getByLabelText("Image file"),
     new File(["synthetic"], "unused.png", { type: "image/png" }),
   );
-  await user.click(screen.getByRole("button", { name: "Upload image" }));
   await screen.findByText("Image ready to attach.");
   await user.click(
     screen.getByRole("button", { name: "Discard unused upload" }),
@@ -93,7 +92,6 @@ it("rejects invalid image bytes and cleans the unused reservation", async () => 
     screen.getByLabelText("Image file"),
     new File(["bad"], "bad.png", { type: "image/png" }),
   );
-  await user.click(screen.getByRole("button", { name: "Upload image" }));
   expect(await screen.findByRole("alert")).toHaveTextContent(
     "Choose a valid JPEG",
   );
@@ -122,7 +120,6 @@ it("keeps a failed cleanup reachable for retry", async () => {
     screen.getByLabelText("Image file"),
     new File(["bad"], "bad.png", { type: "image/png" }),
   );
-  await user.click(screen.getByRole("button", { name: "Upload image" }));
   expect(
     await screen.findByRole("button", { name: "Retry cleanup" }),
   ).toBeVisible();
@@ -169,7 +166,6 @@ it("uploads a file, requires alt and credit, then attaches the finalized asset",
     screen.getByLabelText("Image file"),
     new File(["synthetic"], "headline.png", { type: "image/png" }),
   );
-  await user.click(screen.getByRole("button", { name: "Upload image" }));
   expect(await screen.findByText("Image ready to attach.")).toBeInTheDocument();
   expect(mocks.request).toHaveBeenCalledOnce();
   const [url] = vi.mocked(fetch).mock.calls[0];
@@ -307,7 +303,6 @@ it("retains a pending attachment asset and blocks competing mutations until retr
     screen.getByLabelText("Image file"),
     new File(["synthetic"], "pending.png", { type: "image/png" }),
   );
-  await user.click(screen.getByRole("button", { name: "Upload image" }));
   await screen.findByText("Image ready to attach.");
   fireEvent.change(screen.getByLabelText("Alt text"), {
     target: { value: "  Submitted alt  " },
@@ -319,7 +314,9 @@ it("retains a pending attachment asset and blocks competing mutations until retr
   expect(await screen.findByRole("alert")).toHaveTextContent("unavailable");
   const command = mocks.setImage.mock.calls[0][0];
   expect(screen.getByLabelText("Image file")).toBeDisabled();
-  expect(screen.getByRole("button", { name: "Upload image" })).toBeDisabled();
+  expect(
+    screen.queryByRole("button", { name: "Upload image" }),
+  ).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Attach image" })).toBeDisabled();
   const discard = screen.getByRole("button", { name: "Discard unused upload" });
   expect(discard).toBeDisabled();
@@ -509,7 +506,6 @@ it("retains the same file and reservation after throttling without cleanup", asy
     screen.getByLabelText("Image file"),
     new File(["image"], "image.png", { type: "image/png" }),
   );
-  await user.click(screen.getByRole("button", { name: "Upload image" }));
   expect(await screen.findByRole("alert")).toHaveTextContent(
     "retry the same file",
   );
@@ -517,4 +513,24 @@ it("retains the same file and reservation after throttling without cleanup", asy
   await user.click(screen.getByRole("button", { name: "Retry upload" }));
   expect(await screen.findByText("Image ready to attach.")).toBeVisible();
   expect(mocks.request.mock.calls[1]).toEqual(mocks.request.mock.calls[0]);
+});
+
+it("uploads a file handed over at creation once, without a click", async () => {
+  vi.stubGlobal("URL", {
+    ...URL,
+    createObjectURL: vi.fn(() => "blob:preview"),
+    revokeObjectURL: vi.fn(),
+  });
+  render(
+    <ArticleMedia
+      article={article}
+      initialImage={null}
+      disabled={false}
+      onCommit={vi.fn()}
+      initialFile={new File(["synthetic"], "first.png", { type: "image/png" })}
+    />,
+  );
+  expect(await screen.findByText("Image ready to attach.")).toBeVisible();
+  expect(mocks.request).toHaveBeenCalledTimes(1);
+  expect(mocks.request).toHaveBeenCalledWith(article.id, expect.any(String));
 });

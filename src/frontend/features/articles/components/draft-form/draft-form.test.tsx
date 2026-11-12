@@ -32,7 +32,9 @@ vi.mock("../article-media/article-media", () => ({
   ArticleMedia: ({
     onCommit,
     onBusyChange,
+    initialFile,
   }: {
+    initialFile?: File | null;
     onCommit: (result: {
       ok: true;
       articleId: string;
@@ -60,7 +62,7 @@ vi.mock("../article-media/article-media", () => ({
         };
       }}
     >
-      Start deferred image write
+      Start deferred image write{initialFile ? `: ${initialFile.name}` : ""}
     </button>
   ),
 }));
@@ -691,3 +693,46 @@ it.each(["conflict", "request_conflict"] as const)(
     ).toBeNull();
   },
 );
+it("creates the draft in place when a photo is chosen first, then hands the photo over", async () => {
+  mocks.create.mockResolvedValue({
+    ok: true,
+    articleId: baseDraft.sectionId,
+    version: 1,
+    updatedAt: "2026-10-23T12:00:00Z",
+    replayed: false,
+    changed: true,
+  });
+  const replace = vi.spyOn(window.history, "replaceState");
+  render(<DraftForm initialDraft={baseDraft} options={options} />);
+  await userEvent.upload(
+    screen.getByLabelText("Image file"),
+    new File(["synthetic"], "cover.png", { type: "image/png" }),
+  );
+  expect(
+    await screen.findByRole("button", {
+      name: "Start deferred image write: cover.png",
+    }),
+  ).toBeVisible();
+  expect(mocks.create).toHaveBeenCalledTimes(1);
+  expect(replace).toHaveBeenCalledWith(
+    null,
+    "",
+    `/dashboard/articles/${baseDraft.sectionId}`,
+  );
+  expect(mocks.push).not.toHaveBeenCalled();
+  expect(screen.getByLabelText(/Title/)).toBeEnabled();
+  replace.mockRestore();
+});
+it("keeps a chosen photo and does not create when required fields are missing", async () => {
+  render(
+    <DraftForm initialDraft={{ ...baseDraft, title: "" }} options={options} />,
+  );
+  await userEvent.upload(
+    screen.getByLabelText("Image file"),
+    new File(["synthetic"], "cover.png", { type: "image/png" }),
+  );
+  expect(
+    await screen.findByText(/cover.png will upload once the draft is saved/),
+  ).toBeVisible();
+  expect(mocks.create).not.toHaveBeenCalled();
+});
