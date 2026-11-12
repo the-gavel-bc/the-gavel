@@ -760,6 +760,7 @@ export type Database = {
         };
         Returns: Json;
       };
+      ensure_tag: { Args: { p_name: string }; Returns: Json };
       finalize_article_image_upload: {
         Args: {
           p_actor_user_id: string;

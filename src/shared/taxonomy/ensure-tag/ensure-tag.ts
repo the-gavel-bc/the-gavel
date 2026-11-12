@@ -1,0 +1,21 @@
+import { z } from "zod";
+import { isDraftUuid } from "@/shared/articles/draft-cursor/draft-cursor";
+
+export const tagNameSchema = z
+  .string()
+  .transform((name) => name.replace(/\s+/gu, " ").trim())
+  .pipe(z.string().min(1).max(120));
+export const ensureTagResultSchema = z.discriminatedUnion("ok", [
+  z.object({
+    ok: z.literal(true),
+    id: z.custom<string>(isDraftUuid),
+    name: z.string().min(1).max(120),
+    slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/u),
+    created: z.boolean(),
+  }),
+  z.object({
+    ok: z.literal(false),
+    code: z.enum(["forbidden", "invalid_input", "rate_limited", "unavailable"]),
+  }),
+]);
+export type EnsureTagResult = z.infer<typeof ensureTagResultSchema>;
