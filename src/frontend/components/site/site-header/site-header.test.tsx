@@ -83,7 +83,14 @@ it("footer omits unknown information and accepts a typed Read This slot", () => 
         facebookUrl: null,
         submissionInstructions: "Write to us",
       }}
-      readThis={[{ title: "A story", slug: "a-story" }]}
+      readThis={[
+        {
+          id: "00000000-0000-4000-8000-000000000001",
+          title: "A story",
+          slug: "a-story",
+          mainImage: null,
+        },
+      ]}
     />,
   );
   expect(screen.getByRole("link", { name: "A story" })).toHaveAttribute(

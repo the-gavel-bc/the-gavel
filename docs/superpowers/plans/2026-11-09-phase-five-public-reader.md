@@ -12,7 +12,7 @@
 
 ## Decisions and boundaries
 
-- Owner confirmed on 2026-11-09: include **News** in main navigation.
+- Owner confirmed on 2026-11-09: include **News** in main navigation. **Superseded on 2026-11-12:** match the live site, which has no top-level News section (News is an Allston-Brighton category); the seeded taxonomy follows the live menu.
 - Owner confirmed on 2026-11-09: category URLs are **`/sections/[sectionSlug]/categories/[categorySlug]`**, matching section-scoped category uniqueness. Replace the earlier proposed `/categories/[slug]`; no old public category implementation or redirect migration exists.
 - Keep `/articles/[slug]`, `/sections/[slug]`, `/tags/[slug]`, `/authors/[slug]`, `/search`, `/about`, `/letters`, and `/letters/how-to-submit`. Slugs remain generated, noneditable and frozen after publication under Phase 4 rules.
 - Use the demo as a visual/component reference. It does not authorize importing its authentication, database schema, taxonomy changes, article content, policies or editorial workflow.
@@ -296,22 +296,26 @@ Implemented on `feat/public-sitemap-robots`; see the [focused plan and verificat
 
 ## Task 22 — screenshot reconciliation and reader accessibility
 
+Implemented on `feat/phase5-visual-reconciliation` (with settings fields on `feat/site-social-links`); see the [final tasks plan](2026-11-11-phase-five-final-tasks.md) and [design system](../../design-system.md#screenshot-reconciliation-task-22). All nine owner screenshots are desktop homepage views; mobile and non-homepage visual signoff and human screen-reader review remain pending.
+
 **Files:** Only affected reader components/CSS, public route states, design-system notes and focused browser tests.
 
-- [ ] Compare owner-provided screenshots and the inspected demo against implemented reader pages; record which screenshots cover desktop/mobile and which details remain unconfirmed.
-- [ ] Make small component-level adjustments to hierarchy, spacing, crop, typography, navigation and sidebars; preserve semantic structure and settled contracts. Do not rebuild whole pages to match one screenshot.
-- [ ] Verify keyboard/focus, mobile/zoom/reflow, contrast, reduced motion, long real-shaped content, image alt/captions and all loading/empty/error/404 states. Request human screen-reader review separately.
+- [x] Compare owner-provided screenshots and the inspected demo against implemented reader pages; record which screenshots cover desktop/mobile and which details remain unconfirmed.
+- [x] Make small component-level adjustments to hierarchy, spacing, crop, typography, navigation and sidebars; preserve semantic structure and settled contracts. Do not rebuild whole pages to match one screenshot.
+- [x] Verify keyboard/focus, mobile/zoom/reflow, contrast, reduced motion, long real-shaped content, image alt/captions and all loading/empty/error/404 states. Request human screen-reader review separately.
 
 **Acceptance/validation:** Approved visual differences are resolved in small commits, with targeted component/browser checks. Capture screenshots only when needed for visual comparison/reviewer evidence. If inputs are still missing, record visual signoff as pending rather than blocking independent backend tasks or claiming a match.
 
 ## Task 23 — integrated public-reader verification and handoff
 
+Partially complete: see the [Phase 5 evidence and handoff](../../reviews/phase-5-public-reader.md). The lifecycle check and handoff are done; full-suite verification runs in owner-watched hosted CI, and a fresh whole-slice review of the final Task 22 branch remains.
+
 **Files:** One focused Phase 5 evidence/task record; this plan, README/index and affected authoritative docs. Only demonstrated defect fixes enter product code.
 
 - [ ] Verify populated upgrade and clean install in a disposable project, full SQL/public/private role denials, generated types/schema, unit/contract/editor/concurrency, production build and reader-plus-dashboard browser journeys.
-- [ ] Exercise publish/edit/archive/restore/delete across detail/list/search/homepage/author/media/metadata/sitemap paths and header/cache variants. Include anonymous and signed-in public requests; no private preview is allowed.
+- [x] Exercise publish/edit/archive/restore/delete across detail/list/search/homepage/author/media/metadata/sitemap paths and header/cache variants. Include anonymous and signed-in public requests; no private preview is allowed.
 - [ ] Obtain fresh whole-slice code/security review, resolve reproduced blockers and record automated versus human accessibility/performance evidence. Record actual command/head/results and owner-run hosted check link; do not monitor CI for the owner.
-- [ ] Reconcile final screenshots, remaining copy/taxonomy/assets/providers/profile-image inputs and operational launch gates. Publish a concrete implemented/pending handoff; do not call the entire MVP deployable while required work or verification remains.
+- [x] Reconcile final screenshots, remaining copy/taxonomy/assets/providers/profile-image inputs and operational launch gates. Publish a concrete implemented/pending handoff; do not call the entire MVP deployable while required work or verification remains.
 
 **Acceptance/validation:** Traceable public-reader evidence matches the final source; Phase 4 private invariants are preserved. Hosted/human/operational and owner-decision gates are named explicitly, with no invented approval.
 

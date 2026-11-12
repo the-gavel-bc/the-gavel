@@ -33,7 +33,10 @@ for (const javaScriptEnabled of [false, true]) {
       await assertShell();
       await page
         .getByRole("banner")
-        .getByRole("link", { name: "The Gavel", exact: true })
+        .getByRole("link", {
+          name: "The Gavel: the progressive student voice of Boston College",
+          exact: true,
+        })
         .click();
       await expect(page).toHaveURL(/\/$/);
       await assertShell();

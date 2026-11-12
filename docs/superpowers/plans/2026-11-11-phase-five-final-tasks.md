@@ -19,7 +19,7 @@
 ## Owner decisions (2026-11-11)
 
 - Use the official logo (`gavel-logo.png`, including its tagline) as the masthead, and the gavel mark (`icon-192.png`) for favicons and the no-image card placeholder.
-- Self-host Playfair Display (headings) and Source Serif 4 (body) through `next/font`, so the browser makes no third-party request and the CSP stays `'self'`. Both are OFL licensed.
+- Self-host Playfair Display (headings) and Source Serif 4 (body) as committed WOFF2 files loaded with `next/font/local`, so the browser makes no third-party request and the CSP stays `'self'`. Both are OFL licensed.
 - Add optional Spotify, LinkedIn and Facebook URLs to administrator site settings, validated to their official HTTPS hosts, and render them in Stay Connected and the footer.
 - Show "Est. 2009" in the footer as fixed publication copy.
 - Not adopted: the live Newsletter link (newsletter is unapproved scope), the "Designed with WordPress" bar, the demo's policy pages and its client-side search.
@@ -45,4 +45,23 @@
 
 ## Verification record
 
-Pending.
+- Slice 1 (PR #85): SQL 69 files / 2,086 assertions; 27 targeted and 107 affected-area unit tests; typecheck, lint and format. Details in the PR.
+- Slice 2 (this branch): unit 144 files / 1,001 tests, plus 3 new social-link/footer tests; typecheck, lint and format; production build. Browser checks at 1440px and 375px against seeded synthetic content in a disposable project: screenshot structure matched, accessibility checks passed, no horizontal scroll, no CSP violations after replacing `next/image` (it emits an inline `style` attribute the nonce policy blocks), and the keyboard dropdown works. Contrast was computed for every new colour pair. One E2E name assertion was updated for the logo link; CI runs the browser suite.
+- Task 23: the archive/restore lifecycle across article, homepage, section, search, author and sitemap, and a draft-slug 404, were checked on the production build. The handoff is in [Phase 5 evidence](../../reviews/phase-5-public-reader.md).
+- No scratch artifacts are committed; nothing ran against the primary local project.
+- CI follow-up: the hosted production build failed inside `next/font/google` (Turbopack import-map error) though local builds passed. With owner approval the two variable latin WOFF2 files and their OFL licenses were downloaded from Google Fonts and committed, and the layout switched to `next/font/local`. A `CI=true` production build passed with both fonts bundled as same-origin assets and no Google references; fonts loaded with no external requests or console errors; unit (1,004), typecheck and lint passed. A committed `src/types/static-images.d.ts` also fixes CI typecheck, which runs before `next-env.d.ts` exists.
+
+## Navigation and letters page follow-up (2026-11-12)
+
+The owner supplied live dropdown and How to Submit screenshots and decided:
+
+- **Taxonomy seeded by migration** (`20261112020000_live_site_taxonomy.sql`, idempotent, existing names untouched): Features (On Campus, Outside of BC, Authentic Eagles), Opinions (Beyond Campus, Campus POV), Culture (Politics and Activism, Arts and Entertainment), Sports (Football, Hockey, Basketball, Press Pass), Allston-Brighton (News, Culture and Community), Letter to the Editor. Admins have no create operation, so this is the only path for initial taxonomy.
+- **No top-level News section**, matching the live menu (supersedes the 2026-11-09 decision). The homepage News row disappears because no News section exists.
+- **Letter to the Editor dropdown** shows "How to Submit" (a page, not a category).
+- **How to Submit page:** dark banner titled "How to Submit", the live illustration (cropped from the owner's screenshot into `src/frontend/assets/brand/letters-illustration.jpg`), heading "How to Submit to The Gavel’s Letter to the Editor" and the configured instructions. The Contact block is omitted there, as on the live page; About keeps it.
+
+Dropdowns now use the live navy top rule, square panel and larger bold items. The navigation search is compact (icon button, name still "Search") so the whole menu fits on one line at 1440px.
+
+Verification: SQL suite 70 files / 2,092 assertions passed with the seeded taxonomy, including a new `056_live_site_taxonomy` test of section order, categories, no News and public projection order. Unit 145 files / 1,006 tests, typecheck, lint and format passed (one existing navigation test file had been overwritten during editing and was restored with its three tests). Production build checks at 1440px and 375px: one-line desktop menu, live-style dropdowns, How to Submit item, page headings and illustration alt text, no horizontal scroll and no CSP violations.
+
+CI follow-up (2026-11-12): the hosted browser run at `499db5a` failed `public-archives` "archives enforce public visibility…" on every retry. Archive pages promote their first story through `HomeHero`, and the homepage restyle had removed its section link, so `/letters` lost its in-page "Letter to the Editor" link. `HomeHero` now takes `showSection`, which archives pass. The seeded taxonomy also broke that spec's fixture, which refused to run whenever a "Letter to the Editor" section existed; it now reuses the seeded letters section. A temporary copy of the public-reader, home, reader-shell, security-header and access-boundary specs, pointed at a disposable project, passed for archives and every product case. Remaining failures there came from the copy's setup: a hard-coded `127.0.0.1:3100` origin, an email the run had changed, and the metadata fixture's image upload resolving to the primary project's Storage, which its cleanup removed. The resource-404 test is the documented expected failure. Unit 1,007, typecheck, lint and format pass.

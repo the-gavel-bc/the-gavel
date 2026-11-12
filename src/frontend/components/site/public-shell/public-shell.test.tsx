@@ -15,7 +15,11 @@ describe("PublicShell", () => {
     expect(screen.getAllByRole("banner")).toHaveLength(1);
     expect(screen.getAllByRole("main")).toHaveLength(1);
     expect(screen.getAllByRole("contentinfo")).toHaveLength(1);
-    expect(screen.getByRole("link", { name: "The Gavel" })).toBeVisible();
+    expect(
+      screen.getByRole("link", {
+        name: "The Gavel: the progressive student voice of Boston College",
+      }),
+    ).toBeVisible();
 
     const skipLink = screen.getByRole("link", { name: "Skip to content" });
     expect(skipLink).toHaveAttribute("href", "#main-content");
@@ -23,6 +27,10 @@ describe("PublicShell", () => {
     await user.tab();
     expect(skipLink).toHaveFocus();
     await user.tab();
-    expect(screen.getByRole("link", { name: "The Gavel" })).toHaveFocus();
+    expect(
+      screen.getByRole("link", {
+        name: "The Gavel: the progressive student voice of Boston College",
+      }),
+    ).toHaveFocus();
   });
 });

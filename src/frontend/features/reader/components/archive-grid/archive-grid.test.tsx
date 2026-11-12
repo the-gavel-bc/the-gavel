@@ -131,7 +131,7 @@ it("links letters submission guidance and keeps continuation pages as a grid", (
 });
 
 it("renders sectionless tag archives as a grid without section-only controls", () => {
-  render(
+  const { container } = render(
     <ArchiveGrid
       result={{
         ...result,
@@ -155,7 +155,8 @@ it("renders sectionless tag archives as a grid without section-only controls", (
     screen.queryByRole("link", { name: "How to submit a letter" }),
   ).not.toBeInTheDocument();
   expect(screen.getAllByRole("article")).toHaveLength(2);
-  expect(screen.getAllByText("No image")).toHaveLength(2);
+  // Missing images render a decorative brand tile (empty alt), not text.
+  expect(container.querySelectorAll('img[alt=""]')).toHaveLength(2);
   expect(screen.getAllByRole("link", { name: "News" })[0]).toHaveAttribute(
     "href",
     "/sections/news",

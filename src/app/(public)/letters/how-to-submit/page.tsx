@@ -12,9 +12,9 @@ export async function generateMetadata(): Promise<Metadata> {
     result.kind === "unavailable" ||
     !result.information.submissionInstructions?.trim()
   )
-    return excludedMetadata("How to submit a letter");
+    return excludedMetadata("How to Submit");
   return publicPageMetadata({
-    title: "How to submit a letter",
+    title: "How to Submit",
     path: "/letters/how-to-submit",
     description: result.information.submissionInstructions,
   });

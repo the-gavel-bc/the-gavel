@@ -1,8 +1,8 @@
 # Current work
 
-- Phase: owner-approved deferral of the no-JavaScript matched-resource 404 framework defect.
-- Branch: `docs/defer-resource-404`, based on main `a3146a1` plus planning/experiment documentation.
-- Decision and evidence: [accepted deferral](docs/superpowers/plans/2026-11-11-resource-404-framework-fix.md#accepted-deferral--owner-decision-2026-11-11).
-- This specific limitation no longer blocks release. Other launch gates remain required; the defect is not fixed.
-- Keep original dependencies and the narrowly scoped expected-failure regression. Revisit on Next upgrades, a compatible upstream fix or pre-release review.
-- No framework patch, routing workaround, application behavior, database or deployment change. Separate local search-control failure remains uninvestigated.
+- Phase: 5, public reader experience. The accepted plan is [Phase 5 public reader](docs/superpowers/plans/2026-11-09-phase-five-public-reader.md); the final tasks plan is [Tasks 22–23](docs/superpowers/plans/2026-11-11-phase-five-final-tasks.md).
+- Task 22: social-link settings in PR #85 (`feat/site-social-links`); screenshot reconciliation and accessibility on `feat/phase5-visual-reconciliation`, stacked on #85 (merge #85 first).
+- Task 23: [Phase 5 evidence and handoff](docs/reviews/phase-5-public-reader.md). Lifecycle check done; full suites run in owner-watched hosted CI; a fresh whole-slice review of the final branch remains.
+- Approved decisions (2026-11-11): official logo and gavel mark; self-hosted Playfair Display and Source Serif 4; optional Spotify/LinkedIn/Facebook settings; fixed "Est. 2009" footer copy; no Newsletter link.
+- Not deployable: owner copy/taxonomy/links and mobile screenshots, profile-image and video contract decisions, hosted OAuth/email-signup/cleanup/header checks, and human security/screen-reader review remain (see the evidence record).
+- Workspace: the primary checkout holds the owner's uncommitted README/STATUS edits and untracked screenshots; Task 22/23 work is in worktree `/private/tmp/the-gavel-phase5-final`.

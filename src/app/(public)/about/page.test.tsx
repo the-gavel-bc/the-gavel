@@ -31,7 +31,7 @@ it("routes use the existing request-cached public reader and correct fields", as
   expect(read).toHaveBeenCalledTimes(1);
   expect(await aboutMetadata()).toMatchObject({ title: "About The Gavel" });
   expect(await submitMetadata()).toMatchObject({
-    title: "How to submit a letter",
+    title: "How to Submit",
   });
 });
 it("renders the independent submission route", async () => {

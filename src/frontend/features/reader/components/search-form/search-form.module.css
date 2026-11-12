@@ -45,7 +45,7 @@
   outline-offset: 3px;
 }
 .navigation {
-  flex: 0 1 20rem;
+  flex: 0 1 13rem;
   min-width: 0;
   max-width: 100%;
   padding-block: 0.25rem;
@@ -56,6 +56,10 @@
 }
 .navigation .controls button {
   background: transparent;
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.75rem;
+  padding-inline: 0.5rem;
 }
 .navigation :is(input, button):focus-visible {
   outline: 3px solid #fff;

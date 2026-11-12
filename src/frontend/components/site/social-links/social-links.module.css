@@ -1,0 +1,55 @@
+.connect {
+  text-align: center;
+  padding-block: 2.5rem 3rem;
+  border-top: 1px solid var(--reader-line, #e3e6ee);
+}
+.connect h2 {
+  margin: 0 0 1.5rem;
+  font: 700 clamp(2rem, 4vw, 3.25rem)/1.15 var(--reader-display, Georgia);
+}
+.connect ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2.75rem;
+  padding: 0.6rem 1.5rem;
+  border-radius: 999px;
+  color: #fff;
+  font: 700 1rem/1.2 var(--reader-sans, system-ui, sans-serif);
+  text-decoration: none;
+}
+.pill svg {
+  width: 1.4em;
+  height: 1.4em;
+}
+.pill:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.pill:focus-visible {
+  outline: 3px solid var(--reader-ink, #14161c);
+  outline-offset: 3px;
+}
+/* Brand colours chosen for WCAG AA text contrast (4.9:1 or better). */
+.instagram {
+  background: #c13584;
+}
+.spotify {
+  background: #1db954;
+  color: #14161c;
+}
+.linkedin {
+  background: #0a66c2;
+}
+.facebook {
+  background: #1665cc;
+}

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
 import { ReaderNavigation } from "./reader-navigation";
@@ -46,4 +46,40 @@ it("respects a viewport change before handling Escape", () => {
   synchronize();
   fireEvent.keyDown(home, { key: "Escape" });
   expect(menu.open).toBe(true);
+});
+it("matches the live menu: category dropdowns and How to Submit under letters", () => {
+  render(
+    <ReaderNavigation
+      sections={[
+        {
+          name: "Sports",
+          slug: "sports",
+          categories: [
+            { name: "Football", slug: "football" },
+            { name: "Press Pass", slug: "press-pass" },
+          ],
+        },
+        {
+          name: "Letter to the Editor",
+          slug: "letter-to-the-editor",
+          categories: [],
+        },
+      ]}
+    />,
+  );
+  const nav = screen.getByRole("navigation", { name: "Primary navigation" });
+  expect(within(nav).getByRole("link", { name: "Press Pass" })).toHaveAttribute(
+    "href",
+    "/sections/sports/categories/press-pass",
+  );
+  expect(within(nav).getByText("Categories for Sports")).toBeInTheDocument();
+  expect(
+    within(nav).getByRole("link", { name: "Letter to the Editor" }),
+  ).toHaveAttribute("href", "/letters");
+  expect(
+    within(nav).getByText("Links for Letter to the Editor"),
+  ).toBeInTheDocument();
+  expect(
+    within(nav).getByRole("link", { name: "How to Submit" }),
+  ).toHaveAttribute("href", "/letters/how-to-submit");
 });

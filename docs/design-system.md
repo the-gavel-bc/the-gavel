@@ -1,6 +1,6 @@
 # Design system
 
-Status: Reader-scoped card primitives and provisional tokens are implemented in Phase 5 Task 7; shell/page composition and final visual signoff remain pending.
+Status: The public reader matches the owner's desktop homepage screenshots as of Phase 5 Task 22 (2026-11-11). Mobile and non-homepage visual signoff, and human screen-reader review, remain pending.
 
 ## Direction
 
@@ -72,3 +72,19 @@ Task 10 uses the reader tokens for a large serif lead, a Latest column above 56r
 ## Article body presentation
 
 Task 11 adds reader-scoped prose with serif text, h2/h3 hierarchy, semantic quotes/lists, underlined safe links, responsive intrinsic-size images and plain-text captions. Public image dimensions come from checked descriptors. Shared rendering adds only local overflow/image constraints so private previews retain their typography. No external font, raw HTML or editor runtime is added to public rendering. Human rich-content and screen-reader review remain pending.
+
+## Screenshot reconciliation (Task 22)
+
+Owner-approved on 2026-11-11 and implemented against the nine desktop homepage screenshots, using the demo frontend's components as the structural reference:
+
+- **Brand:** the official logo (`src/frontend/assets/brand/gavel-logo.png`, tagline included) is the centered masthead. The gavel mark is the favicon, the Apple touch icon and the decorative placeholder for stories without an image (a blue tile instead of "No image" text).
+- **Type:** Playfair Display for headings and Source Serif 4 for body text, self-hosted as committed variable latin WOFF2 files in `src/frontend/assets/fonts` (SIL OFL 1.1, licenses alongside) and loaded with `next/font/local` (`--font-display`, `--font-body`), so builds never fetch fonts, so no third-party request is made and the CSP's `font-src 'self'` holds. Interface labels stay system sans-serif. Dashboard typography is unchanged.
+- **Colour:** the live band blue (`#6b8bd9`) gives white text only 3.32:1, so navigation and the Featured band use `#4a72cf` (4.57:1), the nearest AA-compliant shade. Social pills use brand colours with AA text: Instagram `#c13584`, Spotify `#1db954` with dark text, LinkedIn `#0a66c2`, Facebook `#1665cc`.
+- **Homepage:** centered uppercase navigation with caret category dropdowns; a lead image with the headline and date overlaid on a dark gradient, plus three thumbnail stories beside it; a full-width blue Featured News band with compact thumbnail rows; section rows with large headings, "View All →" and image/title/date/excerpt cards; a centered Stay Connected block listing only configured social links.
+- **Footer:** black, three columns. The Gavel (fixed "Est. 2009", configured mission, email and labelled social icons), Useful Links (uppercase) and Read This cards with thumbnails, then a bottom row with copyright and the member sign-in link (moved from the masthead).
+- **Kept from the app, not the live site:** photo credits stay visible; archive and search cards keep section labels and bylines (the compact card variant is homepage-only); search stays a native form in the navigation band; no Newsletter link, WordPress credit or policy links.
+- **CSP:** logo and mark use plain `<img>` with statically imported files, because `next/image` adds an inline `style` attribute the nonce policy blocks.
+
+Verified at 1440px and 375px in a production build: one `h1`, no heading-level jumps, all images with alt text (decorative ones empty), no unnamed links, single main/footer landmarks, keyboard-operable category dropdown with visible focus, no horizontal scroll, both fonts served from this origin and no CSP violations on the homepage, archives and search. Article, archive, author, search and About pages had no screenshots and keep the earlier treatment with the new fonts.
+
+Navigation follow-up (2026-11-12): the menu follows the live taxonomy (no top-level News). Dropdowns use a 5px navy (`#1f2380`) top rule, a square white panel and 17px bold items; the Letter to the Editor dropdown links How to Submit. The How to Submit page has a full-width dark banner, the live illustration and the live heading.
