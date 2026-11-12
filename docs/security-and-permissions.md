@@ -322,3 +322,7 @@ Interrupted upload cancellation retains actor/article/asset locking, owner/admin
 ## Contributor discovery and author-created guests
 
 The authenticated contributor search requires an active eligible identity/member/profile and returns at most ten active public profile summaries. It exposes no authentication links, emails or membership data. Guest creation uses the existing profile lock order, collision-safe slug allocator, per-actor draft quota, immutable actor/request receipts and atomic `profile.created` audit. Case-insensitive existing names are returned for selection. A guest has no login, and credits never grant article access. Administrators alone edit or deactivate other contributors; direct profile writes remain closed.
+
+## Main-photo caption boundary
+
+Optional captions use the existing versioned owner/admin media mutation and exact request receipts. The database bounds nonempty trimmed captions at 400 characters; empty input becomes null. Captions are plain text rendered by React and enter public detail only through its existing published-only projection. Source table grants, ownership and media visibility are unchanged by caption support.

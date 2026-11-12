@@ -106,3 +106,15 @@ Every slice must retain anonymous/inactive/ineligible and cross-owner denial cov
 - `node /private/tmp/gavel-uiux-run.mjs build`: passed. `... start --port 3151` and `node /private/tmp/gavel-uiux-smoke.mjs D`: production browser passed keyboard search/selection, new guest creation/selection and role/order controls. No page/console/CSP errors.
 - Fresh task review: spec/quality passed, no Critical/Important findings. Default full browser suite remains for CI; human security/screen-reader review remains outstanding.
 - Implementation choice: preserve administrator three-argument guest RPC and add an active-member two-argument overload. Existing names return a safe summary with `created:false`; UI selects that row and announces reuse, preventing duplicate creation.
+
+### E preflight clarification (before coding)
+
+Published attachment also requires extending the existing draft-only upload reservation, processing-admission, claim and trusted-finalization guards. Changing only the attachment RPC/UI would make published uploads fail before attachment. Extend these stages to draft/published owner/admin authority using the current actor/article/asset lock order; keep archived denial and reference-based public Storage authorization. This is necessary for the approved published-photo flow, not a separate body-editor feature. Body-image insertion UI remains draft-only.
+
+### Slice B verification
+
+- `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, and `git diff --check`: passed. `pnpm test`: 149 files, 1,035 tests passed. Focused six-file run: 47 tests passed.
+- Completed disposable `node /private/tmp/gavel-uiux-run.mjs reset`, followed by `... types` and `... sql`: clean migration/seed and generated types passed; 73 SQL files, 2,167 assertions passed (20 new caption assertions).
+- `node /private/tmp/gavel-uiux-run.mjs build`: passed. `... start --port 3152`, `node /private/tmp/gavel-uiux-smoke.mjs B`: production-browser upload/attach caption, reload persistence, clearing and published caption-before-credit rendering passed, with the real public image loaded and no page/console/CSP errors. Standalone smoke fixture import, repeated-fixture insertion and saved-state assertions were corrected before the successful run; no application fixes were needed.
+- Fresh task review: spec/quality passed with no Critical/Important findings. Full default browser suite remains a CI gate; human maintainer/screen-reader review remains outstanding.
+- Compatibility decision: replace the old six-argument signature with a seven-argument RPC whose caption defaults to null, so existing six-argument calls still resolve. New receipts include caption; null-caption retries also accept the legacy payload hash, preserving pre-deployment in-flight requests. Non-null captions never match legacy hashes. Existing rows and historical snapshots remain valid.
