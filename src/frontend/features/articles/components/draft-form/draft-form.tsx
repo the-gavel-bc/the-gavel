@@ -453,7 +453,7 @@ export function DraftForm({
           )}
         </section>
       )}
-      {command.article && status === "draft" && (
+      {command.article && (
         <ArticleMedia
           initialFile={pendingPhoto}
           article={command.article}

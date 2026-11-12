@@ -24,6 +24,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/backend/articles/draft-actions/draft-actions", () => ({
   createDraftAction: mocks.create,
   saveDraftAction: mocks.save,
+  savePublishedArticleAction: mocks.save,
 }));
 vi.mock("@/backend/taxonomy/ensure-tag/ensure-tag-action", () => ({
   ensureTagAction: mocks.ensureTag,
@@ -100,8 +101,8 @@ const options = {
 };
 beforeEach(() => {
   vi.clearAllMocks();
-  mocks.searchPeople.mockResolvedValue({ ok: true, items: [] });
   mocks.unused.mockResolvedValue({ ok: true, items: [], nextCursor: null });
+  mocks.searchPeople.mockResolvedValue({ ok: true, items: [] });
 });
 it("requires title and section, then focuses a safe error summary", async () => {
   render(
@@ -406,7 +407,7 @@ it("toolbar correction does not clear an independent invalid native body", async
 });
 
 it.each(["draft", "published"] as const)(
-  "exposes explicit unused cleanup on %s articles",
+  "exposes main-photo editing and unused cleanup on %s articles",
   async (status) => {
     render(
       <DraftForm
@@ -420,6 +421,9 @@ it.each(["draft", "published"] as const)(
         }}
       />,
     );
+    expect(
+      screen.getByRole("button", { name: "Start deferred image write" }),
+    ).toBeVisible();
     expect(
       await screen.findByRole("region", { name: "Unused uploads" }),
     ).toBeVisible();
@@ -630,49 +634,54 @@ it("does not offer snapshot adoption while a save is uncertain", async () => {
   expect(mocks.review).not.toHaveBeenCalled();
 });
 
-it("keeps title edits while an image write completes and saves using its new version", async () => {
-  mocks.save.mockResolvedValue({
-    ok: true,
-    articleId: baseDraft.sectionId,
-    version: 3,
-    updatedAt: "2026-11-11T12:01:00Z",
-    replayed: false,
-    changed: true,
-  });
-  render(
-    <DraftForm
-      initialDraft={baseDraft}
-      article={{
-        id: baseDraft.sectionId,
-        version: 1,
-        updatedAt: "2026-11-11T11:00:00Z",
-      }}
-      options={options}
-    />,
-  );
-  await userEvent.click(
-    screen.getByRole("button", { name: "Start deferred image write" }),
-  );
-  const title = screen.getByLabelText(/Title/);
-  await userEvent.clear(title);
-  await userEvent.type(title, "Typed while image saves");
-  expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
-  fireEvent.submit(
-    screen.getByRole("button", { name: "Save draft" }).closest("form")!,
-  );
-  expect(mocks.save).not.toHaveBeenCalled();
-  act(() => mocks.finishMedia?.());
-  expect(title).toHaveValue("Typed while image saves");
-  await userEvent.click(screen.getByRole("button", { name: "Save draft" }));
-  await waitFor(() =>
-    expect(mocks.save).toHaveBeenCalledWith(
-      expect.objectContaining({
-        expectedVersion: 2,
-        draft: expect.objectContaining({ title: "Typed while image saves" }),
-      }),
-    ),
-  );
-});
+it.each(["draft", "published"] as const)(
+  "keeps title edits while a %s image write completes and saves using its new version",
+  async (status) => {
+    const saveLabel = status === "published" ? "Save article" : "Save draft";
+    mocks.save.mockResolvedValue({
+      ok: true,
+      articleId: baseDraft.sectionId,
+      version: 3,
+      updatedAt: "2026-11-11T12:01:00Z",
+      replayed: false,
+      changed: true,
+    });
+    render(
+      <DraftForm
+        initialDraft={baseDraft}
+        status={status}
+        article={{
+          id: baseDraft.sectionId,
+          version: 1,
+          updatedAt: "2026-11-11T11:00:00Z",
+        }}
+        options={options}
+      />,
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "Start deferred image write" }),
+    );
+    const title = screen.getByLabelText(/Title/);
+    await userEvent.clear(title);
+    await userEvent.type(title, "Typed while image saves");
+    expect(screen.getByRole("button", { name: saveLabel })).toBeDisabled();
+    fireEvent.submit(
+      screen.getByRole("button", { name: saveLabel }).closest("form")!,
+    );
+    expect(mocks.save).not.toHaveBeenCalled();
+    act(() => mocks.finishMedia?.());
+    expect(title).toHaveValue("Typed while image saves");
+    await userEvent.click(screen.getByRole("button", { name: saveLabel }));
+    await waitFor(() =>
+      expect(mocks.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          expectedVersion: 2,
+          draft: expect.objectContaining({ title: "Typed while image saves" }),
+        }),
+      ),
+    );
+  },
+);
 
 it.each(["conflict", "request_conflict"] as const)(
   "offers review after an uncertain save resolves to %s",
@@ -758,6 +767,11 @@ const newTag = {
   name: "New tag",
   slug: "new-tag",
 };
+const newGuest = {
+  id: "d9000000-0000-0000-0000-000000000002",
+  displayName: "New Guest",
+  slug: "new-guest",
+};
 it("creates a draft with a server-created tag while retaining newer title edits", async () => {
   let finish!: (value: unknown) => void;
   mocks.ensureTag.mockImplementation(
@@ -788,12 +802,6 @@ it("creates a draft with a server-created tag while retaining newer title edits"
     screen.getByRole("button", { name: `Remove tag ${newTag.name}` }),
   ).toBeVisible();
 });
-
-const newGuest = {
-  id: "d9000000-0000-0000-0000-000000000002",
-  displayName: "New Guest",
-  slug: "new-guest",
-};
 it.each(["search", "guest"])(
   "saves and reloads a %s contributor outside the initial catalog",
   async (kind) => {
