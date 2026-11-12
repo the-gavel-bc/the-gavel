@@ -223,3 +223,7 @@ Active members can search active profiles through `search_contributors(text)`, a
 ## Main-photo caption
 
 The caption migration adds nullable `article_main_images.caption`. Main-photo write fingerprints bind caption alongside asset/alt/credit; snapshots and the published-only detail projection include it. Existing rows and historical snapshots remain valid with no caption. Caption precedes credit in the article figure caption. See the [editor plan](superpowers/plans/2026-11-12-editor-tags-contributors-photo.md).
+
+## Published main-photo mutations
+
+Published owners/administrators may reserve, process, finalize, attach, replace and remove main images using the existing media tables and caption-aware versioned RPC. Article identity, publication timestamp and ownership remain fixed. Changes capture a revision and audit atomically; retained revision media references continue blocking cleanup even after replacement/removal. New finalized assets stay private until a current published reference exists. No new table or retention period is introduced.
