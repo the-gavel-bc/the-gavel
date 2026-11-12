@@ -1,8 +1,8 @@
 # Current work
 
-- Phase: [PR #82](https://github.com/dylandrozario/the-gavel/pull/82) integration after PR #81 merged to main `fb18a23`.
-- Branch: `fix/eligible-administrator-guard`; PRs #79, #80 and #81 are merged.
-- Plans: [eligible administrator guard](docs/superpowers/plans/2026-11-11-eligible-administrator-guard.md), [merged recovery and cleanup](docs/superpowers/plans/2026-11-11-recovery-cleanup-fixes.md).
-- Preserve finding 24 identity protection alongside explicit upload cancellation, cleanup fairness, receipt-safe recovery and status-change guards.
-- Only status/review documentation conflicted; both implementation evidence sections are retained. PR #82 eligibility code and tests are unchanged.
-- Hosted CI must rerun after integration. Human security review remains required; no merge of PR #82 or deployment performed.
+- Phase: planning the matched-resource no-JavaScript 404 framework fix; no implementation started.
+- Branch: `docs/resource-404-fix-plan`, based on main `a3146a1`.
+- Plan: [resource 404 framework fix](docs/superpowers/plans/2026-11-11-resource-404-framework-fix.md).
+- Confirmed: upstream issue #100596 and both proposed fixes remain open; installed Next.js is 16.4.2.
+- Proposed: reproduce, test a stable patch upgrade, then assess an explicitly reviewed backport only if necessary. Prior no-framework-patch decision remains in effect.
+- No dependency, application, database, merge or deployment change. Existing release blocker remains unresolved.
