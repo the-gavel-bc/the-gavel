@@ -778,3 +778,76 @@ it("creates a draft with a server-created tag while retaining newer title edits"
     screen.getByRole("button", { name: `Remove tag ${newTag.name}` }),
   ).toBeVisible();
 });
+
+it("ignores a pending tag response after explicitly adopting a conflict snapshot", async () => {
+  let finish!: (value: unknown) => void;
+  mocks.ensureTag.mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+  );
+  mocks.save
+    .mockResolvedValueOnce({ ok: false, code: "conflict" })
+    .mockResolvedValue({ ok: false, code: "unavailable" });
+  mocks.review.mockResolvedValue({
+    ok: true,
+    detail: {
+      kind: "editable",
+      status: "draft",
+      articleId: baseDraft.sectionId,
+      version: 2,
+      updatedAt: "2026-11-12T12:00:00Z",
+      draft: { ...baseDraft, title: "Adopted snapshot" },
+      unavailableSelections: {
+        sectionId: null,
+        categoryIds: [],
+        tagIds: [],
+        contributorIds: [],
+      },
+    },
+    options,
+  });
+  const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+  try {
+    render(
+      <DraftForm
+        initialDraft={baseDraft}
+        options={options}
+        article={{
+          id: baseDraft.sectionId,
+          version: 1,
+          updatedAt: "2026-11-12T12:00:00Z",
+        }}
+      />,
+    );
+    await userEvent.type(screen.getByLabelText(/Title/), " local");
+    await userEvent.type(screen.getByLabelText("Add tag"), newTag.name);
+    await userEvent.keyboard("{Enter}");
+    expect(mocks.ensureTag).toHaveBeenCalledOnce();
+    await userEvent.click(screen.getByRole("button", { name: "Save draft" }));
+    await userEvent.click(
+      await screen.findByRole("button", {
+        name: "Review latest saved version",
+      }),
+    );
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Load latest saved version" }),
+    );
+    expect(screen.getByLabelText(/Title/)).toHaveValue("Adopted snapshot");
+    await act(async () => finish({ ...newTag, ok: true, created: true }));
+    expect(
+      screen.queryByRole("button", { name: `Remove tag ${newTag.name}` }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Add tag")).toBeEnabled();
+    await userEvent.type(screen.getByLabelText(/Title/), " reconciled");
+    await userEvent.click(screen.getByRole("button", { name: "Save draft" }));
+    await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(2));
+    expect(mocks.save.mock.calls[1][0]).toMatchObject({
+      expectedVersion: 2,
+      draft: { title: "Adopted snapshot reconciled", tagIds: [] },
+    });
+  } finally {
+    confirm.mockRestore();
+  }
+});

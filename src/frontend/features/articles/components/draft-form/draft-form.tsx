@@ -363,6 +363,7 @@ export function DraftForm({
           </div>
         )}
         <DraftTaxonomyFields
+          key={`taxonomy:${catalog.revision}`}
           draft={command.draft}
           options={currentOptions}
           errors={errors}
