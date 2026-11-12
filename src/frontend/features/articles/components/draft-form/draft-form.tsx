@@ -367,6 +367,18 @@ export function DraftForm({
           options={currentOptions}
           errors={errors}
           onChange={update}
+          onOption={(tag) =>
+            setCatalog((current) => ({
+              ...current,
+              options: {
+                ...current.options,
+                tags: [
+                  ...current.options.tags.filter((item) => item.id !== tag.id),
+                  tag,
+                ],
+              },
+            }))
+          }
         />
         <DraftContributorFields
           value={command.draft.contributors}
