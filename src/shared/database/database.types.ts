@@ -141,6 +141,7 @@ export type Database = {
           alt_text: string;
           article_id: string;
           asset_id: string;
+          caption: string | null;
           credit: string;
         };
         ComputedFields: never;
@@ -148,12 +149,14 @@ export type Database = {
           alt_text: string;
           article_id: string;
           asset_id: string;
+          caption?: string | null;
           credit: string;
         };
         Update: {
           alt_text?: string;
           article_id?: string;
           asset_id?: string;
+          caption?: string | null;
           credit?: string;
         };
         Relationships: [
@@ -720,14 +723,19 @@ export type Database = {
         Args: { p_draft: Json; p_request_id: string };
         Returns: Json;
       };
-      create_guest_contributor: {
-        Args: {
-          p_biography: string;
-          p_display_name: string;
-          p_request_id: string;
-        };
-        Returns: Json;
-      };
+      create_guest_contributor:
+        | {
+            Args: { p_display_name: string; p_request_id: string };
+            Returns: Json;
+          }
+        | {
+            Args: {
+              p_biography: string;
+              p_display_name: string;
+              p_request_id: string;
+            };
+            Returns: Json;
+          };
       current_profile: {
         Args: Record<PropertyKey, never>;
         Returns: {
@@ -760,6 +768,7 @@ export type Database = {
         };
         Returns: Json;
       };
+      ensure_tag: { Args: { p_name: string }; Returns: Json };
       finalize_article_image_upload: {
         Args: {
           p_actor_user_id: string;
@@ -1058,6 +1067,7 @@ export type Database = {
         };
         Returns: Json;
       };
+      search_contributors: { Args: { p_query: string }; Returns: Json };
       search_public_articles: {
         Args: { p_cursor?: Json; p_limit?: number; p_query: string };
         Returns: Json;
@@ -1067,6 +1077,7 @@ export type Database = {
           p_alt_text: string;
           p_article_id: string;
           p_asset_id: string;
+          p_caption?: string;
           p_credit: string;
           p_expected_version: number;
           p_request_id: string;

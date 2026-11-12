@@ -51,31 +51,6 @@ export default async function AdminArticlesPage({
           uploads.
         </p>
       )}
-      <p>
-        <Link href="/dashboard/admin/audit" prefetch={false}>
-          Article activity
-        </Link>
-      </p>
-      <p>
-        <Link href="/dashboard/admin/members" prefetch={false}>
-          Memberships
-        </Link>
-        <Link href="/dashboard/admin/contributors" prefetch={false}>
-          Contributors
-        </Link>
-        <Link href="/dashboard/admin/site" prefetch={false}>
-          Site information
-        </Link>
-        <Link href="/dashboard/admin/taxonomy" prefetch={false}>
-          Taxonomy
-        </Link>
-        <Link href="/dashboard/admin/media-cleanup" prefetch={false}>
-          Media cleanup
-        </Link>
-        <Link href="/dashboard/admin/homepage" prefetch={false}>
-          Homepage
-        </Link>
-      </p>
       <AdminArticleList
         key={`${status}:${search}`}
         page={page}

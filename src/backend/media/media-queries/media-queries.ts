@@ -9,6 +9,7 @@ export type MainImage = {
   assetId: string;
   altText: string;
   credit: string;
+  caption: string | null;
 };
 
 export async function getArticleMainImage(
@@ -19,7 +20,7 @@ export async function getArticleMainImage(
   const client = await createServerSupabaseClient();
   const { data, error } = await client
     .from("article_main_images")
-    .select("asset_id,alt_text,credit")
+    .select("asset_id,alt_text,credit,caption")
     .eq("article_id", articleId)
     .maybeSingle();
   if (error) throw new Error("Unable to load article image.");
@@ -29,11 +30,13 @@ export async function getArticleMainImage(
       asset_id: z.custom<string>(isDraftUuid),
       alt_text: z.string().min(1).max(240),
       credit: z.string().min(1).max(240),
+      caption: z.string().min(1).max(400).nullable(),
     })
     .parse(data);
   return {
     assetId: parsed.asset_id,
     altText: parsed.alt_text,
     credit: parsed.credit,
+    caption: parsed.caption,
   };
 }

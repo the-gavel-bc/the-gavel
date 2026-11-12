@@ -25,29 +25,44 @@ test("creates and reopens categories tags and multiple guest credits", async ({
   await page.keyboard.press("Space");
   await expect(category).toBeChecked();
   await page
-    .getByLabel(`Synthetic ${info.project.name} topic`, { exact: true })
-    .focus();
-  await page.keyboard.press("Space");
+    .getByLabel("Add tag", { exact: true })
+    .fill(`Synthetic ${info.project.name} topic`);
+  await page.getByLabel("Add tag", { exact: true }).press("Enter");
   await page.getByRole("button", { name: "Add contributor" }).click();
   await page
     .getByLabel("Contributor 1", { exact: true })
-    .selectOption(fixture.id(94));
+    .fill(`Synthetic ${info.project.name} guest`);
+  await page
+    .getByRole("option", {
+      name: `Synthetic ${info.project.name} guest (task9-${info.project.name}-guest)`,
+      exact: true,
+    })
+    .click();
   await page.getByRole("button", { name: "Add contributor" }).click();
   await page
     .getByLabel("Contributor 2", { exact: true })
-    .selectOption(fixture.id(94));
+    .fill(`Synthetic ${info.project.name} guest`);
+  await page
+    .getByRole("option", {
+      name: `Synthetic ${info.project.name} guest (task9-${info.project.name}-guest)`,
+      exact: true,
+    })
+    .click();
   await page.getByLabel("Role 2", { exact: true }).selectOption("editor");
   await page.getByRole("button", { name: "Create draft" }).click();
   await expect(page).toHaveURL(/\/dashboard\/articles\/[0-9a-f-]+$/);
   await page.reload();
   await expect(category).toBeChecked();
   await expect(
-    page.getByLabel(`Synthetic ${info.project.name} topic`, { exact: true }),
-  ).toBeChecked();
+    page.getByRole("button", {
+      name: `Remove tag Synthetic ${info.project.name} topic`,
+      exact: true,
+    }),
+  ).toBeVisible();
   for (const n of [1, 2]) {
     await expect(
       page.getByLabel(`Contributor ${n}`, { exact: true }),
-    ).toHaveValue(fixture.id(94));
+    ).toHaveValue(new RegExp(`Synthetic ${info.project.name} guest`, "i"));
     await expect(
       page.getByLabel(`Display order ${n}`, { exact: true }),
     ).toHaveValue("0");
@@ -77,8 +92,9 @@ test("section changes retain categories until explicit replacement and preserve 
     .getByLabel(`Synthetic ${info.project.name} category`, { exact: true })
     .check();
   await page
-    .getByLabel(`Synthetic ${info.project.name} topic`, { exact: true })
-    .check();
+    .getByLabel("Add tag", { exact: true })
+    .fill(`Synthetic ${info.project.name} topic`);
+  await page.getByLabel("Add tag", { exact: true }).press("Enter");
   await expect(
     page.getByRole("status").filter({ hasText: "Unsaved changes" }),
   ).toBeVisible();

@@ -64,6 +64,7 @@ const articleSchema = z.strictObject({
       ...image,
       alt: text(240, 1),
       credit: text(240, 1),
+      caption: text(400, 1).nullable(),
     })
     .nullable(),
   bodyImages: z.array(z.strictObject(image)).max(5000),

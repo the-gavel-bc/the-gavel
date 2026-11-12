@@ -31,6 +31,7 @@ const article: PublicArticle = {
     height: 600,
     alt: "Campus",
     credit: "Photographer",
+    caption: null,
   },
   bodyImages: [],
 };

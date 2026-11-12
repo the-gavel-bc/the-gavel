@@ -17,9 +17,9 @@ export default async function DashboardLayout({
       <DashboardShell
         displayName={access.displayName}
         isAdmin={access.role === "administrator"}
+        accountAction={<DashboardSignOutForm action={signOut} />}
       >
         {children}
-        <DashboardSignOutForm action={signOut} />
       </DashboardShell>
     </DraftNavigationProvider>
   );
