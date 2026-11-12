@@ -2,7 +2,7 @@
 
 > **For agentic workers:** After implementation is authorized, use `superpowers:executing-plans` task by task. Keep the prior no-patch decision until a replacement is explicitly selected.
 
-**Status:** Proposed, planning only. No dependency, framework patch or application change is approved or implemented by this document.
+**Status:** Stable-upgrade experiment completed; 16.4.6 does not fix the regression. Dependency/test changes were reverted. Framework backport remains unapproved.
 
 **Goal:** Render the existing recovery heading, search form and Home link in initial HTML for missing public resources, with JavaScript disabled and a real HTTP 404.
 
@@ -42,7 +42,7 @@ An application routing workaround is not selected: redirecting to a recovery rou
 
 **Files:** `e2e/public-search/public-search.spec.ts`; existing fixture helpers only where necessary.
 
-- [ ] On an isolated branch from current main, record commit, Node/pnpm/Next versions and the existing expected-failure result under `next build`/`next start`. A development server result is insufficient.
+- [x] On an isolated branch from current main, record commit, Node/pnpm/Next versions and the existing expected-failure result under `next build`/`next start`. A development server result is insufficient.
 - [ ] Replace the single draft-only probe with independent missing-resource cases covering unknown article, draft (fixture 14), archived (15), deleted (16), missing section/category/tag/author, and unmatched root URL. Test desktop/mobile with JavaScript disabled. A failure in one case must not prevent the remaining cases from running.
 - [ ] Assert response status is 404 and the parsed visible body contains one main landmark, the correct Article/Archive recovery heading, labeled GET search and Home link. Searching raw response text is insufficient: Flight scripts already contain the missing UI.
 - [ ] Check initial robots metadata and dynamic-resource privacy/cache behavior. Verify native recovery search and Home navigation, not only element presence. Retain a small hydrated equivalent and valid published/empty-archive controls.
@@ -54,8 +54,8 @@ Focused production command: `pnpm exec playwright test e2e/public-search/public-
 
 **Files, only if successful:** `package.json`, `pnpm-lock.yaml`, the acceptance tests above. Keep `next` and `eslint-config-next` on the same exact patch version.
 
-- [ ] Recheck official issue, fix PRs and stable release notes. Test 16.4.6 first unless a newer verified stable fix has appeared; record the exact version and source. Do not infer inclusion from issue closure or release recency alone.
-- [ ] Change only the Next.js and matching ESLint package versions in the experiment, regenerate the lockfile, and build from a clean artifact state. Keep React and other dependencies unchanged unless their required compatibility would need a separate decision.
+- [x] Recheck official issue, fix PRs and stable release notes. Test 16.4.6 first unless a newer verified stable fix has appeared; record the exact version and source. Do not infer inclusion from issue closure or release recency alone.
+- [x] Change only the Next.js and matching ESLint package versions in the experiment, regenerate the lockfile, and build from a clean artifact state. Keep React and other dependencies unchanged unless their required compatibility would need a separate decision.
 - [ ] Rerun Task 1 without expected-failure markers. If it still fails, discard this experiment's dependency/lockfile changes and record the result. Do not describe an unrelated upgrade as fixing the blocker.
 - [ ] If it passes, retain the smallest upgrade diff and proceed to Task 4. Record a rollback to the original exact package/lockfile versions; rollback reopens the release blocker.
 
@@ -81,3 +81,20 @@ Focused production command: `pnpm exec playwright test e2e/public-search/public-
 ## Planning validation
 
 Read the original investigation, current error boundaries, proxy matcher, production Playwright configuration, synthetic search fixture and installed 16.4.2 error-shell source. Checked official upstream issue/PR state and latest stable release notes. No runtime reproduction, candidate install, build, dependency patch, migration or browser suite was run in this planning session. The framework failure remains recorded as unresolved.
+
+## Stable-upgrade experiment
+
+User authorized testing the stable upgrade first. On branch `test/resource-404-stable-upgrade`, base `5b2d491` (documentation on main `a3146a1`), compared Next 16.4.2 and 16.4.6 under Node 22.20.0 / pnpm 11.25.0. React stayed 19.3.0; `eslint-config-next` matched each Next version. Both runs used production build/start through the existing Playwright web server and fixed local synthetic fixtures. No working database reset or migration occurred.
+
+For the experiment only, removed the hardcoded `test.fail` marker from the existing no-JavaScript resource probe and asserted HTTP 404 before asserting visible recovery. This prevented an expected failure from masquerading as a fix. The checked-in test was restored afterward.
+
+| Production candidate | Hydrated recovery, desktop/mobile | No-JavaScript recovery, desktop/mobile | Build  |
+| -------------------- | --------------------------------- | -------------------------------------- | ------ |
+| Next 16.4.2          | 2 passed                          | 2 failed: recovery searchbox absent    | Passed |
+| Next 16.4.6          | 2 passed                          | 2 failed: recovery searchbox absent    | Passed |
+
+Identical focused command for both candidates: `pnpm exec playwright test e2e/public-search/public-search.spec.ts --grep 'missing, private|resource 404'`. Both no-JavaScript probes returned HTTP 404 but had no visible main/searchbox. This is sufficient to reject 16.4.6 as the proposed fix; broader framework regression suites were not run.
+
+The initial baseline command also selected `unmatched URLs`. Its initial recovery shell rendered, but native search returned **Search temporarily unavailable** and zero articles instead of twelve on both projects. The serial suite then skipped the resource probes. Reran the narrower command above to isolate the actual renderer defect. This separate local search failure was not fixed or attributed to the upgrade; no full search-suite pass is claimed.
+
+Restored `package.json`, `pnpm-lock.yaml`, the original expected-failure test, and the installed 16.4.2 dependencies. Removed the experiment’s ignored production build artifact to avoid reusing a 16.4.6 build with restored dependencies. Only documentation of the experiment is retained. The stable-upgrade stage is complete with a negative result. The blocker remains; no backport, route workaround, PR, merge or deployment was attempted.

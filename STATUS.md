@@ -1,8 +1,8 @@
 # Current work
 
-- Phase: planning the matched-resource no-JavaScript 404 framework fix; no implementation started.
-- Branch: `docs/resource-404-fix-plan`, based on main `a3146a1`.
-- Plan: [resource 404 framework fix](docs/superpowers/plans/2026-11-11-resource-404-framework-fix.md).
-- Confirmed: upstream issue #100596 and both proposed fixes remain open; installed Next.js is 16.4.2.
-- Proposed: reproduce, test a stable patch upgrade, then assess an explicitly reviewed backport only if necessary. Prior no-framework-patch decision remains in effect.
-- No dependency, application, database, merge or deployment change. Existing release blocker remains unresolved.
+- Phase: stable-upgrade experiment complete; Next 16.4.6 does not fix the no-JavaScript resource 404 defect.
+- Branch: `test/resource-404-stable-upgrade`; base `5b2d491` on main `a3146a1`.
+- Plan/evidence: [resource 404 framework fix](docs/superpowers/plans/2026-11-11-resource-404-framework-fix.md).
+- Both 16.4.2 and 16.4.6: production build and two hydrated recovery cases pass; two no-JavaScript recovery cases fail.
+- Initial broader baseline also hit local Search temporarily unavailable; no full search-suite pass claimed.
+- Original dependency versions and expected-failure test restored. Only experiment documentation retained; no backport, PR, merge, deployment or working database reset.
