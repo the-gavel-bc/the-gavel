@@ -215,3 +215,7 @@ Explicit interrupted-upload cancellation uses the existing uploading → deletin
 ## Optimization support
 
 `20261111060100_upload_processing_admission.sql` adds private `upload_processing_limits`, keyed to Auth user with cascading deletion, a window start and bounded attempt count. It is separate from draft-write quota and has no application table grants. `20261111060200_admin_article_pagination_index.sql` adds `articles_updated_page_idx(updated_at DESC,id DESC)` without changing pagination, RLS or article data. The index adds storage and write maintenance; the existing OR continuation predicate still filters newer rows. Design measurements and rollback are recorded in the [optimization plan](superpowers/plans/2026-11-11-low-priority-optimizations.md).
+
+## Author-created guest contributors
+
+Active members can search active profiles through `search_contributors(text)`, a bounded ten-result substring projection returning only ID, display name and slug. `create_guest_contributor(uuid,text)` accepts a request UUID and the existing trimmed 1–120-character profile-name contract, reuses an active case-insensitive match, or creates a no-login guest with the existing slug allocator. Actor/request receipts bind exact payloads and preserve replay; creation writes one profile audit event. Administrators retain profile editing/deactivation. Credits still grant no permissions. See the [editor plan](superpowers/plans/2026-11-12-editor-tags-contributors-photo.md).

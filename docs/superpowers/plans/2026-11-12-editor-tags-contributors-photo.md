@@ -96,3 +96,13 @@ Every slice must retain anonymous/inactive/ineligible and cross-owner denial cov
 - `python3 /private/tmp/gavel-uiux-tag-race.py`: independent-session identical-name, slug collision, and overlapping-base allocation checks passed.
 - `node /private/tmp/gavel-uiux-run.mjs build`: production build passed with disposable API 58521. `... start --port 3150` and `node /private/tmp/gavel-uiux-smoke.mjs`: active author created a typed tag, removed it, and reused the case-insensitive name via comma. No page/console/CSP errors. Synthetic Auth fixtures needed non-null timestamps; this was a fixture repair, not an application change.
 - Fresh task review: spec and quality passed; no Critical/Important findings. Full default browser suite not run locally because its fixtures target the primary project; CI runs it. Human maintainer review remains outstanding.
+
+### Slice D verification
+
+- `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, `git diff --check`: passed.
+- `pnpm test`: 149 files, 1,030 tests passed. Focused run: five files, 45 tests passed, including stale search, Escape, preserved role changes and exact uncertain retries.
+- `node /private/tmp/gavel-uiux-run.mjs up`: additive migration applied to disposable project. Separate completed `... reset`, then `... types` and `... sql`: clean migration/seed and generated types passed; 72 SQL files, 2,147 assertions passed (32 new).
+- `python3 /private/tmp/gavel-uiux-guest-race.py`: independent sessions proved distinct actors/case-insensitive names create one guest/audit, same actor/request replays one receipt, and changed payload conflicts.
+- `node /private/tmp/gavel-uiux-run.mjs build`: passed. `... start --port 3151` and `node /private/tmp/gavel-uiux-smoke.mjs D`: production browser passed keyboard search/selection, new guest creation/selection and role/order controls. No page/console/CSP errors.
+- Fresh task review: spec/quality passed, no Critical/Important findings. Default full browser suite remains for CI; human security/screen-reader review remains outstanding.
+- Implementation choice: preserve administrator three-argument guest RPC and add an active-member two-argument overload. Existing names return a safe summary with `created:false`; UI selects that row and announces reuse, preventing duplicate creation.

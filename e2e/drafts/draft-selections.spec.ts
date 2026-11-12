@@ -31,11 +31,21 @@ test("creates and reopens categories tags and multiple guest credits", async ({
   await page.getByRole("button", { name: "Add contributor" }).click();
   await page
     .getByLabel("Contributor 1", { exact: true })
-    .selectOption(fixture.id(94));
+    .fill(`Synthetic ${info.project.name} guest`);
+  await page
+    .getByRole("option", {
+      name: new RegExp(`Synthetic ${info.project.name} guest`, "i"),
+    })
+    .click();
   await page.getByRole("button", { name: "Add contributor" }).click();
   await page
     .getByLabel("Contributor 2", { exact: true })
-    .selectOption(fixture.id(94));
+    .fill(`Synthetic ${info.project.name} guest`);
+  await page
+    .getByRole("option", {
+      name: new RegExp(`Synthetic ${info.project.name} guest`, "i"),
+    })
+    .click();
   await page.getByLabel("Role 2", { exact: true }).selectOption("editor");
   await page.getByRole("button", { name: "Create draft" }).click();
   await expect(page).toHaveURL(/\/dashboard\/articles\/[0-9a-f-]+$/);
@@ -50,7 +60,7 @@ test("creates and reopens categories tags and multiple guest credits", async ({
   for (const n of [1, 2]) {
     await expect(
       page.getByLabel(`Contributor ${n}`, { exact: true }),
-    ).toHaveValue(fixture.id(94));
+    ).toHaveValue(new RegExp(`Synthetic ${info.project.name} guest`, "i"));
     await expect(
       page.getByLabel(`Display order ${n}`, { exact: true }),
     ).toHaveValue("0");

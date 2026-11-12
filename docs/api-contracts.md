@@ -284,3 +284,7 @@ Explicit unused-image removal accepts unreferenced uploading claims. Owner/admin
 ## Typed tag creation
 
 `ensure_tag(p_name text)` is authenticated-only and requires an eligible active member and active profile. It trims/collapses whitespace, accepts 1–120 characters, reuses case-insensitive names and allocates canonical collision-safe slugs. Success returns `{ok,id,name,slug,created}`; safe failures are `forbidden`, `invalid_input`, `rate_limited`, or `unavailable`. It consumes the existing 30-attempt/60-second draft quota. The editor adds at most ten tags while existing server draft validation still accepts up to 64. See the [editor plan](superpowers/plans/2026-11-12-editor-tags-contributors-photo.md).
+
+## Contributor discovery and guest creation
+
+`search_contributors(p_query text)` requires active membership and returns `{ok:true,items:[{id,displayName,slug}]}` with at most ten active substring matches. `%` and `_` have literal meaning. `create_guest_contributor(p_request_id uuid,p_display_name text)` returns `{ok,id,displayName,slug,created,replayed}`; a case-insensitive active name match returns `created:false`. Names use existing administrator validation (trimmed, 1–120 characters, no controls). Exact actor/request retries replay before quota; changed payloads return `request_conflict`. Other failures are `forbidden`, `invalid_input`, `rate_limited`, `unavailable`. The administrator three-argument operation remains available under its existing permissions.
