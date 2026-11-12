@@ -55,6 +55,9 @@ it("encodes reserved characters in contact links", () => {
         mission: null,
         contactEmail: "desk?letters@bc.edu",
         instagramUrl: null,
+        spotifyUrl: null,
+        linkedinUrl: null,
+        facebookUrl: null,
         submissionInstructions: null,
       }}
     />,
@@ -75,6 +78,9 @@ it("footer omits unknown information and accepts a typed Read This slot", () => 
         mission: "Our mission",
         contactEmail: "editor@bc.edu",
         instagramUrl: "https://instagram.com/thegavel/",
+        spotifyUrl: null,
+        linkedinUrl: null,
+        facebookUrl: null,
         submissionInstructions: "Write to us",
       }}
       readThis={[{ title: "A story", slug: "a-story" }]}

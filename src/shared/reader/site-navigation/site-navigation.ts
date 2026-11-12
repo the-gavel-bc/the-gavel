@@ -7,5 +7,8 @@ export type PublicSiteInformation = {
   mission: string | null;
   contactEmail: string | null;
   instagramUrl: string | null;
+  spotifyUrl: string | null;
+  linkedinUrl: string | null;
+  facebookUrl: string | null;
   submissionInstructions: string | null;
 };

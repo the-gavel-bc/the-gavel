@@ -22,6 +22,9 @@ const result = {
     mission: "😀".repeat(5000),
     contactEmail: "editor@bc.edu",
     instagramUrl: "https://www.instagram.com/thegavel/",
+    spotifyUrl: null,
+    linkedinUrl: null,
+    facebookUrl: null,
     submissionInstructions: "Send a letter",
   },
 };
@@ -41,6 +44,9 @@ describe("getPublicSiteNavigation", () => {
         mission: null,
         contactEmail: null,
         instagramUrl: null,
+        spotifyUrl: null,
+        linkedinUrl: null,
+        facebookUrl: null,
         submissionInstructions: null,
       },
     };
@@ -52,6 +58,9 @@ describe("getPublicSiteNavigation", () => {
       {
         ...result.information,
         instagramUrl: "https://instagram.com.evil.test/user",
+        spotifyUrl: null,
+        linkedinUrl: null,
+        facebookUrl: null,
       },
       { ...result.information, instagramUrl: "https://instagram.com/user\n" },
       { ...result.information, contactEmail: "editor@bc.edu\n" },

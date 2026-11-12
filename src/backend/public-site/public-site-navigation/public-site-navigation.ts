@@ -3,7 +3,10 @@ import "server-only";
 import { cache } from "react";
 import { z } from "zod";
 import { createPublicReaderClient } from "@/backend/infrastructure/supabase/public-reader/public-reader";
-import { isValidContactEmail } from "@/shared/site-information/site-information/site-information-command";
+import {
+  isValidContactEmail,
+  socialUrlPattern,
+} from "@/shared/site-information/site-information/site-information-command";
 
 const slug = z
   .string()
@@ -32,6 +35,12 @@ const instagram = z
       /^https:\/\/(?:www\.)?instagram\.com\/[A-Za-z0-9._/]+$/u.test(value),
   )
   .nullable();
+const social = (kind: keyof typeof socialUrlPattern) =>
+  z
+    .string()
+    .max(255)
+    .refine((value) => socialUrlPattern[kind].test(value))
+    .nullable();
 const category = z.strictObject({ name: boundedText(120), slug });
 const section = z.strictObject({
   name: boundedText(120),
@@ -47,6 +56,9 @@ const responseSchema = z.discriminatedUnion("kind", [
       mission: plainText,
       contactEmail: email,
       instagramUrl: instagram,
+      spotifyUrl: social("spotify"),
+      linkedinUrl: social("linkedin"),
+      facebookUrl: social("facebook"),
       submissionInstructions: plainText,
     }),
   }),

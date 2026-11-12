@@ -10,6 +10,9 @@ const valid = {
   mission: "Independent journalism.\n\nFor our community.",
   contactEmail: "news@example.edu",
   instagramUrl: "https://www.instagram.com/thegavel/",
+  spotifyUrl: null,
+  linkedinUrl: null,
+  facebookUrl: null,
   submissionInstructions: "Send a letter.\nInclude your name.",
 };
 
@@ -22,6 +25,9 @@ describe("site information command", () => {
         mission: null,
         contactEmail: null,
         instagramUrl: null,
+        spotifyUrl: null,
+        linkedinUrl: null,
+        facebookUrl: null,
         submissionInstructions: null,
       }).success,
     ).toBe(true);
@@ -59,5 +65,29 @@ describe("site information command", () => {
       `${"a".repeat(64)}@bc.edu`,
     ])
       expect(isValidContactEmail(address)).toBe(true);
+  });
+  it.each([
+    ["spotifyUrl", "https://open.spotify.com/show/2abc"],
+    ["linkedinUrl", "https://www.linkedin.com/company/the-gavel/"],
+    ["linkedinUrl", "https://linkedin.com/in/editor"],
+    ["facebookUrl", "https://www.facebook.com/bcgavel"],
+  ])("accepts an official %s", (field, url) => {
+    expect(
+      siteInformationCommandSchema.safeParse({ ...valid, [field]: url })
+        .success,
+    ).toBe(true);
+  });
+  it.each([
+    ["spotifyUrl", "http://open.spotify.com/show/2abc"],
+    ["spotifyUrl", "https://spotify.com.evil.test/show"],
+    ["linkedinUrl", "https://www.linkedin.com/feed/"],
+    ["linkedinUrl", "javascript:alert(1)"],
+    ["facebookUrl", "https://facebook.com.evil.test/gavel"],
+    ["facebookUrl", "https://www.facebook.com/gavel?x=1"],
+  ])("rejects %s %s", (field, url) => {
+    expect(
+      siteInformationCommandSchema.safeParse({ ...valid, [field]: url })
+        .success,
+    ).toBe(false);
   });
 });

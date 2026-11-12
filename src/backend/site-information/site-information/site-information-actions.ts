@@ -25,6 +25,9 @@ export async function saveSiteInformationAction(
       p_contact_email: parsed.data.contactEmail as string,
       p_instagram_url: parsed.data.instagramUrl as string,
       p_submission_instructions: parsed.data.submissionInstructions as string,
+      p_spotify_url: parsed.data.spotifyUrl as string,
+      p_linkedin_url: parsed.data.linkedinUrl as string,
+      p_facebook_url: parsed.data.facebookUrl as string,
     });
     if (error) return { ok: false, code: "unavailable" };
     const result = parseSiteInformationResult(data);

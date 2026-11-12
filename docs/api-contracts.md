@@ -18,7 +18,7 @@
 
 ## Public navigation and information
 
-`get_public_site_navigation()` returns active sections and active categories in configured order, together with the public mission, contact email, Instagram URL and submission instructions. Unset or unsafe stored fields return null. Public email validation is stricter than the current administrator editor: a malformed address accepted there can be hidden here until corrected. The projection fails safely rather than truncating when more than 100 sections or 1,000 categories are active; these limits do not restrict editorial writes. It excludes settings versions, IDs, receipts and audit data. The server adapter uses the cookie-free, no-store public client and validates the complete result. See the [Task 4 plan](superpowers/plans/2026-11-09-public-site-navigation.md).
+`get_public_site_navigation()` returns active sections and active categories in configured order, together with the public mission, contact email, Instagram, Spotify, LinkedIn and Facebook URLs and submission instructions. Unset or unsafe stored fields return null. Save and public read share the same email and social-link rules. The projection fails safely rather than truncating when more than 100 sections or 1,000 categories are active; these limits do not restrict editorial writes. It excludes settings versions, IDs, receipts and audit data. The server adapter uses the cookie-free, no-store public client and validates the complete result. See the [Task 4 plan](superpowers/plans/2026-11-09-public-site-navigation.md).
 
 ## Implemented private draft main image
 
@@ -217,7 +217,7 @@ Private object keys are retained in a permanent registry and cleanup ledger. A b
 
 ## Administrator site information
 
-`get_site_information()` returns the allowlisted settings only to an eligible active administrator. `save_site_information(expected_version, request_id, mission, contact_email, instagram_url, submission_instructions)` checks the same authority and validates each named field. Empty fields are represented by null; only HTTPS Instagram URLs are accepted. Changed saves increment the version and atomically record a bounded audit event. Exact retries return their original result; stale edits and changed request payloads return conflicts. No caller-supplied arbitrary key, HTML, audit data, or public read is supported. See the [Task 14 plan](superpowers/plans/2026-11-07-admin-site-information.md).
+`get_site_information()` returns the allowlisted settings only to an eligible active administrator. `save_site_information(expected_version, request_id, mission, contact_email, instagram_url, submission_instructions, spotify_url, linkedin_url, facebook_url)` checks the same authority and validates each named field. Empty fields are represented by null. Social links must be HTTPS on their official hosts: `instagram.com`, `open.spotify.com`, `linkedin.com` (company, school, showcase or profile paths) and `facebook.com`, with no query strings. The earlier six-argument save is removed (see the [Phase 5 final tasks plan](superpowers/plans/2026-11-11-phase-five-final-tasks.md)). Changed saves increment the version and atomically record a bounded audit event. Exact retries return their original result; stale edits and changed request payloads return conflicts. No caller-supplied arbitrary key, HTML, audit data, or public read is supported. See the [Task 14 plan](superpowers/plans/2026-11-07-admin-site-information.md).
 
 ## Integrated Phase 4 authorization verification
 

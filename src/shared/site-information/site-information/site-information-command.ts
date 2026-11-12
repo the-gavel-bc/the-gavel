@@ -42,12 +42,24 @@ const instagram = z
   .max(255)
   .regex(/^https:\/\/(?:www\.)?instagram\.com\/[A-Za-z0-9._/]+$/u)
   .nullable();
+// Official HTTPS hosts only; mirrors SQL private.is_valid_social_url.
+export const socialUrlPattern = {
+  spotify: /^https:\/\/open\.spotify\.com\/[A-Za-z0-9._/-]+$/u,
+  linkedin:
+    /^https:\/\/(?:www\.)?linkedin\.com\/(?:company|school|showcase|in)\/[A-Za-z0-9._%-]+\/?$/u,
+  facebook: /^https:\/\/(?:www\.)?facebook\.com\/[A-Za-z0-9._/-]+$/u,
+} as const;
+const social = (kind: keyof typeof socialUrlPattern) =>
+  z.string().max(255).regex(socialUrlPattern[kind]).nullable();
 export const siteInformationCommandSchema = z.strictObject({
   requestId: uuid,
   expectedVersion: version,
   mission: text,
   contactEmail: email,
   instagramUrl: instagram,
+  spotifyUrl: social("spotify"),
+  linkedinUrl: social("linkedin"),
+  facebookUrl: social("facebook"),
   submissionInstructions: text,
 });
 export type SiteInformationCommand = z.infer<

@@ -10,12 +10,18 @@ const rowSchema = z.object({
   contact_email: z.string().max(254).nullable(),
   instagram_url: z.string().max(255).nullable(),
   submission_instructions: z.string().max(5000).nullable(),
+  spotify_url: z.string().max(255).nullable(),
+  linkedin_url: z.string().max(255).nullable(),
+  facebook_url: z.string().max(255).nullable(),
 });
 export type SiteInformation = {
   version: number;
   mission: string | null;
   contactEmail: string | null;
   instagramUrl: string | null;
+  spotifyUrl: string | null;
+  linkedinUrl: string | null;
+  facebookUrl: string | null;
   submissionInstructions: string | null;
 };
 export async function getSiteInformation(): Promise<SiteInformation> {
@@ -33,6 +39,9 @@ export async function getSiteInformation(): Promise<SiteInformation> {
       mission: row.mission,
       contactEmail: row.contact_email,
       instagramUrl: row.instagram_url,
+      spotifyUrl: row.spotify_url,
+      linkedinUrl: row.linkedin_url,
+      facebookUrl: row.facebook_url,
       submissionInstructions: row.submission_instructions,
     };
   } catch {
