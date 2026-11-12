@@ -58,7 +58,10 @@ export default async function AdminTaxonomyPage({
         <button type="submit">Show catalog</button>
       </form>
       {kind === "tag" && (
-        <p>Tag creation and renaming await an approved normalization rule.</p>
+        <p>
+          Active members create tags in the article editor. Administrator
+          renaming and unused-tag cleanup are planned.
+        </p>
       )}
       {page.items.length === 0 ? (
         <p>No items in this catalog.</p>

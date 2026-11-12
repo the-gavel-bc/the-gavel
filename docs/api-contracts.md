@@ -280,3 +280,7 @@ Authorization and missing-resource denials that precede receipt lookup cannot pr
 ## Interrupted upload and save recovery
 
 Explicit unused-image removal accepts unreferenced uploading claims. Owner/admin checks and current/historical reference denials remain; published unused cleanup follows the owner-approved scope of PR 79. Marking deleting fences finalization, and completion retains the permanent retired-key cleanup ledger. No automatic claim expiration is introduced. Upload begin/finalize business denials map to 400/403/404/409; transport or unknown responses remain 503. Definitive draft/published-save conflict or request-conflict responses release an uncertain retry handle and expose recovery while preserving local input. Missing-resource and access denials retain that handle. See the [focused plan](superpowers/plans/2026-11-11-recovery-cleanup-fixes.md).
+
+## Typed tag creation
+
+`ensure_tag(p_name text)` is authenticated-only and requires an eligible active member and active profile. It trims/collapses whitespace, accepts 1–120 characters, reuses case-insensitive names and allocates canonical collision-safe slugs. Success returns `{ok,id,name,slug,created}`; safe failures are `forbidden`, `invalid_input`, `rate_limited`, or `unavailable`. It consumes the existing 30-attempt/60-second draft quota. The editor adds at most ten tags while existing server draft validation still accepts up to 64. See the [editor plan](superpowers/plans/2026-11-12-editor-tags-contributors-photo.md).

@@ -25,9 +25,9 @@ test("creates and reopens categories tags and multiple guest credits", async ({
   await page.keyboard.press("Space");
   await expect(category).toBeChecked();
   await page
-    .getByLabel(`Synthetic ${info.project.name} topic`, { exact: true })
-    .focus();
-  await page.keyboard.press("Space");
+    .getByLabel("Add tag", { exact: true })
+    .fill(`Synthetic ${info.project.name} topic`);
+  await page.getByLabel("Add tag", { exact: true }).press("Enter");
   await page.getByRole("button", { name: "Add contributor" }).click();
   await page
     .getByLabel("Contributor 1", { exact: true })
@@ -42,8 +42,11 @@ test("creates and reopens categories tags and multiple guest credits", async ({
   await page.reload();
   await expect(category).toBeChecked();
   await expect(
-    page.getByLabel(`Synthetic ${info.project.name} topic`, { exact: true }),
-  ).toBeChecked();
+    page.getByRole("button", {
+      name: `Remove tag Synthetic ${info.project.name} topic`,
+      exact: true,
+    }),
+  ).toBeVisible();
   for (const n of [1, 2]) {
     await expect(
       page.getByLabel(`Contributor ${n}`, { exact: true }),
@@ -77,8 +80,9 @@ test("section changes retain categories until explicit replacement and preserve 
     .getByLabel(`Synthetic ${info.project.name} category`, { exact: true })
     .check();
   await page
-    .getByLabel(`Synthetic ${info.project.name} topic`, { exact: true })
-    .check();
+    .getByLabel("Add tag", { exact: true })
+    .fill(`Synthetic ${info.project.name} topic`);
+  await page.getByLabel("Add tag", { exact: true }).press("Enter");
   await expect(
     page.getByRole("status").filter({ hasText: "Unsaved changes" }),
   ).toBeVisible();

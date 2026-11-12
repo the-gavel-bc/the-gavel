@@ -211,7 +211,7 @@ it("requires deliberate removal of unavailable selections and submits selected c
   expect(screen.getByRole("alert")).toHaveTextContent(/remove or replace/i);
   expect(mocks.create).not.toHaveBeenCalled();
   await userEvent.click(screen.getByLabelText(/Unavailable category/));
-  await userEvent.click(screen.getByLabelText("Topic"));
+  await userEvent.type(screen.getByLabelText("Add tag"), "Topic{Enter}");
   await userEvent.click(
     screen.getByRole("button", { name: "Add contributor" }),
   );
@@ -219,7 +219,9 @@ it("requires deliberate removal of unavailable selections and submits selected c
   await waitFor(() =>
     expect(screen.getByRole("alert")).toHaveTextContent(/article address/i),
   );
-  expect(screen.getByLabelText("Topic")).toBeChecked();
+  expect(
+    screen.getByRole("button", { name: "Remove tag Topic" }),
+  ).toBeVisible();
   expect(mocks.create.mock.calls[0][0].draft).toMatchObject({
     categoryIds: [],
     tagIds: [baseDraft.sectionId],

@@ -69,3 +69,30 @@ Slice A:
   - Alt text and credit were then attached ("Attached image: … — Jane Doe / The Gavel").
   - No console or CSP errors.
 - Found and fixed in the browser: a stale selection-error banner stayed after a successful in-place create.
+
+## Execution plan (2026-11-12)
+
+Order: C typed tags (base `feat/editor-photo-autosave`), D contributor search/guests, B caption, then E published main photos. Each slice gets focused SQL/UI tests, generated types, fast checks, production build and disposable-project browser proof, review, and a separate stacked PR. Do not merge.
+
+All database commands target disposable `gavel-p5` at `/private/tmp/gavel-p5-db` (API 58521, DB 58522). Its migrations/tests/seed symlinks now point to `/private/tmp/the-gavel-uiux/supabase`. Primary local projects must not be used. The default full browser suite remains a CI gate because its fixture helper targets the primary project.
+
+### Design risks and recovery
+
+- C: serialize tag slug allocation across all bases, including suffixed names; select again after insertion conflicts. Normalize before case-insensitive lookup. Failed/uncertain requests retain input; identical retries reuse the row. Preserve selected IDs unavailable in the catalog, and permit removal from older drafts above the UI cap of ten.
+- D: checked reads expose only active profile ID, display name and slug. Guest creation never creates an Auth identity or membership. Serialize duplicate-name checks and slug allocation, bind immutable receipts to actor/request/payload, replay before consuming rate quota, and audit creation atomically. Debounced searches discard stale results; uncertain creates retain the original request ID and name until resolved.
+- B: null represents an empty caption; nonempty values are trimmed and bounded at 400 characters. A signature change must remove the old callable mutation and update grants/callers. Caption joins snapshots/public detail and the immutable media receipt fingerprint. A changed retry payload returns request_conflict.
+- E (before implementation): uploads remain private until linked to a published article. Attachment and version increment commit atomically. Replaced/removed assets follow existing revision references and cleanup policy; no retained revision may lose its object. Existing public URLs may remain cached up to five minutes. Dynamic homepage, search, sitemap and article reads must observe the new version/link on their next request. Row/version locking must serialize concurrent attaches and publish/archive races; stale writes conflict, archived writes fail, and replay must preserve original results without reapplying. Owner/admin authority must be checked after waits. Browser proof must compare public rendering before and after replacement.
+
+### Review gates
+
+Every slice must retain anonymous/inactive/ineligible and cross-owner denial coverage, keyboard operation and announced errors. Fresh task review precedes its PR. Human maintainer security review remains outstanding until provided; agent review does not substitute for it.
+
+### Slice C verification
+
+- `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, and `git diff --check`: passed with Node 22.20.0.
+- `pnpm test`: 148 files, 1,022 tests passed. Focused agent run: six files, 46 tests passed, including async input preservation.
+- `node /private/tmp/gavel-uiux-run.mjs reset`, then `node /private/tmp/gavel-uiux-run.mjs sql`: disposable clean migration/seed succeeded; 71 SQL files, 2,115 assertions passed (24 new tag assertions). An initial SQL run overlapped reset and failed against its transient schema; the completed-reset rerun passed.
+- `node /private/tmp/gavel-uiux-run.mjs types`: regenerated from disposable DB 58522.
+- `python3 /private/tmp/gavel-uiux-tag-race.py`: independent-session identical-name, slug collision, and overlapping-base allocation checks passed.
+- `node /private/tmp/gavel-uiux-run.mjs build`: production build passed with disposable API 58521. `... start --port 3150` and `node /private/tmp/gavel-uiux-smoke.mjs`: active author created a typed tag, removed it, and reused the case-insensitive name via comma. No page/console/CSP errors. Synthetic Auth fixtures needed non-null timestamps; this was a fixture repair, not an application change.
+- Fresh task review: spec and quality passed; no Critical/Important findings. Full default browser suite not run locally because its fixtures target the primary project; CI runs it. Human maintainer review remains outstanding.

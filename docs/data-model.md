@@ -73,7 +73,7 @@ Sections and categories have names, canonical slugs, non-negative navigation ord
 
 Anonymous and ordinary authenticated readers see active sections and only active categories with active parents; all tags are readable. Eligible active administrators can also read inactive taxonomy. Direct application writes remain denied. Task 11 adds `edit_version` to sections and categories and checked administrator updates with immutable request receipts and atomic audit events. IDs, slugs, parent links, and article associations remain unchanged. Published or archived references block deactivation; draft references remain and existing save validation rejects unavailable selections. See [security controls](security-and-permissions.md#implemented-taxonomy-controls).
 
-No real publication taxonomy is seeded. Fixtures are synthetic and transaction-local. Tag-entry normalization, including Unicode and punctuation rules, remains unresolved; tags are read-only in the administrator catalog. The unresolved `Outside of BC` label cannot be renamed until the client decision is accepted.
+No real publication taxonomy is seeded. Fixtures are synthetic and transaction-local. Tag entry uses `ensure_tag(text)`: trim and collapse whitespace, require 1–120 characters, and reuse a case-insensitive name match. New slugs use the article slug normalizer with collision suffixes under a transaction lock. Tags remain read-only in the administrator catalog; cleanup of unused tags is a follow-up. The unresolved `Outside of BC` label cannot be renamed until the client decision is accepted.
 
 ## Implemented article storage
 
@@ -103,7 +103,7 @@ Association reads reuse the private article predicate: eligible active owners re
 
 Credit display order defaults to zero, must be non-negative and non-NULL, and permits ties. One profile may hold different roles on the same article, but cannot repeat the same role. Profiles without Auth identities can receive credits. A future presentation layer must supply a deterministic tie-breaker; this migration introduces no renderer.
 
-Both tables grant authenticated SELECT only, with RLS reusing the existing private article predicate. Actual credits never grant private article, category, tag, or credit access: a credited author on another owner's article still cannot read it. Owners retain read access without credits; eligible active administrators read all associations. All application writes remain denied, including administrator writes. No tag-entry normalization, create-tag operation, or credit-management interface is exposed.
+Both tables grant authenticated SELECT only, with RLS reusing the existing private article predicate. Actual credits never grant private article, category, tag, or credit access: a credited author on another owner's article still cannot read it. Owners retain read access without credits; eligible active administrators read all associations. All application writes remain denied, including administrator writes. Tag creation is exposed through the checked `ensure_tag` RPC; association writes use the existing draft mutation boundary. The editor limits new tag additions to ten while the database draft limit stays 64 for older drafts.
 
 ## Implemented revision and audit storage
 
