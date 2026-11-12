@@ -84,3 +84,15 @@
     width: 100%;
   }
 }
+.newPhoto {
+  background: var(--color-paper);
+  border: 1px solid var(--dash-line, #e3e6ee);
+  border-radius: 12px;
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-6);
+}
+.newPhoto h2,
+.newPhoto p {
+  margin: 0;
+}

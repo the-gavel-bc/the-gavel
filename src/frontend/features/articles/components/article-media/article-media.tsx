@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/frontend/components/ui/button/button";
 import type { DraftArticle } from "@/frontend/features/articles/draft-save-state/draft-save-state";
 import type { DraftWriteResult } from "@/shared/articles/draft-contract/draft-contract";
@@ -34,6 +34,7 @@ export function ArticleMedia({
   onCommit,
   onDirtyChange,
   onBusyChange,
+  initialFile,
 }: {
   article: DraftArticle;
   initialImage: MainImage | null;
@@ -41,10 +42,12 @@ export function ArticleMedia({
   onCommit: (result: Confirmed) => void;
   onDirtyChange?: (dirty: boolean) => void;
   onBusyChange?: (busy: boolean) => void;
+  /** A file chosen before the draft existed; uploaded once on mount. */
+  initialFile?: File | null;
 }) {
   const [image, setImage] = useState(initialImage);
   const fileInput = useRef<HTMLInputElement>(null);
-  const [file, setFile] = useState<File | null>(null);
+  const [file, setFile] = useState<File | null>(initialFile ?? null);
   const [assetId, setAssetId] = useState<string | null>(null);
   const [cleanupAssetId, setCleanupAssetId] = useState<string | null>(null);
   const [conflict, setConflict] = useState(false);
@@ -69,8 +72,27 @@ export function ArticleMedia({
     [busy, pendingWrite, onBusyChange],
   );
 
-  async function upload() {
-    if (!file || mutationLocked) return;
+  const preview = useMemo(
+    () => (file ? URL.createObjectURL(file) : null),
+    [file],
+  );
+  useEffect(
+    () => () => {
+      if (preview) URL.revokeObjectURL(preview);
+    },
+    [preview],
+  );
+  const started = useRef(false);
+  useEffect(() => {
+    if (!initialFile || started.current) return;
+    started.current = true;
+    void upload(initialFile);
+    // Runs once for the file handed over at creation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function upload(selected: File | null = file) {
+    if (!selected || mutationLocked) return;
     setBusy(true);
     setError("");
     setStatus("Uploading image…");
@@ -87,7 +109,7 @@ export function ArticleMedia({
         return;
       }
       const body = new FormData();
-      body.set("file", file);
+      body.set("file", selected);
       const response = await fetch(
         `/api/articles/${article.id}/media/${reservation.assetId}`,
         { method: "POST", body },
@@ -263,8 +285,8 @@ export function ArticleMedia({
     >
       <h2 id="article-main-image-heading">Main image</h2>
       <p>
-        JPEG, PNG or WebP, up to 10 MB. Add alt text and a credit before
-        attaching.
+        JPEG, PNG or WebP, up to 10 MB. The photo uploads as soon as you choose
+        it; add alt text and a photo credit, then attach it.
       </p>
       {disabled && <p>Save your draft changes before managing its image.</p>}
       {image && (
@@ -286,20 +308,29 @@ export function ArticleMedia({
             Boolean(cleanupAssetId)
           }
           onChange={(event) => {
-            setFile(event.target.files?.[0] ?? null);
+            const selected = event.target.files?.[0] ?? null;
+            setFile(selected);
             setAssetId(null);
             setUploadRequestId(null);
             setStatus("");
             setError("");
+            // Upload immediately; alt text and credit can be typed meanwhile.
+            if (selected) void upload(selected);
           }}
         />
-        <Button
-          type="button"
-          disabled={mutationLocked || !file || Boolean(assetId)}
-          onClick={() => void upload()}
-        >
-          {uploadRequestId ? "Retry upload" : "Upload image"}
-        </Button>
+        {file && !assetId && !busy && (
+          <Button
+            type="button"
+            disabled={mutationLocked}
+            onClick={() => void upload()}
+          >
+            {error ? "Retry upload" : "Upload image"}
+          </Button>
+        )}
+        {preview && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className={styles.preview} src={preview} alt="" />
+        )}
         <label htmlFor="article-image-alt">Alt text</label>
         <input
           id="article-image-alt"
