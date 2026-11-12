@@ -10,6 +10,7 @@ import { beforeEach, expect, it, vi } from "vitest";
 import { baseDraft } from "@/shared/articles/draft-contract/draft-test-cases";
 const mocks = vi.hoisted(() => ({
   create: vi.fn(),
+  ensureTag: vi.fn(),
   save: vi.fn(),
   push: vi.fn(),
   refresh: vi.fn(),
@@ -21,6 +22,9 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/backend/articles/draft-actions/draft-actions", () => ({
   createDraftAction: mocks.create,
   saveDraftAction: mocks.save,
+}));
+vi.mock("@/backend/taxonomy/ensure-tag/ensure-tag-action", () => ({
+  ensureTagAction: mocks.ensureTag,
 }));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mocks.push, refresh: mocks.refresh }),
@@ -737,4 +741,40 @@ it("keeps a chosen photo and does not create when required fields are missing", 
     await screen.findByText(/cover.png will upload once the draft is saved/),
   ).toBeVisible();
   expect(mocks.create).not.toHaveBeenCalled();
+});
+
+const newTag = {
+  id: "d9000000-0000-0000-0000-000000000001",
+  name: "New tag",
+  slug: "new-tag",
+};
+it("creates a draft with a server-created tag while retaining newer title edits", async () => {
+  let finish!: (value: unknown) => void;
+  mocks.ensureTag.mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+  );
+  mocks.create.mockResolvedValue({ ok: false, code: "unavailable" });
+  const view = render(<DraftForm initialDraft={baseDraft} options={options} />);
+  await userEvent.type(screen.getByLabelText("Add tag"), newTag.name);
+  await userEvent.keyboard("{Enter}");
+  await userEvent.type(screen.getByLabelText(/Title/), " newest");
+  await act(async () => finish({ ...newTag, ok: true, created: true }));
+  await screen.findByRole("button", { name: `Remove tag ${newTag.name}` });
+  await userEvent.click(screen.getByRole("button", { name: "Create draft" }));
+  await waitFor(() => expect(mocks.create).toHaveBeenCalledOnce());
+  const saved = mocks.create.mock.calls[0][0].draft;
+  expect(saved).toMatchObject({
+    title: baseDraft.title + " newest",
+    tagIds: [newTag.id],
+  });
+  view.unmount();
+  render(
+    <DraftForm initialDraft={saved} options={{ ...options, tags: [newTag] }} />,
+  );
+  expect(
+    screen.getByRole("button", { name: `Remove tag ${newTag.name}` }),
+  ).toBeVisible();
 });

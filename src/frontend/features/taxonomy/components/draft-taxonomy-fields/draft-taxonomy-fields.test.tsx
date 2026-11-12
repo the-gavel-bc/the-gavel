@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { beforeEach, expect, it, vi } from "vitest";
@@ -136,4 +136,46 @@ it("preserves intervening edits while a new tag request resolves", async () => {
   expect(
     JSON.parse(screen.getByRole("status").textContent!).categoryIds,
   ).toEqual(["missing", "category"]);
+});
+
+it("reports locally cached server tags again after a catalog replacement", async () => {
+  const onOption = vi.fn();
+  const onChange = vi.fn();
+  mocks.ensure.mockResolvedValue({
+    ok: true,
+    id: "cached",
+    name: "Cached tag",
+    slug: "cached-tag",
+    created: true,
+  });
+  const view = render(
+    <DraftTaxonomyFields
+      draft={baseDraft}
+      options={options}
+      errors={{}}
+      onChange={onChange}
+      onOption={onOption}
+    />,
+  );
+  await userEvent.type(screen.getByLabelText("Add tag"), "Cached tag{Enter}");
+  await waitFor(() =>
+    expect(onOption).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "cached" }),
+    ),
+  );
+  onOption.mockClear();
+  view.rerender(
+    <DraftTaxonomyFields
+      draft={baseDraft}
+      options={{ ...options, tags: [] }}
+      errors={{}}
+      onChange={onChange}
+      onOption={onOption}
+    />,
+  );
+  await userEvent.type(screen.getByLabelText("Add tag"), "cached TAG{Enter}");
+  expect(onOption).toHaveBeenCalledWith(
+    expect.objectContaining({ id: "cached" }),
+  );
+  expect(mocks.ensure).toHaveBeenCalledOnce();
 });
