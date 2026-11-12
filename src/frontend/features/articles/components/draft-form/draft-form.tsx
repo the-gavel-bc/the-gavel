@@ -363,15 +363,43 @@ export function DraftForm({
           </div>
         )}
         <DraftTaxonomyFields
+          key={`taxonomy:${catalog.revision}`}
           draft={command.draft}
           options={currentOptions}
           errors={errors}
           onChange={update}
+          onOption={(tag) =>
+            setCatalog((current) => ({
+              ...current,
+              options: {
+                ...current.options,
+                tags: [
+                  ...current.options.tags.filter((item) => item.id !== tag.id),
+                  tag,
+                ],
+              },
+            }))
+          }
         />
         <DraftContributorFields
+          key={catalog.revision}
           value={command.draft.contributors}
           options={catalog.options.contributors}
           error={errors.contributors}
+          onOption={(contributor) =>
+            setCatalog((current) => ({
+              ...current,
+              options: {
+                ...current.options,
+                contributors: [
+                  ...current.options.contributors.filter(
+                    (item) => item.id !== contributor.id,
+                  ),
+                  contributor,
+                ],
+              },
+            }))
+          }
           onChange={(contributors) =>
             update((current) => ({ ...current, contributors }))
           }

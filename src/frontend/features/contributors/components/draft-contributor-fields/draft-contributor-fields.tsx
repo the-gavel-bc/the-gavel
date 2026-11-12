@@ -12,11 +12,13 @@ export function DraftContributorFields({
   options,
   error,
   onChange,
+  onOption,
 }: {
   value: DraftInput["contributors"];
   options: DraftOptions["contributors"];
   error?: string;
   onChange: (value: DraftInput["contributors"]) => void;
+  onOption?: (contributor: DraftOptions["contributors"][number]) => void;
 }) {
   const [added, setAdded] = useState<DraftOptions["contributors"]>([]);
   const [keys, setKeys] = useState(() =>
@@ -60,6 +62,7 @@ export function DraftContributorFields({
               }
             }
             onSelect={(choice) => {
+              onOption?.(choice);
               setAdded((rows) =>
                 rows.some((p) => p.id === choice.id) ? rows : [...rows, choice],
               );

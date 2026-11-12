@@ -9,21 +9,23 @@ export function DraftTaxonomyFields({
   options,
   errors,
   onChange,
+  onOption,
 }: {
   draft: DraftInput;
   options: DraftOptions;
   errors: Record<string, string>;
   onChange: (draft: DraftInput) => void;
+  onOption?: (tag: DraftOptions["tags"][number]) => void;
 }) {
   const [text, setText] = useState("");
   const [added, setAdded] = useState<DraftOptions["tags"]>([]);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
-  const latest = useRef({ draft, onChange });
+  const latest = useRef({ draft, onChange, onOption });
   const inFlight = useRef(false);
   const mounted = useRef(true);
   useLayoutEffect(() => {
-    latest.current = { draft, onChange };
+    latest.current = { draft, onChange, onOption };
   });
   useLayoutEffect(() => {
     mounted.current = true;
@@ -76,6 +78,7 @@ export function DraftTaxonomyFields({
       }
     }
     const current = latest.current;
+    current.onOption?.(tag);
     if (
       !current.draft.tagIds.includes(tag.id) &&
       current.draft.tagIds.length < 10

@@ -10,6 +10,9 @@ import { beforeEach, expect, it, vi } from "vitest";
 import { baseDraft } from "@/shared/articles/draft-contract/draft-test-cases";
 const mocks = vi.hoisted(() => ({
   create: vi.fn(),
+  ensureTag: vi.fn(),
+  searchPeople: vi.fn(),
+  createGuest: vi.fn(),
   save: vi.fn(),
   push: vi.fn(),
   refresh: vi.fn(),
@@ -22,6 +25,16 @@ vi.mock("@/backend/articles/draft-actions/draft-actions", () => ({
   createDraftAction: mocks.create,
   saveDraftAction: mocks.save,
 }));
+vi.mock("@/backend/taxonomy/ensure-tag/ensure-tag-action", () => ({
+  ensureTagAction: mocks.ensureTag,
+}));
+vi.mock(
+  "@/backend/contributors/guest-contributor/guest-contributor-actions",
+  () => ({
+    searchContributorsAction: mocks.searchPeople,
+    createGuestContributorAction: mocks.createGuest,
+  }),
+);
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mocks.push, refresh: mocks.refresh }),
 }));
@@ -87,6 +100,7 @@ const options = {
 };
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.searchPeople.mockResolvedValue({ ok: true, items: [] });
   mocks.unused.mockResolvedValue({ ok: true, items: [], nextCursor: null });
 });
 it("requires title and section, then focuses a safe error summary", async () => {
@@ -737,4 +751,399 @@ it("keeps a chosen photo and does not create when required fields are missing", 
     await screen.findByText(/cover.png will upload once the draft is saved/),
   ).toBeVisible();
   expect(mocks.create).not.toHaveBeenCalled();
+});
+
+const newTag = {
+  id: "d9000000-0000-0000-0000-000000000001",
+  name: "New tag",
+  slug: "new-tag",
+};
+it("creates a draft with a server-created tag while retaining newer title edits", async () => {
+  let finish!: (value: unknown) => void;
+  mocks.ensureTag.mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+  );
+  mocks.create.mockResolvedValue({ ok: false, code: "unavailable" });
+  const view = render(<DraftForm initialDraft={baseDraft} options={options} />);
+  await userEvent.type(screen.getByLabelText("Add tag"), newTag.name);
+  await userEvent.keyboard("{Enter}");
+  await userEvent.type(screen.getByLabelText(/Title/), " newest");
+  await act(async () => finish({ ...newTag, ok: true, created: true }));
+  await screen.findByRole("button", { name: `Remove tag ${newTag.name}` });
+  await userEvent.click(screen.getByRole("button", { name: "Create draft" }));
+  await waitFor(() => expect(mocks.create).toHaveBeenCalledOnce());
+  const saved = mocks.create.mock.calls[0][0].draft;
+  expect(saved).toMatchObject({
+    title: baseDraft.title + " newest",
+    tagIds: [newTag.id],
+  });
+  view.unmount();
+  render(
+    <DraftForm initialDraft={saved} options={{ ...options, tags: [newTag] }} />,
+  );
+  expect(
+    screen.getByRole("button", { name: `Remove tag ${newTag.name}` }),
+  ).toBeVisible();
+});
+
+const newGuest = {
+  id: "d9000000-0000-0000-0000-000000000002",
+  displayName: "New Guest",
+  slug: "new-guest",
+};
+it.each(["search", "guest"])(
+  "saves and reloads a %s contributor outside the initial catalog",
+  async (kind) => {
+    let finish!: (value: unknown) => void;
+    mocks.searchPeople.mockResolvedValue({
+      ok: true,
+      items: kind === "search" ? [newGuest] : [],
+    });
+    mocks.createGuest.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    );
+    mocks.save.mockResolvedValue({ ok: false, code: "unavailable" });
+    const view = render(
+      <DraftForm
+        initialDraft={baseDraft}
+        options={options}
+        article={{
+          id: baseDraft.sectionId,
+          version: 1,
+          updatedAt: "2026-11-12T12:00:00Z",
+        }}
+      />,
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "Add contributor" }),
+    );
+    await userEvent.clear(screen.getByLabelText("Contributor 1"));
+    await userEvent.type(
+      screen.getByLabelText("Contributor 1"),
+      newGuest.displayName,
+    );
+    await userEvent.click(
+      await screen.findByRole("option", {
+        name:
+          kind === "search"
+            ? "New Guest (new-guest)"
+            : "Add 'New Guest' as a new contributor",
+      }),
+    );
+    await userEvent.selectOptions(screen.getByLabelText("Role 1"), "editor");
+    await userEvent.type(screen.getByLabelText(/Title/), " newest");
+    if (kind === "guest")
+      await act(async () =>
+        finish({ ...newGuest, ok: true, created: true, replayed: false }),
+      );
+    await screen.findByDisplayValue("New Guest (new-guest)");
+    await userEvent.click(screen.getByRole("button", { name: "Save draft" }));
+    await waitFor(() => expect(mocks.save).toHaveBeenCalledOnce());
+    const saved = mocks.save.mock.calls[0][0].draft;
+    expect(saved).toMatchObject({
+      title: baseDraft.title + " newest",
+      contributors: [
+        { profileId: newGuest.id, role: "editor", displayOrder: 0 },
+      ],
+    });
+    view.unmount();
+    render(
+      <DraftForm
+        initialDraft={saved}
+        options={{ ...options, contributors: [newGuest] }}
+      />,
+    );
+    expect(screen.getByLabelText("Contributor 1")).toHaveValue(
+      "New Guest (new-guest)",
+    );
+  },
+);
+it("merges new choices into the reviewed catalog without losing recovered associations", async () => {
+  const category = {
+    id: "d9000000-0000-0000-0000-000000000003",
+    name: "Recovered category",
+    sectionId: baseDraft.sectionId,
+  };
+  const retainedTag = {
+    id: "d9000000-0000-0000-0000-000000000004",
+    name: "Retained tag",
+  };
+  const retainedGuest = {
+    id: "d9000000-0000-0000-0000-000000000005",
+    displayName: "Retained Guest",
+    slug: "retained-guest",
+  };
+  const recovered = {
+    ...baseDraft,
+    title: "Recovered",
+    categoryIds: [category.id],
+    tagIds: [retainedTag.id],
+    contributors: [
+      { profileId: retainedGuest.id, role: "writer" as const, displayOrder: 5 },
+    ],
+  };
+  mocks.save
+    .mockResolvedValueOnce({ ok: false, code: "conflict" })
+    .mockResolvedValue({ ok: false, code: "unavailable" });
+  mocks.ensureTag.mockResolvedValue({ ...newTag, ok: true, created: true });
+  mocks.searchPeople.mockResolvedValue({ ok: true, items: [newGuest] });
+  mocks.review.mockResolvedValue({
+    ok: true,
+    detail: {
+      kind: "editable",
+      status: "draft",
+      articleId: baseDraft.sectionId,
+      version: 2,
+      updatedAt: "2026-11-12T12:00:00Z",
+      draft: recovered,
+      unavailableSelections: {
+        sectionId: null,
+        categoryIds: [],
+        tagIds: [],
+        contributorIds: [],
+      },
+    },
+    options: {
+      ...options,
+      categories: [category],
+      tags: [retainedTag],
+      contributors: [retainedGuest],
+    },
+  });
+  const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+  try {
+    render(
+      <DraftForm
+        initialDraft={baseDraft}
+        options={options}
+        article={{
+          id: baseDraft.sectionId,
+          version: 1,
+          updatedAt: "2026-11-12T12:00:00Z",
+        }}
+      />,
+    );
+    await userEvent.type(screen.getByLabelText(/Title/), " local");
+    await userEvent.click(screen.getByRole("button", { name: "Save draft" }));
+    await userEvent.click(
+      await screen.findByRole("button", {
+        name: "Review latest saved version",
+      }),
+    );
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Load latest saved version" }),
+    );
+    await userEvent.type(screen.getByLabelText("Add tag"), newTag.name);
+    await userEvent.keyboard("{Enter}");
+    await screen.findByRole("button", { name: `Remove tag ${newTag.name}` });
+    await userEvent.click(
+      screen.getByRole("button", { name: "Add contributor" }),
+    );
+    await userEvent.clear(screen.getByLabelText("Contributor 2"));
+    await userEvent.type(
+      screen.getByLabelText("Contributor 2"),
+      newGuest.displayName,
+    );
+    await userEvent.click(
+      await screen.findByRole("option", { name: "New Guest (new-guest)" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Save draft" }));
+    await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(2));
+    expect(mocks.save.mock.calls[1][0]).toMatchObject({
+      expectedVersion: 2,
+      draft: {
+        categoryIds: [category.id],
+        tagIds: [newTag.id, retainedTag.id],
+        contributors: [
+          { profileId: newGuest.id, role: "writer", displayOrder: 0 },
+          recovered.contributors[0],
+        ],
+      },
+    });
+  } finally {
+    confirm.mockRestore();
+  }
+});
+
+it("retains an uncertain guest request when adding a row after two-credit recovery", async () => {
+  const first = {
+    id: "d9000000-0000-0000-0000-000000000006",
+    displayName: "First Guest",
+    slug: "first-guest",
+  };
+  const second = {
+    id: "d9000000-0000-0000-0000-000000000007",
+    displayName: "Second Guest",
+    slug: "second-guest",
+  };
+  const firstCredit = {
+    profileId: first.id,
+    role: "writer" as const,
+    displayOrder: 0,
+  };
+  const secondCredit = {
+    profileId: second.id,
+    role: "editor" as const,
+    displayOrder: 1,
+  };
+  mocks.save.mockResolvedValue({ ok: false, code: "conflict" });
+  mocks.createGuest
+    .mockResolvedValueOnce({ ok: false, code: "unavailable" })
+    .mockResolvedValueOnce({
+      ...newGuest,
+      ok: true,
+      created: true,
+      replayed: true,
+    });
+  mocks.review.mockResolvedValue({
+    ok: true,
+    detail: {
+      kind: "editable",
+      status: "draft",
+      articleId: baseDraft.sectionId,
+      version: 2,
+      updatedAt: "2026-11-12T12:00:00Z",
+      draft: { ...baseDraft, contributors: [firstCredit, secondCredit] },
+      unavailableSelections: {
+        sectionId: null,
+        categoryIds: [],
+        tagIds: [],
+        contributorIds: [],
+      },
+    },
+    options: { ...options, contributors: [first, second] },
+  });
+  const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+  try {
+    render(
+      <DraftForm
+        initialDraft={{ ...baseDraft, contributors: [firstCredit] }}
+        options={{ ...options, contributors: [first] }}
+        article={{
+          id: baseDraft.sectionId,
+          version: 1,
+          updatedAt: "2026-11-12T12:00:00Z",
+        }}
+      />,
+    );
+    await userEvent.type(screen.getByLabelText(/Title/), " local");
+    await userEvent.click(screen.getByRole("button", { name: "Save draft" }));
+    await userEvent.click(
+      await screen.findByRole("button", {
+        name: "Review latest saved version",
+      }),
+    );
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Load latest saved version" }),
+    );
+    await userEvent.clear(screen.getByLabelText("Contributor 2"));
+    await userEvent.type(
+      screen.getByLabelText("Contributor 2"),
+      newGuest.displayName,
+    );
+    await userEvent.click(
+      await screen.findByRole("option", {
+        name: "Add 'New Guest' as a new contributor",
+      }),
+    );
+    await screen.findByRole("button", { name: "Retry contributor creation" });
+    await userEvent.click(
+      screen.getByRole("button", { name: "Add contributor" }),
+    );
+    expect(
+      screen.getByRole("button", { name: "Retry contributor creation" }),
+    ).toBeVisible();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Retry contributor creation" }),
+    );
+    await screen.findByDisplayValue("New Guest (new-guest)");
+    expect(mocks.createGuest.mock.calls[1][0]).toEqual(
+      mocks.createGuest.mock.calls[0][0],
+    );
+    expect(screen.getByLabelText("Role 2")).toHaveValue("editor");
+    expect(screen.getByLabelText("Contributor 3")).toHaveValue(
+      "First Guest (first-guest)",
+    );
+  } finally {
+    confirm.mockRestore();
+  }
+});
+
+it("ignores a pending tag response after explicitly adopting a conflict snapshot", async () => {
+  let finish!: (value: unknown) => void;
+  mocks.ensureTag.mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+  );
+  mocks.save
+    .mockResolvedValueOnce({ ok: false, code: "conflict" })
+    .mockResolvedValue({ ok: false, code: "unavailable" });
+  mocks.review.mockResolvedValue({
+    ok: true,
+    detail: {
+      kind: "editable",
+      status: "draft",
+      articleId: baseDraft.sectionId,
+      version: 2,
+      updatedAt: "2026-11-12T12:00:00Z",
+      draft: { ...baseDraft, title: "Adopted snapshot" },
+      unavailableSelections: {
+        sectionId: null,
+        categoryIds: [],
+        tagIds: [],
+        contributorIds: [],
+      },
+    },
+    options,
+  });
+  const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+  try {
+    render(
+      <DraftForm
+        initialDraft={baseDraft}
+        options={options}
+        article={{
+          id: baseDraft.sectionId,
+          version: 1,
+          updatedAt: "2026-11-12T12:00:00Z",
+        }}
+      />,
+    );
+    await userEvent.type(screen.getByLabelText(/Title/), " local");
+    await userEvent.type(screen.getByLabelText("Add tag"), newTag.name);
+    await userEvent.keyboard("{Enter}");
+    expect(mocks.ensureTag).toHaveBeenCalledOnce();
+    await userEvent.click(screen.getByRole("button", { name: "Save draft" }));
+    await userEvent.click(
+      await screen.findByRole("button", {
+        name: "Review latest saved version",
+      }),
+    );
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Load latest saved version" }),
+    );
+    expect(screen.getByLabelText(/Title/)).toHaveValue("Adopted snapshot");
+    await act(async () => finish({ ...newTag, ok: true, created: true }));
+    expect(
+      screen.queryByRole("button", { name: `Remove tag ${newTag.name}` }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Add tag")).toBeEnabled();
+    await userEvent.type(screen.getByLabelText(/Title/), " reconciled");
+    await userEvent.click(screen.getByRole("button", { name: "Save draft" }));
+    await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(2));
+    expect(mocks.save.mock.calls[1][0]).toMatchObject({
+      expectedVersion: 2,
+      draft: { title: "Adopted snapshot reconciled", tagIds: [] },
+    });
+  } finally {
+    confirm.mockRestore();
+  }
 });

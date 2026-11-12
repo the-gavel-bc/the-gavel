@@ -34,7 +34,8 @@ test("creates and reopens categories tags and multiple guest credits", async ({
     .fill(`Synthetic ${info.project.name} guest`);
   await page
     .getByRole("option", {
-      name: new RegExp(`Synthetic ${info.project.name} guest`, "i"),
+      name: `Synthetic ${info.project.name} guest (task9-${info.project.name}-guest)`,
+      exact: true,
     })
     .click();
   await page.getByRole("button", { name: "Add contributor" }).click();
@@ -43,7 +44,8 @@ test("creates and reopens categories tags and multiple guest credits", async ({
     .fill(`Synthetic ${info.project.name} guest`);
   await page
     .getByRole("option", {
-      name: new RegExp(`Synthetic ${info.project.name} guest`, "i"),
+      name: `Synthetic ${info.project.name} guest (task9-${info.project.name}-guest)`,
+      exact: true,
     })
     .click();
   await page.getByLabel("Role 2", { exact: true }).selectOption("editor");
