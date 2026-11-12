@@ -326,3 +326,7 @@ The authenticated contributor search requires an active eligible identity/member
 ## Main-photo caption boundary
 
 Optional captions use the existing versioned owner/admin media mutation and exact request receipts. The database bounds nonempty trimmed captions at 400 characters; empty input becomes null. Captions are plain text rendered by React and enter public detail only through its existing published-only projection. Source table grants, ownership and media visibility are unchanged by caption support.
+
+## Published main-photo authorization
+
+Upload reservation/admission/claim/finalization and main-photo attachment permit active eligible owners or administrators on draft/published articles, retaining uploader restrictions and actor/article/asset locking. Archived mutations remain denied. The private bucket and current-reference published GET policy are unchanged: finalized unattached and revision-only assets remain private. Attachment/version/history commit atomically, stale concurrent edits conflict, and retained revisions prevent cleanup of replaced/removed objects. Public cached image URLs may remain usable for the approved five minutes; subsequent origin requests recheck current references. Credits confer no mutation authority.

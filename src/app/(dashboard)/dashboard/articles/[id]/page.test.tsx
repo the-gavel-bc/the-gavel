@@ -69,7 +69,7 @@ it("loads the same form with the current version for an editable draft", async (
   expect(screen.getByLabelText(/Title/)).toHaveValue(baseDraft.title);
   expect(screen.getByRole("button", { name: "Save draft" })).toBeVisible();
 });
-it("opens a published article for editing without draft-only media controls", async () => {
+it("opens a published article with main-photo editing and no body-image upload controls", async () => {
   mocks.detail.mockResolvedValue({
     kind: "editable",
     status: "published",
@@ -89,7 +89,9 @@ it("opens a published article for editing without draft-only media controls", as
     screen.getByRole("heading", { name: "Edit published article" }),
   ).toBeVisible();
   expect(screen.getByRole("button", { name: "Save article" })).toBeVisible();
-  expect(screen.queryByLabelText("Main image")).not.toBeInTheDocument();
+  expect(screen.getByRole("region", { name: "Main image" })).toBeVisible();
+  await screen.findByRole("textbox", { name: "Article body" });
+  expect(screen.queryByLabelText("Body image file")).not.toBeInTheDocument();
 });
 it("keeps archived records read-only", async () => {
   mocks.detail.mockResolvedValue({ kind: "readOnly", status: "archived" });
