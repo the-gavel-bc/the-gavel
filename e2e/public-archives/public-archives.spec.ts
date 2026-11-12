@@ -41,15 +41,16 @@ test.beforeAll(({}, info) => {
   sports = `${prefix}-sports`;
   id = (n) =>
     `7c000000-0000-0000-0000-${String((project === "desktop" ? 1000 : 2000) + n).padStart(12, "0")}`;
+  // The live taxonomy migration seeds the Letter to the Editor section; the
+  // letters case reuses it instead of creating a second one.
   sql(`do $$ begin if exists(select 1 from public.sections where slug like '${prefix}-%')
-    ${project === "desktop" ? "or exists(select 1 from public.sections where lower(name)='letter to the editor')" : ""}
-    then raise exception 'Archive fixture collision; refusing to replace existing taxonomy'; end if; end $$;
+    ${project === "desktop" ? "or not exists(select 1 from public.sections where lower(name)='letter to the editor' and active)" : ""}
+    then raise exception 'Archive fixture collision or missing seeded letters section'; end if; end $$;
     insert into public.sections(id,name,slug,active) values
       ('${id(101)}','Archive News ${project}','${news}',true),
       ('${id(102)}','Archive Sports ${project}','${sports}',true),
       ('${id(103)}','Archive Empty ${project}','${prefix}-empty',true),
-      ('${id(104)}','Archive Hidden ${project}','${prefix}-hidden',false)
-      ${project === "desktop" ? `,('${id(105)}','Letter to the Editor','${prefix}-configured-letters',true)` : ""};
+      ('${id(104)}','Archive Hidden ${project}','${prefix}-hidden',false);
     insert into public.categories(id,section_id,name,slug,active) values
       ('${id(201)}','${id(101)}','Campus news ${project}','campus',true),
       ('${id(202)}','${id(102)}','Campus sports ${project}','campus',true),
@@ -58,7 +59,7 @@ test.beforeAll(({}, info) => {
       ('${id(205)}','${id(101)}','Empty category ${project}','empty',true);
     insert into public.articles(id,owner_profile_id,section_id,title,slug,content,status,published_at,archived_at)
     select ('7c000000-0000-0000-0000-'||lpad((${project === "desktop" ? 1000 : 2000}+n)::text,12,'0'))::uuid,
-      '10000000-0000-0000-0000-000000000002',case when n=14 then '${id(102)}'::uuid when n=17 then '${id(105)}'::uuid else '${id(101)}'::uuid end,
+      '10000000-0000-0000-0000-000000000002',case when n=14 then '${id(102)}'::uuid when n=17 then (select id from public.sections where lower(name)='letter to the editor') else '${id(101)}'::uuid end,
       '${prefix} story '||n,'${prefix}-story-'||n,
       '{"format":"gavel-draft","version":1,"document":{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Synthetic archive article body."}]}]}}'::jsonb,
       case n when 15 then 'draft'::public.article_status when 16 then 'archived'::public.article_status else 'published'::public.article_status end,

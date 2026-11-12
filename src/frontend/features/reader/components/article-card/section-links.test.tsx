@@ -2,6 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 import type { PublicArticle } from "@/backend/public-articles/public-article/public-article";
 import { ArticleCard } from "./article-card";
+import { HomeHero } from "../home-hero/home-hero";
 import { HomeSection } from "../home-section/home-section";
 import { ArticleHeader } from "../article-header/article-header";
 import { ArchiveHeader } from "../archive-header/archive-header";
@@ -63,6 +64,7 @@ beforeEach(() =>
 );
 it.each([
   ["card", () => <ArticleCard article={card} />],
+  ["archive hero", () => <HomeHero article={card} showSection />],
   ["article header", () => <ArticleHeader article={article} />],
   ["archive breadcrumb", () => <ArchiveHeader archive={archive} />],
   ["footer", () => <SiteFooter sections={[section]} />],
