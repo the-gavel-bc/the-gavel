@@ -1,0 +1,21 @@
+/* Text labels carry the state; colour is a secondary cue. All pairs exceed 5.8:1. */
+.badge {
+  border-radius: 999px;
+  display: inline-block;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.375rem 0.625rem;
+}
+.draft {
+  background: #fff4e0;
+  color: #8a4b00;
+}
+.published {
+  background: #e8f5ec;
+  color: #1e6b3a;
+}
+.archived {
+  background: #eceef2;
+  color: #4a515c;
+}

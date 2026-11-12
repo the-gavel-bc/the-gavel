@@ -103,3 +103,12 @@ Slice 1 of the [UI/UX refresh plan](superpowers/plans/2026-11-12-ui-ux-refresh.m
   - Danger `#b3261e` on `#fdf1f0` (5.92:1).
 - **Base styles:** zero-specificity `:where()` base styles give unclassed labels stacked above fields; 44px fields, buttons and links; pill buttons, filled for submit and outlined otherwise; card forms; tinted status and alert messages; and tables. Feature module classes always override them.
 - **Fonts:** interface text uses the system sans stack, and headings use the reader display font. No font was added.
+
+Slice 2:
+
+- **Status badges:** a text label plus tint. Draft is `#8a4b00` on `#fff4e0` (6.24:1), Published `#1e6b3a` on `#e8f5ec` (5.81:1), Archived `#4a515c` on `#eceef2` (6.89:1).
+- **Lists:** article lists use card rows with a pill action, and the admin filters form a toolbar.
+- **Editor:**
+  - It groups details in a card.
+  - A sticky save bar holds the save status, the visibility note and the save button.
+  - Formatting buttons are chips, filled when pressed.

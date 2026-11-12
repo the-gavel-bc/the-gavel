@@ -3,6 +3,7 @@ import type {
   AdminArticlePage,
   AdminArticleSummary,
 } from "@/backend/articles/admin-article-queries/admin-article-queries";
+import { StatusBadge } from "../status-badge/status-badge";
 import styles from "./admin-articles.module.css";
 
 const date = new Intl.DateTimeFormat("en-US", {
@@ -10,7 +11,6 @@ const date = new Intl.DateTimeFormat("en-US", {
   timeStyle: "short",
   timeZone: "UTC",
 });
-const labels = { draft: "Draft", published: "Published", archived: "Archived" };
 
 export function AdminArticleMeta({
   article,
@@ -21,7 +21,9 @@ export function AdminArticleMeta({
     <dl className={styles.meta}>
       <div>
         <dt>Status</dt>
-        <dd>{labels[article.status]}</dd>
+        <dd>
+          <StatusBadge status={article.status} />
+        </dd>
       </div>
       <div>
         <dt>Owner</dt>
@@ -64,42 +66,54 @@ export function AdminArticleList({
         method="get"
         className={styles.filters}
       >
-        <label htmlFor="admin-article-status">Status</label>
-        <select id="admin-article-status" name="status" defaultValue={status}>
-          <option value="all">All statuses</option>
-          <option value="draft">Draft</option>
-          <option value="published">Published</option>
-          <option value="archived">Archived</option>
-        </select>
-        <label htmlFor="admin-article-search">Search article titles</label>
-        <input
-          id="admin-article-search"
-          name="search"
-          type="search"
-          maxLength={80}
-          defaultValue={search}
-        />
-        <button type="submit">Apply filters</button>
-      </form>
-      <p>
-        <Link href="/dashboard/admin/articles?status=archived" prefetch={false}>
+        <div className={styles.field}>
+          <label htmlFor="admin-article-search">Search article titles</label>
+          <input
+            id="admin-article-search"
+            name="search"
+            type="search"
+            maxLength={80}
+            defaultValue={search}
+          />
+        </div>
+        <div className={styles.field}>
+          <label htmlFor="admin-article-status">Status</label>
+          <select id="admin-article-status" name="status" defaultValue={status}>
+            <option value="all">All statuses</option>
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+        <button type="submit" className={styles.apply}>
+          Apply filters
+        </button>
+        <Link
+          className={styles.archives}
+          href="/dashboard/admin/articles?status=archived"
+          prefetch={false}
+        >
           View archives
         </Link>
-      </p>
+      </form>
       {page.items.length === 0 ? (
-        <p>No articles match these filters.</p>
+        <p className={styles.empty}>No articles match these filters.</p>
       ) : (
         <ul className={styles.rows}>
           {page.items.map((article) => (
             <li key={article.id} className={styles.row}>
-              <h2>{article.title}</h2>
+              <div className={styles.rowHead}>
+                <h2>{article.title}</h2>
+                <Link
+                  className={styles.manage}
+                  href={`/dashboard/admin/articles/${article.id}`}
+                  prefetch={false}
+                  aria-label={`Manage article: ${article.title}`}
+                >
+                  Manage
+                </Link>
+              </div>
               <AdminArticleMeta article={article} />
-              <Link
-                href={`/dashboard/admin/articles/${article.id}`}
-                prefetch={false}
-              >
-                Manage article: {article.title}
-              </Link>
             </li>
           ))}
         </ul>

@@ -221,9 +221,6 @@ export function DraftForm({
           articleId={article?.id}
         />
       </noscript>
-      <p role="status">
-        {editorFailure ? "Body needs attention before saving." : saveStatus}
-      </p>
       {!catalog.options.sections.length && (
         <p>
           No active sections are available. Ask an administrator to configure a
@@ -425,12 +422,17 @@ export function DraftForm({
           onBusyChange={setCleanupBusy}
         />
       )}
-      <p>
-        {status === "published"
-          ? "This article remains published when you save changes."
-          : "Your draft stays private."}
-      </p>
-      <div>
+      <div className={styles.saveBar}>
+        <div className={styles.saveText}>
+          <p role="status">
+            {editorFailure ? "Body needs attention before saving." : saveStatus}
+          </p>
+          <p>
+            {status === "published"
+              ? "This article remains published when you save changes."
+              : "Your draft stays private."}
+          </p>
+        </div>
         <Button
           type="submit"
           disabled={

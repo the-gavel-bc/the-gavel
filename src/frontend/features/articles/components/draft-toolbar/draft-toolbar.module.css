@@ -1,21 +1,39 @@
 .toolbar {
+  background: var(--dash-page, #f6f7fb);
+  border: 1px solid var(--dash-line, #e3e6ee);
+  border-radius: 10px;
   display: grid;
   gap: var(--space-3);
+  padding: var(--space-3);
 }
 .buttons {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
 }
-.toolbar input {
-  width: 100%;
-  min-height: 2.75rem;
-  padding: var(--space-3);
-  font: inherit;
-  color: var(--color-ink);
+/* Compact outlined chips; pressed formats are filled so state is visible beyond colour. */
+.buttons button {
   background: var(--color-paper);
-  border: 1px solid var(--color-muted);
+  border-color: var(--dash-line, #e3e6ee);
+  color: var(--dash-ink, #14161c);
+  font-weight: 600;
+  padding-inline: var(--space-4);
 }
-.toolbar [aria-pressed="true"] {
-  box-shadow: inset 0 0 0 2px var(--color-paper);
+.buttons button:hover:not(:disabled) {
+  background: var(--dash-soft, #eef2fc);
+}
+.buttons button[aria-pressed="true"] {
+  background: var(--color-brand);
+  border-color: var(--color-brand);
+  color: var(--color-paper);
+}
+.toolbar input {
+  background: var(--color-paper);
+  border: 1px solid var(--dash-field, #848d9c);
+  border-radius: 8px;
+  color: var(--color-ink);
+  font: inherit;
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-3);
+  width: 100%;
 }

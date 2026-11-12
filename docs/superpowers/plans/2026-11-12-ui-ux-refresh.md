@@ -48,3 +48,18 @@ Slice 1:
   - 375px: the chip row keeps the current page in view, nothing scrolls horizontally, and the fields stack.
   - No console or CSP errors.
 - Not run locally: the browser suite. Its fixtures target the primary local project; CI runs it. Accessible names that the browser tests rely on are unchanged.
+
+Slice 2:
+
+- Unit: 146 files and 1,010 tests passed. Typecheck, lint and format passed.
+- Production build at 1440px and 375px:
+  - My articles and Article management show status badges and card rows with a pill action.
+  - The admin filters sit on one toolbar row.
+  - The editor's save bar stays on screen with the save result next to the button.
+  - Formatting buttons are compact chips, filled when active.
+  - Nothing scrolls horizontally, and there were no CSP errors. One expected connection error appeared from restarting the server.
+- A floated legend initially pushed the editor fields sideways; a `clear` on the following content fixed it, confirmed in the browser.
+- Accessible names are unchanged:
+  - "Manage" keeps its `Manage article: <title>` label.
+  - "Status", "Search article titles", "Apply filters" and "View archives" are kept.
+  - The save live region only moved within the form.
