@@ -443,3 +443,7 @@ Findings 28, 5 and 6 were implemented on `fix/review-recovery-cleanup`, based on
 ## Finding 24 implementation follow-up
 
 The [eligible administrator guard plan](../superpowers/plans/2026-11-11-eligible-administrator-guard.md) records the shared identity predicate, serialized administrator counting, trusted-media revalidation and focused regression proof. Original findings remain historical review snapshots; hosted CI and human security review remain required.
+
+## Browser security headers follow-up
+
+Hardening item 3 (CSP, frame protection, referrer and permissions policies, HSTS) is implemented on `feat/browser-security-headers`. The [plan](../superpowers/plans/2026-11-11-browser-security-headers.md) records the policy, verification and remaining production-origin checks.
