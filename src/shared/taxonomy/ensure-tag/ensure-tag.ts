@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/shared/validation/zod/zod";
 import { isDraftUuid } from "@/shared/articles/draft-cursor/draft-cursor";
 
 export const tagNameSchema = z
