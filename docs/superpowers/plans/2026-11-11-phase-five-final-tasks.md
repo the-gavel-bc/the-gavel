@@ -45,4 +45,7 @@
 
 ## Verification record
 
-Pending.
+- Slice 1 (PR #85): SQL 69 files / 2,086 assertions; 27 targeted and 107 affected-area unit tests; typecheck, lint and format. Details in the PR.
+- Slice 2 (this branch): unit 144 files / 1,001 tests, plus 3 new social-link/footer tests; typecheck, lint and format; production build. Browser checks at 1440px and 375px against seeded synthetic content in a disposable project: screenshot structure matched, accessibility checks passed, no horizontal scroll, no CSP violations after replacing `next/image` (it emits an inline `style` attribute the nonce policy blocks), and the keyboard dropdown works. Contrast was computed for every new colour pair. One E2E name assertion was updated for the logo link; CI runs the browser suite.
+- Task 23: the archive/restore lifecycle across article, homepage, section, search, author and sitemap, and a draft-slug 404, were checked on the production build. The handoff is in [Phase 5 evidence](../../reviews/phase-5-public-reader.md).
+- No scratch artifacts are committed; nothing ran against the primary local project.
