@@ -124,8 +124,22 @@ test("unused uploads survive reload and can be explicitly discarded after public
     .getByLabel("Alt text", { exact: true })
     .fill("Publication main graphic");
   await page.getByLabel("Image credit").fill("The Gavel");
-  await page.getByRole("button", { name: "Attach image" }).click();
-  await expect(page.getByText("Image attached.")).toBeVisible();
+  // Pointer attachment is covered in article-media.spec.ts. Exercise the native
+  // keyboard path here so publication setup does not depend on pointer placement
+  // while the sticky save bar and unused-upload results settle.
+  const attach = page.getByRole("button", { name: "Attach image" });
+  await attach.focus();
+  await attach.press("Enter");
+  await expect(page.getByText("Image attached."))
+    .toBeVisible()
+    .catch(async (cause: unknown) => {
+      const alerts = await page.getByRole("alert").allTextContents();
+      const statuses = await page.getByRole("status").allTextContents();
+      throw new Error(
+        `Main-image attachment failed: ${JSON.stringify({ alerts, statuses })}`,
+        { cause },
+      );
+    });
   await page
     .getByLabel("Body image file")
     .setInputFiles({ name: "unused.png", mimeType: "image/png", buffer: png });
