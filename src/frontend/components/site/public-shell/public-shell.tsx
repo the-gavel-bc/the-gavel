@@ -17,7 +17,7 @@ export function PublicShell({
 }: PropsWithChildren<{
   sections?: PublicSection[];
   information?: PublicSiteInformation;
-  readThis?: Pick<PublicArticleCard, "slug" | "title">[];
+  readThis?: Pick<PublicArticleCard, "id" | "slug" | "title" | "mainImage">[];
 }>) {
   return (
     <>

@@ -22,12 +22,12 @@ test("About and submission navigation work without JavaScript", async ({
     await expect(main.getByRole("heading", { level: 1 })).toHaveText(
       "About The Gavel",
     );
-    const submit = main.getByRole("link", { name: "How to submit a letter" });
+    const submit = main.getByRole("link", { name: "How to Submit" });
     await submit.focus();
     await expectVisibleFocus(submit);
     await submit.click();
     await expect(main.getByRole("heading", { level: 1 })).toHaveText(
-      "How to submit a letter",
+      "How to Submit",
     );
     await expect(main.locator("form")).toHaveCount(0);
     await main.getByRole("link", { name: "About The Gavel" }).click();

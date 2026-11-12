@@ -7,6 +7,8 @@ import { HomeHero } from "@/frontend/features/reader/components/home-hero/home-h
 import { HomeLatest } from "@/frontend/features/reader/components/home-latest/home-latest";
 import { HomeFeatured } from "@/frontend/features/reader/components/home-featured/home-featured";
 import { HomeSection } from "@/frontend/features/reader/components/home-section/home-section";
+import { getPublicSiteNavigationForRequest } from "@/backend/public-site/public-site-navigation/public-site-navigation";
+import { StayConnected } from "@/frontend/components/site/social-links/social-links";
 import { ReaderState } from "@/frontend/features/reader/components/reader-states/reader-states";
 import styles from "./page.module.css";
 import type { Metadata } from "next";
@@ -25,7 +27,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home() {
-  const homepage = await getPublicHomepageForRequest();
+  // The shell already reads site navigation for this request; this reuses it.
+  const [homepage, site] = await Promise.all([
+    getPublicHomepageForRequest(),
+    getPublicSiteNavigationForRequest(),
+  ]);
   return (
     <div className={styles.main}>
       <h1 className={styles.srOnly}>The Gavel</h1>
@@ -57,6 +63,9 @@ export default async function Home() {
           ))}
         </>
       )}
+      <StayConnected
+        information={site.kind === "ok" ? site.information : undefined}
+      />
     </div>
   );
 }

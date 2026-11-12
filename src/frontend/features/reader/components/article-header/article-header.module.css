@@ -4,7 +4,7 @@
 }
 .header h1 {
   margin: 0;
-  font-family: var(--reader-serif);
+  font-family: var(--reader-display);
   font-size: clamp(2rem, 5vw, 3.5rem);
   line-height: 1.12;
   overflow-wrap: anywhere;

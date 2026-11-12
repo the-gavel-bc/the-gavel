@@ -47,7 +47,7 @@ export function ArchiveGrid({
       {introduction}
       {lead && (
         <div className={styles.lead}>
-          <HomeHero article={lead} />
+          <HomeHero article={lead} showSection />
         </div>
       )}
       {cards.length > 0 && (

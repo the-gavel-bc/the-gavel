@@ -3,10 +3,14 @@ vi.mock("@/backend/infrastructure/env/server/server", () => ({
 }));
 import { render, screen } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
-const mocks = vi.hoisted(() => ({ read: vi.fn() }));
+const mocks = vi.hoisted(() => ({ read: vi.fn(), site: vi.fn() }));
 vi.mock("@/backend/public-homepage/public-homepage", () => ({
   getPublicHomepageForRequest: mocks.read,
 }));
+vi.mock(
+  "@/backend/public-site/public-site-navigation/public-site-navigation",
+  () => ({ getPublicSiteNavigationForRequest: mocks.site }),
+);
 import Home, { generateMetadata } from "./page";
 const card = {
   id: "58000000-0000-0000-0000-000000000040",
@@ -27,7 +31,10 @@ const empty = {
   latest: [],
   sections: [],
 };
-beforeEach(() => vi.resetAllMocks());
+beforeEach(() => {
+  vi.resetAllMocks();
+  mocks.site.mockResolvedValue({ kind: "unavailable" });
+});
 it("keeps unavailable homepage responses out of indexing", async () => {
   mocks.read.mockResolvedValue({ kind: "unavailable" });
   expect(await generateMetadata()).toMatchObject({
@@ -113,7 +120,7 @@ it("uses eager authorized hero media and renders real partial groups", async () 
   expect(screen.getByText("Photo: Photographer")).toBeVisible();
   expect(screen.getByRole("heading", { name: "Latest" })).toBeVisible();
   expect(screen.getByRole("heading", { name: "Featured News" })).toBeVisible();
-  expect(screen.getByRole("link", { name: "View all News" })).toHaveAttribute(
+  expect(screen.getByRole("link", { name: "View All News" })).toHaveAttribute(
     "href",
     "/sections/news",
   );

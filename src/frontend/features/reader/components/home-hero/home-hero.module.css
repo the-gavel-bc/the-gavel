@@ -1,51 +1,62 @@
 .hero {
   min-width: 0;
 }
+.story {
+  position: relative;
+  display: block;
+  color: #fff;
+  text-decoration: none;
+  overflow: hidden;
+}
+.image {
+  aspect-ratio: 3 / 2;
+}
+.overlay {
+  position: absolute;
+  inset: auto 0 0;
+  display: grid;
+  gap: 0.75rem;
+  padding: clamp(1rem, 3vw, 2rem);
+  /* Readable over any photo: a dark gradient plus a solid floor under the text. */
+  background: linear-gradient(
+    to bottom,
+    rgb(20 22 28 / 0%),
+    rgb(20 22 28 / 80%) 35%,
+    rgb(20 22 28 / 92%)
+  );
+}
+.title {
+  margin: 0;
+  font: 700 clamp(1.5rem, 3.2vw, 2.75rem)/1.15 var(--reader-display);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 50%);
+  overflow-wrap: anywhere;
+}
+.story:hover .title {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+.story .date {
+  color: #fff;
+  font-family: var(--reader-sans);
+  font-weight: 600;
+}
+.story:focus-visible {
+  outline: 3px solid var(--reader-blue);
+  outline-offset: 4px;
+}
+.credit {
+  margin: 0.5rem 0 0;
+  color: var(--reader-muted);
+  font: 0.75rem/1.5 var(--reader-sans);
+  overflow-wrap: anywhere;
+}
 .section {
   display: inline-flex;
   align-items: center;
   min-height: 2.75rem;
   color: var(--reader-blue);
-  font: 700 0.8125rem/1.4 var(--reader-sans);
+  font: 700 0.75rem/1.4 var(--reader-sans);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-.story {
-  display: block;
-  color: var(--reader-ink);
-  text-decoration: none;
-}
-.story h2 {
-  font: 700 clamp(1.875rem, 3.8vw, 3.25rem)/1.12 var(--reader-serif);
-  letter-spacing: -0.02em;
-  margin: 1rem 0;
-  overflow-wrap: anywhere;
-}
-.story:hover h2 {
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
-}
-.image {
-  aspect-ratio: 3 / 2;
-  overflow: hidden;
-  border-radius: var(--reader-radius);
-  background: var(--reader-soft);
-}
-.image img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.credit {
-  color: var(--reader-muted);
-  font: 0.75rem/1.5 var(--reader-sans);
-  margin: 0 0 0.75rem;
-  overflow-wrap: anywhere;
-}
-.excerpt {
-  color: var(--reader-muted);
-  font: 1.125rem/1.6 var(--reader-serif);
-  max-width: 48rem;
-  overflow-wrap: anywhere;
+  text-underline-offset: 0.2em;
 }

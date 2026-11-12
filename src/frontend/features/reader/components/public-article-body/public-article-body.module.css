@@ -7,7 +7,7 @@
 }
 .prose h2,
 .prose h3 {
-  font-family: var(--reader-serif, Georgia, serif);
+  font-family: var(--reader-display, Georgia, serif);
   line-height: 1.25;
   margin-block: 2rem 1rem;
 }

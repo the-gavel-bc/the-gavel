@@ -64,7 +64,7 @@ beforeEach(() =>
 );
 it.each([
   ["card", () => <ArticleCard article={card} />],
-  ["hero", () => <HomeHero article={card} />],
+  ["archive hero", () => <HomeHero article={card} showSection />],
   ["article header", () => <ArticleHeader article={article} />],
   ["archive breadcrumb", () => <ArchiveHeader archive={archive} />],
   ["footer", () => <SiteFooter sections={[section]} />],
@@ -79,7 +79,7 @@ it.each([
 it("uses the canonical view-all link without changing article identity", () => {
   render(<HomeSection section={{ ...section, articles: [card] }} />);
   expect(
-    screen.getByRole("link", { name: "View all Letter to the Editor" }),
+    screen.getByRole("link", { name: "View All Letter to the Editor" }),
   ).toHaveAttribute("href", "/letters");
   expect(screen.getByRole("link", { name: card.title })).toHaveAttribute(
     "href",
