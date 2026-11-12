@@ -144,3 +144,9 @@ Fresh whole-stack review found and corrected three integration gaps before the f
 - Default full browser/concurrency suites remain hosted CI work. Task-specific browser and independent-session race proofs were run locally against the disposable project. Human security/screen-reader review remains outstanding. No PR was merged.
 
 Stack opened: [C #91](https://github.com/dylandrozario/the-gavel/pull/91), [D #92](https://github.com/dylandrozario/the-gavel/pull/92), [B #93](https://github.com/dylandrozario/the-gavel/pull/93), [E #94](https://github.com/dylandrozario/the-gavel/pull/94). Bases verified in that order starting from #90. Hosted reruns for #89 and #91–#94 are pending; this is not a hosted-pass claim.
+
+## Integration PR against main
+
+The owner requested the completed feature work be proposed against `main` after #88–#94 were merged into their parent feature branches. `feat/editor-features-main` starts at `origin/main` and merges the complete #94 feature history plus the updated #89/#90 parent, including the hosted-green keyboard setup correction (`a1d8aa8`). Only STATUS/design documentation conflicted; the dashboard design section was retained and STATUS now tracks main integration.
+
+Fresh integration checks: `pnpm typecheck`, `pnpm lint`, `pnpm test` (151 files, 1,045 tests), `pnpm format:check`, `git diff --check origin/main...HEAD`, and the disposable-environment production build all passed. Ancestry checks confirmed `main`, the #94 head and `a1d8aa8` are included. Compared with the reviewed #94 source, application/database files are identical; only STATUS, the #89 diagnostic record and the hosted-green browser-test correction differ. SQL, race and browser suites were not repeated locally for this history/documentation integration; their prior evidence remains above and the new main PR runs full CI. No merge into main or deployment was performed.
