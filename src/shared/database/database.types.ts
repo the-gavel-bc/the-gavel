@@ -720,14 +720,19 @@ export type Database = {
         Args: { p_draft: Json; p_request_id: string };
         Returns: Json;
       };
-      create_guest_contributor: {
-        Args: {
-          p_biography: string;
-          p_display_name: string;
-          p_request_id: string;
-        };
-        Returns: Json;
-      };
+      create_guest_contributor:
+        | {
+            Args: { p_display_name: string; p_request_id: string };
+            Returns: Json;
+          }
+        | {
+            Args: {
+              p_biography: string;
+              p_display_name: string;
+              p_request_id: string;
+            };
+            Returns: Json;
+          };
       current_profile: {
         Args: Record<PropertyKey, never>;
         Returns: {
@@ -1059,6 +1064,7 @@ export type Database = {
         };
         Returns: Json;
       };
+      search_contributors: { Args: { p_query: string }; Returns: Json };
       search_public_articles: {
         Args: { p_cursor?: Json; p_limit?: number; p_query: string };
         Returns: Json;
