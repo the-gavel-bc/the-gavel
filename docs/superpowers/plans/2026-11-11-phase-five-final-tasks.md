@@ -19,7 +19,7 @@
 ## Owner decisions (2026-11-11)
 
 - Use the official logo (`gavel-logo.png`, including its tagline) as the masthead, and the gavel mark (`icon-192.png`) for favicons and the no-image card placeholder.
-- Self-host Playfair Display (headings) and Source Serif 4 (body) through `next/font`, so the browser makes no third-party request and the CSP stays `'self'`. Both are OFL licensed.
+- Self-host Playfair Display (headings) and Source Serif 4 (body) as committed WOFF2 files loaded with `next/font/local`, so the browser makes no third-party request and the CSP stays `'self'`. Both are OFL licensed.
 - Add optional Spotify, LinkedIn and Facebook URLs to administrator site settings, validated to their official HTTPS hosts, and render them in Stay Connected and the footer.
 - Show "Est. 2009" in the footer as fixed publication copy.
 - Not adopted: the live Newsletter link (newsletter is unapproved scope), the "Designed with WordPress" bar, the demo's policy pages and its client-side search.
@@ -49,3 +49,4 @@
 - Slice 2 (this branch): unit 144 files / 1,001 tests, plus 3 new social-link/footer tests; typecheck, lint and format; production build. Browser checks at 1440px and 375px against seeded synthetic content in a disposable project: screenshot structure matched, accessibility checks passed, no horizontal scroll, no CSP violations after replacing `next/image` (it emits an inline `style` attribute the nonce policy blocks), and the keyboard dropdown works. Contrast was computed for every new colour pair. One E2E name assertion was updated for the logo link; CI runs the browser suite.
 - Task 23: the archive/restore lifecycle across article, homepage, section, search, author and sitemap, and a draft-slug 404, were checked on the production build. The handoff is in [Phase 5 evidence](../../reviews/phase-5-public-reader.md).
 - No scratch artifacts are committed; nothing ran against the primary local project.
+- CI follow-up: the hosted production build failed inside `next/font/google` (Turbopack import-map error) though local builds passed. With owner approval the two variable latin WOFF2 files and their OFL licenses were downloaded from Google Fonts and committed, and the layout switched to `next/font/local`. A `CI=true` production build passed with both fonts bundled as same-origin assets and no Google references; fonts loaded with no external requests or console errors; unit (1,004), typecheck and lint passed. A committed `src/types/static-images.d.ts` also fixes CI typecheck, which runs before `next-env.d.ts` exists.

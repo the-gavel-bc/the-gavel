@@ -1,20 +1,21 @@
 import { getServerEnv } from "@/backend/infrastructure/env/server/server";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Playfair_Display, Source_Serif_4 } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-// Self-hosted at build time: the browser loads these from this origin only,
-// so the CSP's font-src 'self' holds. Reader styles opt in via the variables.
-const display = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["600", "700"],
+// Self-hosted, committed variable fonts (latin subset, SIL OFL 1.1; licenses
+// beside the files). Builds never fetch fonts, and the CSP's font-src 'self'
+// holds. Reader styles opt in via the CSS variables.
+const display = localFont({
+  src: "../frontend/assets/fonts/playfair-display-latin.woff2",
+  weight: "400 900",
   display: "swap",
   variable: "--font-display",
 });
-const body = Source_Serif_4({
-  subsets: ["latin"],
-  weight: ["400", "600"],
+const body = localFont({
+  src: "../frontend/assets/fonts/source-serif-4-latin.woff2",
+  weight: "200 900",
   display: "swap",
   variable: "--font-body",
 });

@@ -11,7 +11,6 @@ afterEach(async () => {
 });
 
 // next/font is a build-time transform; give tests its runtime shape.
-vi.mock("next/font/google", () => {
-  const font = () => ({ className: "font", variable: "font-variable" });
-  return { Playfair_Display: font, Source_Serif_4: font };
-});
+vi.mock("next/font/local", () => ({
+  default: () => ({ className: "font", variable: "font-variable" }),
+}));
