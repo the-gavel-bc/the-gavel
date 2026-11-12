@@ -2,7 +2,7 @@ begin;
 select no_plan();
 select has_table('public','article_main_images','main image attachment has a relational reference');
 select has_function('public','set_article_main_image',
-  array['uuid','integer','uuid','uuid','text','text'],
+  array['uuid','integer','uuid','uuid','text','text','text'],
   'main image changes use one versioned checked operation');
 \ir support/draft-fixtures/draft-fixtures.inc
 create temp table image_target as select

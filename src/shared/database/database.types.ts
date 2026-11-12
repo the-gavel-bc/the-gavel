@@ -141,6 +141,7 @@ export type Database = {
           alt_text: string;
           article_id: string;
           asset_id: string;
+          caption: string | null;
           credit: string;
         };
         ComputedFields: never;
@@ -148,12 +149,14 @@ export type Database = {
           alt_text: string;
           article_id: string;
           asset_id: string;
+          caption?: string | null;
           credit: string;
         };
         Update: {
           alt_text?: string;
           article_id?: string;
           asset_id?: string;
+          caption?: string | null;
           credit?: string;
         };
         Relationships: [
@@ -1074,6 +1077,7 @@ export type Database = {
           p_alt_text: string;
           p_article_id: string;
           p_asset_id: string;
+          p_caption?: string;
           p_credit: string;
           p_expected_version: number;
           p_request_id: string;
