@@ -71,6 +71,8 @@ export function DraftEditor({
     extensions,
     content: source?.ok ? source.document : undefined,
     immediatelyRender: false,
+    // Base editor CSS lives in the CSS module; an injected <style> has no CSP nonce.
+    injectCSS: false,
     editable: !disabled && (source === null || source.ok),
     enableContentCheck: true,
     enablePasteRules: false,

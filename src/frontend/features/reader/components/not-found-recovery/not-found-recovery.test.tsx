@@ -1,11 +1,15 @@
 import { render, screen, within } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 vi.mock("next/navigation", () => ({ usePathname: () => "/missing" }));
+// The root boundary renders per request so it receives a CSP nonce.
+const connection = vi.hoisted(() => vi.fn(async () => undefined));
+vi.mock("next/server", () => ({ connection }));
 import RootNotFound from "@/app/not-found";
 import ArticleNotFound from "@/app/(public)/articles/[slug]/not-found";
 import { ArchiveNotFound } from "../archive-grid/archive-not-found";
-it("gives unmatched URLs one public shell and recovery search without backend reads", () => {
-  render(<RootNotFound />);
+it("gives unmatched URLs one public shell and recovery search without backend reads", async () => {
+  render(await RootNotFound());
+  expect(connection).toHaveBeenCalledOnce();
   expect(screen.getAllByRole("main")).toHaveLength(1);
   expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
     "Page not found",

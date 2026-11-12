@@ -32,3 +32,19 @@ it("blocks streamed metadata and adds robots headers to private/search families"
     });
   }
 });
+it("sends baseline browser security headers on every path", async () => {
+  const headers = await config.headers!();
+  const all = headers.find((header) => header.source === "/:path*")?.headers;
+  expect(all).toEqual(
+    expect.arrayContaining([
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      { key: "X-Frame-Options", value: "DENY" },
+      { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+      { key: "Strict-Transport-Security", value: "max-age=31536000" },
+    ]),
+  );
+  expect(all?.find((h) => h.key === "Permissions-Policy")?.value).toMatch(
+    /camera=\(\).*microphone=\(\).*geolocation=\(\)/,
+  );
+});
