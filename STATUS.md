@@ -1,8 +1,8 @@
 # Current work
 
-- Phase: 5, public reader experience. The accepted plan is [Phase 5 public reader](docs/superpowers/plans/2026-11-09-phase-five-public-reader.md); the final tasks plan is [Tasks 22–23](docs/superpowers/plans/2026-11-11-phase-five-final-tasks.md).
-- Task 22: social-link settings in PR #85 (`feat/site-social-links`); screenshot reconciliation and accessibility on `feat/phase5-visual-reconciliation`, stacked on #85 (merge #85 first).
-- Task 23: [Phase 5 evidence and handoff](docs/reviews/phase-5-public-reader.md). Lifecycle check done; full suites run in owner-watched hosted CI; a fresh whole-slice review of the final branch remains.
-- Approved decisions (2026-11-11): official logo and gavel mark; self-hosted Playfair Display and Source Serif 4; optional Spotify/LinkedIn/Facebook settings; fixed "Est. 2009" footer copy; no Newsletter link.
-- Not deployable: owner copy/taxonomy/links and mobile screenshots, profile-image and video contract decisions, hosted OAuth/email-signup/cleanup/header checks, and human security/screen-reader review remain (see the evidence record).
-- Workspace: the primary checkout holds the owner's uncommitted README/STATUS edits and untracked screenshots; Task 22/23 work is in worktree `/private/tmp/the-gavel-phase5-final`.
+- Phase: integrate completed dashboard/editor stack into `main` through a pull request; do not merge.
+- Worktree: `/private/tmp/the-gavel-uiux`; branch `feat/editor-features-main`.
+- Sources: PRs #88–#94 merged into their feature parents; this integration includes the complete stack and the #89 keyboard setup correction.
+- Approved behavior and verification: [editor plan](docs/superpowers/plans/2026-11-12-editor-tags-contributors-photo.md) and [UI/UX refresh](docs/superpowers/plans/2026-11-12-ui-ux-refresh.md).
+- Database: disposable `gavel-p5` only (API 58521, DB 58522), symlinked to this worktree. Never use or reset primary projects.
+- Human security/screen-reader and hosted launch gates remain recorded in the Phase 5 handoff.

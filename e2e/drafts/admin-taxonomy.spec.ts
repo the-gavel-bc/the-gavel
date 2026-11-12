@@ -38,7 +38,9 @@ test("administrator edits existing taxonomy and sees gated tags", async ({
   ).toBeVisible();
   await page.getByLabel("Catalog").selectOption("tag");
   await page.getByRole("button", { name: "Show catalog" }).click();
-  await expect(page.getByText(/Tag creation and renaming await/)).toBeVisible();
+  await expect(
+    page.getByText(/Active members create tags in the article editor/),
+  ).toBeVisible();
   await expect(
     page.getByRole("heading", {
       name: `Synthetic ${info.project.name} taxonomy topic`,

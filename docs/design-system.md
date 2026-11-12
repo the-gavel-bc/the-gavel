@@ -88,3 +88,27 @@ Owner-approved on 2026-11-11 and implemented against the nine desktop homepage s
 Verified at 1440px and 375px in a production build: one `h1`, no heading-level jumps, all images with alt text (decorative ones empty), no unnamed links, single main/footer landmarks, keyboard-operable category dropdown with visible focus, no horizontal scroll, both fonts served from this origin and no CSP violations on the homepage, archives and search. Article, archive, author, search and About pages had no screenshots and keep the earlier treatment with the new fonts.
 
 Navigation follow-up (2026-11-12): the menu follows the live taxonomy (no top-level News). Dropdowns use a 5px navy (`#1f2380`) top rule, a square white panel and 17px bold items; the Letter to the Editor dropdown links How to Submit. The How to Submit page has a full-width dark banner, the live illustration and the live heading.
+
+## Dashboard refresh (2026-11-12)
+
+Slice 1 of the [UI/UX refresh plan](superpowers/plans/2026-11-12-ui-ux-refresh.md):
+
+- **Shell:** logo header with the signed-in name and Sign out.
+- **Navigation:** a sidebar with Workspace and Admin groups listing every dashboard page. The current page has `aria-current="page"` and an accent bar. Below 42rem the sidebar becomes a horizontally scrolling chip row that keeps the current page in view.
+- **Tokens:** dashboard tokens live on `DashboardShell`:
+  - Ink `#14161c`.
+  - Muted `#5d6470` (5.57:1 on the `#f6f7fb` page).
+  - Accent `#1e4aa8` (8.08:1 with white).
+  - Field border `#848d9c` (3.35:1 non-text contrast).
+  - Danger `#b3261e` on `#fdf1f0` (5.92:1).
+- **Base styles:** zero-specificity `:where()` base styles give unclassed labels stacked above fields; 44px fields, buttons and links; pill buttons, filled for submit and outlined otherwise; card forms; tinted status and alert messages; and tables. Feature module classes always override them.
+- **Fonts:** interface text uses the system sans stack, and headings use the reader display font. No font was added.
+
+Slice 2:
+
+- **Status badges:** a text label plus tint. Draft is `#8a4b00` on `#fff4e0` (6.24:1), Published `#1e6b3a` on `#e8f5ec` (5.81:1), Archived `#4a515c` on `#eceef2` (6.89:1).
+- **Lists:** article lists use card rows with a pill action, and the admin filters form a toolbar.
+- **Editor:**
+  - It groups details in a card.
+  - A sticky save bar holds the save status, the visibility note and the save button.
+  - Formatting buttons are chips, filled when pressed.

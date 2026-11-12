@@ -156,8 +156,16 @@ export function DraftForm({
       lifecycleBusy ||
       cleanupBusy,
   );
+  // A photo chosen before the draft exists: the draft is created first, then
+  // ArticleMedia uploads it. The editor stays mounted so the file survives.
+  const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
+  const createdInPlace = useRef(false);
+  const [inPlace, setInPlace] = useState(false);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    await save(pendingPhoto);
+  }
+  async function save(photo: File | null) {
     if (
       cleanupBusy ||
       mediaBusy ||
@@ -183,8 +191,16 @@ export function DraftForm({
         return;
       }
     }
+    setSelectionErrors({});
+    if (photo && !article) {
+      createdInPlace.current = true;
+      setInPlace(true);
+    }
     const saved = await command.submit();
-    if (saved && !article && !command.hasUncommitted()) {
+    if (!saved || article) return;
+    if (createdInPlace.current) {
+      window.history.replaceState(null, "", `/dashboard/articles/${saved.id}`);
+    } else if (!command.hasUncommitted()) {
       router.push(`/dashboard/articles/${saved.id}`);
       router.refresh();
     }
@@ -221,9 +237,6 @@ export function DraftForm({
           articleId={article?.id}
         />
       </noscript>
-      <p role="status">
-        {editorFailure ? "Body needs attention before saving." : saveStatus}
-      </p>
       {!catalog.options.sections.length && (
         <p>
           No active sections are available. Ask an administrator to configure a
@@ -325,7 +338,7 @@ export function DraftForm({
           !ready ||
           lifecycleBusy ||
           cleanupBusy ||
-          (!article && command.phase === "saved")
+          (!article && !inPlace && command.phase === "saved")
         }
         className={styles.fields}
       >
@@ -350,15 +363,43 @@ export function DraftForm({
           </div>
         )}
         <DraftTaxonomyFields
+          key={`taxonomy:${catalog.revision}`}
           draft={command.draft}
           options={currentOptions}
           errors={errors}
           onChange={update}
+          onOption={(tag) =>
+            setCatalog((current) => ({
+              ...current,
+              options: {
+                ...current.options,
+                tags: [
+                  ...current.options.tags.filter((item) => item.id !== tag.id),
+                  tag,
+                ],
+              },
+            }))
+          }
         />
         <DraftContributorFields
+          key={catalog.revision}
           value={command.draft.contributors}
           options={catalog.options.contributors}
           error={errors.contributors}
+          onOption={(contributor) =>
+            setCatalog((current) => ({
+              ...current,
+              options: {
+                ...current.options,
+                contributors: [
+                  ...current.options.contributors.filter(
+                    (item) => item.id !== contributor.id,
+                  ),
+                  contributor,
+                ],
+              },
+            }))
+          }
           onChange={(contributors) =>
             update((current) => ({ ...current, contributors }))
           }
@@ -373,7 +414,7 @@ export function DraftForm({
             !ready ||
             lifecycleBusy ||
             cleanupBusy ||
-            (!article && command.phase === "saved")
+            (!article && !inPlace && command.phase === "saved")
           }
           onError={reportEditorFailure}
           onChange={(content) => {
@@ -382,8 +423,39 @@ export function DraftForm({
           }}
         />
       </fieldset>
-      {command.article && status === "draft" && (
+      {!command.article && (
+        <section
+          aria-labelledby="new-draft-image-heading"
+          className={styles.newPhoto}
+        >
+          <h2 id="new-draft-image-heading">Main image</h2>
+          <p>
+            JPEG, PNG or WebP, up to 10 MB. Choosing a photo saves your draft
+            first, then uploads it.
+          </p>
+          <label htmlFor="article-image-file">Image file</label>
+          <input
+            id="article-image-file"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            disabled={!ready || command.phase === "saving"}
+            onChange={(event) => {
+              const photo = event.target.files?.[0] ?? null;
+              setPendingPhoto(photo);
+              if (photo) void save(photo);
+            }}
+          />
+          {pendingPhoto && (
+            <p>
+              {pendingPhoto.name} will upload once the draft is saved. Fix any
+              highlighted fields, then choose Create draft.
+            </p>
+          )}
+        </section>
+      )}
+      {command.article && (
         <ArticleMedia
+          initialFile={pendingPhoto}
           article={command.article}
           initialImage={initialImage ?? null}
           disabled={
@@ -425,12 +497,17 @@ export function DraftForm({
           onBusyChange={setCleanupBusy}
         />
       )}
-      <p>
-        {status === "published"
-          ? "This article remains published when you save changes."
-          : "Your draft stays private."}
-      </p>
-      <div>
+      <div className={styles.saveBar}>
+        <div className={styles.saveText}>
+          <p role="status">
+            {editorFailure ? "Body needs attention before saving." : saveStatus}
+          </p>
+          <p>
+            {status === "published"
+              ? "This article remains published when you save changes."
+              : "Your draft stays private."}
+          </p>
+        </div>
         <Button
           type="submit"
           disabled={

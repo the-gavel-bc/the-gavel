@@ -1,7 +1,19 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
-import { expect, it } from "vitest";
+import { beforeEach, expect, it, vi } from "vitest";
+const mocks = vi.hoisted(() => ({ search: vi.fn(), create: vi.fn() }));
+vi.mock(
+  "@/backend/contributors/guest-contributor/guest-contributor-actions",
+  () => ({
+    searchContributorsAction: mocks.search,
+    createGuestContributorAction: mocks.create,
+  }),
+);
+beforeEach(() => {
+  vi.clearAllMocks();
+  mocks.search.mockResolvedValue({ ok: true, items: options });
+});
 import type { DraftContributor } from "@/shared/articles/draft-contract/draft-contract";
 import { DraftContributorFields } from "./draft-contributor-fields";
 const options = [{ id: "guest", displayName: "Guest", slug: "guest" }];
@@ -16,18 +28,19 @@ function Form() {
         options={options}
         onChange={onChange}
       />
-      <output>{JSON.stringify(value)}</output>
+      <output aria-label="Selected credits">{JSON.stringify(value)}</output>
     </>
   );
 }
 it("repairs an unavailable credit without renumbering existing credits", async () => {
   render(<Form />);
-  expect(screen.getByLabelText("Contributor 1")).toHaveDisplayValue(
-    /Unavailable contributor/,
+  expect(screen.getByLabelText("Contributor 1")).toHaveValue(
+    "Unavailable contributor: missing (unavailable)",
   );
-  await userEvent.selectOptions(
-    screen.getByLabelText("Contributor 1"),
-    "guest",
+  await userEvent.clear(screen.getByLabelText("Contributor 1"));
+  await userEvent.type(screen.getByLabelText("Contributor 1"), "Guest");
+  await userEvent.click(
+    await screen.findByRole("option", { name: "Guest (guest)" }),
   );
   await userEvent.click(
     screen.getByRole("button", { name: "Add contributor" }),
@@ -35,16 +48,22 @@ it("repairs an unavailable credit without renumbering existing credits", async (
   await userEvent.selectOptions(screen.getByLabelText("Role 2"), "editor");
   await userEvent.clear(screen.getByLabelText("Display order 2"));
   await userEvent.type(screen.getByLabelText("Display order 2"), "7");
-  expect(JSON.parse(screen.getByRole("status").textContent!)).toEqual([
+  expect(
+    JSON.parse(
+      screen.getByRole("status", { name: "Selected credits" }).textContent!,
+    ),
+  ).toEqual([
     { profileId: "guest", role: "creative", displayOrder: 7 },
     { profileId: "guest", role: "editor", displayOrder: 7 },
   ]);
   await userEvent.click(
     screen.getByRole("button", { name: "Remove contributor 1" }),
   );
-  expect(JSON.parse(screen.getByRole("status").textContent!)).toEqual([
-    { profileId: "guest", role: "editor", displayOrder: 7 },
-  ]);
+  expect(
+    JSON.parse(
+      screen.getByRole("status", { name: "Selected credits" }).textContent!,
+    ),
+  ).toEqual([{ profileId: "guest", role: "editor", displayOrder: 7 }]);
 });
 it("allows removal with an empty catalog and caps addition at 32", () => {
   render(
@@ -68,4 +87,143 @@ it("allows removal with an empty catalog and caps addition at 32", () => {
   expect(
     screen.getByRole("group", { name: "Contributors" }),
   ).toHaveAccessibleDescription(/Repair credits/);
+});
+
+it("creates a guest with keyboard navigation and announces bounded results", async () => {
+  mocks.search.mockResolvedValue({ ok: true, items: [] });
+  mocks.create.mockResolvedValue({
+    ok: true,
+    id: "new",
+    displayName: "New Person",
+    slug: "new-person",
+    created: true,
+    replayed: false,
+  });
+  render(<Form />);
+  const input = screen.getByRole("combobox", { name: "Contributor 1" });
+  await userEvent.clear(input);
+  await userEvent.type(input, "New Person");
+  await screen.findByRole("option", {
+    name: "Add 'New Person' as a new contributor",
+  });
+  await userEvent.keyboard("{ArrowDown}{Enter}");
+  expect(
+    await screen.findByDisplayValue("New Person (new-person)"),
+  ).toBeVisible();
+  expect(mocks.create).toHaveBeenCalledWith({
+    requestId: expect.any(String),
+    displayName: "New Person",
+  });
+  expect(
+    JSON.parse(
+      screen.getByRole("status", { name: "Selected credits" }).textContent!,
+    )[0],
+  ).toMatchObject({ profileId: "new", role: "creative", displayOrder: 7 });
+});
+it("preserves exact request and name after an uncertain creation", async () => {
+  mocks.search.mockResolvedValue({ ok: true, items: [] });
+  mocks.create
+    .mockResolvedValueOnce({ ok: false, code: "unavailable" })
+    .mockResolvedValueOnce({
+      ok: true,
+      id: "new",
+      displayName: "Retry Guest",
+      slug: "retry-guest",
+      created: true,
+      replayed: true,
+    });
+  render(<Form />);
+  const input = screen.getByRole("combobox", { name: "Contributor 1" });
+  await userEvent.clear(input);
+  await userEvent.type(input, "Retry Guest");
+  await userEvent.click(
+    await screen.findByRole("option", {
+      name: "Add 'Retry Guest' as a new contributor",
+    }),
+  );
+  expect(await screen.findByRole("alert")).toHaveTextContent(/retry/i);
+  expect(input).toBeDisabled();
+  await userEvent.click(
+    screen.getByRole("button", { name: "Retry contributor creation" }),
+  );
+  expect(mocks.create.mock.calls[1][0]).toEqual(mocks.create.mock.calls[0][0]);
+  expect(
+    await screen.findByDisplayValue("Retry Guest (retry-guest)"),
+  ).toBeVisible();
+});
+it("drops stale search results and closes with Escape", async () => {
+  let resolveOld!: (value: unknown) => void;
+  mocks.search.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        resolveOld = resolve;
+      }),
+  );
+  mocks.search.mockResolvedValue({
+    ok: true,
+    items: [{ id: "other", displayName: "Other", slug: "other" }],
+  });
+  render(<Form />);
+  const input = screen.getByRole("combobox", { name: "Contributor 1" });
+  await userEvent.clear(input);
+  await userEvent.type(input, "Guest");
+  await vi.waitFor(() => expect(mocks.search).toHaveBeenCalledWith("Guest"));
+  await userEvent.clear(input);
+  await userEvent.type(input, "Other");
+  expect(
+    await screen.findByRole("option", { name: "Other (other)" }),
+  ).toBeVisible();
+  resolveOld({ ok: true, items: options });
+  await vi.waitFor(() =>
+    expect(
+      screen.queryByRole("option", { name: "Guest (guest)" }),
+    ).not.toBeInTheDocument(),
+  );
+  await userEvent.keyboard("{Escape}");
+  expect(input).toHaveAttribute("aria-expanded", "false");
+});
+it("keeps role edits when guest creation completes and allows adding without a catalog", async () => {
+  let complete!: (value: unknown) => void;
+  mocks.search.mockResolvedValue({ ok: true, items: [] });
+  mocks.create.mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        complete = resolve;
+      }),
+  );
+  render(<Form />);
+  const input = screen.getByRole("combobox", { name: "Contributor 1" });
+  await userEvent.clear(input);
+  await userEvent.type(input, "Slow Guest");
+  await userEvent.click(
+    await screen.findByRole("option", {
+      name: "Add 'Slow Guest' as a new contributor",
+    }),
+  );
+  await userEvent.selectOptions(screen.getByLabelText("Role 1"), "editor");
+  complete({
+    ok: true,
+    id: "slow",
+    displayName: "Slow Guest",
+    slug: "slow-guest",
+    created: true,
+    replayed: false,
+  });
+  await screen.findByDisplayValue("Slow Guest (slow-guest)");
+  expect(
+    JSON.parse(
+      screen.getByRole("status", { name: "Selected credits" }).textContent!,
+    )[0],
+  ).toMatchObject({ profileId: "slow", role: "editor", displayOrder: 7 });
+});
+it("creates a searchable blank credit when no profiles exist", async () => {
+  render(
+    <DraftContributorFields value={[]} options={[]} onChange={mocks.create} />,
+  );
+  await userEvent.click(
+    screen.getByRole("button", { name: "Add contributor" }),
+  );
+  expect(mocks.create).toHaveBeenCalledWith([
+    { profileId: "", role: "writer", displayOrder: 0 },
+  ]);
 });

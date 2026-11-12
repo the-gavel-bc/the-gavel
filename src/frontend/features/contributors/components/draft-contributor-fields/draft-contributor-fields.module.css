@@ -23,3 +23,28 @@
 .credit label {
   font-weight: bold;
 }
+.combobox {
+  min-width: 0;
+}
+.results {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--dash-line);
+  max-height: 18rem;
+  overflow-y: auto;
+}
+.results button {
+  width: 100%;
+  min-height: 2.75rem;
+  text-align: left;
+  padding: var(--space-3);
+  background: var(--color-paper);
+  color: var(--dash-ink);
+  border: 0;
+  font: inherit;
+}
+.results button[aria-selected="true"] {
+  outline: 2px solid var(--dash-accent);
+  outline-offset: -2px;
+}

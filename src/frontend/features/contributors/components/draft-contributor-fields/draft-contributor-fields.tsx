@@ -1,3 +1,5 @@
+import { useRef, useState } from "react";
+import { ContributorCombobox } from "./contributor-combobox";
 import type {
   DraftInput,
   DraftContributor,
@@ -10,12 +12,23 @@ export function DraftContributorFields({
   options,
   error,
   onChange,
+  onOption,
 }: {
   value: DraftInput["contributors"];
   options: DraftOptions["contributors"];
   error?: string;
   onChange: (value: DraftInput["contributors"]) => void;
+  onOption?: (contributor: DraftOptions["contributors"][number]) => void;
 }) {
+  const [added, setAdded] = useState<DraftOptions["contributors"]>([]);
+  const [keys, setKeys] = useState(() =>
+    value.map((_, index) => `initial-${index}`),
+  );
+  const nextKey = useRef(0);
+  const choices = [
+    ...options,
+    ...added.filter((p) => !options.some((option) => option.id === p.id)),
+  ];
   function update(index: number, patch: Partial<DraftContributor>) {
     onChange(
       value.map((credit, i) =>
@@ -38,26 +51,24 @@ export function DraftContributorFields({
       </p>
       {!options.length && <p>No active contributors are available.</p>}
       {value.map((credit, index) => (
-        <div key={index} className={styles.credit}>
-          <label htmlFor={`credit-${index}-profile`}>
-            Contributor {index + 1}
-          </label>
-          <select
-            id={`credit-${index}-profile`}
-            value={credit.profileId}
-            onChange={(e) => update(index, { profileId: e.target.value })}
-          >
-            {!options.some((p) => p.id === credit.profileId) && (
-              <option value={credit.profileId}>
-                Unavailable contributor: {credit.profileId}
-              </option>
-            )}
-            {options.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.displayName} ({p.slug})
-              </option>
-            ))}
-          </select>
+        <div key={keys[index] ?? `external-${index}`} className={styles.credit}>
+          <ContributorCombobox
+            index={index}
+            selected={
+              choices.find((p) => p.id === credit.profileId) ?? {
+                id: credit.profileId,
+                displayName: `Unavailable contributor: ${credit.profileId}`,
+                slug: "unavailable",
+              }
+            }
+            onSelect={(choice) => {
+              onOption?.(choice);
+              setAdded((rows) =>
+                rows.some((p) => p.id === choice.id) ? rows : [...rows, choice],
+              );
+              update(index, { profileId: choice.id });
+            }}
+          />
           <label htmlFor={`credit-${index}-role`}>Role {index + 1}</label>
           <select
             id={`credit-${index}-role`}
@@ -91,7 +102,10 @@ export function DraftContributorFields({
           />
           <Button
             type="button"
-            onClick={() => onChange(value.filter((_, i) => i !== index))}
+            onClick={() => {
+              setKeys((rows) => rows.filter((_, i) => i !== index));
+              onChange(value.filter((_, i) => i !== index));
+            }}
           >
             Remove contributor {index + 1}
           </Button>
@@ -99,13 +113,18 @@ export function DraftContributorFields({
       ))}
       <Button
         type="button"
-        disabled={!options.length || value.length >= 32}
-        onClick={() =>
+        disabled={value.length >= 32}
+        onClick={() => {
+          setKeys((rows) => [...rows, `added-${nextKey.current++}`]);
           onChange([
             ...value,
-            { profileId: options[0].id, role: "writer", displayOrder: 0 },
-          ])
-        }
+            {
+              profileId: options[0]?.id ?? "",
+              role: "writer",
+              displayOrder: 0,
+            },
+          ]);
+        }}
       >
         Add contributor
       </Button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/frontend/components/ui/button/button";
 import type { DraftArticle } from "@/frontend/features/articles/draft-save-state/draft-save-state";
 import type { DraftWriteResult } from "@/shared/articles/draft-contract/draft-contract";
@@ -20,10 +20,11 @@ type ImageCommand = {
   assetId: string | null;
   altText: string | null;
   credit: string | null;
+  caption: string | null;
 };
 type PendingWrite = {
   command: ImageCommand;
-  input: { altText: string; credit: string };
+  input: { altText: string; credit: string; caption: string };
   uncertain: boolean;
 };
 
@@ -34,6 +35,7 @@ export function ArticleMedia({
   onCommit,
   onDirtyChange,
   onBusyChange,
+  initialFile,
 }: {
   article: DraftArticle;
   initialImage: MainImage | null;
@@ -41,10 +43,12 @@ export function ArticleMedia({
   onCommit: (result: Confirmed) => void;
   onDirtyChange?: (dirty: boolean) => void;
   onBusyChange?: (busy: boolean) => void;
+  /** A file chosen before the draft existed; uploaded once on mount. */
+  initialFile?: File | null;
 }) {
   const [image, setImage] = useState(initialImage);
   const fileInput = useRef<HTMLInputElement>(null);
-  const [file, setFile] = useState<File | null>(null);
+  const [file, setFile] = useState<File | null>(initialFile ?? null);
   const [assetId, setAssetId] = useState<string | null>(null);
   const [cleanupAssetId, setCleanupAssetId] = useState<string | null>(null);
   const [conflict, setConflict] = useState(false);
@@ -52,14 +56,17 @@ export function ArticleMedia({
   const [pendingWrite, setPendingWrite] = useState<PendingWrite | null>(null);
   const [altText, setAltText] = useState(initialImage?.altText ?? "");
   const [credit, setCredit] = useState(initialImage?.credit ?? "");
+  const [caption, setCaption] = useState(initialImage?.caption ?? "");
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const locked = disabled || busy || conflict || Boolean(cleanupAssetId);
   const mutationLocked = locked || Boolean(pendingWrite);
   const metadataChanged = image
-    ? altText !== image.altText || credit !== image.credit
-    : Boolean(altText || credit);
+    ? altText !== image.altText ||
+      credit !== image.credit ||
+      caption !== (image.caption ?? "")
+    : Boolean(altText || credit || caption);
   const dirty = Boolean(
     file || assetId || cleanupAssetId || pendingWrite || metadataChanged,
   );
@@ -69,8 +76,27 @@ export function ArticleMedia({
     [busy, pendingWrite, onBusyChange],
   );
 
-  async function upload() {
-    if (!file || mutationLocked) return;
+  const preview = useMemo(
+    () => (file ? URL.createObjectURL(file) : null),
+    [file],
+  );
+  useEffect(
+    () => () => {
+      if (preview) URL.revokeObjectURL(preview);
+    },
+    [preview],
+  );
+  const started = useRef(false);
+  useEffect(() => {
+    if (!initialFile || started.current) return;
+    started.current = true;
+    void upload(initialFile);
+    // Runs once for the file handed over at creation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function upload(selected: File | null = file) {
+    if (!selected || mutationLocked) return;
     setBusy(true);
     setError("");
     setStatus("Uploading image…");
@@ -87,7 +113,7 @@ export function ArticleMedia({
         return;
       }
       const body = new FormData();
-      body.set("file", file);
+      body.set("file", selected);
       const response = await fetch(
         `/api/articles/${article.id}/media/${reservation.assetId}`,
         { method: "POST", body },
@@ -137,7 +163,9 @@ export function ArticleMedia({
     }
   }
 
-  function commit(next: Pick<ImageCommand, "assetId" | "altText" | "credit">) {
+  function commit(
+    next: Pick<ImageCommand, "assetId" | "altText" | "credit" | "caption">,
+  ) {
     if (mutationLocked) return;
     const write = {
       command: {
@@ -146,7 +174,7 @@ export function ArticleMedia({
         requestId: crypto.randomUUID(),
         ...next,
       },
-      input: { altText, credit },
+      input: { altText, credit, caption },
       uncertain: false,
     };
     setPendingWrite(write);
@@ -193,6 +221,7 @@ export function ArticleMedia({
               assetId: command.assetId,
               altText: command.altText,
               credit: command.credit,
+              caption: command.caption,
             }
           : null,
       );
@@ -201,6 +230,9 @@ export function ArticleMedia({
       );
       setCredit((current) =>
         current === input.credit ? (command.credit ?? "") : current,
+      );
+      setCaption((current) =>
+        current === input.caption ? (command.caption ?? "") : current,
       );
       setAssetId(null);
       setFile(null);
@@ -224,7 +256,17 @@ export function ArticleMedia({
       setError("Alt text and credit are required.");
       return;
     }
-    void commit({ assetId: targetAssetId, altText: alt, credit: by });
+    const description = caption.trim();
+    if (Array.from(description).length > 400) {
+      setError("Caption must be 400 characters or fewer.");
+      return;
+    }
+    void commit({
+      assetId: targetAssetId,
+      altText: alt,
+      credit: by,
+      caption: description || null,
+    });
   }
 
   async function discardUpload() {
@@ -247,6 +289,7 @@ export function ArticleMedia({
       if (!image) {
         setAltText("");
         setCredit("");
+        setCaption("");
       }
       setStatus("Unused upload removed.");
     } catch {
@@ -263,8 +306,8 @@ export function ArticleMedia({
     >
       <h2 id="article-main-image-heading">Main image</h2>
       <p>
-        JPEG, PNG or WebP, up to 10 MB. Add alt text and a credit before
-        attaching.
+        JPEG, PNG or WebP, up to 10 MB. The photo uploads as soon as you choose
+        it; add alt text and a photo credit, then attach it.
       </p>
       {disabled && <p>Save your draft changes before managing its image.</p>}
       {image && (
@@ -286,20 +329,29 @@ export function ArticleMedia({
             Boolean(cleanupAssetId)
           }
           onChange={(event) => {
-            setFile(event.target.files?.[0] ?? null);
+            const selected = event.target.files?.[0] ?? null;
+            setFile(selected);
             setAssetId(null);
             setUploadRequestId(null);
             setStatus("");
             setError("");
+            // Upload immediately; alt text and credit can be typed meanwhile.
+            if (selected) void upload(selected);
           }}
         />
-        <Button
-          type="button"
-          disabled={mutationLocked || !file || Boolean(assetId)}
-          onClick={() => void upload()}
-        >
-          {uploadRequestId ? "Retry upload" : "Upload image"}
-        </Button>
+        {file && !assetId && !busy && (
+          <Button
+            type="button"
+            disabled={mutationLocked}
+            onClick={() => void upload()}
+          >
+            {error ? "Retry upload" : "Upload image"}
+          </Button>
+        )}
+        {preview && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className={styles.preview} src={preview} alt="" />
+        )}
         <label htmlFor="article-image-alt">Alt text</label>
         <input
           id="article-image-alt"
@@ -316,6 +368,18 @@ export function ArticleMedia({
           disabled={locked}
           onChange={(event) => setCredit(event.target.value)}
         />
+        <label htmlFor="article-image-caption">Caption</label>
+        <textarea
+          id="article-image-caption"
+          value={caption}
+          maxLength={400}
+          disabled={locked}
+          aria-describedby="article-image-caption-hint"
+          onChange={(event) => setCaption(event.target.value)}
+        />
+        <p id="article-image-caption-hint">
+          Optional. Up to 400 characters, shown under the photo.
+        </p>
       </div>
       <div className={styles.actions}>
         <Button
@@ -366,7 +430,12 @@ export function ArticleMedia({
             type="button"
             disabled={mutationLocked}
             onClick={() =>
-              void commit({ assetId: null, altText: null, credit: null })
+              void commit({
+                assetId: null,
+                altText: null,
+                credit: null,
+                caption: null,
+              })
             }
           >
             Remove image

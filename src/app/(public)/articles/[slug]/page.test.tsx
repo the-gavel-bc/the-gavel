@@ -75,6 +75,7 @@ const article = {
     height: 600,
     alt: "Campus scene",
     credit: "Photographer",
+    caption: null,
   },
   bodyImages: [],
 };
@@ -240,4 +241,22 @@ it("canonical metadata uses the stored public slug and authorized media route", 
       },
     ],
   });
+});
+
+it("renders the optional main photo caption before its credit as safe text", async () => {
+  mocks.read.mockResolvedValue({
+    kind: "ok",
+    article: {
+      ...article,
+      mainImage: {
+        ...article.mainImage,
+        caption: "<script>Caption text</script>",
+      },
+    },
+  });
+  render(await Page({ params }));
+  expect(document.querySelector("figcaption")).toHaveTextContent(
+    "<script>Caption text</script> Photo: Photographer",
+  );
+  expect(document.querySelector("article script")).toBeNull();
 });

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import sharp from "sharp";
 import { draftListFixture } from "../support/draft-list-fixture/draft-list-fixture";
 import { setLocalSession } from "../support/local-supabase/local-supabase";
 
@@ -32,7 +33,7 @@ test("owner and administrator save published changes without changing publicatio
   await expect(
     page.getByRole("button", { name: "Save article" }),
   ).toBeVisible();
-  await expect(page.getByLabel("Image file", { exact: true })).toHaveCount(0);
+  await expect(page.getByLabel("Image file", { exact: true })).toBeVisible();
   await expect(page.getByLabel("Body image file")).toHaveCount(0);
   await page.getByLabel("Title (required)").fill("Owner published edit");
   await page
@@ -123,4 +124,75 @@ test("archived article remains read only", async ({ context, page }) => {
   await expect(page.getByRole("button", { name: "Save article" })).toHaveCount(
     0,
   );
+});
+
+test("published photo stays private until attached and replacement updates public rendering", async ({
+  context,
+  page,
+  browser,
+}) => {
+  await setLocalSession(context, fixture.users.author);
+  const articleId = fixture.id(20);
+  await page.goto(`/dashboard/articles/${articleId}`);
+  const publicContext = await browser.newContext({
+    baseURL: "http://127.0.0.1:3100",
+  });
+  try {
+    const reader = await publicContext.newPage();
+    const slug = fixture.article(20).article.slug;
+    for (const [color, alt, caption] of [
+      ["#bd222c", "Published baseline photo", "Baseline caption"],
+      ["#2244cc", "Published replacement photo", "Replacement caption"],
+    ]) {
+      const response = page.waitForResponse(
+        (result) =>
+          result.request().method() === "POST" &&
+          result.url().includes(`/api/articles/${articleId}/media/`),
+      );
+      await page.getByLabel("Image file", { exact: true }).setInputFiles({
+        name: "published-photo.png",
+        mimeType: "image/png",
+        buffer: await sharp({
+          create: { width: 12, height: 8, channels: 3, background: color },
+        })
+          .png()
+          .toBuffer(),
+      });
+      const assetId = (await response).url().split("/").at(-1);
+      await expect(
+        page.getByText("Image ready to attach.", { exact: true }),
+      ).toBeVisible();
+      expect(
+        (
+          await publicContext.request.get(
+            `/api/public/articles/${articleId}/media/${assetId}`,
+          )
+        ).status(),
+      ).toBe(404);
+      await page.getByLabel("Alt text", { exact: true }).fill(alt);
+      await page.getByLabel("Image credit", { exact: true }).fill("The Gavel");
+      await page.getByLabel("Caption", { exact: true }).fill(caption);
+      await page
+        .getByRole("button", { name: "Attach image", exact: true })
+        .click();
+      await expect(
+        page.getByText("Image attached.", { exact: true }),
+      ).toBeVisible();
+      await reader.goto(`/articles/${slug}`);
+      const image = reader.getByRole("img", { name: alt, exact: true });
+      await expect(image).toBeVisible();
+      await expect
+        .poll(() =>
+          image.evaluate(
+            (element) => (element as HTMLImageElement).naturalWidth,
+          ),
+        )
+        .toBeGreaterThan(0);
+      await expect(reader.locator("figcaption")).toHaveText(
+        `${caption} Photo: The Gavel`,
+      );
+    }
+  } finally {
+    await publicContext.close();
+  }
 });

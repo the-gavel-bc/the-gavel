@@ -1,48 +1,52 @@
 import styles from "./dashboard-shell.module.css";
 import { GuardedDashboardLink as Link } from "../guarded-dashboard-link/guarded-dashboard-link";
-import type { PropsWithChildren } from "react";
+import type { PropsWithChildren, ReactNode } from "react";
 import { SkipLink } from "@/frontend/components/site/skip-link/skip-link";
+import logo from "@/frontend/assets/brand/gavel-logo.png";
+import { DashboardNav } from "../dashboard-nav/dashboard-nav";
 
 export interface DashboardShellProps extends PropsWithChildren {
   displayName: string;
   isAdmin: boolean;
+  accountAction?: ReactNode;
 }
 
 export function DashboardShell({
   children,
   displayName,
   isAdmin,
+  accountAction,
 }: DashboardShellProps) {
   return (
-    <>
+    <div className={styles.surface}>
       <SkipLink />
       <header className={styles.header}>
-        <Link className={styles.identity} href="/">
-          The Gavel
-        </Link>
-        <p>Signed in as {displayName}</p>
+        <div className={styles.headerInner}>
+          <Link className={styles.identity} href="/">
+            {/* Plain img: next/image adds an inline style attribute the CSP blocks. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={logo.src}
+              width={logo.width}
+              height={logo.height}
+              alt="The Gavel"
+            />
+          </Link>
+          <div className={styles.account}>
+            <p>Signed in as {displayName}</p>
+            {accountAction}
+          </div>
+        </div>
       </header>
       <div className={styles.layout}>
-        <nav aria-label="Dashboard navigation">
-          <ul>
-            <li>
-              <Link href="/dashboard">My articles</Link>
-            </li>
-            <li>
-              <Link href="/dashboard/profile">Profile</Link>
-            </li>
-            {isAdmin ? (
-              <li>
-                <Link href="/dashboard/admin/articles">Administration</Link>
-              </li>
-            ) : null}
-          </ul>
-        </nav>
-        <main id="main-content">{children}</main>
+        <DashboardNav isAdmin={isAdmin} />
+        <main id="main-content" className={styles.main}>
+          {children}
+        </main>
       </div>
       <footer className={styles.footer}>
         <Link href="/">Return to the public site</Link>
       </footer>
-    </>
+    </div>
   );
 }
