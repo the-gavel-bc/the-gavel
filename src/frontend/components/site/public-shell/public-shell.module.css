@@ -1,4 +1,5 @@
 .main {
   composes: container from "../../../styles/shell/shell.module.css";
   min-height: 65vh;
+  max-width: 80rem;
 }

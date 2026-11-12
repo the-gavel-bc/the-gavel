@@ -1,6 +1,29 @@
 import Link from "next/link";
+import { CalendarIcon } from "@/frontend/components/site/site-icons/site-icons";
 import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
 import styles from "./story-meta.module.css";
+const formatDate = (iso: string) =>
+  new Intl.DateTimeFormat("en-US", {
+    dateStyle: "long",
+    timeZone: "UTC",
+  }).format(new Date(iso));
+
+// Date with a calendar glyph, as on the live homepage.
+export function StoryDate({
+  publishedAt,
+  className,
+}: {
+  publishedAt: string;
+  className?: string;
+}) {
+  return (
+    <p className={`${styles.date} ${className ?? ""}`}>
+      <CalendarIcon />
+      <time dateTime={publishedAt}>{formatDate(publishedAt)}</time>
+    </p>
+  );
+}
+
 export function StoryMeta({
   article,
 }: {

@@ -81,10 +81,9 @@ export function ReaderNavigation({ sections }: { sections: PublicSection[] }) {
                     {section.categories.length > 0 && (
                       <details className={styles.categories}>
                         <summary>
-                          Categories
+                          <span aria-hidden="true" className={styles.caret} />
                           <span className={styles.srOnly}>
-                            {" "}
-                            for {section.name}
+                            Categories for {section.name}
                           </span>
                         </summary>
                         <ul>
