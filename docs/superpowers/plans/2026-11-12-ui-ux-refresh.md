@@ -63,3 +63,9 @@ Slice 2:
   - "Manage" keeps its `Manage article: <title>` label.
   - "Status", "Search article titles", "Apply filters" and "View archives" are kept.
   - The save live region only moved within the form.
+
+## PR 89 attachment CI investigation
+
+The repeated hosted failure waits for `Image attached.` in the desktop body-image cleanup case. Its logs omit the resulting application alert. The exact PR branch (`ad07e07`) was built against a clean disposable gavel-p5 schema; all four desktop body-image cases passed in sequence. The same attachment case also passed in a copied parallel suite explicitly retargeted to gavel-p5. These local passes do not establish a hosted fix.
+
+The failing assertion now includes safe alert/status text on failure so the next hosted run identifies an RPC denial, conflict, or pending operation without logging credentials or draft payloads. Targeted ESLint/Prettier passed. No authorization, timeout, assertion condition, or product behavior changed. The primary local project was not used.
