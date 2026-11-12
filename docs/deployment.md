@@ -99,9 +99,9 @@ Apply Task 16 migrations before `20261110020000` and `20261110020100`, then depl
 
 The local HTTP checker is `SEARCH_CHECK_WORKDIR=/private/tmp/gavel-task17-api pnpm test:public-search`; it intentionally refuses other projects and resets/restores only its disposable counter. Follow the [Task 17 plan](superpowers/plans/2026-11-10-bounded-public-search.md) for evidence and [ADR 0011](decisions/0011-database-public-search-admission.md) for tradeoffs. This local proof does not certify hosted configuration. Roll back consumers first and revoke `public.search_public_articles(text,integer,jsonb)` through a forward migration; retain derived state until reviewed cleanup. Never weaken existing source grants or RLS.
 
-## Resource 404 initial-HTML release blocker
+## Accepted resource 404 initial-HTML limitation
 
-Do not approve public release while matched missing/private/archived/deleted resource URLs render blank initial HTML without JavaScript. Task 18 reproduced this on Next 16.4.2, matching [upstream issue #100596](https://github.com/vercel/next.js/issues/100596). HTTP 404 status, hydrated recovery and unmatched-URL initial recovery remain intact. The owner approved keeping the framework unchanged and recording this gap; no framework fork or routing precheck is introduced. The explicit expected-failure browser assertion must become a passing assertion before release; an unexpected pass forces its marker to be revisited. See the [Task 18 evidence](superpowers/plans/2026-11-10-search-page-and-recovery.md#framework-recovery-investigation).
+The owner approved deferring the matched-resource no-JavaScript recovery defect after testing stable Next 16.4.6. This specific gap no longer blocks release. Its scope, retained expected-failure regression, revisit triggers and removal criteria are authoritative in the [accepted deferral](superpowers/plans/2026-11-11-resource-404-framework-fix.md#accepted-deferral--owner-decision-2026-11-11). The framework defect is unresolved; all other launch gates remain required.
 
 ## Remaining review optimization rollout
 
