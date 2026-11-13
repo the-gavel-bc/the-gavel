@@ -33,13 +33,18 @@ it("picks a skeleton only for internal navigations to another page", () => {
   expect(skeletonFor(at("/sign-in"), here)).toBeNull();
 });
 
-it("shows a skeleton on link click and clears it when the route renders", () => {
+it("shows a skeleton on a slow navigation and clears it when the route renders", () => {
+  vi.useFakeTimers();
   const view = render(
     <RouteTransition>
       <a href="/articles/a-story">A story</a>
     </RouteTransition>,
   );
   fireEvent.click(screen.getByRole("link", { name: "A story" }));
+  // A fast navigation never flashes the skeleton.
+  act(() => vi.advanceTimersByTime(100));
+  expect(screen.queryByRole("status")).toBeNull();
+  act(() => vi.advanceTimersByTime(50));
   expect(screen.getByRole("status")).toHaveTextContent("Loading");
   expect(screen.queryByRole("link", { name: "A story" })).toBeNull();
 
@@ -65,6 +70,7 @@ it("ignores new-tab clicks and gives up on a stalled navigation", () => {
   expect(screen.queryByRole("status")).toBeNull();
 
   fireEvent.click(link);
+  act(() => vi.advanceTimersByTime(150));
   expect(screen.getByRole("status")).toBeInTheDocument();
   act(() => vi.advanceTimersByTime(8000));
   expect(screen.queryByRole("status")).toBeNull();

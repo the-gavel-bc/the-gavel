@@ -78,3 +78,36 @@ Run once after slice 5, on the top of the stack, against the disposable `gavel-p
   - No horizontal scroll.
 - **Screenshot timing:** the browser pane was hidden during part of the run, which throttles animations. Mobile behavior was therefore confirmed through DOM state rather than screenshots.
 - **Not run locally:** the browser suite, whose fixtures target the primary local project; CI runs it. Accessible names the specs use are unchanged ("Menu", "Search", "Search stories", "Primary navigation", the banner landmark and `header details`).
+
+## Follow-ups (2026-11-13)
+
+Owner requests after the first review, in one PR on top of the stack:
+
+- **Search expands to the right:**
+  - On desktop the field grows rightward from the icon. When the band is short of room, the navigation row glides left just enough, never past its first item, so the field keeps its full 272px.
+  - Mobile still opens leftward from the icon at the bar's edge.
+- **Live suggestions:**
+  - Typing two or more characters shows up to 6 matching stories in a panel under the field, with a status count and a "See all results" link. Arrow keys move between results, and Escape closes the panel.
+  - **Decision:** suggestions reuse the bounded public search budget instead of adding an unbounded endpoint. A 300ms debounce, aborted stale requests and a 30-second cache on identical queries keep the cost near one search per typed query.
+  - If the budget is exhausted, the panel says suggestions are unavailable and Enter still searches.
+- **Hover dropdowns:** on desktop, mouse hover opens a section's categories and leaving closes them. Click, touch and keyboard still toggle.
+- **Staff desk icon:**
+  - Signed-in active members see an initials avatar and "Desk" at the end of the band, linking to `/dashboard`; on mobile it shows the avatar only.
+  - It is loaded from `GET /api/session/desk` so that public Server Components never touch the session.
+- **Navigation flash:** the route fade-in is removed, and the navigation skeleton now appears only when a navigation takes longer than 150ms. A browser trace across home → section → home → article saw no header remount and no skeleton on fast navigations.
+
+Verification:
+
+- **Unit:** 92 tests under the API routes, site components and reader features passed, including:
+  - The desk route: no cookie, pending, error and active cases.
+  - The suggestions route: field allowlist and status mapping.
+  - Typing suggestions: debounce, links, arrow keys and Escape.
+  - Hover dropdowns, and the delayed skeleton.
+- **Static checks:** typecheck, lint, format and the production build passed.
+- **Playwright against the production build on `gavel-p5`:**
+  - Hover opens and closes a dropdown.
+  - At 1440px the field spans 1152–1424px at its full 272px, and Home stays visible.
+  - "eagles" listed 5 stories, and clicking one opened the article.
+  - At 375px the field and panel stay inside the viewport, with no horizontal scroll.
+  - The signed-in synthetic administrator saw "Your desk", which led to `/dashboard`; anonymous visitors got `{desk: null}`.
+  - No console errors.

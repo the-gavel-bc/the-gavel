@@ -4,6 +4,8 @@ import { useEffect, useState, type ReactNode } from "react";
 import styles from "./route-transition.module.css";
 
 type Kind = "article" | "list";
+// Fast (prefetched) navigations finish before this, so no skeleton flashes.
+const SHOW_AFTER_MS = 150;
 // Clears a skeleton that outlives a stalled or cancelled navigation.
 const STALE_AFTER_MS = 8000;
 
@@ -19,8 +21,8 @@ export function skeletonFor(url: URL, current: URL): Kind | null {
 
 // Reader routes resolve eligibility before streaming, so they have no route
 // loading boundary (that would turn later 404s into 200s). This shows a
-// page-shaped skeleton on the client the moment a reader follows a link,
-// until the next route renders. Status codes are unaffected.
+// page-shaped skeleton on the client when a followed link takes longer than
+// SHOW_AFTER_MS, until the next route renders. Status codes are unaffected.
 export function RouteTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? "";
   const search = useSearchParams()?.toString() ?? "";
@@ -28,7 +30,9 @@ export function RouteTransition({ children }: { children: ReactNode }) {
   const [pending, setPending] = useState<{ from: string; kind: Kind } | null>(
     null,
   );
-  const showing = pending?.from === route ? pending.kind : null;
+  const [slow, setSlow] = useState<{ from: string } | null>(null);
+  const waiting = pending?.from === route ? pending : null;
+  const showing = waiting && slow === waiting ? waiting.kind : null;
 
   useEffect(() => {
     const start = (target: string) => {
@@ -74,18 +78,19 @@ export function RouteTransition({ children }: { children: ReactNode }) {
   }, [route]);
 
   useEffect(() => {
-    if (!showing) return;
-    const timer = setTimeout(() => setPending(null), STALE_AFTER_MS);
-    return () => clearTimeout(timer);
-  }, [showing]);
+    if (!waiting) return;
+    const show = setTimeout(() => setSlow(waiting), SHOW_AFTER_MS);
+    const stale = setTimeout(() => setPending(null), STALE_AFTER_MS);
+    return () => {
+      clearTimeout(show);
+      clearTimeout(stale);
+    };
+  }, [waiting]);
 
   return (
     <>
       {showing && <PageSkeleton kind={showing} />}
-      {/* Keyed by route so each new page replays the entrance fade. */}
-      <div key={route} className={styles.page} hidden={!!showing}>
-        {children}
-      </div>
+      <div hidden={!!showing}>{children}</div>
     </>
   );
 }

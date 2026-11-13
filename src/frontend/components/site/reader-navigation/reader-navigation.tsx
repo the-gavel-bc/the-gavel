@@ -3,9 +3,10 @@ import {
   isLettersSection,
   sectionHref,
 } from "@/shared/reader/section-link/section-link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type PointerEvent } from "react";
 import { SearchForm } from "@/frontend/features/reader/components/search-form/search-form";
 import { usePathname } from "next/navigation";
+import { DeskLink } from "../desk-link/desk-link";
 import Link from "next/link";
 import type { PublicSection } from "@/shared/reader/site-navigation/site-navigation";
 import styles from "./reader-navigation.module.css";
@@ -27,6 +28,16 @@ export function ReaderNavigation({ sections }: { sections: PublicSection[] }) {
     wide.addEventListener("change", synchronize);
     return () => wide.removeEventListener("change", synchronize);
   }, []);
+  // Desktop mouse users get dropdowns on hover; click and keyboard still toggle.
+  const hover = (event: PointerEvent<HTMLLIElement>, open: boolean) => {
+    if (
+      event.pointerType !== "mouse" ||
+      !window.matchMedia?.("(min-width: 45rem)").matches
+    )
+      return;
+    const detail = event.currentTarget.querySelector("details");
+    if (detail) detail.open = open;
+  };
   const current = (href: string) =>
     pathname === href ? ("page" as const) : undefined;
   return (
@@ -96,7 +107,12 @@ export function ReaderNavigation({ sections }: { sections: PublicSection[] }) {
                     : []),
                 ];
                 return (
-                  <li key={section.slug} className={styles.section}>
+                  <li
+                    key={section.slug}
+                    className={styles.section}
+                    onPointerEnter={(event) => hover(event, true)}
+                    onPointerLeave={(event) => hover(event, false)}
+                  >
                     <Link
                       href={href}
                       aria-current={current(href)}
@@ -141,6 +157,7 @@ export function ReaderNavigation({ sections }: { sections: PublicSection[] }) {
           </nav>
         </details>
         <SearchForm id="reader-search" navigation />
+        <DeskLink />
       </div>
     </div>
   );

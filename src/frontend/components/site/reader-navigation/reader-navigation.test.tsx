@@ -86,3 +86,24 @@ it("matches the live menu: category dropdowns and How to Submit under letters", 
     within(nav).getByRole("link", { name: "How to Submit" }),
   ).toHaveAttribute("href", "/letters/how-to-submit");
 });
+it("opens a category dropdown on mouse hover and closes it on leave", () => {
+  render(
+    <ReaderNavigation
+      sections={[
+        {
+          name: "News",
+          slug: "news",
+          categories: [{ name: "Campus", slug: "campus" }],
+        },
+      ]}
+    />,
+  );
+  const item = screen.getByRole("link", { name: "News" }).closest("li")!;
+  const dropdown = item.querySelector("details")!;
+  fireEvent.pointerEnter(item, { pointerType: "touch" });
+  expect(dropdown.open).toBe(false);
+  fireEvent.pointerEnter(item, { pointerType: "mouse" });
+  expect(dropdown.open).toBe(true);
+  fireEvent.pointerLeave(item, { pointerType: "mouse" });
+  expect(dropdown.open).toBe(false);
+});
