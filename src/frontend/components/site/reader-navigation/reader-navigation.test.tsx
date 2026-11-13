@@ -104,6 +104,42 @@ it("opens a category dropdown on mouse hover and closes it on leave", () => {
   expect(dropdown.open).toBe(false);
   fireEvent.pointerEnter(item, { pointerType: "mouse" });
   expect(dropdown.open).toBe(true);
+  // Clicking the caret of a hover-opened dropdown keeps it open.
+  fireEvent.click(dropdown.querySelector("summary")!);
+  expect(dropdown.open).toBe(true);
   fireEvent.pointerLeave(item, { pointerType: "mouse" });
   expect(dropdown.open).toBe(false);
+});
+it("keeps one category dropdown open and closes it on an outside tap", () => {
+  render(
+    <ReaderNavigation
+      sections={[
+        {
+          name: "News",
+          slug: "news",
+          categories: [{ name: "Campus", slug: "campus" }],
+        },
+        {
+          name: "Sports",
+          slug: "sports",
+          categories: [{ name: "Hockey", slug: "hockey" }],
+        },
+      ]}
+    />,
+  );
+  const dropdown = (name: string) =>
+    screen.getByRole("link", { name }).closest("li")!.querySelector("details")!;
+  const news = dropdown("News");
+  const sports = dropdown("Sports");
+  news.open = true;
+  fireEvent(news, new Event("toggle"));
+  sports.open = true;
+  fireEvent(sports, new Event("toggle"));
+  expect(news.open).toBe(false);
+  expect(sports.open).toBe(true);
+  // Taps inside the open dropdown keep it open; taps elsewhere close it.
+  fireEvent.pointerDown(sports.querySelector("ul")!);
+  expect(sports.open).toBe(true);
+  fireEvent.pointerDown(document.body);
+  expect(sports.open).toBe(false);
 });

@@ -26,8 +26,36 @@ export function ReaderNavigation({ sections }: { sections: PublicSection[] }) {
     };
     synchronize();
     wide.addEventListener("change", synchronize);
-    return () => wide.removeEventListener("change", synchronize);
+    // A tap or click anywhere else closes an open category dropdown (touch
+    // screens have no hover-out to close it).
+    const outside = (event: Event) => {
+      const target = event.target as Node;
+      menu.current
+        ?.querySelectorAll<HTMLDetailsElement>("details[open]")
+        .forEach((detail) => {
+          if (!detail.contains(target)) detail.open = false;
+        });
+    };
+    document.addEventListener("pointerdown", outside);
+    return () => {
+      wide.removeEventListener("change", synchronize);
+      document.removeEventListener("pointerdown", outside);
+    };
   }, []);
+  // One dropdown at a time; on wrapped (tablet) rows, a dropdown that would
+  // run off the right edge opens aligned to its section's right edge.
+  const toggled = (detail: HTMLDetailsElement) => {
+    if (!detail.open) return;
+    menu.current
+      ?.querySelectorAll<HTMLDetailsElement>("li details[open]")
+      .forEach((other) => {
+        if (other !== detail) other.open = false;
+      });
+    detail.removeAttribute("data-align");
+    const list = detail.querySelector("ul");
+    if (list && list.getBoundingClientRect().right > window.innerWidth - 8)
+      detail.setAttribute("data-align", "end");
+  };
   // Desktop mouse users get dropdowns on hover; click and keyboard still toggle.
   const hover = (event: PointerEvent<HTMLLIElement>, open: boolean) => {
     if (
@@ -36,7 +64,11 @@ export function ReaderNavigation({ sections }: { sections: PublicSection[] }) {
     )
       return;
     const detail = event.currentTarget.querySelector("details");
-    if (detail) detail.open = open;
+    if (!detail) return;
+    detail.open = open;
+    // Remember that hover opened it, so a click on the caret keeps it open
+    // instead of toggling it shut under the pointer.
+    detail.toggleAttribute("data-hover-open", open);
   };
   const current = (href: string) =>
     pathname === href ? ("page" as const) : undefined;
@@ -125,8 +157,19 @@ export function ReaderNavigation({ sections }: { sections: PublicSection[] }) {
                       {section.name}
                     </Link>
                     {items.length > 0 && (
-                      <details className={styles.categories}>
-                        <summary>
+                      <details
+                        className={styles.categories}
+                        onToggle={(event) => toggled(event.currentTarget)}
+                      >
+                        <summary
+                          onClick={(event) => {
+                            const detail = event.currentTarget
+                              .parentElement as HTMLDetailsElement;
+                            if (!detail.hasAttribute("data-hover-open")) return;
+                            detail.removeAttribute("data-hover-open");
+                            event.preventDefault();
+                          }}
+                        >
                           <span aria-hidden="true" className={styles.caret} />
                           <span className={styles.srOnly}>
                             {isLettersSection(section) &&

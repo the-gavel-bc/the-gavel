@@ -212,6 +212,10 @@
     left: 0;
     z-index: 10;
   }
+  .categories[data-align="end"] ul {
+    right: 0;
+    left: auto;
+  }
 }
 /* Mobile: a compact bar with the menu button left and search right; the
    menu slides down as a full-width panel. */
@@ -249,14 +253,49 @@
     padding-inline: 0.5rem;
     font-size: 0.875rem;
   }
+  /* Section link fills the row; the caret sits at its right edge; the open
+     category list drops below as an indented list inside the menu panel. */
+  .section {
+    position: relative;
+  }
+  .section > a {
+    flex: 1;
+    padding-right: 3.25rem;
+  }
   .categories {
-    flex-basis: auto;
+    flex-basis: 100%;
+  }
+  .categories summary {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 2.75rem;
   }
   .categories ul {
-    margin-block-end: 0.75rem;
+    min-width: 0;
+    margin: 0 0 0.75rem;
+    padding: 0.25rem 0;
+    border-top: 0;
+    border-left: 2px solid rgb(255 255 255 / 45%);
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
   }
   .categories ul a {
+    min-height: 2.75rem;
+    padding-inline: 1rem;
+    color: #fff;
+    font-size: 0.9375rem;
+    font-weight: 600;
     white-space: normal;
+  }
+  .categories ul a:hover,
+  .categories ul a[aria-current] {
+    color: #fff;
+    text-decoration: underline;
+  }
+  .bar .categories ul a:focus-visible {
+    outline-color: #fff;
   }
 }
 @media (prefers-reduced-motion: reduce) {

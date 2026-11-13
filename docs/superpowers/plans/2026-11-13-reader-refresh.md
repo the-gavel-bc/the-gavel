@@ -191,3 +191,33 @@ Verification:
   - Against a production build of the previous implementation, both cases fail on desktop.
   - Against the fix, all 4 runs (desktop and mobile) passed, 3 times in a row.
 - **Sweep:** a scratch sweep over the seeded `gavel-p5` content saw no skeleton after any of 15 navigations: sections, category chips, articles, author pages, related stories, back/forward, letters, home and search.
+
+## Mobile and tablet dropdown fix (2026-11-13)
+
+Reproduced in Playwright at 390px (iPhone 13) and 810px (iPad) before fixing:
+
+- **Phone:** opening a category list reflowed the row. The section name moved to mid-row, the caret floated above it, and a desktop-style white panel squeezed in beside it.
+- **Tablet:** the wrapped two-row band let a dropdown run past the right edge of the screen.
+- **Touch:** an open dropdown never closed, because there is no hover-out.
+- **Desktop mouse:** hover opened a dropdown, and a click on its caret then toggled it shut.
+
+Fixes:
+
+- **Phone:** the section link fills its row with the caret pinned at the right edge. The open list drops below it as an indented white list inside the menu panel.
+- **Tablet:** a dropdown that would overflow the viewport opens aligned to its section's right edge.
+- **All widths:**
+  - Only one dropdown can be open at a time.
+  - A tap or click outside closes it.
+  - Clicking the caret of a hover-opened dropdown keeps it open.
+
+Verification:
+
+- **Unit:** navigation tests now cover single-open, outside close and caret-after-hover, 17 site-component tests in all.
+- **Browser:** the new fixture-free `e2e/reader-shell/navigation-dropdowns.spec.ts` runs at phone, tablet and desktop widths under both the desktop and mobile Playwright projects. It checks that:
+  - opening a dropdown doesn't move the section link;
+  - the list stays inside the viewport and the caret stays on the link's row;
+  - there is no horizontal scroll;
+  - an outside tap closes it;
+  - choosing a category navigates.
+- **Results:** together with the skeleton spec, all 10 cases passed three runs in a row on the production build against `gavel-p5`.
+- **Flake fixed:** the first version of the layout assertion flaked on subpixel heights (44.00001 against 44). It now compares whole pixels.
