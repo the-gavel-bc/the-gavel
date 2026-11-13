@@ -3,9 +3,9 @@ import { useEffect, useState, type ReactNode } from "react";
 import { PageSkeleton, type SkeletonKind } from "./page-skeletons";
 
 type Kind = SkeletonKind;
-// Typical navigations finish before this, so the skeleton only appears when
-// data is genuinely slow to load.
-const SHOW_AFTER_MS = 600;
+// Typical navigations take well under a second (70–190ms measured on a
+// production build), so the skeleton is reserved for genuinely slow loads.
+const SHOW_AFTER_MS = 1500;
 // Clears a skeleton that outlives a stalled or cancelled navigation.
 const STALE_AFTER_MS = 8000;
 

@@ -1,5 +1,12 @@
+/* Fades in rather than popping over the page. */
 .skeleton {
   padding-block: 2rem 4rem;
+  animation: appear var(--reader-medium, 260ms) var(--reader-ease, ease) both;
+}
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
 }
 .bone {
   display: block;
@@ -197,6 +204,7 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  .skeleton,
   .bone {
     animation: none;
   }

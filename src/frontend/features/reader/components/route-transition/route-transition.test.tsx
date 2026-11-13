@@ -42,7 +42,7 @@ it("shows a skeleton on a slow navigation and clears it when the route renders",
   );
   fireEvent.click(screen.getByRole("link", { name: "A story" }));
   // A typical navigation never shows the skeleton.
-  act(() => vi.advanceTimersByTime(500));
+  act(() => vi.advanceTimersByTime(1400));
   expect(screen.queryByRole("status")).toBeNull();
   act(() => vi.advanceTimersByTime(100));
   expect(screen.getByRole("status")).toHaveTextContent("Loading");
@@ -74,7 +74,7 @@ it("ignores new-tab clicks and gives up on a stalled navigation", () => {
   expect(screen.queryByRole("status")).toBeNull();
 
   fireEvent.click(link);
-  act(() => vi.advanceTimersByTime(600));
+  act(() => vi.advanceTimersByTime(1500));
   expect(screen.getByRole("status")).toBeInTheDocument();
   act(() => vi.advanceTimersByTime(8000));
   expect(screen.queryByRole("status")).toBeNull();

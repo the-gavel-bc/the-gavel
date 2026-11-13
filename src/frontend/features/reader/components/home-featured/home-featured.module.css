@@ -25,30 +25,25 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
   gap: 1.5rem;
 }
-/* Full-size cards: image on top, then byline, date and title on white. */
+/* Full-size stories that sit directly on the band: rounded image, then
+   byline, date and title in white. No card box, so they blend in. */
 .story {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-  border-radius: var(--reader-radius);
-  color: var(--reader-ink);
-  background: #fff;
+  display: grid;
+  gap: 0.875rem;
+  align-content: start;
+  color: #fff;
   text-decoration: none;
-  box-shadow: 0 0.5rem 1.5rem rgb(20 22 28 / 18%);
-  transition:
-    transform var(--reader-fast) var(--reader-ease),
-    box-shadow var(--reader-fast) var(--reader-ease);
 }
-.story:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--reader-shadow);
-}
-.story:hover h3 {
-  color: var(--reader-blue);
+.thumb {
+  border-radius: var(--reader-radius);
+  box-shadow: 0 0.5rem 1.25rem rgb(14 32 84 / 25%);
 }
 .story:hover .thumb img {
   transform: scale(1.05);
+}
+/* A paler tint of the band blue: still readable as large text on the band. */
+.story:hover h3 {
+  color: #dfe8ff;
 }
 .story:focus-visible {
   outline: 3px solid #fff;
@@ -58,7 +53,9 @@
   display: grid;
   gap: 0.5rem;
   min-width: 0;
-  padding: 1rem 1.125rem 1.25rem;
+}
+.text p {
+  color: rgb(255 255 255 / 85%);
 }
 .text h3 {
   margin: 0;
@@ -67,9 +64,7 @@
   transition: color var(--reader-fast) var(--reader-ease);
 }
 @media (prefers-reduced-motion: reduce) {
-  .story,
-  .story:hover {
-    transform: none;
+  .text h3 {
     transition: none;
   }
 }

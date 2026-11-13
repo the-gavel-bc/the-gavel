@@ -160,3 +160,9 @@ Verification:
   - Featured cards measure 290×333px.
   - No console errors.
   - The search form itself submits as a full page load, which the harness cannot delay; its skeleton was verified through the client-side See all results link.
+
+## Fourth follow-ups (2026-11-13)
+
+- **Skeleton threshold:** raised from 600ms to 1.5 seconds, and the skeleton now fades in. Measured client navigations on the production build took 68–190ms, so it now appears only on genuinely slow loads. No skeleton appeared across five consecutive navigations.
+- **Featured News:** items drop the white card box and sit directly on the band: a rounded image with a soft shadow, a white byline and date, then the title. Hover zooms the image and tints the title pale blue.
+- **Verification:** reader unit tests (50), typecheck, lint, format and the build passed. The Featured band was checked by screenshot at 1440px.
