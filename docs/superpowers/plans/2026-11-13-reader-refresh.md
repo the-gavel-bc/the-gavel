@@ -166,3 +166,28 @@ Verification:
 - **Skeleton threshold:** raised from 600ms to 1.5 seconds, and the skeleton now fades in. Measured client navigations on the production build took 68–190ms, so it now appears only on genuinely slow loads. No skeleton appeared across five consecutive navigations.
 - **Featured News:** items drop the white card box and sit directly on the band: a rounded image with a soft shadow, a white byline and date, then the title. Hover zooms the image and tints the title pale blue.
 - **Verification:** reader unit tests (50), typecheck, lint, format and the build passed. The Featured band was checked by screenshot at 1440px.
+
+## Skeleton arrival fix (2026-11-13)
+
+**Bug:**
+
+- The skeleton treated a change in the layout's `children` as "the new page arrived". In the App Router a layout's `children` is a stable router placeholder, so arrival was never detected.
+- Every navigation within one layout group left a pending state behind. 1.5 seconds later, the skeleton covered the already-loaded page.
+- Unit tests missed it because they swapped `children` by hand. The earlier browser checks missed it because Home ↔ About crosses the home and reader layout groups, which remounts the shell.
+
+**Fix:** a navigation is now pending until the URL path or query changes. The router updates the URL in the same commit that renders the destination, and the check polls every 50ms while a navigation is pending. A page restored from the back/forward cache also clears any pending state.
+
+**Tests:**
+
+- **Unit:** 9 tests in `route-transition.test.tsx` use one stable `children` element, as Next does, and sample every 100ms so a late skeleton fails. They cover:
+  - quick navigations, query-only changes and back/forward;
+  - modified and new-tab clicks;
+  - the 1.5-second threshold with the destination-shaped skeleton and its clearing;
+  - stalls, the back/forward cache and GET form submissions.
+
+  Against the previous implementation, 5 of the 9 fail.
+
+- **Browser:** `e2e/reader-shell/route-skeleton.spec.ts` needs no fixtures. It watches for a skeleton for 2.5 seconds after each quick navigation within the reader layout (About → search → About) and across layouts (→ Home). It also delays one navigation by 3 seconds and expects the page-shaped skeleton, then the page, then no late skeleton.
+  - Against a production build of the previous implementation, both cases fail on desktop.
+  - Against the fix, all 4 runs (desktop and mobile) passed, 3 times in a row.
+- **Sweep:** a scratch sweep over the seeded `gavel-p5` content saw no skeleton after any of 15 navigations: sections, category chips, articles, author pages, related stories, back/forward, letters, home and search.

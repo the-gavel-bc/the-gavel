@@ -26,21 +26,23 @@ export function skeletonFor(url: URL, current: URL): Kind | null {
   return "archive";
 }
 
+// Path and query of the page on screen. The App Router updates the URL in the
+// same commit that renders the destination, so a changed URL means the new
+// page is visible. (A layout's `children` is a stable router placeholder, so
+// it cannot signal arrival; that bug showed skeletons over loaded pages.)
+const here = () => location.pathname + location.search;
+const SETTLE_POLL_MS = 50;
+
 // Reader routes resolve eligibility before streaming, so they have no route
 // loading boundary (that would turn later 404s into 200s). This shows a
 // page-shaped skeleton on the client when a followed link takes longer than
 // SHOW_AFTER_MS, until the next route renders. Status codes are unaffected.
 export function RouteTransition({ children }: { children: ReactNode }) {
-  // A navigation is pending until the router delivers new page content
-  // (children), including query-only changes such as pagination. This avoids
-  // useSearchParams, whose server-side bail-out duplicated every page's HTML.
-  const [pending, setPending] = useState<{
-    from: ReactNode;
-    kind: Kind;
-  } | null>(null);
-  const [slow, setSlow] = useState<object | null>(null);
-  const waiting = pending?.from === children ? pending : null;
-  const showing = waiting && slow === waiting ? waiting.kind : null;
+  const [pending, setPending] = useState<{ from: string; kind: Kind } | null>(
+    null,
+  );
+  const [shown, setShown] = useState<object | null>(null);
+  const showing = pending && shown === pending ? pending.kind : null;
 
   useEffect(() => {
     const start = (target: string) => {
@@ -48,7 +50,7 @@ export function RouteTransition({ children }: { children: ReactNode }) {
         new URL(target, location.href),
         new URL(location.href),
       );
-      if (kind) setPending({ from: children, kind });
+      if (kind) setPending({ from: here(), kind });
     };
     const onClick = (event: MouseEvent) => {
       if (
@@ -77,23 +79,39 @@ export function RouteTransition({ children }: { children: ReactNode }) {
           )}`,
         );
     };
+    // A page restored from the back/forward cache must not resume a skeleton
+    // from the full-page navigation that left it.
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) setPending(null);
+    };
     document.addEventListener("click", onClick);
     document.addEventListener("submit", onSubmit);
+    window.addEventListener("pageshow", onPageShow);
     return () => {
       document.removeEventListener("click", onClick);
       document.removeEventListener("submit", onSubmit);
+      window.removeEventListener("pageshow", onPageShow);
     };
-  }, [children]);
+  }, []);
 
   useEffect(() => {
-    if (!waiting) return;
-    const show = setTimeout(() => setSlow(waiting), SHOW_AFTER_MS);
+    if (!pending) return;
+    const settle = () => {
+      if (here() !== pending.from) setPending(null);
+    };
+    // ponytail: polls the URL every 50ms while a navigation is pending; the
+    // Navigation API's currententrychange can replace it once widely shipped.
+    const poll = setInterval(settle, SETTLE_POLL_MS);
+    const show = setTimeout(() => {
+      if (here() === pending.from) setShown(pending);
+    }, SHOW_AFTER_MS);
     const stale = setTimeout(() => setPending(null), STALE_AFTER_MS);
     return () => {
+      clearInterval(poll);
       clearTimeout(show);
       clearTimeout(stale);
     };
-  }, [waiting]);
+  }, [pending]);
 
   return (
     <>
