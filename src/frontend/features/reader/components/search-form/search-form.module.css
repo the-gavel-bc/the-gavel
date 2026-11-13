@@ -19,21 +19,32 @@
   min-height: 2.75rem;
   padding: 0.5rem;
   border: 1px solid var(--reader-muted, #5d6470);
-  border-radius: 0.25rem;
+  border-radius: 999px;
+  padding-inline: 1.125rem;
   color: var(--reader-ink, #14161c);
   background: #fff;
   font: inherit;
 }
 .controls button {
   min-height: 2.75rem;
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 1.375rem;
   border: 1px solid var(--reader-blue, #1e4aa8);
-  border-radius: 0.25rem;
+  border-radius: 999px;
+  transition:
+    background var(--reader-fast, 180ms),
+    transform var(--reader-fast, 180ms);
   background: var(--reader-blue, #1e4aa8);
   color: #fff;
   font: inherit;
   font-weight: 700;
   cursor: pointer;
+}
+.form .controls button:hover {
+  background: var(--reader-band, #4a72cf);
+  border-color: var(--reader-band, #4a72cf);
+}
+.form .controls button:active {
+  transform: scale(0.97);
 }
 .help {
   color: var(--reader-muted, #5d6470);
@@ -44,26 +55,77 @@
   outline: 3px solid var(--reader-blue, #1e4aa8);
   outline-offset: 3px;
 }
+/* Navigation search: an icon button that expands into a field. */
 .navigation {
-  flex: 0 1 13rem;
-  min-width: 0;
-  max-width: 100%;
-  padding-block: 0.25rem;
+  position: relative;
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
 }
-.navigation .controls input,
-.navigation .controls button {
-  border-color: #fff;
+.navigation .controls {
+  display: block;
 }
-.navigation .controls button {
+.navigation .controls input {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-height: 0;
+  padding: 0 2.75rem 0 0;
+  border: 0;
+  border-radius: 999px;
   background: transparent;
-  display: inline-grid;
+  opacity: 0;
+  transition:
+    width var(--reader-medium, 260ms) var(--reader-ease, ease),
+    opacity var(--reader-fast, 180ms),
+    background var(--reader-fast, 180ms);
+}
+.navigation[data-open] .controls input,
+.navigation:has(input:focus) .controls input {
+  width: min(17rem, calc(100vw - 6rem));
+  padding-left: 1rem;
+  background: #fff;
+  opacity: 1;
+  box-shadow: var(--reader-shadow);
+}
+.navigation .controls button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  display: grid;
   place-items: center;
-  min-width: 2.75rem;
-  padding-inline: 0.5rem;
+  width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  background: transparent;
+  transition:
+    background var(--reader-fast, 180ms),
+    color var(--reader-fast, 180ms),
+    transform var(--reader-fast, 180ms);
+}
+.navigation .controls button:hover {
+  background: rgb(255 255 255 / 20%);
+}
+.navigation .controls button:active {
+  transform: scale(0.92);
+}
+.navigation[data-open] .controls button,
+.navigation:has(input:focus) .controls button {
+  color: var(--reader-blue, #1e4aa8);
+  background: transparent;
 }
 .navigation :is(input, button):focus-visible {
   outline: 3px solid #fff;
   outline-offset: 3px;
+}
+.navigation input:focus-visible {
+  outline-offset: 2px;
 }
 .srOnly {
   position: absolute;
@@ -75,9 +137,4 @@
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
-}
-@media (max-width: 44.999rem) {
-  .navigation {
-    flex-basis: 100%;
-  }
 }

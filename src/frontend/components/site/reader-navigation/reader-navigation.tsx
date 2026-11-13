@@ -17,6 +17,8 @@ export function ReaderNavigation({ sections }: { sections: PublicSection[] }) {
   // Progressive enhancement collapses only the narrow-screen disclosure.
   useEffect(() => {
     if (!window.matchMedia) return;
+    // Only an enhanced menu overlays the page; without JavaScript it stays in flow.
+    menu.current?.setAttribute("data-enhanced", "");
     const wide = window.matchMedia("(min-width: 45rem)");
     const synchronize = () => {
       if (menu.current) menu.current.open = wide.matches;
@@ -52,7 +54,14 @@ export function ReaderNavigation({ sections }: { sections: PublicSection[] }) {
             event.stopPropagation();
           }}
         >
-          <summary className={styles.toggle}>Menu</summary>
+          <summary className={styles.toggle}>
+            <span aria-hidden="true" className={styles.burger}>
+              <span />
+              <span />
+              <span />
+            </span>
+            <span className={styles.srOnly}>Menu</span>
+          </summary>
           <nav aria-label="Primary navigation">
             <ul className={styles.links}>
               <li>
