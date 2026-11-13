@@ -135,3 +135,28 @@ Verification:
   - Typing "ea" shows 6 stories, and "dining pl" finds the dining story.
   - Chips render without separators at 31px tall.
   - No console errors.
+
+## Third follow-ups (2026-11-13)
+
+- **Skeleton timing:** the skeleton waited only 150ms, so ordinary server-rendered navigations (about 700ms locally) always showed it. It now appears only after 600ms.
+- **Page-specific skeletons:** each page type has its own skeleton matching its layout:
+  - **Home:** hero with Latest rows, the Featured band, a section row.
+  - **Article:** a centred reading column.
+  - **Archive:** crumbs, title, chips, a rule, the lead story and cards.
+  - **Author:** the archive heading, a biography card and cards.
+  - **Search:** heading, a pill field and button, cards.
+  - **Information pages:** a prose column.
+- **Previews:** a small byline and date sit side by side under every preview image. Photo credits stay off previews.
+- **Hover:** every homepage preview turns blue on hover, with no underline; so do View All and the footer Read This cards.
+- **Featured News:** items are now full-size cards, about 290×333px at 1440px, instead of small thumbnails.
+
+Verification:
+
+- **Unit:** the full suite passed, 153 files and 1,038 tests, including preview-meta tests, the skeleton mapping for every page type, and the 600ms threshold. Typecheck, lint and the build passed.
+- **Playwright against the production build on `gavel-p5`:**
+  - A normal 708ms navigation showed no skeleton.
+  - With RSC responses delayed 2.5s, navigating to home, archive, About, an article, an author page and search each showed its own skeleton.
+  - Hero and card titles turn blue on hover with no underline.
+  - Featured cards measure 290×333px.
+  - No console errors.
+  - The search form itself submits as a full page load, which the harness cannot delay; its skeleton was verified through the client-side See all results link.

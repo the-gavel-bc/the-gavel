@@ -36,10 +36,16 @@
   text-shadow: 0 1px 2px rgb(0 0 0 / 50%);
   overflow-wrap: anywhere;
 }
+/* Turns blue like every other preview (a light blue that reads on the
+   dark overlay), with no underline. */
+.title {
+  transition: color var(--reader-fast) var(--reader-ease);
+}
 .story:hover .title {
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
-  text-decoration-thickness: 2px;
+  color: #b8cbf7;
+}
+.story .meta {
+  color: rgb(255 255 255 / 85%);
 }
 .excerpt {
   display: -webkit-box;

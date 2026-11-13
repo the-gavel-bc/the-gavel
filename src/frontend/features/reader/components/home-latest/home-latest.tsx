@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
 import { StoryImage } from "../story-image/story-image";
+import { PreviewMeta } from "../preview-meta/preview-meta";
 import layout from "../reader-layout/reader-layout.module.css";
 import styles from "./home-latest.module.css";
 // Stories beside the lead: thumbnail, headline and date.
@@ -21,8 +22,11 @@ export function HomeLatest({ articles }: { articles: PublicArticleCard[] }) {
             >
               <StoryImage article={article} className={styles.thumb} />
               <div className={styles.text}>
+                <PreviewMeta article={article} />
                 <h3>{article.title}</h3>
-                {article.excerpt && <p>{article.excerpt}</p>}
+                {article.excerpt && (
+                  <p className={styles.excerpt}>{article.excerpt}</p>
+                )}
               </div>
             </Link>
           </li>

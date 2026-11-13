@@ -2,6 +2,7 @@ import Link from "next/link";
 import { sectionHref } from "@/shared/reader/section-link/section-link";
 import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
 import { StoryImage } from "../story-image/story-image";
+import { PreviewMeta } from "../preview-meta/preview-meta";
 import styles from "./home-hero.module.css";
 // Lead story: image with the headline and date overlaid, as on the live site.
 // Archives keep the section link above their promoted story; the homepage
@@ -31,6 +32,7 @@ export function HomeHero({
           {article.excerpt && (
             <p className={styles.excerpt}>{article.excerpt}</p>
           )}
+          <PreviewMeta article={article} className={styles.meta} />
         </div>
       </Link>
     </article>

@@ -19,8 +19,14 @@ const prevent = (event: Event) => event.preventDefault();
 
 it("picks a skeleton only for internal navigations to another page", () => {
   expect(skeletonFor(at("/articles/a-story"), here)).toBe("article");
-  expect(skeletonFor(at("/tags/campus"), here)).toBe("list");
-  expect(skeletonFor(at("/sections/news?cursor=x"), here)).toBe("list");
+  expect(skeletonFor(at("/"), here)).toBe("home");
+  expect(skeletonFor(at("/tags/campus"), here)).toBe("archive");
+  expect(skeletonFor(at("/sections/news?cursor=x"), here)).toBe("archive");
+  expect(skeletonFor(at("/letters"), here)).toBe("archive");
+  expect(skeletonFor(at("/authors/avery"), here)).toBe("author");
+  expect(skeletonFor(at("/search?q=x"), here)).toBe("search");
+  expect(skeletonFor(at("/about"), here)).toBe("page");
+  expect(skeletonFor(at("/letters/how-to-submit"), here)).toBe("page");
   expect(skeletonFor(at("/sections/news#top"), here)).toBeNull();
   expect(skeletonFor(new URL("https://example.com/a"), here)).toBeNull();
   expect(skeletonFor(at("/dashboard"), here)).toBeNull();
@@ -35,11 +41,16 @@ it("shows a skeleton on a slow navigation and clears it when the route renders",
     </RouteTransition>,
   );
   fireEvent.click(screen.getByRole("link", { name: "A story" }));
-  // A fast navigation never flashes the skeleton.
-  act(() => vi.advanceTimersByTime(100));
+  // A typical navigation never shows the skeleton.
+  act(() => vi.advanceTimersByTime(500));
   expect(screen.queryByRole("status")).toBeNull();
-  act(() => vi.advanceTimersByTime(50));
+  act(() => vi.advanceTimersByTime(100));
   expect(screen.getByRole("status")).toHaveTextContent("Loading");
+  // Shaped like the destination: an article, not a list.
+  expect(screen.getByRole("status").closest("[data-skeleton]")).toHaveAttribute(
+    "data-skeleton",
+    "article",
+  );
   expect(screen.queryByRole("link", { name: "A story" })).toBeNull();
 
   view.rerender(
@@ -63,7 +74,7 @@ it("ignores new-tab clicks and gives up on a stalled navigation", () => {
   expect(screen.queryByRole("status")).toBeNull();
 
   fireEvent.click(link);
-  act(() => vi.advanceTimersByTime(150));
+  act(() => vi.advanceTimersByTime(600));
   expect(screen.getByRole("status")).toBeInTheDocument();
   act(() => vi.advanceTimersByTime(8000));
   expect(screen.queryByRole("status")).toBeNull();

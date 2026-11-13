@@ -17,7 +17,7 @@ const article: PublicArticleCard = {
   mainImage: null,
 };
 describe("reader primitives", () => {
-  it("previews only the image, title and summary", () => {
+  it("previews the title, a small byline and date, and the summary", () => {
     render(
       <ReaderSurface>
         <ArticleCard article={article} />
@@ -28,9 +28,14 @@ describe("reader primitives", () => {
       "/articles/campus-story",
     );
     expect(screen.getByText(article.excerpt!)).toBeVisible();
-    // No byline, date or photo credit in previews.
+    // Byline and date as small plain text inside the story link; no photo
+    // credit and no separate author link.
+    expect(screen.getByText("Writer")).toBeVisible();
     expect(screen.queryByRole("link", { name: "Writer" })).toBeNull();
-    expect(screen.queryByText("Nov 9, 2026")).toBeNull();
+    expect(screen.getByText("Nov 9, 2026")).toHaveAttribute(
+      "datetime",
+      article.publishedAt,
+    );
     expect(screen.queryByText(/^Photo:/)).toBeNull();
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
   });

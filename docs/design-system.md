@@ -123,7 +123,7 @@ From the [reader refresh plan](superpowers/plans/2026-11-13-reader-refresh.md), 
   - `--reader-shadow` is the shared shadow.
   - All motion is off under `prefers-reduced-motion: reduce`.
 - **Cards:** rounded image frames zoom 3–6% on hover, titles turn blue, and grids and lists rise into view with scroll-driven CSS where supported.
-- **Skeletons:** story image frames shimmer until the photo paints. Following an internal link shows a page-shaped skeleton, article or list, until the next route renders. Reader routes keep no `loading.tsx`, so 404 responses stay 404.
+- **Skeletons:** story image frames shimmer until the photo paints. A navigation that takes longer than 600ms shows a skeleton shaped like the destination: home, article, archive, author, search or information page. Reader routes keep no `loading.tsx`, so 404 responses stay 404.
 - **Navigation:**
   - On desktop the band is sticky, with pill hover states and a filled, underlined current pill. Dropdowns animate open.
   - On mobile it is a compact bar with a hamburger that folds into a cross and a full-width panel.
@@ -135,4 +135,4 @@ From the [reader refresh plan](superpowers/plans/2026-11-13-reader-refresh.md), 
   - Stay Connected is a soft-blue band.
   - Footer cards and icons lift on hover.
 
-Previews (2026-11-13, owner direction): story cards, the hero, Latest, Featured and search results show only the image, title and summary, plus a section label on archive cards. Bylines, dates and photo credits appear on the article page only. This supersedes "photo credits stay visible" in Task 22 for previews. Summaries are clamped to two or three lines. Category and topic chips are slim pills (about 31px) whose tap target is extended to 44px with a pseudo-element. Dropdown hover changes only the category name (blue and underlined), with no highlighted block. The Featured News band's content uses the page container box, so it lines up with the section rows.
+Previews (2026-11-13, owner direction): story cards, the hero, Latest, Featured and search results show the image, then a small byline and date side by side (plain text inside the story link), then the title and summary, plus a section label on archive cards. Photo credits appear on the article page only. Every preview title turns blue on hover with no underline; the hero uses light blue `#b8cbf7` over its dark overlay. Featured News items are full cards: a white card on the band with the image on top, lifting on hover. This supersedes "photo credits stay visible" in Task 22 for previews. Summaries are clamped to two or three lines. Category and topic chips are slim pills (about 31px) whose tap target is extended to 44px with a pseudo-element. Dropdown hover changes only the category name (blue and underlined), with no highlighted block. The Featured News band's content uses the page container box, so it lines up with the section rows.
