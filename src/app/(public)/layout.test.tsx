@@ -13,7 +13,10 @@ vi.mock(
   "@/backend/public-site/public-site-navigation/public-site-navigation",
   () => ({ getPublicSiteNavigationForRequest: mocks.read }),
 );
-vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/",
+  useSearchParams: () => new URLSearchParams(),
+}));
 import PublicLayout from "./layout";
 it("loads only narrow footer data and renders a single shell", async () => {
   mocks.footer.mockResolvedValue({

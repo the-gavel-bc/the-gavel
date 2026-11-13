@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages -- plain anchors stand in for rendered links. */
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
