@@ -15,6 +15,12 @@
   --reader-serif: var(--font-body, Georgia), Georgia, "Times New Roman", serif;
   --reader-display: var(--font-display, Georgia), Georgia, serif;
   --reader-sans: system-ui, sans-serif;
+  /* Motion: hover/press 180ms, entrances 260ms, image zoom 500ms. */
+  --reader-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --reader-fast: 180ms;
+  --reader-medium: 260ms;
+  --reader-slow: 500ms;
+  --reader-shadow: 0 0.875rem 2.125rem rgb(20 22 28 / 14%);
   color: var(--reader-ink);
   background: var(--reader-paper);
   font-family: var(--reader-serif);
@@ -44,4 +50,22 @@
 
 .surface :is(h1, h2, h3) {
   font-family: var(--reader-display);
+}
+
+/* Cards rise in as they scroll into view, where scroll-driven animations are
+   supported. Elsewhere, and with reduced motion, they are simply visible. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .grid > * {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
 }

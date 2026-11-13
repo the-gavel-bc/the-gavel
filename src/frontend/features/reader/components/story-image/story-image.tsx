@@ -15,7 +15,9 @@ export function StoryImage({
 }) {
   const image = article.mainImage;
   return (
-    <div className={`${styles.frame} ${className ?? ""}`}>
+    <div
+      className={`${styles.frame} ${image ? styles.loading : ""} ${className ?? ""}`}
+    >
       {image ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img

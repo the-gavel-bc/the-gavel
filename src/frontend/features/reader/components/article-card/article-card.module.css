@@ -12,6 +12,7 @@
   align-items: center;
   min-height: 2.75rem;
   color: var(--reader-blue);
+  text-decoration: none;
   font: 700 0.75rem/1.4 var(--reader-sans);
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -22,9 +23,20 @@
   text-decoration: none;
   display: block;
 }
+.title {
+  transition: color var(--reader-fast) var(--reader-ease);
+}
 .story:hover .title {
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
+  color: var(--reader-blue);
+}
+.story:hover .image img {
+  transform: scale(1.05);
+}
+.story:active .image {
+  transform: scale(0.99);
+}
+.image {
+  transition: transform var(--reader-fast) var(--reader-ease);
 }
 .image {
   border-radius: var(--reader-radius);
@@ -39,4 +51,7 @@
   color: var(--reader-muted);
   font: 1rem/1.6 var(--reader-serif);
   overflow-wrap: anywhere;
+}
+.section:hover {
+  text-decoration: underline;
 }
