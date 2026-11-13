@@ -27,7 +27,8 @@
       z-index: 40;
       display: block;
       height: 0.25rem;
-      background: var(--reader-blue);
+      /* Navy reads against both the blue band and white page. */
+      background: #1f2380;
       transform-origin: left;
       animation: read linear both;
       animation-timeline: scroll(root);
