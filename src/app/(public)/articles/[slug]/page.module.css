@@ -14,3 +14,31 @@
     padding: 3rem 2rem 4rem;
   }
 }
+
+/* Reading progress, driven by page scroll in CSS where supported. */
+.progress {
+  display: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    .progress {
+      position: fixed;
+      inset: 0 0 auto;
+      z-index: 40;
+      display: block;
+      height: 0.25rem;
+      background: var(--reader-blue);
+      transform-origin: left;
+      animation: read linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+}
+@keyframes read {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}

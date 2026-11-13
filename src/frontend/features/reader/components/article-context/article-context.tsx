@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { PublicArticle } from "@/backend/public-articles/public-article/public-article";
 import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
 import { ArticleCard } from "../article-card/article-card";
+import layout from "../reader-layout/reader-layout.module.css";
 import styles from "./article-context.module.css";
 
 export function ArticleContext({
@@ -57,7 +58,7 @@ export function ArticleContext({
       {related.length > 0 && (
         <aside aria-labelledby="keep-reading">
           <h2 id="keep-reading">Keep reading</h2>
-          <div className={styles.grid}>
+          <div className={`${styles.grid} ${layout.reveal}`}>
             {related.map((story) => (
               <ArticleCard key={story.id} article={story} />
             ))}
@@ -65,7 +66,9 @@ export function ArticleContext({
         </aside>
       )}
       <p>
-        <Link href="/search">Search articles</Link>
+        <Link className={styles.search} href="/search">
+          Search articles
+        </Link>
       </p>
     </div>
   );
