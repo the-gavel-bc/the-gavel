@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
 import { StoryDate } from "../story-meta/story-meta";
 import { StoryImage } from "../story-image/story-image";
+import layout from "../reader-layout/reader-layout.module.css";
 import styles from "./home-latest.module.css";
 // Stories beside the lead: thumbnail, headline and date.
 export function HomeLatest({ articles }: { articles: PublicArticleCard[] }) {
@@ -11,7 +12,7 @@ export function HomeLatest({ articles }: { articles: PublicArticleCard[] }) {
       <h2 id="home-latest-title" className={styles.srOnly}>
         Latest
       </h2>
-      <ol>
+      <ol className={layout.reveal}>
         {articles.map((article) => (
           <li key={article.id}>
             <Link

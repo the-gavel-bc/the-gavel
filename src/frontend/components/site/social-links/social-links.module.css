@@ -1,7 +1,10 @@
+/* Soft-blue band across the page, as in the demo. */
 .connect {
+  margin-inline: calc(50% - 50vw);
+  padding: clamp(2.5rem, 5vw, 3.5rem) 1rem;
   text-align: center;
-  padding-block: 2.5rem 3rem;
-  border-top: 1px solid var(--reader-line, #e3e6ee);
+  border-block: 1px solid var(--reader-line, #e3e6ee);
+  background: var(--reader-soft, #eef2fc);
 }
 .connect h2 {
   margin: 0 0 1.5rem;
@@ -31,9 +34,27 @@
   width: 1.4em;
   height: 1.4em;
 }
+.pill {
+  transition:
+    transform var(--reader-fast, 180ms) var(--reader-ease, ease),
+    box-shadow var(--reader-fast, 180ms);
+}
 .pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.375rem 1rem rgb(0 0 0 / 20%);
   text-decoration: underline;
   text-underline-offset: 0.2em;
+}
+.pill:active {
+  transform: translateY(0) scale(0.97);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pill {
+    transition: none;
+  }
+  .pill:hover {
+    transform: none;
+  }
 }
 .pill:focus-visible {
   outline: 3px solid var(--reader-ink, #14161c);
