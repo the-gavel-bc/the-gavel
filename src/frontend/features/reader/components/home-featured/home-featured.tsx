@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
-import { StoryDate } from "../story-meta/story-meta";
 import { StoryImage } from "../story-image/story-image";
 import layout from "../reader-layout/reader-layout.module.css";
 import styles from "./home-featured.module.css";
@@ -21,10 +20,6 @@ export function HomeFeatured({ articles }: { articles: PublicArticleCard[] }) {
               >
                 <StoryImage article={article} className={styles.thumb} />
                 <div className={styles.text}>
-                  <StoryDate
-                    publishedAt={article.publishedAt}
-                    className={styles.date}
-                  />
                   <h3>{article.title}</h3>
                 </div>
               </Link>

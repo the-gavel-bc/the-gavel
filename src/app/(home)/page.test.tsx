@@ -117,7 +117,8 @@ it("uses eager authorized hero media and renders real partial groups", async () 
     "eager",
   );
   expect(screen.getByRole("img")).toHaveAttribute("fetchpriority", "high");
-  expect(screen.getByText("Photo: Photographer")).toBeVisible();
+  // Previews omit photo credits; the article page shows them.
+  expect(screen.queryByText("Photo: Photographer")).toBeNull();
   expect(screen.getByRole("heading", { name: "Latest" })).toBeVisible();
   expect(screen.getByRole("heading", { name: "Featured News" })).toBeVisible();
   expect(screen.getByRole("link", { name: "View All News" })).toHaveAttribute(

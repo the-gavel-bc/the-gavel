@@ -1,7 +1,7 @@
 import { beforeEach, expect, it, vi } from "vitest";
 const search = vi.hoisted(() => vi.fn());
 vi.mock("@/backend/public-articles/public-search/public-search", () => ({
-  searchPublicArticles: search,
+  suggestPublicArticles: search,
 }));
 import { GET } from "./route";
 
@@ -12,8 +12,6 @@ beforeEach(() => search.mockReset());
 it("returns a few titles with their section and nothing else", async () => {
   search.mockResolvedValue({
     kind: "ok",
-    query: "campus",
-    nextCursor: "next",
     items: [
       {
         id: "a",
@@ -25,7 +23,7 @@ it("returns a few titles with their section and nothing else", async () => {
     ],
   });
   const response = await get("campus");
-  expect(search).toHaveBeenCalledWith({ query: "campus", limit: 6 });
+  expect(search).toHaveBeenCalledWith("campus");
   expect(response.status).toBe(200);
   expect(await response.json()).toEqual({
     kind: "ok",

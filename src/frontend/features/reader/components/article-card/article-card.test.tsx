@@ -17,7 +17,7 @@ const article: PublicArticleCard = {
   mainImage: null,
 };
 describe("reader primitives", () => {
-  it("uses canonical links, credited writers and stable UTC dates", () => {
+  it("previews only the image, title and summary", () => {
     render(
       <ReaderSurface>
         <ArticleCard article={article} />
@@ -27,18 +27,11 @@ describe("reader primitives", () => {
       "href",
       "/articles/campus-story",
     );
-    expect(screen.getByRole("link", { name: "Writer" })).toHaveAttribute(
-      "href",
-      "/authors/writer",
-    );
-    expect(
-      screen.queryByRole("link", { name: "Owner" }),
-    ).not.toBeInTheDocument();
-    expect(screen.getByText("Nov 9, 2026")).toHaveAttribute(
-      "datetime",
-      article.publishedAt,
-    );
     expect(screen.getByText(article.excerpt!)).toBeVisible();
+    // No byline, date or photo credit in previews.
+    expect(screen.queryByRole("link", { name: "Writer" })).toBeNull();
+    expect(screen.queryByText("Nov 9, 2026")).toBeNull();
+    expect(screen.queryByText(/^Photo:/)).toBeNull();
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
   });
   it("uses the authorized image route and intrinsic dimensions", () => {

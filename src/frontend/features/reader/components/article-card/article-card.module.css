@@ -1,12 +1,6 @@
 .card {
   min-width: 0;
 }
-.credit {
-  margin: 0 0 0.5rem;
-  color: var(--reader-muted);
-  font: 0.75rem/1.5 var(--reader-sans);
-  overflow-wrap: anywhere;
-}
 .section {
   display: inline-flex;
   align-items: center;
@@ -46,8 +40,13 @@
   font: 700 1.375rem/1.25 var(--reader-display);
   overflow-wrap: anywhere;
 }
+/* Three lines at most, as in the demo. */
 .excerpt {
-  margin: 0.75rem 0 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
   color: var(--reader-muted);
   font: 1rem/1.6 var(--reader-serif);
   overflow-wrap: anywhere;

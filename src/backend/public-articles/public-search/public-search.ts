@@ -127,3 +127,37 @@ export async function searchPublicArticles(
   if (query === null) return { kind: "invalid" };
   return readForRequest(query, parsed.data.limit ?? 12, parsed.data.cursor);
 }
+
+const suggestionSchema = z.discriminatedUnion("kind", [
+  z.strictObject({ kind: z.literal("invalid") }),
+  z.strictObject({ kind: z.literal("unavailable") }),
+  z.strictObject({
+    kind: z.literal("rate_limited"),
+    retryAfter: z.number().int().min(1).max(60),
+  }),
+  z.strictObject({
+    kind: z.literal("ok"),
+    items: z.array(publicArticleCardSchema).max(6),
+  }),
+]);
+export type PublicSearchSuggestions = z.infer<typeof suggestionSchema>;
+
+// Typeahead: titles containing the typed text, so partial words match. Shares
+// the public search budget; see suggest_public_articles.
+export async function suggestPublicArticles(
+  input: unknown,
+): Promise<PublicSearchSuggestions> {
+  if (typeof input !== "string") return { kind: "invalid" };
+  const query = normalizePublicSearchQuery(input);
+  if (query === null || query.length < 2) return { kind: "invalid" };
+  try {
+    const { data, error } = await createPublicReaderClient()
+      .rpc("suggest_public_articles", { p_query: query })
+      .abortSignal(AbortSignal.timeout(3000));
+    if (error) return { kind: "unavailable" };
+    const parsed = suggestionSchema.safeParse(data);
+    return parsed.success ? parsed.data : { kind: "unavailable" };
+  } catch {
+    return { kind: "unavailable" };
+  }
+}

@@ -134,3 +134,5 @@ From the [reader refresh plan](superpowers/plans/2026-11-13-reader-refresh.md), 
   - Chips and pagination are pill controls.
   - Stay Connected is a soft-blue band.
   - Footer cards and icons lift on hover.
+
+Previews (2026-11-13, owner direction): story cards, the hero, Latest, Featured and search results show only the image, title and summary, plus a section label on archive cards. Bylines, dates and photo credits appear on the article page only. This supersedes "photo credits stay visible" in Task 22 for previews. Summaries are clamped to two or three lines. Category and topic chips are slim pills (about 31px) whose tap target is extended to 44px with a pseudo-element. Dropdown hover changes only the category name (blue and underlined), with no highlighted block. The Featured News band's content uses the page container box, so it lines up with the section rows.

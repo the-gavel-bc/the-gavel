@@ -118,9 +118,6 @@
   list-style: none;
   transition: background var(--reader-fast, 180ms);
 }
-.categories summary:hover {
-  background: rgb(255 255 255 / 20%);
-}
 .categories summary::-webkit-details-marker {
   display: none;
 }
@@ -164,13 +161,13 @@
   letter-spacing: 0;
   white-space: nowrap;
 }
+/* Only the name changes: no highlighted block in the dropdown. */
 .categories ul a:hover,
 .categories ul a[aria-current] {
   color: var(--reader-blue, #1e4aa8);
-  background: var(--reader-soft, #eef2fc);
-}
-.categories ul a[aria-current] {
+  background: none;
   text-decoration: underline;
+  text-underline-offset: 0.3em;
 }
 .bar .links a:focus-visible,
 .bar :is(summary, input, button):focus-visible {

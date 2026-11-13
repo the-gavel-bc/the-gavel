@@ -1,7 +1,6 @@
 import { sectionHref } from "@/shared/reader/section-link/section-link";
 import Link from "next/link";
 import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
-import { StoryDate, StoryMeta } from "../story-meta/story-meta";
 import { StoryImage } from "../story-image/story-image";
 import styles from "./article-card.module.css";
 
@@ -12,7 +11,8 @@ export function ArticleCard({
 }: {
   article: PublicArticleCard;
   headingLevel?: 2 | 3;
-  // "home" matches the live homepage rows: image, title, date and excerpt.
+  // Previews show only image, title and summary; "home" also drops the
+  // section label, as on the live homepage rows.
   variant?: "full" | "home";
 }) {
   const home = variant === "home";
@@ -32,14 +32,6 @@ export function ArticleCard({
         <StoryImage article={article} className={styles.image} />
         <Heading className={styles.title}>{article.title}</Heading>
       </Link>
-      {article.mainImage && (
-        <p className={styles.credit}>Photo: {article.mainImage.credit}</p>
-      )}
-      {home ? (
-        <StoryDate publishedAt={article.publishedAt} />
-      ) : (
-        <StoryMeta article={article} />
-      )}
       {article.excerpt && <p className={styles.excerpt}>{article.excerpt}</p>}
     </article>
   );

@@ -111,3 +111,27 @@ Verification:
   - At 375px the field and panel stay inside the viewport, with no horizontal scroll.
   - The signed-in synthetic administrator saw "Your desk", which led to `/dashboard`; anonymous visitors got `{desk: null}`.
   - No console errors.
+
+## Second follow-ups (2026-11-13)
+
+- **Previews:** previews show only image, title and summary; bylines, dates and photo credits remain on the article page. The `story-meta` component and the calendar icon were removed as unused.
+- **Category chips:** the breadcrumb `/` separator rule had leaked onto the category chips; it is now scoped to the breadcrumb list. Chips, topic chips and the archive section pill are slim, with 44px tap targets.
+- **Dropdowns:** hover only recolours and underlines the category name.
+- **Featured band:** its content was 24px wider on each side than the page (80–1360px against 104–1336px at 1440px). It now uses the container box and lines up exactly.
+- **Duplicated pages:** `useSearchParams` in the navigation skeleton made the server render a fallback copy of every page and swap it in with a script. That doubled the HTML and could flash. The skeleton now keys on the page content itself, and the Suspense wrapper is gone.
+- **Partial-word typing:** suggestions previously used whole-word full-text search, so nothing appeared until a word was complete.
+  - **Decision:** add `suggest_public_articles`, a title-contains match that spends the same budget and returns the same allowlisted cards. Full search is unchanged.
+  - It is a sequential scan over published titles, marked with a `ponytail:` note to add a `pg_trgm` index if the catalog grows.
+
+Verification:
+
+- **SQL:** `061_public_search_suggestions` and the existing `046_public_search` passed (63 assertions). They cover anonymous partial matches, the cap of 6, newest first, exclusion of drafts and archived stories, the card allowlist, short and blank input, literal `%` and `_`, and the direct-RPC guard.
+- **Unit:** the full suite passed, 152 files and 1,036 tests. Typecheck, lint, format and the build passed.
+- **Playwright against the production build on `gavel-p5`:**
+  - The homepage HTML contains one copy of each section and no Suspense swap.
+  - The Featured band and Features row both span 104–1336px.
+  - No "Photo:", date or byline text appears in homepage or archive previews.
+  - Hovering the Hockey item shows a transparent background with blue underlined text.
+  - Typing "ea" shows 6 stories, and "dining pl" finds the dining story.
+  - Chips render without separators at 31px tall.
+  - No console errors.

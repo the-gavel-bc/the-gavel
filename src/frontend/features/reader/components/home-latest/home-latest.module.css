@@ -43,6 +43,15 @@
   gap: 0.75rem;
   min-width: 0;
 }
+.text p {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+  color: var(--reader-muted);
+  font: 0.9375rem/1.5 var(--reader-serif);
+}
 .text h3 {
   margin: 0;
   font: 700 clamp(1.125rem, 1.6vw, 1.5rem)/1.25 var(--reader-display);

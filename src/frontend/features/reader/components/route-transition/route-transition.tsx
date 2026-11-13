@@ -1,5 +1,4 @@
 "use client";
-import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import styles from "./route-transition.module.css";
 
@@ -24,14 +23,15 @@ export function skeletonFor(url: URL, current: URL): Kind | null {
 // page-shaped skeleton on the client when a followed link takes longer than
 // SHOW_AFTER_MS, until the next route renders. Status codes are unaffected.
 export function RouteTransition({ children }: { children: ReactNode }) {
-  const pathname = usePathname() ?? "";
-  const search = useSearchParams()?.toString() ?? "";
-  const route = `${pathname}?${search}`;
-  const [pending, setPending] = useState<{ from: string; kind: Kind } | null>(
-    null,
-  );
-  const [slow, setSlow] = useState<{ from: string } | null>(null);
-  const waiting = pending?.from === route ? pending : null;
+  // A navigation is pending until the router delivers new page content
+  // (children), including query-only changes such as pagination. This avoids
+  // useSearchParams, whose server-side bail-out duplicated every page's HTML.
+  const [pending, setPending] = useState<{
+    from: ReactNode;
+    kind: Kind;
+  } | null>(null);
+  const [slow, setSlow] = useState<object | null>(null);
+  const waiting = pending?.from === children ? pending : null;
   const showing = waiting && slow === waiting ? waiting.kind : null;
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export function RouteTransition({ children }: { children: ReactNode }) {
         new URL(target, location.href),
         new URL(location.href),
       );
-      if (kind) setPending({ from: route, kind });
+      if (kind) setPending({ from: children, kind });
     };
     const onClick = (event: MouseEvent) => {
       if (
@@ -75,7 +75,7 @@ export function RouteTransition({ children }: { children: ReactNode }) {
       document.removeEventListener("click", onClick);
       document.removeEventListener("submit", onSubmit);
     };
-  }, [route]);
+  }, [children]);
 
   useEffect(() => {
     if (!waiting) return;

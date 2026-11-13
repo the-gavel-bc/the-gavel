@@ -2,18 +2,12 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
-let pathname = "/";
-vi.mock("next/navigation", () => ({
-  usePathname: () => pathname,
-  useSearchParams: () => new URLSearchParams(),
-}));
 import { RouteTransition, skeletonFor } from "./route-transition";
 
 const here = new URL("http://localhost/sections/news");
 const at = (path: string) => new URL(path, here);
 
 beforeEach(() => {
-  pathname = "/";
   // Links in jsdom don't navigate; stop the default so nothing is logged.
   document.addEventListener("click", prevent);
 });
@@ -48,7 +42,6 @@ it("shows a skeleton on a slow navigation and clears it when the route renders",
   expect(screen.getByRole("status")).toHaveTextContent("Loading");
   expect(screen.queryByRole("link", { name: "A story" })).toBeNull();
 
-  pathname = "/articles/a-story";
   view.rerender(
     <RouteTransition>
       <h1>A story</h1>

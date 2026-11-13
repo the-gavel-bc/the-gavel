@@ -13,10 +13,13 @@
 Added by the [reader refresh plan](superpowers/plans/2026-11-13-reader-refresh.md#follow-ups-2026-11-13).
 
 - **`GET /api/public/search/suggestions?q=`:** typeahead for the navigation search.
-  - It calls the same `searchPublicArticles` adapter as `/search`, with a limit of 6, so it spends the same bounded public search budget (120 per server minute).
-  - `ok` returns `{kind: "ok", items: [{title, slug, section}]}` with `Cache-Control: public, max-age=30, s-maxage=30`. Only the title, slug and section name of published stories are returned.
+  - It calls `suggest_public_articles(p_query)`: published titles that contain the typed text, case-insensitive, newest first, at most 6. Partial words match, and typed `%` and `_` are literal.
+  - The query is normalized like search and must be at least 2 characters. Each call spends one ticket from the shared public search budget (120 per server minute).
+  - Cards go through the same allowlisted `homepage_card_map` projection as search; the route returns only `{title, slug, section}`.
+  - `ok` returns `{kind: "ok", items: [{title, slug, section}]}` with `Cache-Control: public, max-age=30, s-maxage=30`.
   - `invalid` returns 400, `rate_limited` returns 429 with `Retry-After`, and `unavailable` returns 503; all three are `private, no-store`.
-  - The client waits for a 300ms pause and at least 2 characters, and aborts stale requests, so a typed query costs about one search.
+  - The client waits for a 300ms pause and at least 2 characters, and aborts stale requests.
+  - Full-text `/search` stays whole-word.
 - **`GET /api/session/desk`:** tells the reader whether to show the staff desk shortcut.
   - It returns `{desk: null}`, or `{desk: {displayName, role}}` for the caller's own active membership. Responses are always `private, no-store`.
   - Requests without a Supabase auth cookie are answered without contacting Supabase.
