@@ -112,3 +112,25 @@ Slice 2:
   - It groups details in a card.
   - A sticky save bar holds the save status, the visibility note and the save button.
   - Formatting buttons are chips, filled when pressed.
+
+## Reader refresh (2026-11-13)
+
+From the [reader refresh plan](superpowers/plans/2026-11-13-reader-refresh.md), following the demo frontend:
+
+- **Motion tokens on `ReaderSurface`:**
+  - `--reader-ease` is `cubic-bezier(0.2, 0.7, 0.2, 1)`.
+  - Durations: `--reader-fast` 180ms for hover and press, `--reader-medium` 260ms for entrances and panels, `--reader-slow` 500ms for image zoom.
+  - `--reader-shadow` is the shared shadow.
+  - All motion is off under `prefers-reduced-motion: reduce`.
+- **Cards:** rounded image frames zoom 3–6% on hover, titles turn blue, and grids and lists rise into view with scroll-driven CSS where supported.
+- **Skeletons:** story image frames shimmer until the photo paints. Following an internal link shows a page-shaped skeleton, article or list, until the next route renders. Reader routes keep no `loading.tsx`, so 404 responses stay 404.
+- **Navigation:**
+  - On desktop the band is sticky, with pill hover states and a filled, underlined current pill. Dropdowns animate open.
+  - On mobile it is a compact bar with a hamburger that folds into a cross and a full-width panel.
+  - Search is an icon that expands into a field. Without JavaScript the menu stays in flow and an empty search opens the search page.
+- **Article:** a navy (`#1f2380`) scroll-driven reading progress bar, a section kicker, sans metadata, topic chips, a soft author card and a Keep reading block.
+- **Archives and pages:**
+  - Archive headings use uppercase crumbs, a large title and a 2px ink rule.
+  - Chips and pagination are pill controls.
+  - Stay Connected is a soft-blue band.
+  - Footer cards and icons lift on hover.
