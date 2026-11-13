@@ -2,16 +2,29 @@
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-  margin-block: 2rem;
+  justify-content: center;
+  margin-block: 3rem 2rem;
   font-family: var(--reader-sans);
 }
 .pagination a {
   display: inline-flex;
   align-items: center;
   min-height: 2.75rem;
-  padding: 0.625rem 1rem;
+  padding: 0.625rem 1.5rem;
   color: var(--reader-blue);
   border: 1px solid currentcolor;
-  border-radius: 0.25rem;
-  text-underline-offset: 0.2em;
+  border-radius: 999px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background var(--reader-fast) var(--reader-ease),
+    color var(--reader-fast) var(--reader-ease),
+    transform var(--reader-fast) var(--reader-ease);
+}
+.pagination a:hover {
+  color: #fff;
+  background: var(--reader-blue);
+}
+.pagination a:active {
+  transform: scale(0.97);
 }

@@ -1,6 +1,9 @@
 .biography {
   max-width: 68ch;
   margin-block: 1.5rem 2.5rem;
+  padding: 1.5rem;
+  border-radius: var(--reader-radius);
+  background: var(--reader-soft);
 }
 .biography h2 {
   font: 700 1.5rem/1.3 var(--reader-display);
