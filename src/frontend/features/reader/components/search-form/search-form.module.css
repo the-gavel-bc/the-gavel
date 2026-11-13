@@ -27,6 +27,8 @@
 }
 .controls button {
   min-height: 2.75rem;
+  flex: none;
+  white-space: nowrap;
   padding: 0.5rem 1.375rem;
   border: 1px solid var(--reader-blue, #1e4aa8);
   border-radius: 999px;
