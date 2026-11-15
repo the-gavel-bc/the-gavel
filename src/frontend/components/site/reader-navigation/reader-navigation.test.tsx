@@ -143,3 +143,36 @@ it("keeps one category dropdown open and closes it on an outside tap", () => {
   fireEvent.pointerDown(document.body);
   expect(sports.open).toBe(false);
 });
+it("closes a hover-opened dropdown on Escape and a dropdown the reader tabs out of", () => {
+  render(
+    <ReaderNavigation
+      sections={[
+        {
+          name: "News",
+          slug: "news",
+          categories: [{ name: "Campus", slug: "campus" }],
+        },
+      ]}
+    />,
+  );
+  const item = screen.getByRole("link", { name: "News" }).closest("li")!;
+  const dropdown = item.querySelector("details")!;
+  // Hover opens it while focus is elsewhere; Escape still dismisses it.
+  fireEvent.pointerEnter(item, { pointerType: "mouse" });
+  expect(dropdown.open).toBe(true);
+  fireEvent.keyDown(document.body, { key: "Escape" });
+  expect(dropdown.open).toBe(false);
+
+  dropdown.open = true;
+  const campus = screen.getByRole("link", { name: "Campus" });
+  // A click that moves focus nowhere (Safari) must not close it mid-click.
+  fireEvent.blur(campus, { relatedTarget: null });
+  expect(dropdown.open).toBe(true);
+  // Moving focus within the item keeps it open; tabbing away closes it.
+  fireEvent.blur(campus, { relatedTarget: dropdown.querySelector("summary") });
+  expect(dropdown.open).toBe(true);
+  fireEvent.blur(campus, {
+    relatedTarget: screen.getByRole("link", { name: "About" }),
+  });
+  expect(dropdown.open).toBe(false);
+});

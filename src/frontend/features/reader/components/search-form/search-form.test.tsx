@@ -49,6 +49,8 @@ it("opens the navigation field on the first press instead of submitting", () => 
   fireEvent.change(input, { target: { value: "" } });
   fireEvent.keyDown(input, { key: "Escape" });
   expect(button).toHaveAttribute("aria-expanded", "false");
+  // Focus returns to the search button instead of dropping to the page.
+  expect(button).toHaveFocus();
 });
 
 it("keeps the page search a plain submit form", () => {
@@ -95,6 +97,7 @@ it("suggests stories while typing and links straight to them", async () => {
     expect(screen.getByRole("link", { name: /Budget vote/ })).toHaveFocus();
     fireEvent.keyDown(document.activeElement!, { key: "Escape" });
     expect(screen.queryByRole("status")).toBeNull();
+    expect(screen.getByRole("button", { name: "Search" })).toHaveFocus();
   } finally {
     vi.useRealTimers();
     vi.unstubAllGlobals();

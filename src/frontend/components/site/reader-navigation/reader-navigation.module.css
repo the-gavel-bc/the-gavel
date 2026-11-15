@@ -85,13 +85,14 @@
   overflow-wrap: anywhere;
   transition: background var(--reader-fast, 180ms);
 }
+/* Darker fills, not lighter: white text stays above 4.5:1 on them. */
 .links a:hover {
-  background: rgb(255 255 255 / 20%);
+  background: rgb(20 22 28 / 16%);
 }
 /* Current page: a filled pill plus an underline, so it isn't colour alone. */
 .links a[aria-current],
 .links a[data-active] {
-  background: rgb(255 255 255 / 22%);
+  background: rgb(20 22 28 / 24%);
   text-decoration: underline;
   text-underline-offset: 0.35em;
   text-decoration-thickness: 2px;
@@ -296,6 +297,18 @@
   }
   .bar .categories ul a:focus-visible {
     outline-color: #fff;
+  }
+}
+/* With scripting on, the server-rendered open menu would sit in the page
+   flow until hydration collapses it, shifting everything below. Hide it
+   until then; without JavaScript it stays open and usable. */
+@media (max-width: 44.999rem) and (scripting: enabled) {
+  .menu:not([data-enhanced]) > nav {
+    display: none;
+  }
+  .menu:not([data-enhanced]) .burger span {
+    opacity: 1;
+    transform: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {

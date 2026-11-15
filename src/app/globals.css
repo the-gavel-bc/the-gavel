@@ -45,3 +45,16 @@ summary {
   outline: 3px solid var(--color-focus);
   outline-offset: 3px;
 }
+
+/* Reader pages have a sticky navigation band on wider screens; keep focused
+   elements and anchor targets clear of it (two rows below 75rem). */
+@media (min-width: 45rem) {
+  html:has([data-reader-surface]) {
+    scroll-padding-top: 6.5rem;
+  }
+}
+@media (min-width: 75rem) {
+  html:has([data-reader-surface]) {
+    scroll-padding-top: 4.5rem;
+  }
+}

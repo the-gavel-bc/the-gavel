@@ -24,6 +24,7 @@ export function SearchForm({
   const [text, setText] = useState(query);
   const input = useRef<HTMLInputElement>(null);
   const form = useRef<HTMLFormElement>(null);
+  const toggle = useRef<HTMLButtonElement>(null);
   const suggestions = useSearchSuggestions(navigation ? text : "");
   const expand = () => {
     if (!open && form.current) {
@@ -75,7 +76,9 @@ export function SearchForm({
         if (!navigation || !open) return;
         if (event.key === "Escape") {
           close();
-          input.current?.blur();
+          // Keep the reader's place: focus goes to the search button, not
+          // the page body.
+          toggle.current?.focus();
           return;
         }
         // Arrow keys move between the field and the suggestion links.
@@ -123,6 +126,7 @@ export function SearchForm({
           aria-describedby={navigation ? undefined : `${id}-help`}
         />
         <button
+          ref={toggle}
           type="submit"
           aria-expanded={navigation ? open : undefined}
           aria-controls={navigation ? id : undefined}

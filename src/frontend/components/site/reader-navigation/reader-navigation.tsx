@@ -36,10 +36,22 @@ export function ReaderNavigation({ sections }: { sections: PublicSection[] }) {
           if (!detail.contains(target)) detail.open = false;
         });
     };
+    // Escape dismisses a dropdown that hover opened, wherever focus is.
+    const escape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      menu.current
+        ?.querySelectorAll<HTMLDetailsElement>("details[data-hover-open]")
+        .forEach((detail) => {
+          detail.open = false;
+          detail.removeAttribute("data-hover-open");
+        });
+    };
     document.addEventListener("pointerdown", outside);
+    document.addEventListener("keydown", escape);
     return () => {
       wide.removeEventListener("change", synchronize);
       document.removeEventListener("pointerdown", outside);
+      document.removeEventListener("keydown", escape);
     };
   }, []);
   // One dropdown at a time; on wrapped (tablet) rows, a dropdown that would
@@ -144,6 +156,16 @@ export function ReaderNavigation({ sections }: { sections: PublicSection[] }) {
                     className={styles.section}
                     onPointerEnter={(event) => hover(event, true)}
                     onPointerLeave={(event) => hover(event, false)}
+                    onBlur={(event) => {
+                      // Tabbing on closes the dropdown left behind. Only when
+                      // focus moves to another element: a click that does not
+                      // move focus (Safari) must not close it mid-click.
+                      const next = event.relatedTarget;
+                      if (!next || event.currentTarget.contains(next)) return;
+                      const detail =
+                        event.currentTarget.querySelector("details");
+                      if (detail) detail.open = false;
+                    }}
                   >
                     <Link
                       href={href}

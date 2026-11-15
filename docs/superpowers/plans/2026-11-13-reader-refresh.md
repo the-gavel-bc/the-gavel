@@ -221,3 +221,28 @@ Verification:
   - choosing a category navigates.
 - **Results:** together with the skeleton spec, all 10 cases passed three runs in a row on the production build against `gavel-p5`.
 - **Flake fixed:** the first version of the layout assertion flaked on subpixel heights (44.00001 against 44). It now compares whole pixels.
+
+## Research audit, batch 1: reader accessibility and performance fixes (2026-11-14)
+
+Four read-only research agents audited the reader, accessibility and performance, the demo and live site, and the staff desk. The owner chose batch 1: nine reader fixes with no product decisions.
+
+Fixes, each with its measured result on the production build against `gavel-p5`:
+
+- **Mobile layout jump:** the server sends the mobile menu open for no-JavaScript readers, and hydration collapsed it after first paint. On a cold, throttled phone load (4x CPU, slow network) the layout-shift score was 0.388. With scripting on, CSS now hides the menu until it is enhanced (`@media (scripting: enabled)`). The score is now 0; the menu still opens on tap and still shows without JavaScript.
+- **Endless shimmer:** the image skeleton looped forever behind loaded photos, costing about 16% of idle main-thread time. It now runs four times and parks off-frame; no shimmer animation was running after 7 seconds.
+- **Focus rings:** the reader's default link ring outranked the white rings on the Featured band and footer (1.77:1 and 2.34:1). The default now uses `:where()`, so both show white rings; cards on white keep the blue ring.
+- **Featured byline and date:** solid white, 4.57:1 (was 3.78:1).
+- **Navigation pills:** current and hover pills use a darker fill instead of a lighter one. White text is now 6.44:1 on the current pill and 5.72:1 on hover (was about 3.1:1). The desk shortcut uses the same darker fill.
+- **Sticky band over focus:** reader pages set `scroll-padding-top` (6.5rem while the band wraps to two rows, 4.5rem from 75rem). Shift+Tab through `/sections/sports` covered 0 of 12 focus stops (was 2).
+- **Escape handling:**
+  - In search, Escape returns focus to the search button (it used to drop to the page).
+  - A hover-opened dropdown closes on Escape wherever focus is.
+  - Tabbing out of a dropdown closes it; a click that moves focus nowhere does not.
+- **404 titles:** not-found pages render their own `<title>`: "Page not found", "Article not found" or "Archive not found", each with "| The Gavel". Status stays 404.
+- **Hero title over bright photos:** the overlay gradient reaches 72% at the title's top edge, with extra padding above for the ramp. Over a white photo that gives white text about 7:1 and the hover blue about 4:1 (calculated).
+
+Verification:
+
+- **Unit:** the full suite passed, 153 files and 1,046 tests, with new assertions for search focus return, Escape on a hover-opened dropdown and focus-out closing. Typecheck, lint, format and the build passed.
+- **Browser:** the skeleton and dropdown specs passed, 10 of 10.
+- **Not done in this batch:** under reduced motion, image hover still scales without animating (minor). Batches 2 and 3 and the owner-decision items from the audit are untouched.

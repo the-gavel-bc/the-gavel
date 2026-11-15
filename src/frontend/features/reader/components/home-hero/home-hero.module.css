@@ -22,12 +22,16 @@
   display: grid;
   gap: 0.75rem;
   padding: clamp(1rem, 3vw, 2rem);
-  /* Readable over any photo: a dark gradient plus a solid floor under the text. */
+  /* Extra room above the title for the gradient to ramp up. */
+  padding-top: calc(clamp(1rem, 3vw, 2rem) + 2.5rem);
+  /* Readable over any photo, even a white one: the gradient is already 72%
+     where the title starts (white text 7:1, hover blue 4:1). */
   background: linear-gradient(
     to bottom,
     rgb(20 22 28 / 0%),
-    rgb(20 22 28 / 80%) 35%,
-    rgb(20 22 28 / 92%)
+    rgb(20 22 28 / 72%) 3.25rem,
+    rgb(20 22 28 / 88%) 55%,
+    rgb(20 22 28 / 94%)
   );
 }
 .title {

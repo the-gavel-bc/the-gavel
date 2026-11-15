@@ -8,6 +8,8 @@ export function NotFoundRecovery({
 }) {
   return (
     <div className={styles.page}>
+      {/* Hoisted into <head>: tabs, history and screen readers name the error. */}
+      <title>{`${title} | The Gavel`}</title>
       <h1>{title}</h1>
       <p>
         We couldn’t find that page. Check the address or search for a published

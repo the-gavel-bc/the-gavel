@@ -54,8 +54,9 @@
   gap: 0.5rem;
   min-width: 0;
 }
+/* Solid white: 4.57:1 on the band at this small size. */
 .text p {
-  color: rgb(255 255 255 / 85%);
+  color: #fff;
 }
 .text h3 {
   margin: 0;
