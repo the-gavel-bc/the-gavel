@@ -69,3 +69,13 @@
     transition: none;
   }
 }
+/* Small screens: first Featured story full size, the rest compact rows. */
+@media (max-width: 44.999rem) {
+  .inner li:not(:first-child) .story {
+    grid-template-columns: minmax(6rem, 2fr) 3fr;
+    align-items: start;
+  }
+  .inner li:not(:first-child) h3 {
+    font-size: 1.125rem;
+  }
+}

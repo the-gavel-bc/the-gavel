@@ -101,6 +101,8 @@ export function SiteFooter({
       </div>
       <div className={styles.bottom}>
         <p>© {new Date().getUTCFullYear()} The Gavel · Boston College</p>
+        {/* Any unmatched fragment scrolls to the top; no script needed. */}
+        <a href="#top">Back to top ↑</a>
         <Link href="/sign-in">Member sign in</Link>
       </div>
     </footer>

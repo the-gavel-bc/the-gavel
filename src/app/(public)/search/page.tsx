@@ -5,7 +5,7 @@ import { normalizePublicSearchQuery } from "@/shared/reader/public-search/public
 import { SearchResults } from "@/frontend/features/reader/components/search-results/search-results";
 export const dynamic = "force-dynamic";
 // Static metadata avoids a second quota-bearing read and never indexes queries.
-export const metadata: Metadata = excludedMetadata("Search articles");
+export const metadata: Metadata = excludedMetadata("Search stories");
 export default async function SearchPage({
   searchParams,
 }: {

@@ -100,3 +100,13 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* Topics, the author card and the search link sit in the reading column;
+   Keep reading stays wide. */
+.context > nav,
+.context > .bio,
+.context > p {
+  width: min(100%, 46rem);
+  max-width: none;
+  margin-inline: auto;
+}

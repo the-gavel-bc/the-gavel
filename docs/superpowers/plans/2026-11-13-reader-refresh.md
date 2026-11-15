@@ -246,3 +246,30 @@ Verification:
 - **Unit:** the full suite passed, 153 files and 1,046 tests, with new assertions for search focus return, Escape on a hover-opened dropdown and focus-out closing. Typecheck, lint, format and the build passed.
 - **Browser:** the skeleton and dropdown specs passed, 10 of 10.
 - **Not done in this batch:** under reduced motion, image hover still scales without animating (minor). Batches 2 and 3 and the owner-decision items from the audit are untouched.
+
+## Research audit, batch 2: reader layout polish (2026-11-14)
+
+Owner-approved batch from the research audit. Measured on the production build against `gavel-p5`.
+
+- **Article page:**
+  - A plain-text byline sits beside the date: "By {writers}", falling back to the article owner, as on previews. It is not a link, because existing browser tests locate author links on this page by name; the linked credits block is unchanged.
+  - The header, photo, body, topics and author card now share one 46rem column (left edge 352px, width 736px at 1440px). Keep reading stays wide.
+- **Section lead:** a new `ArchiveLead` replaces the overlay hero on archives. It spans the page (144–1296px, like the heading and cards), with the photo beside the byline, title and summary from 56rem. The section pill stays a link: over the photo's corner on small screens, above the byline on wide ones. `HomeHero` lost its now-unused section option.
+- **Mobile homepage:** below 45rem, each section row and Featured News keep their first story full size and show the rest as compact rows (thumbnail beside byline and title, no summary). The homepage at 375px went from 14,677px to 9,083px tall.
+- **How to Submit:** the illustration is capped at 22rem tall and the text at 46rem wide. At 1440×900 the first heading now starts at 813px, on the first screen (it was at 1,039px).
+- **Smaller changes:**
+  - The sticky band has a darker bottom edge, so it stays distinct over the Featured band.
+  - An empty category page links to "See all {section} stories".
+  - Search says "stories" throughout, and whole-word matches in result titles are marked.
+  - The footer has a "Back to top" link (`#top`, no script).
+
+Not done, on purpose:
+
+- **Section labels on section archives stay.** The audit suggested dropping them as repetitive, but the design system keeps them and an existing archive browser test relies on that link.
+- **The "Article owner" label in the credits block is unchanged.** Renaming or removing it is an owner decision.
+
+Verification:
+
+- **Unit:** frontend and app tests passed (403), with new tests for the byline, title highlighting (no HTML parsing, punctuation in queries), and the empty-state link. Typecheck, lint, format and the build passed.
+- **Flake noted:** in one full-suite run, an unrelated dashboard page test failed once under load and passed 3 of 3 alone.
+- **Browser:** measurements above; no horizontal scroll at 375px on home or a section; Back to top returns to 0 without a skeleton; no console errors. The skeleton and dropdown specs passed, 10 of 10.

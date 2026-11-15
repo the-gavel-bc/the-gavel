@@ -195,6 +195,8 @@
   .bar {
     position: sticky;
     top: 0;
+    /* A darker edge keeps the band distinct over the blue Featured band. */
+    border-bottom: 1px solid rgb(20 22 28 / 22%);
   }
   .menu[open] > .toggle {
     display: none;

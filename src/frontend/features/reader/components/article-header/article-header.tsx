@@ -3,6 +3,17 @@ import Link from "next/link";
 import type { PublicArticle } from "@/backend/public-articles/public-article/public-article";
 import styles from "./article-header.module.css";
 
+// Credited writers in order, or the article owner when none are credited,
+// matching the byline on previews.
+const byline = (article: PublicArticle) => {
+  const writers = article.contributors
+    .filter((person) => person.role === "writer")
+    .sort((a, b) => a.displayOrder - b.displayOrder);
+  return (writers.length ? writers : [article.owner])
+    .map((person) => person.displayName)
+    .join(", ");
+};
+
 export function ArticleHeader({ article }: { article: PublicArticle }) {
   return (
     <header className={styles.header}>
@@ -12,6 +23,9 @@ export function ArticleHeader({ article }: { article: PublicArticle }) {
       <h1>{article.title}</h1>
       {article.excerpt && <p className={styles.dek}>{article.excerpt}</p>}
       <p className={styles.date}>
+        {/* Plain text; the credits block below links to author pages. */}
+        <span>By {byline(article)}</span>
+        <span aria-hidden="true"> · </span>
         <time dateTime={article.publishedAt}>
           {new Intl.DateTimeFormat("en-US", {
             dateStyle: "long",

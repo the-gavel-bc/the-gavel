@@ -51,6 +51,7 @@
 ### Task 1: Scaffold the web application and quality toolchain
 
 **Files:**
+
 - Create: `package.json`
 - Create: `pnpm-lock.yaml`
 - Create: `.nvmrc`
@@ -72,6 +73,7 @@
 - Modify: `docs/decisions/README.md`
 
 **Interfaces:**
+
 - Consumes: approved architecture and design documents.
 - Produces: scripts `dev`, `build`, `start`, `lint`, `format:check`, `typecheck`, `test`, `test:db`, and `test:e2e`; the `@/*` import alias; a renderable root page.
 
@@ -115,6 +117,7 @@ git commit -m "chore: scaffold application foundation"
 ### Task 2: Add typed environment validation
 
 **Files:**
+
 - Create: `.env.example`
 - Create: `src/lib/env/server.ts`
 - Create: `src/lib/env/public.ts`
@@ -124,6 +127,7 @@ git commit -m "chore: scaffold application foundation"
 - Modify: `docs/deployment.md`
 
 **Interfaces:**
+
 - Consumes: Node runtime and Zod from Task 1.
 - Produces: `getServerEnv(source?: NodeJS.ProcessEnv): ServerEnv` and `getPublicEnv(source?: PublicEnvSource): PublicEnv`; no other module reads `process.env` directly.
 
@@ -159,6 +163,7 @@ git commit -m "feat: validate runtime configuration"
 ### Task 3: Build the accessible application shells
 
 **Files:**
+
 - Create: `src/app/globals.css`
 - Create: `src/components/site/skip-link.tsx`
 - Create: `src/components/site/site-header.tsx`
@@ -173,6 +178,7 @@ git commit -m "feat: validate runtime configuration"
 - Modify: `src/app/page.tsx`
 
 **Interfaces:**
+
 - Consumes: root layout and CSS support from Task 1.
 - Produces: `PublicShell({ children }: PropsWithChildren)`, `DashboardShell({ children, displayName, isAdmin }: DashboardShellProps)`, and shared link/button primitives.
 
@@ -208,6 +214,7 @@ git commit -m "feat: add accessible application shells"
 ### Task 4: Create the local Supabase membership boundary
 
 **Files:**
+
 - Create: `supabase/config.toml`
 - Create: `supabase/migrations/20261017000000_foundation_identity.sql`
 - Create: `supabase/seed.sql`
@@ -218,6 +225,7 @@ git commit -m "feat: add accessible application shells"
 - Modify: `docs/security-and-permissions.md`
 
 **Interfaces:**
+
 - Consumes: local Supabase CLI and approved profile/membership model.
 - Produces: `public.profiles`, `public.memberships`, enum `public.app_role`, RLS/grants, synthetic fixtures, and generated `Database` TypeScript type.
 
@@ -264,6 +272,7 @@ git commit -m "feat: establish membership data boundary"
 ### Task 5: Integrate Supabase sessions and protect the dashboard
 
 **Files:**
+
 - Create: `src/lib/supabase/browser.ts`
 - Create: `src/lib/supabase/server.ts`
 - Create: `src/lib/supabase/proxy.ts`
@@ -280,6 +289,7 @@ git commit -m "feat: establish membership data boundary"
 - Modify: `src/components/site/site-header.tsx`
 
 **Interfaces:**
+
 - Consumes: validated environment access from Task 2, shells from Task 3, and generated database types/tables from Task 4.
 - Produces: `createBrowserSupabaseClient()`, `createServerSupabaseClient()`, `refreshSession(request)`, `getCurrentAccess(): Promise<AccessState>`, and `requireActiveMembership(): Promise<ActiveMembership>`.
 - `AccessState` is a discriminated union: `signedOut | pending | active`, with active carrying `userId`, `profileId`, `displayName`, and `role`.
@@ -331,6 +341,7 @@ git commit -m "feat: protect dashboard membership access"
 ### Task 6: Add CI and close the foundation milestone
 
 **Files:**
+
 - Create: `.github/workflows/ci.yml`
 - Modify: `README.md`
 - Modify: `docs/architecture.md`
@@ -340,6 +351,7 @@ git commit -m "feat: protect dashboard membership access"
 - Modify: `docs/testing.md`
 
 **Interfaces:**
+
 - Consumes: all scripts and checks from Tasks 1–5.
 - Produces: one CI workflow that installs with the frozen lockfile and runs formatting, lint, types, unit/component tests, local Supabase reset/pgTAP/lint/type-generation drift, production build, and Playwright smoke/access tests.
 

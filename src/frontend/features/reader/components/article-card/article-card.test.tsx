@@ -84,4 +84,33 @@ describe("reader primitives", () => {
       "/sections/news",
     );
   });
+  it("marks whole search words in the title without parsing HTML", () => {
+    render(
+      <ReaderSurface>
+        <ArticleCard
+          article={{ ...article, title: "A campus story <b>campuswide</b>" }}
+          highlight="CAMPUS (story"
+        />
+      </ReaderSurface>,
+    );
+    const marks = [...document.querySelectorAll("mark")].map(
+      (mark) => mark.textContent,
+    );
+    expect(marks).toEqual(["campus", "story"]);
+    expect(screen.getByRole("heading")).toHaveTextContent(
+      "A campus story <b>campuswide</b>",
+    );
+    expect(document.querySelector("h3 b")).toBeNull();
+  });
+  it("offers a way forward from an empty archive", () => {
+    render(
+      <ReaderState
+        kind="empty"
+        action={{ href: "/sections/sports", label: "See all Sports stories" }}
+      />,
+    );
+    expect(
+      screen.getByRole("link", { name: /See all Sports stories/ }),
+    ).toHaveAttribute("href", "/sections/sports");
+  });
 });

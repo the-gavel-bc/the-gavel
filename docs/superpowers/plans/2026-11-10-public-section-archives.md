@@ -21,7 +21,6 @@ Status: implemented and locally verified on `feat/public-section-archives`, base
 
 Rollback: revert application consumers and resolver; no migration or stored-data change is required.
 
-
 ## Verification record
 
 - Backend and archive UI tests first failed because their implementation modules were missing; the first implementation passed twelve focused cases. Expanded route/query/navigation regression coverage passed 23 cases.

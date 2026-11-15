@@ -64,29 +64,3 @@
   outline: 3px solid var(--reader-blue);
   outline-offset: 4px;
 }
-/* Section label as a pill, as in the demo's hero. */
-.section {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  margin-bottom: 0.75rem;
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  color: #fff;
-  background: var(--reader-blue);
-  font: 700 0.6875rem/1.4 var(--reader-sans);
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  text-decoration: none;
-  transition: background var(--reader-fast) var(--reader-ease);
-}
-/* Keeps a 44px tap target around the slim pill. */
-.section::before {
-  position: absolute;
-  inset: -0.5rem 0;
-  content: "";
-}
-.section:hover {
-  background: var(--reader-band);
-  text-decoration: underline;
-}

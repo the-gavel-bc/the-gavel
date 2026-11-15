@@ -20,7 +20,7 @@ import { SearchResults } from "./search-results";
 it("renders instructions without pretending an empty query was searched", () => {
   render(<SearchResults result={{ kind: "prompt" }} query="" />);
   expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-    "Search articles",
+    "Search stories",
   );
   expect(screen.queryByText(/No stories/)).toBeNull();
 });

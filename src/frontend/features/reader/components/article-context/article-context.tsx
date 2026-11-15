@@ -67,7 +67,7 @@ export function ArticleContext({
       )}
       <p>
         <Link className={styles.search} href="/search">
-          Search articles
+          Search stories
         </Link>
       </p>
     </div>

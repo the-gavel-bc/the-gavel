@@ -1,11 +1,12 @@
 import Link from "next/link";
+import { sectionHref } from "@/shared/reader/section-link/section-link";
 import type { ReactNode } from "react";
 import type { PublicArchiveResult } from "@/backend/public-articles/public-archive/public-archive";
 import { ArchiveHeader } from "../archive-header/archive-header";
 import { ArticleGrid } from "../reader-layout/reader-layout";
 import { ArticleCard } from "../article-card/article-card";
 import { ArticlePagination } from "../pagination/pagination";
-import { HomeHero } from "../home-hero/home-hero";
+import { ArchiveLead } from "./archive-lead";
 import { ReaderState } from "../reader-states/reader-states";
 import styles from "./archive-grid.module.css";
 
@@ -47,7 +48,7 @@ export function ArchiveGrid({
       {introduction}
       {lead && (
         <div className={styles.lead}>
-          <HomeHero article={lead} showSection />
+          <ArchiveLead article={lead} />
         </div>
       )}
       {cards.length > 0 && (
@@ -61,7 +62,17 @@ export function ArchiveGrid({
         (result.continuation ? (
           <h2>No more articles</h2>
         ) : (
-          <ReaderState kind="empty" />
+          <ReaderState
+            kind="empty"
+            action={
+              archive.category && archive.section
+                ? {
+                    href: sectionHref(archive.section),
+                    label: `See all ${archive.section.name} stories`,
+                  }
+                : undefined
+            }
+          />
         ))}
       {result.continuation && (
         <p className={styles.newest}>

@@ -174,7 +174,7 @@ it("omits empty optional groups rather than fabricating a byline, biography or i
   expect(
     screen.queryByRole("heading", { name: "Keep reading" }),
   ).not.toBeInTheDocument();
-  expect(screen.getByRole("link", { name: "Search articles" })).toHaveAttribute(
+  expect(screen.getByRole("link", { name: "Search stories" })).toHaveAttribute(
     "href",
     "/search",
   );

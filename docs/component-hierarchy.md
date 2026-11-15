@@ -235,7 +235,6 @@ SearchForm supplies the labeled native GET query to navigation, results and reco
 
 The mounted private form keeps its original draft/published save mode. If a reviewed editable snapshot has a different status, recovery does not adopt its fields or version: it retains local input, blocks stale-mode saves and offers an explicit full Reload article action. The existing dirty-input unload warning remains active. Same-status deliberate loads still preserve the previous local snapshot; unresolved writes remain ineligible for recovery. No publication or mutation authority changes.
 
-
 ## Canonical section-root links
 
 Reader navigation, footer, story cards/heroes/headers, home section links and archive breadcrumbs/chips use the browser-safe `shared/reader/section-link` helper. The approved case-insensitive `Letter to the Editor` label maps section roots to `/letters`; other roots retain encoded section slugs. Category links stay `/sections/<section>/categories/<category>`, including letters categories. Existing routes, redirects, metadata policy and publication checks are unchanged.
