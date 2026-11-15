@@ -643,3 +643,31 @@ it("retries the original caption and retains newer caption input", async () => {
   expect(mocks.setImage).toHaveBeenNthCalledWith(2, command);
   expect(screen.getByLabelText("Caption")).toHaveValue("Newer caption");
 });
+
+it("asks before removing a published article's photo, and marks it destructive", async () => {
+  const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+  try {
+    render(
+      <ArticleMedia
+        article={article}
+        published
+        initialImage={{
+          assetId,
+          altText: "Current",
+          credit: "The Gavel",
+          caption: null,
+        }}
+        disabled={false}
+        onCommit={vi.fn()}
+      />,
+    );
+    const remove = screen.getByRole("button", { name: "Remove image" });
+    expect(remove).toHaveAttribute("data-variant", "danger");
+    fireEvent.click(remove);
+    expect(confirm).toHaveBeenCalledOnce();
+    // Declined: nothing is sent.
+    expect(mocks.setImage).not.toHaveBeenCalled();
+  } finally {
+    confirm.mockRestore();
+  }
+});

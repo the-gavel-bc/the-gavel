@@ -127,7 +127,13 @@ export function DraftTaxonomyFields({
               Choose up to {cap}. Categories must match the selected section.
               Changing section keeps existing selections until you remove them.
             </p>
-            {!rows.length && <p>No {label.toLowerCase()} are available.</p>}
+            {!rows.length && (
+              <p>
+                {draft.sectionId
+                  ? `No ${label.toLowerCase()} are available for this section.`
+                  : "Choose a section first."}
+              </p>
+            )}
             {rows.map((row) => (
               <label key={row.id} className={styles.choice}>
                 <input

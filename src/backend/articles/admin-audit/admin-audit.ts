@@ -25,6 +25,8 @@ export type AuditEvent = {
   createdAt: string;
   actorLabel: string;
   articleExists: boolean;
+  // Current title, when the article still exists and could be read.
+  articleTitle: string | null;
 };
 export type AuditPage = { items: AuditEvent[]; nextCursor: string | null };
 
@@ -109,6 +111,22 @@ export async function listAuditEvents(input: unknown): Promise<AuditPage> {
       .array(rowSchema)
       .max(pageSize + 1)
       .parse(data);
+    // Titles for the listed articles; administrators may read every article.
+    // A failed lookup only loses the titles, not the activity list.
+    const ids = [
+      ...new Set(
+        rows.filter((row) => row.article_exists).map((row) => row.resource_id),
+      ),
+    ];
+    const titles = new Map<string, string>();
+    if (ids.length) {
+      const found = await client
+        .from("articles")
+        .select("id, title")
+        .in("id", ids);
+      for (const article of found.data ?? [])
+        titles.set(article.id, article.title);
+    }
     const items = rows.slice(0, pageSize).map((row) => ({
       id: row.event_id,
       action: row.action,
@@ -116,6 +134,7 @@ export async function listAuditEvents(input: unknown): Promise<AuditPage> {
       createdAt: row.created_at,
       actorLabel: row.actor_label,
       articleExists: row.article_exists,
+      articleTitle: titles.get(row.resource_id) ?? null,
     }));
     const last = items.at(-1);
     return {

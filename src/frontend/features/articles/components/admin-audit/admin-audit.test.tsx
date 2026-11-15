@@ -13,6 +13,7 @@ it("renders safe action, actor, resource and timestamp with filtered pagination"
             action: "article.archived",
             actorLabel: "Editor",
             articleExists: true,
+            articleTitle: "Budget vote",
             resourceId: "00000000-0000-0000-0000-000000000002",
             createdAt: "2026-11-05T12:00:00+00:00",
           },
@@ -29,7 +30,9 @@ it("renders safe action, actor, resource and timestamp with filtered pagination"
     "datetime",
     "2026-11-05T12:00:00+00:00",
   );
-  expect(screen.getByRole("link", { name: /View article/ })).toHaveAttribute(
+  expect(
+    screen.getByRole("link", { name: "View “Budget vote”" }),
+  ).toHaveAttribute(
     "href",
     "/dashboard/admin/articles/00000000-0000-0000-0000-000000000002",
   );
@@ -53,6 +56,7 @@ it("does not link prior activity to a deleted article", () => {
             resourceId: "00000000-0000-0000-0000-000000000002",
             createdAt: "2026-11-05T12:00:00+00:00",
             articleExists: false,
+            articleTitle: null,
           },
         ],
       }}

@@ -115,7 +115,12 @@ export function ArticleLifecycleControls({
             ? "Restore only when the article and its images are still ready for publication."
             : "Archive to remove this article from circulation."}
       </p>
-      <Button type="button" disabled={blocked} onClick={run}>
+      <Button
+        type="button"
+        variant={status === "published" ? "danger" : undefined}
+        disabled={blocked}
+        onClick={run}
+      >
         {pending
           ? `${progressVerb}…`
           : retryCommand

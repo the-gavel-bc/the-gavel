@@ -36,6 +36,7 @@ export function ArticleMedia({
   onDirtyChange,
   onBusyChange,
   initialFile,
+  published = false,
 }: {
   article: DraftArticle;
   initialImage: MainImage | null;
@@ -45,6 +46,8 @@ export function ArticleMedia({
   onBusyChange?: (busy: boolean) => void;
   /** A file chosen before the draft existed; uploaded once on mount. */
   initialFile?: File | null;
+  /** Readers can see this article, so removing its photo asks first. */
+  published?: boolean;
 }) {
   const [image, setImage] = useState(initialImage);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -428,15 +431,24 @@ export function ArticleMedia({
         {image && (
           <Button
             type="button"
+            variant="danger"
             disabled={mutationLocked}
-            onClick={() =>
+            onClick={() => {
+              // Readers see a published article's photo, so confirm first.
+              if (
+                published &&
+                !window.confirm(
+                  "Remove the main image from this published article? Readers will stop seeing it.",
+                )
+              )
+                return;
               void commit({
                 assetId: null,
                 altText: null,
                 credit: null,
                 caption: null,
-              })
-            }
+              });
+            }}
           >
             Remove image
           </Button>

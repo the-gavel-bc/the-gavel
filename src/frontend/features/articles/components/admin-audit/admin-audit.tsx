@@ -68,7 +68,9 @@ export function AdminAudit({
                   href={`/dashboard/admin/articles/${event.resourceId}`}
                   prefetch={false}
                 >
-                  View article {event.resourceId}
+                  {event.articleTitle
+                    ? `View “${event.articleTitle}”`
+                    : `View article ${event.resourceId}`}
                 </Link>
               )}
             </li>

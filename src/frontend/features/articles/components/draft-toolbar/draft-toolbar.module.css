@@ -5,6 +5,10 @@
   display: grid;
   gap: var(--space-3);
   padding: var(--space-3);
+  /* Stays in view while writing a long body. */
+  position: sticky;
+  top: var(--space-2);
+  z-index: 1;
 }
 .buttons {
   display: flex;

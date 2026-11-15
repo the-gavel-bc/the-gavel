@@ -58,3 +58,8 @@ summary {
     scroll-padding-top: 4.5rem;
   }
 }
+
+/* The editor's sticky save bar must not cover the focused field. */
+html:has([data-draft-save-bar]) {
+  scroll-padding-bottom: 6rem;
+}

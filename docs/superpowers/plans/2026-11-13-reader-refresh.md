@@ -273,3 +273,30 @@ Verification:
 - **Unit:** frontend and app tests passed (403), with new tests for the byline, title highlighting (no HTML parsing, punctuation in queries), and the empty-state link. Typecheck, lint, format and the build passed.
 - **Flake noted:** in one full-suite run, an unrelated dashboard page test failed once under load and passed 3 of 3 alone.
 - **Browser:** measurements above; no horizontal scroll at 375px on home or a section; Back to top returns to 0 without a skeleton; no console errors. The skeleton and dropdown specs passed, 10 of 10.
+
+## Research audit, batch 3: staff desk fixes (2026-11-14)
+
+Owner-approved batch from the research audit. Checked signed in as the synthetic administrator on the production build against `gavel-p5`, browsing only; nothing was saved or published.
+
+- **Mobile save bar:** at 375px the bar was 150px tall and covered focused fields. It is now one compact row, 62px tall: save status and button, with the visibility note hidden on small screens. The editor also sets `scroll-padding-bottom`. Tabbing through the editor, 0 of 35 focus stops were mostly covered.
+- **Destructive actions:**
+  - `Button` gains a `variant="danger"` (outlined red). Remove image and Archive article use it.
+  - Plain dashboard buttons take `data-variant="danger"`; Deactivate contributor and Deactivate member use it.
+  - Remove image asks for confirmation when the article is published. Drafts are unchanged, so the existing draft browser test needs no dialog handling.
+- **Article management filters:** on phones the fields were about 105px tall, because a 12rem flex basis became a height in the column layout. They are 69px now (label plus field).
+- **Article activity:** links show the article's current title ("View “…”") instead of its ID.
+  - **Decision:** titles come from a second read of `articles` (id and title only) under the administrator's own session and the existing owner-or-admin read policy. No migration or RPC change was needed.
+  - If that read fails, the list still renders with IDs.
+- **Smaller fixes:**
+  - Nested groups in the editor (categories, tags, contributors) no longer touch their neighbours.
+  - Adjacent plain buttons have an 8px gap.
+  - The formatting toolbar is sticky while writing.
+  - Categories say "Choose a section first." before a section is picked.
+  - The "Article body" label is bold like the other labels.
+
+Not in this batch (larger, or needing a decision): a thumbnail for the attached photo, restyling Memberships, Contributors and Taxonomy to the refreshed card rows, Status and Search filters on My articles, simpler homepage-curation buttons, and showing times in Boston time instead of UTC.
+
+Verification:
+
+- **Unit:** the audit adapter and article component tests passed (163), with new tests for the title lookup and its failure fallback, and for the published Remove image confirmation and danger marking. The full suite passed, 153 files and 1,051 tests; typecheck, lint, format and the build passed.
+- **Browser:** the measurements above, plus no horizontal scroll at 375px on Article management.

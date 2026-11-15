@@ -115,6 +115,10 @@
     align-items: stretch;
     flex-direction: column;
   }
+  /* In a column the 12rem flex basis would become each field's height. */
+  .field {
+    flex: 0 0 auto;
+  }
   .apply {
     width: 100%;
   }
