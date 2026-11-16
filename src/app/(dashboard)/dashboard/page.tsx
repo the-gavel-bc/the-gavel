@@ -4,18 +4,40 @@ import { LinkButton } from "@/frontend/components/ui/link-button/link-button";
 import Link from "next/link";
 import { requireActiveMembership } from "@/backend/auth/access/access";
 import { getMyArticlesPage } from "@/backend/articles/draft-queries/draft-queries";
-import { ArticleList } from "@/frontend/features/articles/components/article-list/article-list";
+import {
+  ArticleFilters,
+  ArticleList,
+} from "@/frontend/features/articles/components/article-list/article-list";
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ cursor?: string | string[] }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   await requireActiveMembership();
-  const { cursor } = await searchParams;
+  const { cursor, status: rawStatus, search: rawSearch } = await searchParams;
+  const statuses = ["all", "draft", "published", "archived"] as const;
+  const status =
+    statuses.find((value) => value === rawStatus) ?? ("all" as const);
+  const search = typeof rawSearch === "string" ? rawSearch.trim() : "";
+  // Filters travel with every page link.
+  const filters = new URLSearchParams();
+  if (status !== "all") filters.set("status", status);
+  if (search) filters.set("search", search);
+  const filtered = filters.size > 0;
   let page;
   try {
-    if (Array.isArray(cursor)) throw new Error("Invalid article page request.");
-    page = await getMyArticlesPage({ cursor });
+    if (
+      Array.isArray(cursor) ||
+      Array.isArray(rawStatus) ||
+      Array.isArray(rawSearch) ||
+      (rawStatus !== undefined && rawStatus !== status)
+    )
+      throw new Error("Invalid article page request.");
+    page = await getMyArticlesPage({
+      cursor,
+      status,
+      ...(search ? { search } : {}),
+    });
   } catch (error) {
     unstable_rethrow(error);
     const retryHref =
@@ -38,12 +60,25 @@ export default async function DashboardPage({
       <h1>My articles</h1>
       {cursor !== undefined && (
         <p>
-          <Link href="/dashboard" prefetch={false}>
+          <Link
+            href={filtered ? `/dashboard?${filters}` : "/dashboard"}
+            prefetch={false}
+          >
             Newest articles
           </Link>
         </p>
       )}
-      <ArticleList page={page} />
+      <ArticleFilters
+        key={`filters:${status}:${search}`}
+        status={status}
+        search={search}
+      />
+      <ArticleList
+        key={`${status}:${search}`}
+        page={page}
+        status={status}
+        search={search}
+      />
     </>
   );
 }

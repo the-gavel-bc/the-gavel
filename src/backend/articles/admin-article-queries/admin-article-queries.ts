@@ -9,8 +9,8 @@ import {
   isDraftUuid,
 } from "../../../shared/articles/draft-cursor/draft-cursor";
 
-const statusSchema = z.enum(["all", "draft", "published", "archived"]);
-const searchSchema = z
+export const statusSchema = z.enum(["all", "draft", "published", "archived"]);
+export const searchSchema = z
   .string()
   .trim()
   .max(80)

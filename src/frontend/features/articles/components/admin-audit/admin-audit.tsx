@@ -16,7 +16,8 @@ const labels: Record<AuditAction, string> = {
 const date = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
   timeStyle: "short",
-  timeZone: "UTC",
+  // Staff work in Boston: Eastern time, labelled "ET".
+  timeZone: "America/New_York",
 });
 
 export function AdminAudit({
@@ -58,7 +59,7 @@ export function AdminAudit({
               <p>By {event.actorLabel}</p>
               <p>
                 <time dateTime={event.createdAt}>
-                  {date.format(new Date(event.createdAt))} UTC
+                  {date.format(new Date(event.createdAt))} ET
                 </time>
               </p>
               {!event.articleExists ? (

@@ -32,6 +32,7 @@ const row = {
   section_id: profileId,
   edit_version: 2,
   updated_at: updatedAt,
+  section: { name: "News" },
 };
 beforeEach(() => {
   vi.clearAllMocks();
@@ -53,6 +54,7 @@ describe("own article page", () => {
           slug: "draft",
           status: "draft",
           sectionId: profileId,
+          sectionName: "News",
           version: 2,
           updatedAt,
         },
@@ -65,11 +67,31 @@ describe("own article page", () => {
       const url = new URL(String(http.network.mock.calls[0][0]));
       expect(url.searchParams.get("owner_profile_id")).toBe(`eq.${profileId}`);
       expect(url.searchParams.get("select")).toBe(
-        "id,title,slug,status,section_id,edit_version,updated_at",
+        "id,title,slug,status,section_id,edit_version,updated_at,section:sections!articles_section_id_fkey(name)",
       );
+      // No filters unless asked for.
+      expect(url.searchParams.get("status")).toBeNull();
+      expect(url.searchParams.get("title")).toBeNull();
       expect(url.searchParams.get("order")).toBe("updated_at.desc,id.desc");
       expect(url.searchParams.get("limit")).toBe("2");
       expect(mocks.connection).toHaveBeenCalledOnce();
+    },
+  );
+  it("filters by status and a safe title search, still owner-scoped", async () => {
+    http.respond([]);
+    await getMyArticlesPage({ status: "published", search: " O'Neill-1 " });
+    const url = new URL(String(http.network.mock.calls[0][0]));
+    expect(url.searchParams.get("owner_profile_id")).toBe(`eq.${profileId}`);
+    expect(url.searchParams.get("status")).toBe("eq.published");
+    expect(url.searchParams.get("title")).toBe("ilike.%O'Neill-1%");
+  });
+  it.each([{ status: "deleted" }, { search: "100%" }, { search: "a,b)" }])(
+    "rejects an unknown status or unsafe search before a read: %o",
+    async (input) => {
+      await expect(getMyArticlesPage(input)).rejects.toThrow(
+        "Invalid article page request.",
+      );
+      expect(http.network).not.toHaveBeenCalled();
     },
   );
   it("uses default bounds and a precision-preserving keyset", async () => {

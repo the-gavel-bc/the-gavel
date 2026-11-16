@@ -314,9 +314,19 @@ export function ArticleMedia({
       </p>
       {disabled && <p>Save your draft changes before managing its image.</p>}
       {image && (
-        <p>
-          Attached image: {image.altText} — {image.credit}
-        </p>
+        <>
+          {/* Private media route: only the owner or an administrator can load it. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className={styles.preview}
+            src={`/api/articles/${article.id}/media/${image.assetId}`}
+            alt={image.altText}
+            loading="lazy"
+          />
+          <p>
+            Attached image: {image.altText} — {image.credit}
+          </p>
+        </>
       )}
       <div className={styles.fields}>
         <label htmlFor="article-image-file">Image file</label>

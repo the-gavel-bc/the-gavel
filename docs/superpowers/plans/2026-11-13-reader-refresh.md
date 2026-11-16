@@ -300,3 +300,37 @@ Verification:
 
 - **Unit:** the audit adapter and article component tests passed (163), with new tests for the title lookup and its failure fallback, and for the published Remove image confirmation and danger marking. The full suite passed, 153 files and 1,051 tests; typecheck, lint, format and the build passed.
 - **Browser:** the measurements above, plus no horizontal scroll at 375px on Article management.
+
+## Research audit: remaining staff desk items (2026-11-16)
+
+The owner asked for the five desk items left out of batch 3. Checked signed in as the synthetic administrator on the production build against `gavel-p5`, browsing and filtering only; nothing was saved.
+
+- **Attached photo thumbnail:** the editor shows the attached main photo (320px wide) above its alt text and credit. It loads from the existing private media route, so only the owner or an administrator can fetch it.
+- **Times in Eastern time:** My articles, Article management, Article activity and Membership activity show `America/New_York` time with an "ET" label instead of UTC.
+- **Homepage curation:**
+  - Catalog buttons read "Set as lead", "Featured News" and "Read This". Their accessible names still include the story title, so existing tests and screen readers are unaffected.
+  - The saved preview marks an automatic lead as "(automatic: newest story)".
+- **My articles filters:**
+  - A Status and title-search toolbar sits above the list, outside the "Your articles" region so its options are not mistaken for a row's status.
+  - `getMyArticlesPage` takes `status` and `search`, validated with the same schemas as Article management (search allows only letters, digits, spaces, `'` and `-`). It stays owner-scoped.
+  - **Decision:** the cursor is not bound to the filters. Page links carry both, and every row is the caller's own article.
+  - Rows show the section name, which tells same-titled articles apart.
+- **Memberships, Contributors and Taxonomy:**
+  - All three use a shared `admin-list` style: a filter toolbar card, card rows and state badges (Pending approval, Active, Inactive, and Member profile or Guest contributor).
+  - Pending membership requests come first on each page.
+  - The contributor create form sits in a titled "New guest contributor" card.
+  - Sections that fit on one page are listed in menu order.
+  - Text content and control names are unchanged.
+
+Verification:
+
+- **Unit:** the full suite passed, 153 files and 1,057 tests. New tests cover the My articles filters (query parameters, rejected status and unsafe search, filtered empty state, next-page link) and the filters sitting outside the list region. Typecheck, lint, format and the build passed.
+- **Caught by tests while building:**
+  - `Intl.DateTimeFormat` rejects `timeZoneName` together with `dateStyle`, so "ET" is appended as text.
+  - The list schema change briefly broke draft detail reads, which share the summary schema. The list now has its own schema.
+  - The status filter's "Published" option collided with a row's status inside the list region, which an existing browser test relies on. The filters moved outside the region.
+- **Browser:**
+  - My articles listed 20 rows with section names and ET times; `status=published&search=eagles` returned the 5 matching stories; `status=draft&search=eagles` showed the filtered empty state; an unknown status showed the retry state.
+  - The thumbnail loaded (1200px natural, 320px shown).
+  - Sections were listed Features, Opinions, Culture, Sports, Allston-Brighton, Letter to the Editor.
+  - No horizontal scroll at 375px on the five changed pages, and no console errors.
