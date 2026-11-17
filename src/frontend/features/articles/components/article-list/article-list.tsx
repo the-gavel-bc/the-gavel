@@ -68,7 +68,11 @@ export function ArticleList({
   return (
     <section aria-label="Your articles" className={styles.listing}>
       <div className={styles.actions}>
-        <LinkButton href="/dashboard/articles/new" prefetch={false}>
+        <LinkButton
+          href="/dashboard/articles/new"
+          prefetch={false}
+          className={styles.create}
+        >
           Create draft
         </LinkButton>
       </div>

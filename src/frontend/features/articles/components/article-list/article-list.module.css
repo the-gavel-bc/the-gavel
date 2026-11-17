@@ -91,3 +91,14 @@
     transition: none;
   }
 }
+/* The one thing most people come here to do, so it stands apart from the
+   blue controls around it. */
+.create {
+  background: #1e7a46;
+  border-color: #1e7a46;
+  color: #fff;
+}
+.create:hover {
+  background: #176037;
+  border-color: #176037;
+}

@@ -119,8 +119,11 @@ export default async function AdminTaxonomyPage({
                   )}
                   <span>Slug: {item.slug}</span>
                   {item.parentName && <span>Section: {item.parentName}</span>}
-                  {kind === "tag" && (
-                    <span>{item.referencedLive ? "In use" : "Unused"}</span>
+                  {(kind === "tag" ? item.referencedLive : item.inUse) && (
+                    <span>In use by stories, so it cannot be deleted</span>
+                  )}
+                  {kind === "tag" && !item.referencedLive && (
+                    <span>Unused</span>
                   )}
                 </p>
               </div>

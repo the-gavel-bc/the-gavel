@@ -298,7 +298,7 @@ export function DraftBodyImageControl({
               void discard();
           }}
         >
-          Discard unused upload
+          Delete image
         </Button>
       )}
       <p role="status">{status}</p>

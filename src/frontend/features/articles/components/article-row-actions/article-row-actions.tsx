@@ -121,7 +121,7 @@ export function ArticleRowActions({
       {article.status === "published" && (
         <Button
           type="button"
-          variant="secondary"
+          variant="danger"
           disabled={pending}
           onClick={() => void archive()}
           aria-label={`Archive article: ${article.title}`}

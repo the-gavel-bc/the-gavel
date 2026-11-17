@@ -7,6 +7,11 @@ import { listUnusedArticleUploads } from "@/backend/media/unused-article-uploads
 import type { UnusedArticleUploadsResult } from "@/backend/media/unused-article-uploads/unused-article-uploads";
 import { removeUnusedArticleImage } from "@/backend/media/media-removal/media-removal";
 
+const date = new Intl.DateTimeFormat("en-US", {
+  dateStyle: "medium",
+  timeStyle: "short",
+  timeZone: "America/New_York",
+});
 type Page = Extract<UnusedArticleUploadsResult, { ok: true }>;
 export function UnusedArticleUploads({
   articleId,
@@ -85,7 +90,7 @@ export function UnusedArticleUploads({
         ) {
           // Absence may mean a new reference, access changes, or completed cleanup.
           setMessage(
-            "The earlier upload is no longer on this page of unused uploads. Refreshing does not confirm deletion.",
+            "The earlier upload is no longer on this page of leftover images. Refreshing does not confirm deletion.",
           );
         }
       }
@@ -122,7 +127,7 @@ export function UnusedArticleUploads({
             : null,
         }));
         setRetryAsset(null);
-        setMessage("Unused upload discarded.");
+        setMessage("Image deleted.");
       } else if (result.code === "unavailable") {
         unresolved = true;
         setRetryAsset(assetId);
@@ -132,7 +137,7 @@ export function UnusedArticleUploads({
       } else {
         setRetryAsset(null);
         setMessage(
-          "This upload is no longer available for unused cleanup. This does not confirm deletion. Refresh the list.",
+          "This upload is no longer available to delete. This does not confirm deletion. Refresh the list.",
         );
       }
     } catch {
@@ -153,11 +158,12 @@ export function UnusedArticleUploads({
       (item) => !localAssetIds.has(item.assetId.toLowerCase()),
     ) ?? [];
   return (
-    <section aria-label="Unused uploads">
-      <h2>Unused uploads</h2>
+    <section aria-label="Leftover images">
+      <h2>Leftover images</h2>
       <p>
-        Discard uploads that are absent from saved content and retained
-        revisions. This permanently removes the unused file.
+        Pictures uploaded to this article that it does not use. Deleting one
+        removes the file for good. Pictures that are in your article are never
+        listed here.
       </p>
       {disabled && (
         <p>
@@ -170,15 +176,17 @@ export function UnusedArticleUploads({
         disabled={loading || busy}
         onClick={() => void load()}
       >
-        Refresh unused uploads
+        Check for leftover images
       </Button>
-      {loading && <p role="status">Loading unused uploads…</p>}
+      {loading && <p role="status">Looking for leftover images…</p>}
       {error && (
-        <p role="alert">Unable to load unused uploads. Refresh to retry.</p>
+        <p role="alert">
+          Unable to check for leftover images. Refresh to retry.
+        </p>
       )}
       {!loading && page && visible.length === 0 && (
         <p>
-          No unused uploads on this page. Images in your current input are
+          No leftover images on this page. Images in your current input are
           hidden.
         </p>
       )}
@@ -196,9 +204,7 @@ export function UnusedArticleUploads({
         <ul>
           {visible.map((item) => (
             <li key={item.assetId}>
-              <span>
-                Upload {item.assetId}, created {item.createdAt}
-              </span>{" "}
+              <span>Uploaded {date.format(new Date(item.createdAt))}</span>{" "}
               <Button
                 type="button"
                 disabled={
@@ -228,7 +234,7 @@ export function UnusedArticleUploads({
               >
                 {item.status === "deleting" || retryAsset === item.assetId
                   ? "Retry cleanup"
-                  : "Discard unused upload"}
+                  : "Delete image"}
               </Button>
             </li>
           ))}
@@ -240,7 +246,7 @@ export function UnusedArticleUploads({
           disabled={loading || busy}
           onClick={() => void load(page.nextCursor)}
         >
-          Next unused uploads
+          More leftover images
         </Button>
       )}
       {confirmDialog}

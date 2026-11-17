@@ -279,11 +279,11 @@ export function ArticleMedia({
     if (!target || disabled || busy || conflict || pendingWrite) return;
     setBusy(true);
     setError("");
-    setStatus("Discarding unused upload…");
+    setStatus("Deleting image…");
     try {
       const result = await removeUnusedArticleImage(target);
       if (!result.ok) {
-        setError(`Unused upload could not be removed (${result.code}). Retry.`);
+        setError(`Image could not be deleted (${result.code}). Retry.`);
         return;
       }
       setAssetId(null);
@@ -296,9 +296,9 @@ export function ArticleMedia({
         setCredit("");
         setCaption("");
       }
-      setStatus("Unused upload removed.");
+      setStatus("Image deleted.");
     } catch {
-      setError("Unused upload could not be removed. Retry.");
+      setError("Image could not be deleted. Retry.");
     } finally {
       setBusy(false);
     }
@@ -422,7 +422,7 @@ export function ArticleMedia({
                 void discardUpload();
             }}
           >
-            Discard unused upload
+            Delete image
           </Button>
         )}
         {cleanupAssetId && (

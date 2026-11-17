@@ -446,7 +446,7 @@ it.each(["draft", "published"] as const)(
       screen.getByRole("button", { name: "Start deferred image write" }),
     ).toBeVisible();
     expect(
-      await screen.findByRole("region", { name: "Unused uploads" }),
+      await screen.findByRole("region", { name: "Leftover images" }),
     ).toBeVisible();
     await waitFor(() =>
       expect(mocks.unused).toHaveBeenCalledWith(baseDraft.sectionId),
@@ -482,7 +482,7 @@ it("holds save, editing, lifecycle, and navigation guards during explicit cleanu
     />,
   );
   await userEvent.click(
-    await screen.findByRole("button", { name: "Discard unused upload" }),
+    await screen.findByRole("button", { name: "Delete image" }),
   );
   expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
   expect(
@@ -520,7 +520,7 @@ it("keeps lifecycle, save and navigation guarded across uncertain cleanup until 
     />,
   );
   await userEvent.click(
-    await screen.findByRole("button", { name: "Discard unused upload" }),
+    await screen.findByRole("button", { name: "Delete image" }),
   );
   await screen.findByRole("button", { name: "Retry cleanup" });
   expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
@@ -533,7 +533,7 @@ it("keeps lifecycle, save and navigation guarded across uncertain cleanup until 
   expect(event.defaultPrevented).toBe(true);
   mocks.unused.mockResolvedValue({ ok: true, items: [], nextCursor: null });
   await userEvent.click(
-    screen.getByRole("button", { name: "Refresh unused uploads" }),
+    screen.getByRole("button", { name: "Check for leftover images" }),
   );
   await screen.findByText(/Refreshing does not confirm deletion/);
   expect(
