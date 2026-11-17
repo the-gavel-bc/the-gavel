@@ -11,6 +11,12 @@
   margin-block: var(--space-4) var(--space-6);
   padding: var(--space-4);
 }
+.toolbar label.inline {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--space-2);
+}
 .toolbar label {
   display: grid;
   flex: 1 1 12rem;

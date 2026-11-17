@@ -1,6 +1,11 @@
 "use client";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
+import { Button } from "@/frontend/components/ui/button/button";
+import { CurationFeedback } from "./curation-feedback";
+import { useCuration } from "./use-curation";
+import styles from "./taxonomy-controls.module.css";
 import type { TaxonomyItem } from "@/backend/taxonomy/admin-taxonomy/admin-taxonomy";
 import { updateTaxonomyAction } from "@/backend/taxonomy/taxonomy-command/taxonomy-actions";
 import type {
@@ -26,6 +31,9 @@ export function TaxonomyControls({
   kind: "section" | "category";
 }) {
   const router = useRouter();
+  const { confirm, confirmDialog } = useConfirm();
+  const remover = useCuration();
+  const [open, setOpen] = useState(false);
   const [name, setName] = useState(item.name);
   const [order, setOrder] = useState(String(item.navigationOrder ?? 0));
   const [active, setActive] = useState(item.active ?? false);
@@ -58,7 +66,29 @@ export function TaxonomyControls({
       router.refresh();
     }
   }
-  function save() {
+  async function remove() {
+    if (remover.blocked || item.inUse) return;
+    if (
+      !(await confirm({
+        title: `Delete ${item.name}?`,
+        message:
+          kind === "section"
+            ? "The section and its categories are removed. Stories are not affected because none use them. This cannot be undone."
+            : "The category is removed. No story uses it. This cannot be undone.",
+        confirmLabel: "Delete",
+        cancelLabel: "Keep",
+        danger: true,
+      }))
+    )
+      return;
+    void remover.run({
+      kind: "deleteTaxonomy",
+      itemKind: kind,
+      requestId: crypto.randomUUID(),
+      id: item.id,
+    });
+  }
+  async function save() {
     const value = Number(order);
     if (
       blocked ||
@@ -76,9 +106,13 @@ export function TaxonomyControls({
     if (
       item.active &&
       !active &&
-      !window.confirm(
-        `Deactivate ${item.name}? Draft references remain but will need repair before saving.`,
-      )
+      !(await confirm({
+        title: `Deactivate ${item.name}?`,
+        message: "Draft references remain but will need repair before saving.",
+        confirmLabel: "Deactivate",
+        cancelLabel: "Cancel",
+        danger: true,
+      }))
     )
       return;
     void run({
@@ -94,74 +128,107 @@ export function TaxonomyControls({
   const labelLocked =
     kind === "category" && item.name.toLowerCase() === "outside of bc";
   return (
-    <section aria-label={`Manage ${item.name}`}>
-      <label>
-        Name
-        <input
-          value={name}
-          maxLength={120}
-          disabled={blocked || labelLocked}
-          onChange={(event) => setName(event.target.value)}
-        />
-      </label>
-      {labelLocked && <p>This category name awaits confirmation.</p>}
-      <label>
-        Navigation order
-        <input
-          type="number"
-          min="0"
-          max="2147483647"
-          step="1"
-          value={order}
-          disabled={blocked}
-          onChange={(event) => setOrder(event.target.value)}
-        />
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          checked={active}
-          disabled={blocked || (item.active === true && item.referencedLive)}
-          onChange={(event) => setActive(event.target.checked)}
-        />
-        Active
-      </label>
-      {item.referencedLive && (
-        <p>Published or archived references prevent deactivation.</p>
-      )}
-      <button type="button" onClick={save} disabled={blocked}>
-        Save {item.name}
-      </button>
-      {pending && <p role="status">Saving taxonomy…</p>}
-      {result?.ok && <p role="status">Taxonomy saved. Refreshing…</p>}
-      {result && !result.ok && (
-        <div role="alert">
-          <p>{messages[result.code]}</p>
-          {retry && (
-            <button
-              type="button"
-              disabled={pending}
-              onClick={() => void run(retry)}
-            >
-              Retry original request
-            </button>
+    <div className={styles.manage}>
+      <div className={styles.actions}>
+        <Button
+          type="button"
+          variant="secondary"
+          aria-expanded={open}
+          onClick={() => setOpen((value) => !value)}
+          aria-label={`${open ? "Close" : "Edit"} ${item.name}`}
+        >
+          {open ? "Close" : "Edit"}
+        </Button>
+        <Button
+          type="button"
+          variant="danger"
+          disabled={remover.blocked || item.inUse}
+          title={
+            item.inUse
+              ? "Stories use this, so it cannot be deleted. Deactivate it instead."
+              : undefined
+          }
+          onClick={() => void remove()}
+          aria-label={`Delete ${item.name}`}
+        >
+          Delete
+        </Button>
+      </div>
+      <CurationFeedback state={remover} />
+      {confirmDialog}
+      {open && (
+        <section aria-label={`Manage ${item.name}`} className={styles.panel}>
+          <label>
+            Name
+            <input
+              value={name}
+              maxLength={120}
+              disabled={blocked || labelLocked}
+              onChange={(event) => setName(event.target.value)}
+            />
+          </label>
+          {labelLocked && <p>This category name awaits confirmation.</p>}
+          <label>
+            Navigation order
+            <input
+              type="number"
+              min="0"
+              max="2147483647"
+              step="1"
+              value={order}
+              disabled={blocked}
+              onChange={(event) => setOrder(event.target.value)}
+            />
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={active}
+              disabled={
+                blocked || (item.active === true && item.referencedLive)
+              }
+              onChange={(event) => setActive(event.target.checked)}
+            />
+            Active
+          </label>
+          {item.referencedLive && (
+            <p>Published or archived references prevent deactivation.</p>
           )}
-          {["conflict", "not_found", "request_conflict"].includes(
-            result.code,
-          ) && (
-            <button
-              type="button"
-              onClick={() => {
-                setResult(null);
-                router.refresh();
-              }}
-            >
-              Reload taxonomy
-            </button>
+          <button type="button" onClick={save} disabled={blocked}>
+            Save {item.name}
+          </button>
+          {pending && <p role="status">Saving taxonomy…</p>}
+          {result?.ok && <p role="status">Taxonomy saved. Refreshing…</p>}
+          {result && !result.ok && (
+            <div role="alert">
+              <p>{messages[result.code]}</p>
+              {retry && (
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={() => void run(retry)}
+                >
+                  Retry original request
+                </button>
+              )}
+              {["conflict", "not_found", "request_conflict"].includes(
+                result.code,
+              ) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setResult(null);
+                    router.refresh();
+                  }}
+                >
+                  Reload taxonomy
+                </button>
+              )}
+            </div>
           )}
-        </div>
+          <noscript>Enable JavaScript to manage taxonomy.</noscript>
+        </section>
       )}
-      <noscript>Enable JavaScript to manage taxonomy.</noscript>
-    </section>
+    </div>
   );
 }

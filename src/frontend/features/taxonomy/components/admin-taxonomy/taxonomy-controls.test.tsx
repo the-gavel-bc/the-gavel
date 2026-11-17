@@ -1,10 +1,20 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
-const mocks = vi.hoisted(() => ({ action: vi.fn(), refresh: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+  action: vi.fn(),
+  curate: vi.fn(),
+  refresh: vi.fn(),
+}));
 vi.mock("@/backend/taxonomy/taxonomy-command/taxonomy-actions", () => ({
   updateTaxonomyAction: mocks.action,
 }));
+vi.mock(
+  "@/backend/taxonomy/taxonomy-curation/taxonomy-curation-action",
+  () => ({
+    curateTaxonomyAction: mocks.curate,
+  }),
+);
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: mocks.refresh }),
 }));
@@ -18,13 +28,10 @@ const item = {
   active: true,
   version: 1,
   referencedLive: false,
+  inUse: false,
 };
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.stubGlobal(
-    "confirm",
-    vi.fn(() => true),
-  );
 });
 it("retries an uncertain change with the same command", async () => {
   mocks.action
@@ -40,6 +47,7 @@ it("retries an uncertain change with the same command", async () => {
       replayed: true,
     });
   render(<TaxonomyControls item={item} kind="section" />);
+  await userEvent.click(screen.getByRole("button", { name: "Edit News" }));
   await userEvent.clear(screen.getByLabelText("Name"));
   await userEvent.type(screen.getByLabelText("Name"), "Newsroom");
   await userEvent.click(screen.getByRole("button", { name: "Save News" }));
@@ -69,8 +77,34 @@ it("keeps controls usable after a no-op and blocks live deactivation", async () 
       kind="section"
     />,
   );
+  await userEvent.click(screen.getByRole("button", { name: "Edit News" }));
   expect(screen.getByLabelText("Active")).toBeDisabled();
   await userEvent.click(screen.getByRole("button", { name: "Save News" }));
   await waitFor(() => expect(mocks.refresh).toHaveBeenCalledOnce());
   expect(screen.getByRole("button", { name: "Save News" })).toBeEnabled();
+});
+
+it("deletes an unused item only after an in-page confirmation", async () => {
+  mocks.curate.mockResolvedValue({ ok: true });
+  render(<TaxonomyControls item={item} kind="section" />);
+  await userEvent.click(screen.getByRole("button", { name: "Delete News" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Keep" }));
+  expect(mocks.curate).not.toHaveBeenCalled();
+  await userEvent.click(screen.getByRole("button", { name: "Delete News" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Delete" }));
+  await waitFor(() =>
+    expect(mocks.curate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: "deleteTaxonomy",
+        itemKind: "section",
+        id: item.id,
+      }),
+    ),
+  );
+  await waitFor(() => expect(mocks.refresh).toHaveBeenCalled());
+});
+
+it("cannot delete an item stories use", () => {
+  render(<TaxonomyControls item={{ ...item, inUse: true }} kind="section" />);
+  expect(screen.getByRole("button", { name: "Delete News" })).toBeDisabled();
 });

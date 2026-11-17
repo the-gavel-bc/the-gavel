@@ -50,6 +50,12 @@ export async function curateTaxonomyAction(
             p_target_id: value.targetId,
             p_request_id: value.requestId,
           });
+        case "deleteTaxonomy":
+          return client.rpc("delete_taxonomy", {
+            p_kind: value.itemKind,
+            p_id: value.id,
+            p_request_id: value.requestId,
+          });
         case "deleteTag":
           return client.rpc("delete_unused_tag", {
             p_id: value.id,

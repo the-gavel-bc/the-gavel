@@ -1,0 +1,80 @@
+/* Taxonomy catalog: kind tabs, then one compact row per item. */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-block: var(--space-4);
+}
+.tabs a {
+  background: var(--color-paper);
+  border: 1px solid var(--dash-line, #e3e6ee);
+  border-radius: 999px;
+  color: inherit;
+  font-weight: 600;
+  padding: var(--space-1) var(--space-4);
+  text-decoration: none;
+}
+.tabs a[aria-current="page"] {
+  background: var(--color-brand, #1e4aa8);
+  border-color: transparent;
+  color: #fff;
+}
+.tabs a:focus-visible {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 2px;
+}
+.items {
+  background: var(--color-paper);
+  border: 1px solid var(--dash-line, #e3e6ee);
+  border-radius: 14px;
+  list-style: none;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+}
+.item {
+  align-items: center;
+  display: grid;
+  gap: var(--space-2) var(--space-4);
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: var(--space-3) var(--space-4);
+}
+.item + .item {
+  border-block-start: 1px solid var(--dash-line, #e3e6ee);
+}
+.item h2 {
+  font-size: 1rem;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.meta {
+  color: var(--color-muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.875rem;
+  gap: var(--space-1) var(--space-3);
+  margin: var(--space-1) 0 0;
+}
+.chip {
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 0.125rem 0.625rem;
+}
+.chip[data-state="active"] {
+  background: #e8f5ec;
+  color: #1e6b3a;
+}
+.chip[data-state="inactive"] {
+  background: #eceef2;
+  color: #4a515c;
+}
+.note {
+  color: var(--color-muted);
+  margin-block: 0 var(--space-4);
+}
+@media (max-width: 40rem) {
+  .item {
+    grid-template-columns: 1fr;
+  }
+}

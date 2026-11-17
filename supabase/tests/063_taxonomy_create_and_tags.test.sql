@@ -84,9 +84,24 @@ select is(public.delete_unused_tag('a2000000-0000-0000-0000-000000000004','b0000
   'not_found','deleting again is not found');
 select is((select referenced_live from public.list_admin_taxonomy('tag',51)
   where id='a2000000-0000-0000-0000-000000000002'),true,'admin list shows tags in use');
+-- Delete (unused only)
+select is(public.delete_taxonomy('section','a1000000-0000-0000-0000-000000000001','b0000000-0000-0000-0000-000000000030')->>'code',
+  'conflict','a section a story uses cannot be deleted');
+select is(public.delete_taxonomy('category',(select id from public.categories where slug='fresh-category'),'b0000000-0000-0000-0000-000000000031')->>'ok',
+  'true','an unused category is deleted');
+select is(public.delete_taxonomy('section',(select id from public.sections where slug='new-section'),'b0000000-0000-0000-0000-000000000032')->>'ok',
+  'true','an unused section is deleted');
+select is(public.delete_taxonomy('section','a1000000-0000-0000-0000-0000000000ee','b0000000-0000-0000-0000-000000000033')->>'code',
+  'not_found','unknown section');
+select is((select in_use from public.list_admin_taxonomy('section',51) where id='a1000000-0000-0000-0000-000000000001'),true,
+  'the admin list marks an item a draft story uses');
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',true);
+select is(public.delete_taxonomy('section','a1000000-0000-0000-0000-000000000002','b0000000-0000-0000-0000-000000000034')->>'code',
+  'forbidden','author cannot delete taxonomy');
 reset role;
 select is((select count(*)::int from public.audit_events where action in
-  ('section.created','category.created','tag.renamed','tag.merged','tag.deleted')),6,
+  ('section.created','category.created','tag.renamed','tag.merged','tag.deleted',
+    'section.deleted','category.deleted')),8,
   'every change is audited once');
 select * from finish();
 rollback;

@@ -25,13 +25,10 @@ const tag = {
   active: null,
   version: null,
   referencedLive: true,
+  inUse: true,
 };
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.stubGlobal(
-    "confirm",
-    vi.fn(() => true),
-  );
   mocks.action.mockResolvedValue({ ok: true });
 });
 
@@ -51,10 +48,11 @@ it("merges a used tag only after confirmation and offers no delete", async () =>
   render(<TagControls item={tag} others={[{ id: other, name: "Beta" }]} />);
   expect(screen.queryByRole("button", { name: /Delete/ })).toBeNull();
   await userEvent.selectOptions(screen.getByLabelText("Merge into"), other);
-  vi.mocked(window.confirm).mockReturnValueOnce(false);
   await userEvent.click(screen.getByRole("button", { name: "Merge Alpha" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Cancel" }));
   expect(mocks.action).not.toHaveBeenCalled();
   await userEvent.click(screen.getByRole("button", { name: "Merge Alpha" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Merge" }));
   expect(mocks.action).toHaveBeenCalledWith(
     expect.objectContaining({ kind: "mergeTags", id, targetId: other }),
   );
@@ -67,6 +65,7 @@ it("deletes only unused tags and retries an uncertain request unchanged", async 
   render(<TagControls item={{ ...tag, referencedLive: false }} others={[]} />);
   expect(screen.queryByLabelText("Merge into")).toBeNull();
   await userEvent.click(screen.getByRole("button", { name: "Delete Alpha" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Delete" }));
   await userEvent.click(
     await screen.findByRole("button", { name: "Retry original request" }),
   );

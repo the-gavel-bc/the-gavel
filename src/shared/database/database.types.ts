@@ -771,6 +771,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      delete_taxonomy: {
+        Args: { p_id: string; p_kind: string; p_request_id: string };
+        Returns: Json;
+      };
       delete_unused_tag: {
         Args: { p_id: string; p_request_id: string };
         Returns: Json;
@@ -881,6 +885,7 @@ export type Database = {
           active: boolean;
           edit_version: number;
           id: string;
+          in_use: boolean;
           name: string;
           navigation_order: number;
           parent_name: string;
