@@ -81,3 +81,41 @@ Owner feedback after reviewing the stack. Built on branch `feat/desk-polish`, on
 Design risks: T4 deletes data, so it is limited to unused items and is irreversible except by recreating; T6 adds storage, so it reuses the existing image processing, bucket policy style and request receipts rather than a new service.
 
 **Round 2 notes:** photos are stored in the database (small, no Storage policy) rather than a new bucket. The in-page confirmation replaces `window.confirm` in the editor Cancel, memberships, taxonomy and tags only; other screens (homepage, lifecycle, media, deletion, profile reload, navigation guard) still use the browser dialog. Taxonomy deletion is blocked while any story of any status uses the item, and a section is deleted together with its (unused) categories. Per-person activity is `?user=<member id or listing id>` on the activity page.
+
+## Round 3 (2026-11-17): homepage curation redesign (plan only, not built)
+
+Done already in this round: the in-page "Article management" links are removed (homepage, activity and media pages; the sidebar keeps them), and the author URL text is removed from the profile form. The sidebar's "Article activity" entry is untouched; there was no in-page activity link to remove.
+
+**Goal:** the admin homepage page looks like the real homepage and has almost no text. Curators arrange stories in horizontal rows, using arrows, drag, or search-and-add.
+
+**Layout (top to bottom)**
+
+1. **Lead** slot: one large card (image, title, section), same proportions as the live hero.
+2. **Featured News** row: four slots in a horizontal strip, like the live featured band.
+3. **Read This** row: four slots in a strip.
+4. **Stories library:** a search field and a horizontal strip of published stories with left and right arrows to page through them (replacing the vertical text list and Next/First page buttons).
+5. **Save bar** (sticky): "Unsaved changes", Discard and Save. The long explanatory paragraphs, the "No curated stories" text and the saved-preview block go away; a slot's empty state is a dashed "Add story" tile.
+
+**Interactions**
+
+- Each filled card shows a left arrow, a right arrow (shift order within its row; disabled at the ends) and a remove button. These are the keyboard and touch path, so every action works without dragging.
+- Drag a card to reorder inside a row or to move it between Featured, Read This and Lead; drop on a full row is refused with a short message; dropping on Lead swaps the old lead into the dragged card's slot. Uses the browser's native drag and drop, no new dependency.
+- Library cards: click "Add" for a small menu (Lead, Featured News, Read This), or drag the card into a slot or empty tile.
+- Arrow buttons keep stable accessible names for tests: "Move X left in Featured News", "Move X right in Featured News", "Remove X from Featured News", "Set X as lead", "Add X to Featured News", "Add X to Read This". A polite live region announces moves and drops.
+
+**Unchanged:** the save contract (expected version, request id, exact retry, conflict reload, one story once, up to four per row, published only) and the navigation guard. No schema or API contract change beyond the open question below.
+
+**Slices (each reviewed once before the next)**
+
+- **H1 Layout and slots:** page structure, slot cards, arrows and remove, sticky save bar, text removed. Acceptance: existing save, retry and conflict behaviour and tests still pass; rows scroll horizontally at phone width.
+- **H2 Library strip:** search, arrow paging, Add menu. Acceptance: search keeps its character limits; adding respects the four-per-row and once-only rules; paging never loses unsaved selections.
+- **H3 Drag and drop:** reorder, move between rows, swap on lead, announcements. Acceptance: touch devices still work through the arrows; drop refusals are explained.
+- **H4 Tests and docs:** unit tests for move/swap/limits, browser spec update (arrow names), design-system note, screenshots of desktop and phone.
+
+**Open decisions for the owner**
+
+1. **Images on cards.** The live homepage is image-led. Admin cards need each story's main image, which the curation and story-list queries do not return today. Recommended: add the main-image id to those two reads (small SQL change, existing authorized preview route serves the image). Alternative: text-only cards with section and date.
+2. **Drop on a full row:** refuse (recommended) or replace the last card.
+3. **Library size:** show 12 stories per page in the strip (recommended) or keep the current page size.
+
+**Design risks:** drag and drop is not accessible alone, so arrows are mandatory and tested; horizontal strips can hide cards on small screens, so arrows stay visible and keyboard focus scrolls the card into view; reordering must never lose the version/request-id retry guarantees.
