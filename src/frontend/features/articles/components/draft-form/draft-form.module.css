@@ -59,15 +59,15 @@
   position: sticky;
   z-index: 2;
 }
-.saveActions {
+.saveLeft {
   align-items: center;
   display: flex;
   gap: var(--space-2);
-  /* Save stays at the far right even when the bar wraps. */
-  margin-inline-start: auto;
 }
 .saveText {
   color: var(--color-muted);
+  flex: 1 1 10rem;
+  text-align: center;
   font-size: 0.9375rem;
   min-width: 0;
 }
@@ -102,7 +102,7 @@
   .saveText p:not([role="status"]) {
     display: none;
   }
-  .saveActions {
+  .saveLeft {
     flex: none;
   }
 }
