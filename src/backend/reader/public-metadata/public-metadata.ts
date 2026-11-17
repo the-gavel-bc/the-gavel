@@ -128,14 +128,18 @@ export function publicArticleMetadata(article: PublicArticle): Metadata {
   });
   if (!result.openGraph) return result;
   const origin = getServerEnv().SITE_URL;
-  const profiles = [
+  const profiles: { displayName: string; slug: string | null }[] = [
     { displayName: article.owner.displayName, slug: article.owner.slug },
     ...article.contributors.filter((person) => person.role === "writer"),
   ];
   const seen = new Set<string>();
   const authors: { name: string; url: string }[] = [];
   for (const person of profiles) {
-    if (seen.has(person.slug) || !publicPath(`/authors/${person.slug}`))
+    if (
+      !person.slug ||
+      seen.has(person.slug) ||
+      !publicPath(`/authors/${person.slug}`)
+    )
       continue;
     seen.add(person.slug);
     authors.push({

@@ -13,7 +13,6 @@ const admin = [
   { href: "/dashboard/admin/audit", label: "Article activity" },
   { href: "/dashboard/admin/homepage", label: "Homepage" },
   { href: "/dashboard/admin/members", label: "Memberships" },
-  { href: "/dashboard/admin/contributors", label: "Contributors" },
   { href: "/dashboard/admin/taxonomy", label: "Taxonomy" },
   { href: "/dashboard/admin/site", label: "Site information" },
   { href: "/dashboard/admin/media-cleanup", label: "Media cleanup" },

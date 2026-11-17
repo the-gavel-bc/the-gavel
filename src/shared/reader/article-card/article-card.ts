@@ -7,7 +7,7 @@ export type PublicArticleCard = {
   publishedAt: string;
   section: { name: string; slug: string };
   owner: { displayName: string; slug: string };
-  writers: { displayName: string; slug: string }[];
+  writers: { displayName: string; slug: string | null }[];
   mainImage: {
     id: string;
     width: number;

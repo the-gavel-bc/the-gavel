@@ -220,6 +220,8 @@ Explicit interrupted-upload cancellation uses the existing uploading → deletin
 
 ## Author-created guest contributors
 
+Since 2026-11-16 these are one-off credits: each typed name creates its own credit-only profile (no account link) and is not reused across articles or suggested by search. Credit-only profiles are hidden from anonymous profile reads, so they have no public page. Existing guest credits were not rewritten; they follow the same rules. Orphaned credit-only rows (credits later removed from every article) are not deleted automatically, because retained revisions may still refer to them.
+
 Active members can search active profiles through `search_contributors(text)`, a bounded ten-result substring projection returning only ID, display name and slug. `create_guest_contributor(uuid,text)` accepts a request UUID and the existing trimmed 1–120-character profile-name contract, reuses an active case-insensitive match, or creates a no-login guest with the existing slug allocator. Actor/request receipts bind exact payloads and preserve replay; creation writes one profile audit event. Administrators retain profile editing/deactivation. Credits still grant no permissions. See the [editor plan](superpowers/plans/2026-11-12-editor-tags-contributors-photo.md).
 
 ## Main-photo caption

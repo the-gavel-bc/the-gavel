@@ -857,7 +857,7 @@ it.each(["search", "guest"])(
         name:
           kind === "search"
             ? "New Guest (new-guest)"
-            : "Add 'New Guest' as a new contributor",
+            : "Add 'New Guest' as a one-off credit",
       }),
     );
     await userEvent.selectOptions(screen.getByLabelText("Role 1"), "editor");
@@ -1073,7 +1073,7 @@ it("retains an uncertain guest request when adding a row after two-credit recove
     );
     await userEvent.click(
       await screen.findByRole("option", {
-        name: "Add 'New Guest' as a new contributor",
+        name: "Add 'New Guest' as a one-off credit",
       }),
     );
     await screen.findByRole("button", { name: "Retry contributor creation" });

@@ -33,7 +33,10 @@ export const publicArticleCardSchema = z.strictObject({
   publishedAt: timestamp,
   section: z.strictObject({ name: text(120, 1), slug: categorySlug }),
   owner: publicPerson,
-  writers: z.array(publicPerson).max(32),
+  // Credit-only people have no author page, so no slug.
+  writers: z
+    .array(z.strictObject({ displayName: text(120, 1), slug: slug.nullable() }))
+    .max(32),
   mainImage: z
     .strictObject({
       id: uuid,

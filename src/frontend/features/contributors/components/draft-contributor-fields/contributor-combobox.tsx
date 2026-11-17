@@ -117,11 +117,7 @@ export function ContributorCombobox({
       if (result.ok) {
         setCommand(null);
         select(result);
-        setNotice(
-          result.created
-            ? "Contributor created and selected."
-            : "Existing contributor found and selected.",
-        );
+        setNotice("One-off credit added. It appears only on this article.");
       } else if (result.code === "unavailable") {
         setError(
           "Creation could not be confirmed. Retry the same contributor request.",
@@ -228,7 +224,7 @@ export function ContributorCombobox({
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => void create()}
               >
-                {`Add '${name.data}' as a new contributor`}
+                {`Add '${name.data}' as a one-off credit`}
               </button>
             </li>
           )}
@@ -236,7 +232,7 @@ export function ContributorCombobox({
       )}
       <p role="status" aria-live="polite">
         {creating
-          ? "Creating contributor…"
+          ? "Adding credit…"
           : notice ||
             (loading
               ? "Searching contributors…"
