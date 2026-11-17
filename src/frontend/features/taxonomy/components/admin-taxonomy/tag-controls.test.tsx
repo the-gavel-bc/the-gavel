@@ -101,3 +101,42 @@ it("refuses an empty name", async () => {
   expect(screen.getByRole("alert")).toBeVisible();
   expect(mocks.action).not.toHaveBeenCalled();
 });
+
+it("creates a section and then its first category", async () => {
+  mocks.action.mockResolvedValueOnce({ ok: true, id: other });
+  mocks.action.mockResolvedValueOnce({ ok: true });
+  render(<CreateTaxonomyForm kind="section" sections={[]} nextOrder={2} />);
+  await userEvent.type(screen.getByLabelText("New section name"), "Features");
+  await userEvent.click(screen.getByLabelText("Also create a first category"));
+  await userEvent.type(
+    screen.getByLabelText("First category name"),
+    "Profiles",
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Create section" }));
+  await waitFor(() => expect(mocks.action).toHaveBeenCalledTimes(2));
+  expect(mocks.action.mock.calls[0][0]).toMatchObject({
+    kind: "createSection",
+    name: "Features",
+    navigationOrder: 2,
+  });
+  expect(mocks.action.mock.calls[1][0]).toMatchObject({
+    kind: "createCategory",
+    name: "Profiles",
+    sectionId: other,
+  });
+});
+
+it("reports a failed first category without hiding the created section", async () => {
+  mocks.action.mockResolvedValueOnce({ ok: true, id: other });
+  mocks.action.mockResolvedValueOnce({ ok: false, code: "conflict" });
+  render(<CreateTaxonomyForm kind="section" sections={[]} nextOrder={0} />);
+  await userEvent.type(screen.getByLabelText("New section name"), "Features");
+  await userEvent.click(screen.getByLabelText("Also create a first category"));
+  await userEvent.type(
+    screen.getByLabelText("First category name"),
+    "Profiles",
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Create section" }));
+  expect(await screen.findByRole("alert")).toBeVisible();
+  expect(screen.getByText('Section "Features" created.')).toBeVisible();
+});
