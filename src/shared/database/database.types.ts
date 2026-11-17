@@ -254,6 +254,9 @@ export type Database = {
           meta_description: string | null;
           owner_profile_id: string;
           published_at: string | null;
+          published_by_profile_id: string | null;
+          review_note: string | null;
+          review_requested_at: string | null;
           section_id: string;
           seo_keyphrase: string | null;
           slug: string;
@@ -272,6 +275,9 @@ export type Database = {
           meta_description?: string | null;
           owner_profile_id: string;
           published_at?: string | null;
+          published_by_profile_id?: string | null;
+          review_note?: string | null;
+          review_requested_at?: string | null;
           section_id: string;
           seo_keyphrase?: string | null;
           slug: string;
@@ -289,6 +295,9 @@ export type Database = {
           meta_description?: string | null;
           owner_profile_id?: string;
           published_at?: string | null;
+          published_by_profile_id?: string | null;
+          review_note?: string | null;
+          review_requested_at?: string | null;
           section_id?: string;
           seo_keyphrase?: string | null;
           slug?: string;
@@ -300,6 +309,13 @@ export type Database = {
           {
             foreignKeyName: "articles_owner_profile_id_fkey";
             columns: ["owner_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "articles_published_by_profile_id_fkey";
+            columns: ["published_by_profile_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
@@ -965,6 +981,19 @@ export type Database = {
         };
         Returns: Json;
       };
+      list_review_articles: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          article_id: string;
+          edit_version: number;
+          owner_name: string;
+          published_at: string;
+          section_name: string;
+          status: string;
+          submitted_at: string;
+          title: string;
+        }[];
+      };
       list_staff: {
         Args: {
           p_after_email?: string;
@@ -1058,6 +1087,15 @@ export type Database = {
         };
         Returns: Json;
       };
+      return_article: {
+        Args: {
+          p_article_id: string;
+          p_expected_version: number;
+          p_note: string;
+          p_request_id: string;
+        };
+        Returns: Json;
+      };
       save_article_draft: {
         Args: {
           p_article_id: string;
@@ -1132,6 +1170,7 @@ export type Database = {
         Returns: {
           administrators: number;
           authors: number;
+          editors: number;
           inactive: number;
           invited: number;
         }[];
@@ -1139,6 +1178,14 @@ export type Database = {
       start_media_cleanup_run: {
         Args: Record<PropertyKey, never>;
         Returns: string;
+      };
+      submit_article: {
+        Args: {
+          p_article_id: string;
+          p_expected_version: number;
+          p_request_id: string;
+        };
+        Returns: Json;
       };
       suggest_public_articles: { Args: { p_query: string }; Returns: Json };
       update_category_taxonomy: {
@@ -1165,7 +1212,7 @@ export type Database = {
       };
     };
     Enums: {
-      app_role: "author" | "administrator";
+      app_role: "author" | "administrator" | "editor";
       article_status: "draft" | "published" | "archived";
       contribution_role: "writer" | "editor" | "creative";
     };
@@ -1298,7 +1345,7 @@ export const Constants = {
   },
   public: {
     Enums: {
-      app_role: ["author", "administrator"],
+      app_role: ["author", "administrator", "editor"],
       article_status: ["draft", "published", "archived"],
       contribution_role: ["writer", "editor", "creative"],
     },
