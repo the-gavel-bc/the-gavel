@@ -3,6 +3,7 @@
 import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import styles from "./article-lifecycle-controls.module.css";
 import { Button } from "@/frontend/components/ui/button/button";
 import {
   archiveArticleAction,
@@ -36,12 +37,15 @@ export function ArticleLifecycleControls({
   status,
   disabled,
   onBusyChange,
+  compact = false,
 }: {
   articleId: string;
   version: number;
   status: "draft" | "published" | "archived";
   disabled: boolean;
   onBusyChange?: (busy: boolean) => void;
+  /** Just the button, for the editor's save bar; messages float above it. */
+  compact?: boolean;
 }) {
   const router = useRouter();
   const { confirm, confirmDialog } = useConfirm();
@@ -119,8 +123,11 @@ export function ArticleLifecycleControls({
   }
 
   return (
-    <section aria-label="Article lifecycle">
-      <p>
+    <section
+      aria-label="Article lifecycle"
+      className={compact ? styles.compact : undefined}
+    >
+      <p hidden={compact || undefined}>
         {status === "draft"
           ? "Publish when the article and its images are ready."
           : status === "archived"
@@ -131,6 +138,11 @@ export function ArticleLifecycleControls({
         type="button"
         variant={status === "published" ? "danger" : undefined}
         disabled={blocked}
+        title={
+          compact && disabled
+            ? "Save or finish pending changes before changing status."
+            : undefined
+        }
         onClick={run}
       >
         {pending
@@ -140,12 +152,14 @@ export function ArticleLifecycleControls({
             : `${verb} article`}
       </Button>
       {disabled && (
-        <p>Save or finish pending changes before changing status.</p>
+        <p hidden={compact || undefined}>
+          Save or finish pending changes before changing status.
+        </p>
       )}
       {pending && <p role="status">{progressVerb} article…</p>}
       {result?.ok && <p role="status">Article {result.status}. Refreshing…</p>}
       {result && !result.ok && (
-        <div role="alert">
+        <div role="alert" className={compact ? styles.note : undefined}>
           <p>
             {status === "archived" && result.code === "invalid_input"
               ? "This archive is not ready to restore. Its body, selections, and images must be repaired through a reviewed workflow."

@@ -1,0 +1,31 @@
+/* In the save bar the section is just its button; any status or error shows
+   as a note floating above the bar (the bar is the positioning parent). */
+.compact {
+  align-items: center;
+  display: inline-flex;
+}
+.compact > p[role="status"] {
+  background: var(--color-paper);
+  border: 1px solid var(--dash-line, #e3e6ee);
+  border-radius: 10px;
+  bottom: calc(100% + var(--space-2));
+  box-shadow: 0 6px 24px rgb(20 22 28 / 12%);
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  position: absolute;
+  right: var(--space-4);
+}
+.note {
+  background: var(--color-paper);
+  border: 1px solid var(--dash-danger, #b3261e);
+  border-radius: 10px;
+  bottom: calc(100% + var(--space-2));
+  box-shadow: 0 6px 24px rgb(20 22 28 / 12%);
+  max-width: min(32rem, calc(100% - 2 * var(--space-4)));
+  padding: var(--space-3) var(--space-4);
+  position: absolute;
+  right: var(--space-4);
+}
+.note p {
+  margin: 0 0 var(--space-2);
+}
