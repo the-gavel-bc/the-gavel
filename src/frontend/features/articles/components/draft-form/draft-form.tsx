@@ -486,6 +486,16 @@ export function DraftForm({
         />
       </fieldset>
       <div className={styles.saveBar} data-draft-save-bar="">
+        <div className={styles.saveText}>
+          <p role="status">
+            {editorFailure ? "Body needs attention before saving." : saveStatus}
+          </p>
+          <p>
+            {status === "published"
+              ? "This article remains published when you save changes."
+              : "Your draft stays private."}
+          </p>
+        </div>
         <div className={styles.saveLeft}>
           <Button
             type="button"
@@ -517,16 +527,6 @@ export function DraftForm({
               }
             />
           )}
-        </div>
-        <div className={styles.saveText}>
-          <p role="status">
-            {editorFailure ? "Body needs attention before saving." : saveStatus}
-          </p>
-          <p>
-            {status === "published"
-              ? "This article remains published when you save changes."
-              : "Your draft stays private."}
-          </p>
         </div>
         <Button
           type="submit"

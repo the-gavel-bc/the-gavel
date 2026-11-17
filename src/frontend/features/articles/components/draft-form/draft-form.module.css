@@ -51,23 +51,31 @@
   border-radius: 12px;
   bottom: var(--space-4);
   box-shadow: 0 6px 24px rgb(20 22 28 / 12%);
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3) var(--space-4);
-  justify-content: space-between;
+  /* Status text on top; Cancel and Archive left, Save right, beneath it. */
+  display: grid;
+  gap: var(--space-2) var(--space-4);
+  grid-template-areas:
+    "text text"
+    "left save";
+  grid-template-columns: 1fr auto;
   padding: var(--space-3) var(--space-4);
   position: sticky;
   z-index: 2;
 }
 .saveLeft {
+  grid-area: left;
   align-items: center;
   display: flex;
   gap: var(--space-2);
 }
+.saveBar > button[type="submit"] {
+  grid-area: save;
+  justify-self: end;
+}
 .saveText {
   color: var(--color-muted);
-  flex: 1 1 10rem;
-  text-align: center;
+  grid-area: text;
+  text-align: left;
   font-size: 0.9375rem;
   min-width: 0;
 }
@@ -91,19 +99,14 @@
   .saveBar {
     bottom: 0;
     border-radius: 12px 12px 0 0;
-    flex-wrap: nowrap;
     padding-block: var(--space-2);
   }
   .saveText {
-    flex: 1;
     font-size: 0.875rem;
   }
   /* The visibility note is dropped here; the save status stays. */
   .saveText p:not([role="status"]) {
     display: none;
-  }
-  .saveLeft {
-    flex: none;
   }
 }
 .newPhoto {
