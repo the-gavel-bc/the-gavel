@@ -155,6 +155,11 @@ export function AdminMemberList({
                 <p>
                   {member.displayName ? member.email : "Name set at sign-in"}
                 </p>
+                {!member.eligible && (
+                  <p className={styles.warning}>
+                    Identity is not currently eligible for dashboard access.
+                  </p>
+                )}
               </div>
               <p className={styles.tags}>
                 <span data-role={member.role}>{roleLabels[member.role]}</span>
@@ -162,11 +167,6 @@ export function AdminMemberList({
                   {stateLabels[member.state]}
                 </span>
               </p>
-              {!member.eligible && (
-                <p className={styles.warning}>
-                  Identity is not currently eligible for dashboard access.
-                </p>
-              )}
               <MemberControls
                 key={`${member.key}:${member.state}:${member.version}:${member.role}`}
                 member={member}

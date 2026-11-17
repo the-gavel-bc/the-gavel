@@ -141,6 +141,7 @@
   display: grid;
   gap: var(--space-1) var(--space-4);
   grid-template-columns: 2.5rem minmax(0, 1fr) auto auto;
+  grid-auto-flow: row;
   padding: var(--space-3) var(--space-4);
 }
 .person + .person {
@@ -202,11 +203,8 @@
   background: #fff4e0;
   color: #8a4b00;
 }
-.warning {
+.identity .warning {
   color: var(--dash-danger, #b3261e);
-  font-size: 0.875rem;
-  grid-column: 2 / -1;
-  margin: 0;
 }
 .controls {
   align-items: center;
@@ -223,6 +221,10 @@
   font: inherit;
   min-height: var(--dash-control, 2.75rem);
   padding: 0 var(--space-4);
+  width: 10.5rem;
+}
+.controls {
+  flex-wrap: nowrap;
 }
 .problem {
   flex-basis: 100%;

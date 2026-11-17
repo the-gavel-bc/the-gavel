@@ -50,21 +50,29 @@ export function CreateTaxonomyForm({
       navigationOrder: value,
     };
     if (kind === "category") {
-      void state.run({ kind: "createCategory", ...base, sectionId });
+      const made = await state.run({
+        kind: "createCategory",
+        ...base,
+        sectionId,
+      });
+      if (made?.ok) setNote(`Category "${name}" created.`);
       return;
     }
     const created = await state.run({ kind: "createSection", ...base });
     // The section exists now; add its first category as a second step so a
     // failure here never hides that the section was created.
+    if (created?.ok && !category) setNote(`Section "${name}" created.`);
     if (created?.ok && created.id && category) {
       setNote(`Section "${name}" created.`);
-      await state.run({
+      const made = await state.run({
         kind: "createCategory",
         requestId: crypto.randomUUID(),
         name: category,
         navigationOrder: 0,
         sectionId: created.id,
       });
+      if (made?.ok)
+        setNote(`Section "${name}" and category "${category}" created.`);
     }
   }
   return (
@@ -75,7 +83,10 @@ export function CreateTaxonomyForm({
           value={name}
           maxLength={120}
           disabled={state.blocked}
-          onChange={(event) => setName(event.target.value)}
+          onChange={(event) => {
+            setName(event.target.value);
+            setNote("");
+          }}
         />
       </label>
       {kind === "category" && (
@@ -134,7 +145,7 @@ export function CreateTaxonomyForm({
       </button>
       {problem && <p role="alert">{problem}</p>}
       {note && <p role="status">{note}</p>}
-      <CurationFeedback state={state} />
+      <CurationFeedback state={state} showSaved={false} />
     </form>
   );
 }
