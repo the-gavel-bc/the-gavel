@@ -103,10 +103,13 @@ export function DraftToolbar({
           </Button>
         ))}
       </div>
-      <label htmlFor="draft-link-url">Link URL</label>
+      <label htmlFor="draft-link-url" className={styles.srOnly}>
+        Link URL
+      </label>
       <input
         id="draft-link-url"
         type="url"
+        placeholder="Link URL (https://…)"
         value={href}
         disabled={disabled || !editor}
         aria-invalid={invalid}
