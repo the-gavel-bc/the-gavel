@@ -174,10 +174,9 @@ it("omits empty optional groups rather than fabricating a byline, biography or i
   expect(
     screen.queryByRole("heading", { name: "Keep reading" }),
   ).not.toBeInTheDocument();
-  expect(screen.getByRole("link", { name: "Search stories" })).toHaveAttribute(
-    "href",
-    "/search",
-  );
+  expect(
+    screen.queryByRole("link", { name: "Search stories" }),
+  ).not.toBeInTheDocument();
 });
 it("offers safe not-found and unexpected-error recovery", () => {
   const { unmount } = render(<NotFound />);

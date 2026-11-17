@@ -173,5 +173,11 @@
   align-items: center;
   min-height: 2.75rem;
   color: #dce4f5;
+  font-weight: 600;
+  text-decoration: none;
+}
+.bottom a:hover {
+  color: #fff;
+  text-decoration: underline;
   text-underline-offset: 0.2em;
 }

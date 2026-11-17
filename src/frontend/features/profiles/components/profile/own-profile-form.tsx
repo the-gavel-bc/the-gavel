@@ -1,4 +1,5 @@
 "use client";
+import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ProfilePhotoControl } from "./profile-photo-control";
@@ -20,6 +21,7 @@ const messages = {
 };
 export function OwnProfileForm({ profile }: { profile: OwnProfile }) {
   const router = useRouter();
+  const { confirm, confirmDialog } = useConfirm();
   const [name, setName] = useState(profile.displayName);
   const [biography, setBiography] = useState(profile.biography ?? "");
   const [version, setVersion] = useState(profile.version);
@@ -66,11 +68,15 @@ export function OwnProfileForm({ profile }: { profile: OwnProfile }) {
       biography: biography || null,
     });
   }
-  function reload() {
+  async function reload() {
     if (
-      window.confirm(
-        "Reload your profile? Unsaved changes in this form will be lost.",
-      )
+      await confirm({
+        title: "Reload your profile?",
+        message: "Unsaved changes in this form will be lost.",
+        confirmLabel: "Reload",
+        cancelLabel: "Keep editing",
+        danger: true,
+      })
     )
       window.location.reload();
   }
@@ -115,13 +121,14 @@ export function OwnProfileForm({ profile }: { profile: OwnProfile }) {
             </button>
           )}
           {["conflict", "request_conflict"].includes(result.code) && (
-            <button type="button" onClick={reload}>
+            <button type="button" onClick={() => void reload()}>
               Reload profile
             </button>
           )}
         </div>
       )}
       <noscript>Enable JavaScript to save profile changes.</noscript>
+      {confirmDialog}
     </form>
   );
 }

@@ -1,6 +1,10 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
+vi.mock(
+  "@/frontend/components/ui/confirm-dialog/use-confirm",
+  () => import("@/frontend/components/ui/confirm-dialog/use-confirm.window"),
+);
 
 const mocks = vi.hoisted(() => ({
   publish: vi.fn(),
@@ -198,7 +202,7 @@ it("restores an archive with confirmation and exact uncertain retry", async () =
     screen.getByRole("button", { name: "Restore article" }),
   );
   expect(window.confirm).toHaveBeenCalledWith(
-    "Restore this article to Published?",
+    "Restore this article to Published? It will be visible to readers again.",
   );
   await userEvent.click(
     await screen.findByRole("button", { name: "Retry original restore" }),

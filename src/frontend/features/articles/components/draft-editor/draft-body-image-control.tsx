@@ -1,4 +1,5 @@
 "use client";
+import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import { useEffect, useRef, useState } from "react";
 import type { Editor } from "@tiptap/core";
 import { NodeSelection } from "@tiptap/pm/state";
@@ -22,6 +23,7 @@ export function DraftBodyImageControl({
 }) {
   const fileInput = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
+  const { confirm, confirmDialog } = useConfirm();
   const [requestId, setRequestId] = useState<string | null>(null);
   const [assetId, setAssetId] = useState<string | null>(null);
   const [cleanupId, setCleanupId] = useState<string | null>(null);
@@ -256,7 +258,17 @@ export function DraftBodyImageControl({
           <Button
             type="button"
             disabled={locked}
-            onClick={() => {
+            onClick={async () => {
+              if (
+                !(await confirm({
+                  title: "Remove this image from the body?",
+                  message: "Save the draft to keep this change.",
+                  confirmLabel: "Remove image",
+                  cancelLabel: "Keep",
+                  danger: true,
+                }))
+              )
+                return;
               editor?.commands.deleteSelection();
               setSelected(false);
               setStatus(
@@ -269,13 +281,30 @@ export function DraftBodyImageControl({
         </>
       )}
       {(assetId || cleanupId) && (
-        <Button type="button" disabled={locked} onClick={() => void discard()}>
+        <Button
+          type="button"
+          disabled={locked}
+          onClick={async () => {
+            if (
+              await confirm({
+                title: "Discard this upload?",
+                message:
+                  "The uploaded image is removed. This cannot be undone.",
+                confirmLabel: "Discard upload",
+                cancelLabel: "Keep",
+                danger: true,
+              })
+            )
+              void discard();
+          }}
+        >
           Discard unused upload
         </Button>
       )}
       <p role="status">{status}</p>
       {error && <p role="alert">{error}</p>}
       <p>Video embeds await approved providers.</p>
+      {confirmDialog}
     </fieldset>
   );
 }

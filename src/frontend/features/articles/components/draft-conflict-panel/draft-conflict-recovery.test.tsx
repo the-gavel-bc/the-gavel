@@ -1,6 +1,10 @@
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
+vi.mock(
+  "@/frontend/components/ui/confirm-dialog/use-confirm",
+  () => import("@/frontend/components/ui/confirm-dialog/use-confirm.window"),
+);
 import { baseDraft } from "@/shared/articles/draft-contract/draft-test-cases";
 const read = vi.hoisted(() => vi.fn());
 vi.mock("@/backend/articles/draft-reload-action/draft-reload-action", () => ({

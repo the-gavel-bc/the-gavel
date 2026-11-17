@@ -14,6 +14,17 @@
   display: inline-flex;
   min-height: 2.75rem;
   align-items: center;
+  padding-inline: 1.25rem;
+  border: 1px solid var(--reader-blue);
+  border-radius: 999px;
   color: var(--reader-blue);
-  font-family: var(--reader-sans);
+  font: 700 0.9375rem/1.2 var(--reader-sans);
+  text-decoration: none;
+  transition:
+    background var(--reader-fast) var(--reader-ease),
+    color var(--reader-fast) var(--reader-ease);
+}
+.state a:hover {
+  background: var(--reader-blue);
+  color: #fff;
 }

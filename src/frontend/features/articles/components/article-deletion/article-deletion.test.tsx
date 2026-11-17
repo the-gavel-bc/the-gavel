@@ -1,5 +1,9 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+vi.mock(
+  "@/frontend/components/ui/confirm-dialog/use-confirm",
+  () => import("@/frontend/components/ui/confirm-dialog/use-confirm.window"),
+);
 const m = vi.hoisted(() => ({
   save: vi.fn(),
   push: vi.fn(),

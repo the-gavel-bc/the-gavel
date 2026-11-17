@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/frontend/components/ui/button/button";
 import { listUnusedArticleUploads } from "@/backend/media/unused-article-uploads/unused-article-uploads";
@@ -34,6 +35,7 @@ export function UnusedArticleUploads({
   const [message, setMessage] = useState("");
   const [retryAsset, setRetryAsset] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const { confirm, confirmDialog } = useConfirm();
   const busyRef = useRef(false);
   const generation = useRef(0);
   useEffect(() => {
@@ -205,7 +207,24 @@ export function UnusedArticleUploads({
                   loading ||
                   (retryAsset !== null && retryAsset !== item.assetId)
                 }
-                onClick={() => void discard(item.assetId)}
+                onClick={async () => {
+                  // A retry of an unconfirmed cleanup repeats an earlier choice.
+                  const retrying =
+                    item.status === "deleting" || retryAsset === item.assetId;
+                  if (
+                    !retrying &&
+                    !(await confirm({
+                      title: "Discard this upload?",
+                      message:
+                        "The uploaded image is removed. This cannot be undone.",
+                      confirmLabel: "Discard upload",
+                      cancelLabel: "Keep",
+                      danger: true,
+                    }))
+                  )
+                    return;
+                  void discard(item.assetId);
+                }}
               >
                 {item.status === "deleting" || retryAsset === item.assetId
                   ? "Retry cleanup"
@@ -224,6 +243,7 @@ export function UnusedArticleUploads({
           Next unused uploads
         </Button>
       )}
+      {confirmDialog}
     </section>
   );
 }

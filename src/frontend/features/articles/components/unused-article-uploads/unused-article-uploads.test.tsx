@@ -1,6 +1,10 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
+vi.mock(
+  "@/frontend/components/ui/confirm-dialog/use-confirm",
+  () => import("@/frontend/components/ui/confirm-dialog/use-confirm.window"),
+);
 import { UnusedArticleUploads } from "./unused-article-uploads";
 const mocks = vi.hoisted(() => ({ list: vi.fn(), remove: vi.fn() }));
 vi.mock(

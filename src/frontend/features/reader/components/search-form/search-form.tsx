@@ -2,9 +2,6 @@
 import { useRef, useState } from "react";
 import styles from "./search-form.module.css";
 import { SearchSuggestions, useSearchSuggestions } from "./search-suggestions";
-// Below this much room to the right, the field opens leftward (mobile).
-const MIN_RIGHT_ROOM = 176;
-const FIELD_WIDTH = 272;
 export function SearchForm({
   id,
   query = "",
@@ -19,39 +16,13 @@ export function SearchForm({
   // Navigation search collapses to an icon; the first press opens the field.
   // Without JavaScript an empty press submits and lands on the search page.
   const [open, setOpen] = useState(false);
-  const [rightward, setRightward] = useState(true);
   const [focused, setFocused] = useState(false);
   const [text, setText] = useState(query);
   const input = useRef<HTMLInputElement>(null);
   const form = useRef<HTMLFormElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
   const suggestions = useSearchSuggestions(navigation ? text : "");
-  const expand = () => {
-    if (!open && form.current) {
-      // Expand to the right, as in the demo. When the band is short of room,
-      // the row glides left (--search-shift on the row) just enough, never
-      // past the first item. CSSOM writes are allowed by the CSP; only style
-      // attributes in markup are blocked.
-      const row = form.current.parentElement;
-      const left = form.current.getBoundingClientRect().left;
-      const first =
-        row?.firstElementChild?.getBoundingClientRect().left ?? left;
-      const free = window.innerWidth - left - 16;
-      const shift = Math.max(0, Math.min(FIELD_WIDTH - free, first - 16));
-      const room = free + shift;
-      const right = room >= MIN_RIGHT_ROOM;
-      setRightward(right);
-      // Leftward (mobile) keeps the stylesheet's viewport-based width.
-      if (right) {
-        form.current.style.setProperty(
-          "--search-width",
-          `${Math.min(FIELD_WIDTH, room)}px`,
-        );
-        row?.style.setProperty("--search-shift", `${shift}px`);
-      } else form.current.style.removeProperty("--search-width");
-    }
-    setOpen(true);
-  };
+  const expand = () => setOpen(true);
   const close = () => {
     setOpen(false);
     setFocused(false);
@@ -70,7 +41,6 @@ export function SearchForm({
       method="get"
       className={navigation ? styles.navigation : styles.form}
       data-open={(navigation && open) || undefined}
-      data-direction={navigation ? (rightward ? "right" : "left") : undefined}
       onFocus={navigation ? () => setFocused(true) : undefined}
       onKeyDown={(event) => {
         if (!navigation || !open) return;

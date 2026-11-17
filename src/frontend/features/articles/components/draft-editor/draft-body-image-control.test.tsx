@@ -3,6 +3,10 @@ import type { Editor } from "@tiptap/core";
 import { Editor as LiveEditor } from "@tiptap/core";
 import { createDraftExtensions } from "@/frontend/features/articles/draft-document/draft-extensions";
 import { expect, it, vi } from "vitest";
+vi.mock(
+  "@/frontend/components/ui/confirm-dialog/use-confirm",
+  () => import("@/frontend/components/ui/confirm-dialog/use-confirm.window"),
+);
 
 const reserve = vi.hoisted(() => vi.fn());
 const remove = vi.hoisted(() => vi.fn());
@@ -70,7 +74,7 @@ it("inserts only the finalized asset ID and bounded text into the body", async (
   }
 });
 
-it("updates and removes a selected image without accepting a URL", () => {
+it("updates and removes a selected image without accepting a URL", async () => {
   const editor = new LiveEditor({
     extensions: createDraftExtensions(),
     content: {
@@ -110,9 +114,11 @@ it("updates and removes a selected image without accepting a URL", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "Remove selected image" }),
     );
-    expect(
-      editor.getJSON().content?.some((node) => node.type === "image"),
-    ).toBe(false);
+    await waitFor(() =>
+      expect(
+        editor.getJSON().content?.some((node) => node.type === "image"),
+      ).toBe(false),
+    );
   } finally {
     editor.destroy();
   }
