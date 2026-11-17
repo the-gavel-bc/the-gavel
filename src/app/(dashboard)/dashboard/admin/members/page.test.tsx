@@ -59,7 +59,9 @@ it("blocks authors before the member directory query", async () => {
 it("renders native filter and safe empty state", async () => {
   render(await Page({ searchParams: Promise.resolve({ state: "invited" }) }));
   expect(screen.getByRole("heading", { name: "Memberships" })).toBeVisible();
-  expect(screen.getByLabelText("State")).toHaveValue("invited");
+  expect(
+    screen.getByRole("link", { name: /Not signed in yet/ }),
+  ).toHaveAttribute("aria-current", "page");
   expect(screen.getByText("No one matches this filter.")).toBeVisible();
   expect(mocks.list).toHaveBeenCalledWith({ state: "invited" });
 });

@@ -6,6 +6,7 @@ import type { MemberSummary } from "@/backend/memberships/member-directory/membe
 import { manageMembershipAction } from "@/backend/memberships/member-command/member-actions";
 import { manageInvitationAction } from "@/backend/memberships/invitation-command/invitation-actions";
 import { Button } from "@/frontend/components/ui/button/button";
+import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import styles from "./admin-members.module.css";
 
 type Role = "author" | "administrator";
@@ -34,6 +35,7 @@ export function MemberControls({
   isSelf: boolean;
 }) {
   const router = useRouter();
+  const { confirm, confirmDialog } = useConfirm();
   const [role, setRole] = useState<Role>(member.role);
   const [pending, setPending] = useState(false);
   const [done, setDone] = useState(false);
@@ -68,14 +70,19 @@ export function MemberControls({
   }
   const requestId = () => crypto.randomUUID();
 
-  function save() {
+  async function save() {
     if (blocked || role === member.role) return;
     if (
       isSelf &&
       role === "author" &&
-      !window.confirm(
-        "Demote your own administrator account? You will lose access to administration if another eligible administrator remains.",
-      )
+      !(await confirm({
+        title: "Demote your own account?",
+        message:
+          "You will lose access to administration if another eligible administrator remains.",
+        confirmLabel: "Demote me",
+        cancelLabel: "Cancel",
+        danger: true,
+      }))
     )
       return;
     const id = requestId();
@@ -101,11 +108,19 @@ export function MemberControls({
       );
   }
 
-  function remove() {
+  async function remove() {
     if (blocked) return;
     const id = requestId();
     if (member.state === "invited" && member.invitationId) {
-      if (!window.confirm(`Remove ${member.email} from the staff list?`))
+      if (
+        !(await confirm({
+          title: "Remove from the staff list?",
+          message: `${member.email} will not get access when they sign in.`,
+          confirmLabel: "Remove",
+          cancelLabel: "Cancel",
+          danger: true,
+        }))
+      )
         return;
       void run(() =>
         manageInvitationAction({
@@ -117,11 +132,17 @@ export function MemberControls({
       );
     } else if (member.userId) {
       if (
-        !window.confirm(
-          isSelf
-            ? "Deactivate your own membership? You will lose dashboard access if another eligible administrator remains."
-            : `Deactivate ${member.email || "this member"}? They will lose dashboard access.`,
-        )
+        !(await confirm({
+          title: isSelf
+            ? "Deactivate your own membership?"
+            : "Deactivate this member?",
+          message: isSelf
+            ? "You will lose dashboard access if another eligible administrator remains."
+            : `${member.email || "This member"} will lose dashboard access.`,
+          confirmLabel: "Deactivate",
+          cancelLabel: "Cancel",
+          danger: true,
+        }))
       )
         return;
       void run(() =>
@@ -177,23 +198,22 @@ export function MemberControls({
         </Button>
       ) : (
         <>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={save}
-            disabled={
-              blocked ||
-              role === member.role ||
-              (role === "administrator" && !member.eligible)
-            }
-            aria-label={`Change role for ${member.email}`}
-          >
-            Save role
-          </Button>
+          {role !== member.role && (
+            <Button
+              type="button"
+              onClick={() => void save()}
+              disabled={
+                blocked || (role === "administrator" && !member.eligible)
+              }
+              aria-label={`Change role for ${member.email}`}
+            >
+              Save role
+            </Button>
+          )}
           <Button
             type="button"
             variant="danger"
-            onClick={remove}
+            onClick={() => void remove()}
             disabled={blocked}
             aria-label={`${member.state === "invited" ? "Remove" : "Deactivate"} ${member.email}`}
           >
@@ -201,6 +221,7 @@ export function MemberControls({
           </Button>
         </>
       )}
+      {confirmDialog}
       {pending && <p role="status">Saving…</p>}
       {done && <p role="status">Saved. Refreshing…</p>}
       {failure && (

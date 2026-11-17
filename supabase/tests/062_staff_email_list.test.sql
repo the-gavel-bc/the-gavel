@@ -117,5 +117,11 @@ select is((select pg_catalog.count(*)::int from public.audit_events
   where action in ('membership.invited','membership.invitation_changed',
     'membership.invitation_removed','membership.claimed')),5,
   'listing changes and claims are audited');
+-- Activity for one person includes events from before they signed in.
+select is((select pg_catalog.count(*)::int from public.list_membership_audit_events(
+  51,null,null,'90000000-0000-0000-0000-000000000031')),2,
+  'one person sees their listing and claim events only');
+select is((select pg_catalog.count(*)::int from public.list_membership_audit_events(
+  51,null,null,'90000000-0000-0000-0000-0000000000ff')),0,'an unknown person has no events');
 select * from finish();
 rollback;

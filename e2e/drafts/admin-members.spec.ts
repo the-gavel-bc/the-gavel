@@ -55,7 +55,12 @@ test("administrator lists an email, the person claims it on sign-in, then role c
   await member.getByRole("button", { name: `Deactivate ${email}` }).click();
   await expect(member).toHaveCount(0);
 
-  await page.getByRole("link", { name: "Membership activity" }).click();
+  // A person's name opens only that person's activity.
+  await page.goto("/dashboard/admin/members?state=inactive");
+  await page.getByRole("link", { name: email }).click();
+  await expect(
+    page.getByRole("heading", { name: `Activity for ${email}` }),
+  ).toBeVisible();
   await expect(
     page.getByText(`Deactivated membership for ${email}`),
   ).toBeVisible();

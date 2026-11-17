@@ -33,9 +33,11 @@ export default async function MemberAuditPage({
         <Link href="/dashboard">My articles</Link>
       </>
     );
+  const input = await searchParams;
+  const user = typeof input.user === "string" ? input.user : undefined;
   let page;
   try {
-    page = await listMemberAudit(await searchParams);
+    page = await listMemberAudit(input);
   } catch (error) {
     unstable_rethrow(error);
     return (
@@ -50,12 +52,20 @@ export default async function MemberAuditPage({
   }
   return (
     <>
-      <h1>Membership activity</h1>
       <p>
-        <Link href="/dashboard/admin/members">Memberships</Link>
+        <Link href="/dashboard/admin/members">← Memberships</Link>
       </p>
+      <h1>
+        {user
+          ? `Activity for ${page.items[0]?.targetEmail || "this person"}`
+          : "Membership activity"}
+      </h1>
       {page.items.length === 0 ? (
-        <p>No membership activity yet.</p>
+        <p>
+          {user
+            ? "No activity for this person yet."
+            : "No membership activity yet."}
+        </p>
       ) : (
         <ol>
           {page.items.map((event) => (
@@ -72,7 +82,10 @@ export default async function MemberAuditPage({
       {page.nextCursor && (
         <nav aria-label="Membership activity pages">
           <Link
-            href={`/dashboard/admin/members/audit?${new URLSearchParams({ cursor: page.nextCursor })}`}
+            href={`/dashboard/admin/members/audit?${new URLSearchParams({
+              ...(user ? { user } : {}),
+              cursor: page.nextCursor,
+            })}`}
             prefetch={false}
           >
             Next page

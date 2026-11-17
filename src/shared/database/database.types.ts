@@ -905,7 +905,12 @@ export type Database = {
         }[];
       };
       list_membership_audit_events: {
-        Args: { p_before_at?: string; p_before_id?: string; p_limit?: number };
+        Args: {
+          p_before_at?: string;
+          p_before_id?: string;
+          p_limit?: number;
+          p_subject?: string;
+        };
         Returns: {
           action: string;
           actor_label: string;

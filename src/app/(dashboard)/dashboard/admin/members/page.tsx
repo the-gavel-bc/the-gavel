@@ -47,9 +47,6 @@ export default async function AdminMembersPage({
   return (
     <>
       <h1>Memberships</h1>
-      <p>
-        <Link href="/dashboard/admin/members/audit">Membership activity</Link>
-      </p>
       <AdminMemberList
         page={page}
         summary={summary}

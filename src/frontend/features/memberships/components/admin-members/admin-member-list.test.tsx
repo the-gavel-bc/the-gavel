@@ -24,37 +24,61 @@ const person = {
   eligible: true,
 };
 
-it("shows role counts, an add form and one compact row per person", () => {
+it("starts on the All pill with counts and links a name to that person's activity", () => {
   render(
     <AdminMemberList
-      filters={{ state: "invited", role: "author", search: "new" }}
+      filters={{ state: "all", role: null, search: "" }}
       summary={summary}
       currentUserId="90000000-0000-0000-0000-000000000004"
       page={{ items: [person], nextCursor: "safe-cursor" }}
     />,
   );
-  const counts = screen.getByRole("list", { name: "Staff by role" });
+  const pills = screen.getByRole("navigation", { name: "Filter people" });
+  const all = within(pills).getByRole("link", { name: /^All/ });
+  expect(all).toHaveAttribute("aria-current", "page");
+  expect(all).toHaveTextContent("107");
   expect(
-    within(counts).getByRole("link", { name: /3 Administrators/ }),
+    within(pills).getByRole("link", { name: /Administrators/ }),
   ).toHaveAttribute(
     "href",
     "/dashboard/admin/members?state=active&role=administrator",
   );
-  expect(within(counts).getByText("97")).toBeVisible();
+  expect(
+    screen.getByRole("searchbox", { name: "Search people" }),
+  ).toBeVisible();
   expect(screen.getByText("Add people")).toBeVisible();
-  expect(screen.getByRole("heading", { name: "new@bc.edu" })).toBeVisible();
+  expect(screen.getByRole("link", { name: "new@bc.edu" })).toHaveAttribute(
+    "href",
+    `/dashboard/admin/members/audit?user=${person.key}`,
+  );
   expect(
     screen.getByText("Not signed in yet", { selector: "span" }),
   ).toBeVisible();
   expect(screen.getByLabelText("Role for new@bc.edu")).toHaveValue("author");
-  expect(
-    screen.getByRole("button", { name: "Remove new@bc.edu" }),
-  ).toBeVisible();
+  expect(screen.queryByText("Membership activity")).not.toBeInTheDocument();
   expect(screen.getByRole("link", { name: "Next page" })).toHaveAttribute(
     "href",
-    "/dashboard/admin/members?cursor=safe-cursor&state=invited&role=author&q=new",
+    "/dashboard/admin/members?cursor=safe-cursor",
   );
-  expect(screen.queryByText(/pending/i)).not.toBeInTheDocument();
+});
+
+it("marks the active pill and keeps the search in every pill", () => {
+  render(
+    <AdminMemberList
+      filters={{ state: "invited", role: null, search: "new" }}
+      summary={summary}
+      currentUserId="x"
+      page={{ items: [person], nextCursor: null }}
+    />,
+  );
+  const pills = screen.getByRole("navigation", { name: "Filter people" });
+  expect(
+    within(pills).getByRole("link", { name: /Not signed in yet/ }),
+  ).toHaveAttribute("aria-current", "page");
+  expect(within(pills).getByRole("link", { name: /^All/ })).toHaveAttribute(
+    "href",
+    "/dashboard/admin/members?q=new",
+  );
 });
 
 it("says so when nobody matches", () => {
