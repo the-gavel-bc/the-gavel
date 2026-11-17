@@ -161,9 +161,10 @@ export function UnusedArticleUploads({
     <section aria-label="Leftover images">
       <h2>Leftover images</h2>
       <p>
-        Pictures uploaded to this article that it does not use. Deleting one
-        removes the file for good. Pictures that are in your article are never
-        listed here.
+        Pictures uploaded to this article that it does not use. They are deleted
+        automatically 7 days after upload; delete one now to remove it right
+        away. Pictures in your article, or in any saved version of it, are never
+        deleted.
       </p>
       {disabled && (
         <p>

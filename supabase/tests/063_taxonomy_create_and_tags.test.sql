@@ -1,5 +1,8 @@
 begin;
 select no_plan();
+create temp table audit_before as select count(*)::int n from public.audit_events
+  where action in ('section.created','category.created','tag.renamed','tag.merged','tag.deleted',
+    'section.deleted','category.deleted');
 update auth.users set email='tax-admin@bc.edu',email_confirmed_at=now(),
   raw_app_meta_data='{"provider":"google","providers":["google"]}'::jsonb
   where id='00000000-0000-0000-0000-000000000004';
@@ -101,7 +104,7 @@ select is(public.delete_taxonomy('section','a1000000-0000-0000-0000-000000000002
 reset role;
 select is((select count(*)::int from public.audit_events where action in
   ('section.created','category.created','tag.renamed','tag.merged','tag.deleted',
-    'section.deleted','category.deleted')),8,
+    'section.deleted','category.deleted')) - (select n from audit_before),8,
   'every change is audited once');
 select * from finish();
 rollback;

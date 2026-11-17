@@ -712,6 +712,13 @@ export type Database = {
         };
         Returns: Json;
       };
+      claim_expired_unused_uploads: {
+        Args: { p_limit?: number; p_older_than?: string };
+        Returns: {
+          asset_id: string;
+          object_key: string;
+        }[];
+      };
       claim_invitation: { Args: Record<PropertyKey, never>; Returns: boolean };
       claim_media_cleanup: {
         Args: { p_limit: number };
@@ -730,6 +737,10 @@ export type Database = {
       };
       complete_article_image_removal: {
         Args: { p_actor_user_id: string; p_asset_id: string };
+        Returns: Json;
+      };
+      complete_expired_unused_upload: {
+        Args: { p_asset_id: string };
         Returns: Json;
       };
       create_article_draft: {

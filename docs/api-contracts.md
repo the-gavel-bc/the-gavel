@@ -315,3 +315,7 @@ The existing reservation, processing admission, upload claim, trusted finalizati
 ## Profile photos (2026-11-17)
 
 `set_own_profile_photo(bytes)` and `remove_own_profile_photo()` change only the signed-in active member's own photo (eligible identity, active membership and profile). The bytes must be a WebP no larger than 512 KB; the server action first re-encodes any JPEG, PNG or WebP upload (3 MB limit) to a 384 px square WebP, so the original is never stored. `get_public_profile_photo(slug)` returns the photo only for an active profile with an account link, so credit-only people never expose one. `GET /api/public/profiles/<slug>/photo` serves it as `image/webp` with `nosniff` and a five-minute public cache; the author page and own-profile form append `?v=<photo time>` to bust the cache when a photo changes. `profiles.photo_updated_at` is the only new public column.
+
+## Unused image expiry (2026-11-18)
+
+Service-role functions: `claim_expired_unused_uploads(p_older_than interval default '7 days', p_limit integer default 25)` returns `(asset_id, object_key)` for images it has hidden (`deleting`); retention under one day or a limit outside 1 to 100 is refused with SQLSTATE 22023. `complete_expired_unused_upload(p_asset_id)` returns `{ok:true,replayed}` or `{ok:false,code:"conflict"}`. The cron route `GET /api/internal/unused-upload-cleanup` returns `{ok, claimed, deleted, failed}` (503 when any image failed; failures are retried the next day).
