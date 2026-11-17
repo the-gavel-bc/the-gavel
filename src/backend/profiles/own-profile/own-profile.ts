@@ -21,6 +21,8 @@ export type OwnProfile = {
   biography: string | null;
   version: number;
   slugFrozen: boolean;
+  /** Same-origin URL of the current photo, or null. */
+  photoUrl: string | null;
 };
 export async function getOwnProfile(): Promise<OwnProfile> {
   await connection();
@@ -31,7 +33,16 @@ export async function getOwnProfile(): Promise<OwnProfile> {
     if (error) throw error;
     const rows = z.array(rowSchema).length(1).parse(data);
     const row = rows[0];
+    const { data: photo, error: photoError } = await client
+      .from("profiles")
+      .select("photo_updated_at")
+      .eq("slug", row.slug)
+      .maybeSingle();
+    if (photoError) throw photoError;
     return {
+      photoUrl: photo?.photo_updated_at
+        ? `/api/public/profiles/${row.slug}/photo?v=${Date.parse(photo.photo_updated_at)}`
+        : null,
       displayName: row.display_name,
       slug: row.slug,
       biography: row.biography,

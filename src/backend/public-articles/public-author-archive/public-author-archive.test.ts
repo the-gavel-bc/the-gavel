@@ -18,6 +18,7 @@ const profile = {
   display_name: "Guest Writer",
   slug: "guest-writer",
   biography: "Public biography\nAnother paragraph",
+  photo_updated_at: null,
 };
 beforeEach(() => {
   vi.resetAllMocks();
@@ -34,6 +35,7 @@ it("projects only public active profile fields and supports empty guest archives
       displayName: "Guest Writer",
       slug: "guest-writer",
       biography: profile.biography,
+      photoUrl: null,
     },
     archive: {
       title: "Guest Writer",
@@ -44,7 +46,7 @@ it("projects only public active profile fields and supports empty guest archives
   });
   expect(mocks.from).toHaveBeenCalledExactlyOnceWith("profiles");
   expect(mocks.select).toHaveBeenCalledExactlyOnceWith(
-    "display_name,slug,biography",
+    "display_name,slug,biography,photo_updated_at",
   );
   expect(mocks.eq).toHaveBeenCalledWith("slug", "guest-writer");
   expect(mocks.eq).toHaveBeenCalledWith("active", true);

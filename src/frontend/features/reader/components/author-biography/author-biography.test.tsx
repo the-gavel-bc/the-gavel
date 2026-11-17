@@ -6,6 +6,7 @@ const author = {
   displayName: "Guest Writer",
   slug: "guest-writer",
   biography: "Literal <script>alert(1)</script>\nSecond paragraph",
+  photoUrl: null,
 };
 it("renders a biography as escaped plain text inside the archive introduction", () => {
   render(
@@ -42,4 +43,23 @@ it("omits absent biography without invented copy or profile images", () => {
     <AuthorBiography author={{ ...author, biography: null }} />,
   );
   expect(container).toBeEmptyDOMElement();
+});
+
+it("shows a photo with the biography, or the photo alone", () => {
+  const photoUrl = "/api/public/profiles/guest-writer/photo?v=1";
+  const { rerender } = render(
+    <AuthorBiography author={{ ...author, photoUrl }} />,
+  );
+  expect(
+    screen.getByRole("img", { name: "Photo of Guest Writer" }),
+  ).toHaveAttribute("src", photoUrl);
+  rerender(
+    <AuthorBiography author={{ ...author, biography: null, photoUrl }} />,
+  );
+  expect(
+    screen.getByRole("img", { name: "Photo of Guest Writer" }),
+  ).toBeVisible();
+  rerender(<AuthorBiography author={{ ...author, biography: null }} />);
+  expect(screen.queryByRole("img")).not.toBeInTheDocument();
+  expect(screen.queryByText("Biography")).not.toBeInTheDocument();
 });

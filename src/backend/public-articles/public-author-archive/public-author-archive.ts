@@ -24,6 +24,7 @@ const profileSchema = z.strictObject({
     .string()
     .refine((value) => Array.from(value).length <= 5000)
     .nullable(),
+  photo_updated_at: z.string().nullable(),
 });
 
 export type PublicAuthorArchiveResult =
@@ -42,7 +43,7 @@ export async function getPublicAuthorArchive(
     // Membership and Auth linkage do not belong in a public profile projection.
     const { data, error } = await createPublicReaderClient()
       .from("profiles")
-      .select("display_name,slug,biography")
+      .select("display_name,slug,biography,photo_updated_at")
       .eq("slug", authorSlug)
       .eq("active", true)
       .maybeSingle();
@@ -55,6 +56,9 @@ export async function getPublicAuthorArchive(
       displayName: profile.data.display_name,
       slug: profile.data.slug,
       biography: profile.data.biography,
+      photoUrl: profile.data.photo_updated_at
+        ? `/api/public/profiles/${profile.data.slug}/photo?v=${Date.parse(profile.data.photo_updated_at)}`
+        : null,
     };
     const archive: PublicArchiveContext = {
       title: author.displayName,

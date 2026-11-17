@@ -529,6 +529,7 @@ export type Database = {
           display_name: string;
           edit_version: number;
           id: string;
+          photo_updated_at: string | null;
           slug: string;
           slug_frozen: boolean;
           updated_at: string;
@@ -542,6 +543,7 @@ export type Database = {
           display_name: string;
           edit_version?: number;
           id?: string;
+          photo_updated_at?: string | null;
           slug: string;
           slug_frozen?: boolean;
           updated_at?: string;
@@ -554,6 +556,7 @@ export type Database = {
           display_name?: string;
           edit_version?: number;
           id?: string;
+          photo_updated_at?: string | null;
           slug?: string;
           slug_frozen?: boolean;
           updated_at?: string;
@@ -857,6 +860,13 @@ export type Database = {
         Returns: Json;
       };
       get_public_homepage: { Args: Record<PropertyKey, never>; Returns: Json };
+      get_public_profile_photo: {
+        Args: { p_slug: string };
+        Returns: {
+          bytes: string;
+          updated_at: string;
+        }[];
+      };
       get_public_read_this: { Args: Record<PropertyKey, never>; Returns: Json };
       get_public_site_navigation: {
         Args: Record<PropertyKey, never>;
@@ -1016,6 +1026,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      remove_own_profile_photo: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
       rename_tag: {
         Args: { p_id: string; p_name: string; p_request_id: string };
         Returns: Json;
@@ -1100,6 +1114,7 @@ export type Database = {
         };
         Returns: Json;
       };
+      set_own_profile_photo: { Args: { p_bytes: string }; Returns: Json };
       staff_summary: {
         Args: Record<PropertyKey, never>;
         Returns: {

@@ -1,6 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ProfilePhotoControl } from "./profile-photo-control";
 import type { OwnProfile } from "@/backend/profiles/own-profile/own-profile";
 import { saveOwnProfileAction } from "@/backend/profiles/own-profile/own-profile-actions";
 import type {
@@ -103,7 +104,7 @@ export function OwnProfileForm({ profile }: { profile: OwnProfile }) {
           onChange={(event) => setBiography(event.target.value)}
         />
       </label>
-      <p>Profile image editing is not available yet.</p>
+      <ProfilePhotoControl name={name} photoUrl={profile.photoUrl} />
       <button type="submit" disabled={blocked}>
         Save profile
       </button>

@@ -339,3 +339,7 @@ Optional captions use the existing versioned owner/admin media mutation and exac
 ## Published main-photo authorization
 
 Upload reservation/admission/claim/finalization and main-photo attachment permit active eligible owners or administrators on draft/published articles, retaining uploader restrictions and actor/article/asset locking. Archived mutations remain denied. The private bucket and current-reference published GET policy are unchanged: finalized unattached and revision-only assets remain private. Attachment/version/history commit atomically, stale concurrent edits conflict, and retained revisions prevent cleanup of replaced/removed objects. Public cached image URLs may remain usable for the approved five minutes; subsequent origin requests recheck current references. Credits confer no mutation authority.
+
+## Profile photos
+
+Only the signed-in active member can set or remove their own photo; the database function re-checks identity, membership and profile, and refuses any payload that is not a WebP. Uploads are re-encoded server-side (metadata dropped, orientation applied, square crop) before storage. Public reads go through a function that requires an active profile with an account link; the route validates the slug, sets `nosniff` and never caches errors. No new Storage bucket, service or dependency was added.
