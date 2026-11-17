@@ -6,12 +6,12 @@ import type {
 import styles from "./admin-audit.module.css";
 
 const labels: Record<AuditAction, string> = {
-  "article.created": "Created article",
-  "article.updated": "Updated article",
-  "article.published": "Published article",
-  "article.archived": "Archived article",
-  "article.restored": "Restored article",
-  "article.deleted": "Deleted article",
+  "article.created": "Created",
+  "article.updated": "Updated",
+  "article.published": "Published",
+  "article.archived": "Archived",
+  "article.restored": "Restored",
+  "article.deleted": "Deleted",
 };
 const date = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
@@ -32,54 +32,59 @@ export function AdminAudit({
     : null;
   if (next && action) next.set("action", action);
   return (
-    <section aria-label="Article activity">
-      <form
-        action="/dashboard/admin/audit"
-        method="get"
-        className={styles.filter}
-      >
-        <label htmlFor="audit-action">Action</label>
-        <select id="audit-action" name="action" defaultValue={action ?? "all"}>
-          <option value="all">All article actions</option>
-          {Object.entries(labels).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
-        <button type="submit">Apply filter</button>
-      </form>
+    <section aria-label="Article activity" className={styles.activity}>
+      <nav aria-label="Filter activity" className={styles.pills}>
+        <Link
+          href="/dashboard/admin/audit"
+          prefetch={false}
+          aria-current={action === null ? "page" : undefined}
+        >
+          All
+        </Link>
+        {Object.entries(labels).map(([value, label]) => (
+          <Link
+            key={value}
+            href={`/dashboard/admin/audit?action=${value}`}
+            prefetch={false}
+            aria-current={action === value ? "page" : undefined}
+          >
+            {label}
+          </Link>
+        ))}
+      </nav>
       {page.items.length === 0 ? (
-        <p>No article activity matches this filter.</p>
+        <p className={styles.empty}>No article activity matches this filter.</p>
       ) : (
         <ol className={styles.events}>
           {page.items.map((event) => (
             <li key={event.id} className={styles.event}>
-              <strong>{labels[event.action]}</strong>
-              <p>By {event.actorLabel}</p>
-              <p>
+              <span className={styles.chip} data-action={event.action}>
+                {labels[event.action]}
+              </span>
+              <p className={styles.title}>
+                {event.articleExists ? (
+                  <Link
+                    href={`/dashboard/admin/articles/${event.resourceId}`}
+                    prefetch={false}
+                  >
+                    {event.articleTitle || "Untitled article"}
+                  </Link>
+                ) : (
+                  <span>Deleted article</span>
+                )}
+              </p>
+              <p className={styles.meta}>
+                {event.actorLabel} ·{" "}
                 <time dateTime={event.createdAt}>
                   {date.format(new Date(event.createdAt))} ET
                 </time>
               </p>
-              {!event.articleExists ? (
-                <p>Deleted article {event.resourceId}</p>
-              ) : (
-                <Link
-                  href={`/dashboard/admin/articles/${event.resourceId}`}
-                  prefetch={false}
-                >
-                  {event.articleTitle
-                    ? `View “${event.articleTitle}”`
-                    : `View article ${event.resourceId}`}
-                </Link>
-              )}
             </li>
           ))}
         </ol>
       )}
       {next && (
-        <nav aria-label="Article activity pages">
+        <nav aria-label="Article activity pages" className={styles.more}>
           <Link href={`/dashboard/admin/audit?${next}`} prefetch={false}>
             Next page
           </Link>

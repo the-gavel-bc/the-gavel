@@ -23,9 +23,11 @@ export default async function AdminHomepagePage() {
       listHomepageStoriesAction({}),
     ]);
     if (!library.ok) throw new Error("Unable to load stories.");
-    const saved = curation.saved;
+    // Show what the live homepage shows now: saved picks, with the newest
+    // published stories filling any slot nobody has chosen.
+    const shown = curation.effective;
     images = await getHomepageImageUrls(
-      [saved.lead, ...saved.featured, ...saved.readThis]
+      [shown.lead, ...shown.featured, ...shown.readThis]
         .filter((story) => story !== null)
         .map((story) => story.id),
     );
@@ -41,12 +43,9 @@ export default async function AdminHomepagePage() {
       </>
     );
   }
-  const withImage = (story: {
-    id: string;
-    title: string;
-    status: "draft" | "published" | "archived";
-  }) => ({
+  const withImage = (story: { id: string; title: string }) => ({
     ...story,
+    status: "published" as const,
     imageUrl: images[story.id] ?? null,
   });
   return (
@@ -55,9 +54,11 @@ export default async function AdminHomepagePage() {
       <HomepageEditor
         version={curation.version}
         saved={{
-          lead: curation.saved.lead ? withImage(curation.saved.lead) : null,
-          featured: curation.saved.featured.map(withImage),
-          readThis: curation.saved.readThis.map(withImage),
+          lead: curation.effective.lead
+            ? withImage(curation.effective.lead)
+            : null,
+          featured: curation.effective.featured.map(withImage),
+          readThis: curation.effective.readThis.map(withImage),
         }}
         library={{ items: library.items, nextCursor: library.nextCursor }}
       />
