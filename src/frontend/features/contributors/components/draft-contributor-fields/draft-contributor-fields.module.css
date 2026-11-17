@@ -23,7 +23,7 @@
   margin-block: var(--space-3);
 }
 .credit {
-  align-items: end;
+  align-items: start;
   background: var(--dash-soft, #f3f5fa);
   border-radius: 12px;
   display: grid;
@@ -34,6 +34,17 @@
 .field {
   display: grid;
   gap: var(--space-1);
+}
+/* Every cell is label over control; the empty combobox status adds no height. */
+.credit p {
+  margin: 0;
+}
+.credit > button {
+  height: var(--dash-control, 2.75rem);
+  min-height: 0;
+  padding-block: 0;
+  /* Lines the button up with the controls, below the labels. */
+  margin-top: calc(0.875rem * 1.5 + var(--space-1));
 }
 .credit select,
 .credit input {
@@ -61,6 +72,8 @@
   }
 }
 .combobox {
+  display: grid;
+  gap: var(--space-1);
   min-width: 0;
 }
 .results {

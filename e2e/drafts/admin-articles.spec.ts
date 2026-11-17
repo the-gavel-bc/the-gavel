@@ -24,42 +24,44 @@ test("administrator filters all articles and restores a ready archive", async ({
   await page.getByLabel("Search article titles").fill("other private");
   await page.getByRole("button", { name: "Apply filters" }).click();
   await expect(
-    page.getByRole("link", {
-      name: `Manage article: ${fixture.label} other private`,
+    page.getByRole("heading", {
+      name: `${fixture.label} other private`,
       exact: true,
     }),
   ).toBeVisible();
   await expect(page.getByText("Archived story body.")).toHaveCount(0);
   await page.goto("/dashboard/admin/articles");
   const firstTitle = await page
-    .getByRole("link", { name: /Manage article:/ })
+    .getByRole("listitem")
+    .getByRole("heading")
     .first()
     .textContent();
   await page.getByRole("link", { name: "Next page" }).click();
   await expect(page).toHaveURL(/cursor=/);
   await expect(
-    page.getByRole("link", { name: firstTitle ?? "", exact: true }),
+    page.getByRole("heading", { name: firstTitle ?? "", exact: true }),
   ).toHaveCount(0);
   await page.goto("/dashboard/admin/articles");
   await page.getByRole("link", { name: "View archives" }).click();
   await expect(page.getByLabel("Status")).toHaveValue("archived");
+  // The same control now returns to the view we came from.
+  await expect(
+    page.getByRole("link", { name: "Back to all articles" }),
+  ).toBeVisible();
   await page.getByLabel("Search article titles").fill("own 19");
   await page.getByRole("button", { name: "Apply filters" }).click();
-  const manage = page.getByRole("link", {
-    name: `Manage article: ${fixture.label} own 19`,
+  const restore = page.getByRole("button", {
+    name: `Restore article: ${fixture.label} own 19`,
   });
-  await manage.focus();
-  await expect(manage).toBeFocused();
-  await manage.press("Enter");
-  await expect(
-    page.getByRole("button", { name: "Restore article" }),
-  ).toBeVisible();
-  page.once("dialog", (dialog) => dialog.dismiss());
-  await page.getByRole("button", { name: "Restore article" }).click();
+  await restore.focus();
+  await expect(restore).toBeFocused();
+  await restore.press("Enter");
+  // Cancelling the in-page confirmation changes nothing.
+  await page.getByRole("button", { name: "Cancel" }).click();
   expect(fixture.article(19).article.status).toBe("archived");
-  page.once("dialog", (dialog) => dialog.accept());
-  await page.getByRole("button", { name: "Restore article" }).click();
-  await expect(page.getByRole("link", { name: "Edit article" })).toBeVisible();
+  await restore.click();
+  await page.getByRole("button", { name: "Restore", exact: true }).click();
+  await expect(restore).toHaveCount(0);
   expect(fixture.article(19)).toMatchObject({
     article: {
       status: "published",

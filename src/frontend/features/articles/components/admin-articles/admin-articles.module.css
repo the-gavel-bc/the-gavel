@@ -77,20 +77,6 @@
   font-family: var(--font-display, var(--font-editorial));
   margin: 0;
 }
-.manage {
-  align-items: center;
-  border: 1px solid var(--color-brand);
-  border-radius: 999px;
-  display: inline-flex;
-  flex-shrink: 0;
-  font-weight: 600;
-  min-height: var(--dash-control, 2.75rem);
-  padding: 0 var(--space-4);
-  text-decoration: none;
-}
-.manage:hover {
-  background: var(--dash-soft, #eef2fc);
-}
 .row .meta {
   margin-bottom: var(--space-3);
 }

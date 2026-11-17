@@ -47,20 +47,40 @@ export function AdminArticleMeta({
   );
 }
 
+type View = "all" | "draft" | "published";
+const viewLabel: Record<View, string> = {
+  all: "Back to all articles",
+  draft: "Back to drafts",
+  published: "Back to published",
+};
 export function AdminArticleList({
   page,
   status,
   search,
+  from = "all",
 }: {
   page: AdminArticlePage;
   status: "all" | "draft" | "published" | "archived";
   search: string;
+  /** The view the archives were opened from, so the toggle can go back. */
+  from?: View;
 }) {
   const next = page.nextCursor
     ? new URLSearchParams({ cursor: page.nextCursor })
     : null;
   if (next && status !== "all") next.set("status", status);
   if (next && search) next.set("search", search);
+  if (next && status === "archived" && from !== "all") next.set("from", from);
+  // One control switches between the archives and the view before them.
+  const toggle = new URLSearchParams();
+  if (status === "archived") {
+    if (from !== "all") toggle.set("status", from);
+  } else {
+    toggle.set("status", "archived");
+    if (status !== "all") toggle.set("from", status);
+  }
+  if (search) toggle.set("search", search);
+  const toggleHref = `/dashboard/admin/articles${toggle.size ? `?${toggle}` : ""}`;
   return (
     <section aria-label="Administrator articles">
       <form
@@ -68,6 +88,9 @@ export function AdminArticleList({
         method="get"
         className={styles.filters}
       >
+        {status === "archived" && from !== "all" && (
+          <input type="hidden" name="from" value={from} />
+        )}
         <div className={styles.field}>
           <label htmlFor="admin-article-search">Search article titles</label>
           <input
@@ -90,12 +113,8 @@ export function AdminArticleList({
         <button type="submit" className={styles.apply}>
           Apply filters
         </button>
-        <Link
-          className={styles.archives}
-          href="/dashboard/admin/articles?status=archived"
-          prefetch={false}
-        >
-          View archives
+        <Link className={styles.archives} href={toggleHref} prefetch={false}>
+          {status === "archived" ? viewLabel[from] : "View archives"}
         </Link>
       </form>
       {page.items.length === 0 ? (
@@ -106,14 +125,6 @@ export function AdminArticleList({
             <li key={article.id} className={styles.row}>
               <div className={styles.rowHead}>
                 <h2>{article.title}</h2>
-                <Link
-                  className={styles.manage}
-                  href={`/dashboard/admin/articles/${article.id}`}
-                  prefetch={false}
-                  aria-label={`Manage article: ${article.title}`}
-                >
-                  Manage
-                </Link>
               </div>
               <AdminArticleMeta article={article} />
               <ArticleRowActions article={article} admin />
