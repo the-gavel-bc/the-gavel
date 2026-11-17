@@ -50,6 +50,7 @@ export default async function AdminAuditPage({
         key={action.success ? action.data : "all"}
         page={page}
         action={action.success ? action.data : null}
+        search={typeof input.search === "string" ? input.search.trim() : ""}
       />
     </>
   );

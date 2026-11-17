@@ -4,14 +4,12 @@ import type { PublicArticle } from "@/backend/public-articles/public-article/pub
 import styles from "./article-header.module.css";
 
 // Credited writers in order, or the article owner when none are credited,
-// matching the byline on previews.
+// matching the byline on previews. People with an author page are links.
 const byline = (article: PublicArticle) => {
   const writers = article.contributors
     .filter((person) => person.role === "writer")
     .sort((a, b) => a.displayOrder - b.displayOrder);
-  return (writers.length ? writers : [article.owner])
-    .map((person) => person.displayName)
-    .join(", ");
+  return writers.length ? writers : [article.owner];
 };
 
 export function ArticleHeader({ article }: { article: PublicArticle }) {
@@ -23,8 +21,24 @@ export function ArticleHeader({ article }: { article: PublicArticle }) {
       <h1>{article.title}</h1>
       {article.excerpt && <p className={styles.dek}>{article.excerpt}</p>}
       <p className={styles.date}>
-        {/* Plain text; the credits block below links to author pages. */}
-        <span>By {byline(article)}</span>
+        <span>
+          By{" "}
+          {byline(article).map((person, index) => (
+            <span key={`${person.slug ?? person.displayName}:${index}`}>
+              {index > 0 && ", "}
+              {person.slug ? (
+                <Link
+                  className={styles.author}
+                  href={`/authors/${person.slug}`}
+                >
+                  {person.displayName}
+                </Link>
+              ) : (
+                person.displayName
+              )}
+            </span>
+          ))}
+        </span>
         <span aria-hidden="true"> · </span>
         <time dateTime={article.publishedAt}>
           {new Intl.DateTimeFormat("en-US", {

@@ -56,3 +56,13 @@
   padding-top: 0.5rem;
   overflow-wrap: anywhere;
 }
+.author {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: none;
+}
+.author:hover {
+  color: var(--reader-blue);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}

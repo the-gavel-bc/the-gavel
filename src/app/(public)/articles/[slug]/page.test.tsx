@@ -117,11 +117,11 @@ it("renders semantic article, attribution, authorized media, safe body and scope
     "Written by",
     "Edited by",
     "Creative contributors",
-    "Article owner",
     "Photo: Photographer",
   ])
     expect(screen.getByText(text)).toBeVisible();
-  for (const person of [article.owner, ...article.contributors])
+  expect(screen.queryByText("Article owner")).not.toBeInTheDocument();
+  for (const person of article.contributors)
     expect(
       screen.getAllByRole("link", { name: person.displayName })[0],
     ).toHaveAttribute("href", `/authors/${person.slug}`);

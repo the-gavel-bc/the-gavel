@@ -23,19 +23,49 @@ const date = new Intl.DateTimeFormat("en-US", {
 export function AdminAudit({
   page,
   action,
+  search = "",
 }: {
   page: AuditPage;
   action: AuditAction | null;
+  search?: string;
 }) {
   const next = page.nextCursor
     ? new URLSearchParams({ cursor: page.nextCursor })
     : null;
   if (next && action) next.set("action", action);
+  if (next && search) next.set("search", search);
+  // Every pill keeps the current search, so searching inside an action works.
+  const href = (value: string | null) => {
+    const query = new URLSearchParams({
+      ...(value ? { action: value } : {}),
+      ...(search ? { search } : {}),
+    });
+    return `/dashboard/admin/audit${query.size ? `?${query}` : ""}`;
+  };
   return (
     <section aria-label="Article activity" className={styles.activity}>
+      <form
+        action="/dashboard/admin/audit"
+        method="get"
+        role="search"
+        className={styles.search}
+      >
+        {action && <input type="hidden" name="action" value={action} />}
+        <label>
+          <span className={styles.srOnly}>Search activity</span>
+          <input
+            type="search"
+            name="search"
+            defaultValue={search}
+            maxLength={80}
+            placeholder="Search by article, person or date"
+          />
+        </label>
+        <button type="submit">Search</button>
+      </form>
       <nav aria-label="Filter activity" className={styles.pills}>
         <Link
-          href="/dashboard/admin/audit"
+          href={href(null)}
           prefetch={false}
           aria-current={action === null ? "page" : undefined}
         >
@@ -44,7 +74,7 @@ export function AdminAudit({
         {Object.entries(labels).map(([value, label]) => (
           <Link
             key={value}
-            href={`/dashboard/admin/audit?action=${value}`}
+            href={href(value)}
             prefetch={false}
             aria-current={action === value ? "page" : undefined}
           >
@@ -53,7 +83,11 @@ export function AdminAudit({
         ))}
       </nav>
       {page.items.length === 0 ? (
-        <p className={styles.empty}>No article activity matches this filter.</p>
+        <p className={styles.empty}>
+          {search
+            ? "No article activity matches this search."
+            : "No article activity matches this filter."}
+        </p>
       ) : (
         <ol className={styles.events}>
           {page.items.map((event) => (

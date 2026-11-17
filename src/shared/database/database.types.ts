@@ -909,6 +909,7 @@ export type Database = {
           p_before_at?: string;
           p_before_id?: string;
           p_limit?: number;
+          p_search?: string;
         };
         Returns: {
           action: string;

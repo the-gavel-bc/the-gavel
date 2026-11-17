@@ -2,6 +2,43 @@
   display: grid;
   gap: var(--space-4);
 }
+.search {
+  display: flex;
+  gap: var(--space-2);
+}
+.search label {
+  flex: 1;
+}
+.search input[type="search"] {
+  background: var(--color-paper);
+  border: 1px solid var(--dash-field, var(--color-muted));
+  border-radius: 999px;
+  font: inherit;
+  min-height: var(--dash-control, 2.75rem);
+  padding: 0 var(--space-6);
+  width: 100%;
+}
+.search button {
+  background: var(--color-brand, #1e4aa8);
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  min-height: var(--dash-control, 2.75rem);
+  padding: 0 var(--space-6);
+}
+.srOnly {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
 .pills {
   display: flex;
   flex-wrap: wrap;

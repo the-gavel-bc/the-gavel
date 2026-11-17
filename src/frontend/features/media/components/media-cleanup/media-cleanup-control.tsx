@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/frontend/components/ui/button/button";
+import styles from "./media-cleanup.module.css";
 import { retryMediaCleanupAction } from "@/backend/media/retired-media-cleanup/cleanup-actions";
 export function MediaCleanupControl() {
   const [pending, setPending] = useState(false);
@@ -19,11 +21,11 @@ export function MediaCleanupControl() {
     router.refresh();
   }
   return (
-    <>
-      <button type="button" disabled={pending} onClick={() => void run()}>
-        Run cleanup check
-      </button>
+    <div className={styles.run}>
+      <Button type="button" disabled={pending} onClick={() => void run()}>
+        {pending ? "Checking…" : "Run cleanup check"}
+      </Button>
       {message && <p role="status">{message}</p>}
-    </>
+    </div>
   );
 }

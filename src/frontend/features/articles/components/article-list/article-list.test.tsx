@@ -1,6 +1,16 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { expect, it } from "vitest";
+import { expect, it, vi } from "vitest";
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh: vi.fn() }),
+}));
+vi.mock(
+  "@/backend/articles/article-lifecycle/article-lifecycle-actions",
+  () => ({ archiveArticleAction: vi.fn(), restoreArticleAction: vi.fn() }),
+);
+vi.mock("@/backend/articles/article-deletion/article-deletion-actions", () => ({
+  deleteArticleAction: vi.fn(),
+}));
 import { ArticleFilters, ArticleList } from "./article-list";
 import type { ArticlePage } from "@/backend/articles/draft-queries/draft-queries";
 const row = {

@@ -3,6 +3,7 @@ import type {
   AdminArticlePage,
   AdminArticleSummary,
 } from "@/backend/articles/admin-article-queries/admin-article-queries";
+import { ArticleRowActions } from "../article-row-actions/article-row-actions";
 import { StatusBadge } from "../status-badge/status-badge";
 import styles from "./admin-articles.module.css";
 
@@ -115,6 +116,7 @@ export function AdminArticleList({
                 </Link>
               </div>
               <AdminArticleMeta article={article} />
+              <ArticleRowActions article={article} admin />
             </li>
           ))}
         </ul>

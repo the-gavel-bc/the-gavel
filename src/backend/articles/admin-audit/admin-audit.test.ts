@@ -132,3 +132,19 @@ it("keeps the activity list when the title lookup fails", async () => {
     articleTitle: null,
   });
 });
+
+it("passes a trimmed search through and binds paging to it", async () => {
+  http.respond([row, { ...row, event_id: profileId }]);
+  const page = await listAuditEvents({ search: "  budget vote ", pageSize: 1 });
+  expect(JSON.parse(String(http.network.mock.calls[0][1]?.body))).toMatchObject(
+    { p_search: "budget vote" },
+  );
+  http.respond([]);
+  await listAuditEvents({ search: "budget vote", cursor: page.nextCursor });
+  await expect(
+    listAuditEvents({ search: "other", cursor: page.nextCursor }),
+  ).rejects.toThrow("Invalid audit request.");
+  await expect(listAuditEvents({ search: "a<b" })).rejects.toThrow(
+    "Invalid audit request.",
+  );
+});

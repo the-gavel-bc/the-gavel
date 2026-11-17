@@ -4,24 +4,61 @@
 .fields legend {
   font-weight: bold;
 }
-.credit {
+.srOnly {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+/* A plain wrapper: some browsers lay a fieldset's children out oddly. */
+.body {
+  /* The legend is floated by the base styles; start below it. */
+  clear: both;
   display: grid;
-  gap: var(--space-2);
-  margin-bottom: var(--space-6);
+  gap: var(--space-3);
+  margin-block: var(--space-3);
+}
+.credit {
+  align-items: end;
+  background: var(--dash-soft, #f3f5fa);
+  border-radius: 12px;
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: minmax(0, 1fr) 9rem 6rem auto;
+  padding: var(--space-3) var(--space-4);
+}
+.field {
+  display: grid;
+  gap: var(--space-1);
 }
 .credit select,
 .credit input {
   width: 100%;
   min-width: 0;
   min-height: var(--dash-control, 2.75rem);
-  padding: var(--space-3);
+  padding: 0 var(--space-3);
   font: inherit;
   color: var(--color-ink);
   background: var(--color-paper);
-  border: 1px solid var(--color-muted);
+  border: 1px solid var(--dash-field, var(--color-muted));
+  border-radius: 8px;
 }
 .credit label {
-  font-weight: bold;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+@media (max-width: 48rem) {
+  .credit {
+    grid-template-columns: 1fr 1fr;
+  }
+  .credit > :first-child,
+  .credit > button {
+    grid-column: 1 / -1;
+  }
 }
 .combobox {
   min-width: 0;

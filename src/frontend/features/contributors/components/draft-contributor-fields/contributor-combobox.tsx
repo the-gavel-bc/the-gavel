@@ -146,7 +146,9 @@ export function ContributorCombobox({
   }
   return (
     <div className={styles.combobox}>
-      <label htmlFor={id}>Contributor {index + 1}</label>
+      <label htmlFor={id}>
+        Contributor <span className={styles.srOnly}>{index + 1}</span>
+      </label>
       <input
         id={id}
         role="combobox"

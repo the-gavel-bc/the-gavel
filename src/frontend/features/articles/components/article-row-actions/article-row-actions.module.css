@@ -1,0 +1,23 @@
+.actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.edit {
+  align-items: center;
+  border: 1px solid var(--color-brand);
+  border-radius: 999px;
+  display: inline-flex;
+  font-weight: 600;
+  min-height: var(--dash-control, 2.75rem);
+  padding: 0 var(--space-4);
+  text-decoration: none;
+}
+.edit:hover {
+  background: var(--dash-soft, #eef2fc);
+}
+.actions p {
+  flex-basis: 100%;
+  margin: 0;
+}
