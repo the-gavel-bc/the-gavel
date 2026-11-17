@@ -1,6 +1,14 @@
 .fields {
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-4);
+}
+@media (min-width: 48rem) {
+  .fields {
+    grid-template-columns: 1fr 1fr;
+  }
+  .fields > [data-wide] {
+    grid-column: 1 / -1;
+  }
 }
 .fields label {
   display: block;
@@ -20,7 +28,7 @@
   min-height: 2.75rem;
 }
 .fields textarea {
-  min-height: 6rem;
+  min-height: 4.5rem;
   resize: vertical;
 }
 .hint {

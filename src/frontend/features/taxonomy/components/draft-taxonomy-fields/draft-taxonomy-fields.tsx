@@ -124,8 +124,7 @@ export function DraftTaxonomyFields({
           >
             <legend>{label}</legend>
             <p id={`draft-${field}-hint`}>
-              Choose up to {cap}. Categories must match the selected section.
-              Changing section keeps existing selections until you remove them.
+              Up to {cap}, from the selected section.
             </p>
             {!rows.length && (
               <p>
@@ -134,26 +133,28 @@ export function DraftTaxonomyFields({
                   : "Choose a section first."}
               </p>
             )}
-            {rows.map((row) => (
-              <label key={row.id} className={styles.choice}>
-                <input
-                  type="checkbox"
-                  checked={selected.includes(row.id)}
-                  disabled={
-                    selected.length >= cap && !selected.includes(row.id)
-                  }
-                  onChange={(e) =>
-                    onChange({
-                      ...draft,
-                      [field]: e.target.checked
-                        ? [...selected, row.id]
-                        : selected.filter((id) => id !== row.id),
-                    })
-                  }
-                />
-                {row.name}
-              </label>
-            ))}
+            <div className={styles.choicesList}>
+              {rows.map((row) => (
+                <label key={row.id} className={styles.choice}>
+                  <input
+                    type="checkbox"
+                    checked={selected.includes(row.id)}
+                    disabled={
+                      selected.length >= cap && !selected.includes(row.id)
+                    }
+                    onChange={(e) =>
+                      onChange({
+                        ...draft,
+                        [field]: e.target.checked
+                          ? [...selected, row.id]
+                          : selected.filter((id) => id !== row.id),
+                      })
+                    }
+                  />
+                  {row.name}
+                </label>
+              ))}
+            </div>
             {errors[field] && (
               <p id={`draft-${field}-error`}>{errors[field]}</p>
             )}
@@ -168,8 +169,7 @@ export function DraftTaxonomyFields({
       >
         <legend>Tags</legend>
         <p id="draft-tagIds-hint">
-          Add up to 10 tags. Press Enter or a comma to add. Existing selections
-          are kept until you remove them.
+          Up to 10 tags. Press Enter or comma to add.
         </p>
         <ul className={styles.chips}>
           {draft.tagIds.map((id) => {

@@ -9,6 +9,9 @@
   --dash-page: #f6f7fb;
   --dash-danger: #b3261e;
   --dash-danger-soft: #fdf1f0;
+  /* Control height and pill padding: roomy for touch, compact with a mouse. */
+  --dash-control: 2.75rem;
+  --dash-pill-pad: var(--space-6);
   --color-brand: var(--dash-accent);
   --color-brand-dark: #173b87;
   --color-focus: var(--dash-accent);
@@ -135,7 +138,7 @@
   font: inherit;
   font-weight: 400;
   max-width: 100%;
-  min-height: 2.75rem;
+  min-height: var(--dash-control);
   padding: var(--space-2) var(--space-3);
   transition:
     border-color 150ms ease,
@@ -181,8 +184,8 @@
   font-weight: 600;
   justify-content: center;
   justify-self: start;
-  min-height: 2.75rem;
-  padding: 0 var(--space-6);
+  min-height: var(--dash-control);
+  padding: 0 var(--dash-pill-pad);
   transition:
     background-color 150ms ease,
     color 150ms ease;
@@ -269,5 +272,12 @@
 @media (prefers-reduced-motion: reduce) {
   :where(.main) :where(input, select, textarea, button) {
     transition: none;
+  }
+}
+
+@media (pointer: fine) and (min-width: 48rem) {
+  .surface {
+    --dash-control: 2.25rem;
+    --dash-pill-pad: var(--space-4);
   }
 }

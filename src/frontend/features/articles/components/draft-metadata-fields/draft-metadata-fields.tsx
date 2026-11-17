@@ -5,25 +5,25 @@ const fields = [
   {
     key: "title",
     label: "Title (required)",
-    hint: "Up to 240 characters.",
+    hint: "Max 240.",
     required: true,
   },
   {
     key: "excerpt",
     label: "Excerpt (optional)",
-    hint: "Up to 600 characters.",
+    hint: "Max 600.",
     required: false,
   },
   {
     key: "seoKeyphrase",
     label: "SEO keyphrase (optional)",
-    hint: "Up to 160 characters.",
+    hint: "Max 160.",
     required: false,
   },
   {
     key: "metaDescription",
     label: "Meta description (optional)",
-    hint: "Up to 320 characters.",
+    hint: "Max 320.",
     required: false,
   },
 ] as const;
@@ -44,7 +44,7 @@ export function DraftMetadataFields({
         const Control =
           key === "excerpt" || key === "metaDescription" ? "textarea" : "input";
         return (
-          <div key={key}>
+          <div key={key} data-wide={key !== "seoKeyphrase" || undefined}>
             <label htmlFor={`draft-${key}`}>{label}</label>
             <Control
               id={`draft-${key}`}

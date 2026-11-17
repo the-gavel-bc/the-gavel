@@ -13,7 +13,7 @@
 }
 .fields input {
   width: 100%;
-  min-height: 2.75rem;
+  min-height: var(--dash-control, 2.75rem);
 }
 .actions {
   display: flex;

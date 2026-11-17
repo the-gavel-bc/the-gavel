@@ -1,6 +1,6 @@
 .fields {
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-4);
 }
 .fields fieldset {
   min-width: 0;
@@ -8,11 +8,16 @@
 .fields legend {
   font-weight: bold;
 }
+.choicesList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-6);
+}
 .choice {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  min-height: 2.75rem;
+  min-height: var(--dash-control, 2.75rem);
   overflow-wrap: anywhere;
 }
 .choice input {
@@ -39,7 +44,7 @@
   overflow-wrap: anywhere;
 }
 .chips button {
-  min-height: 2.75rem;
+  min-height: var(--dash-control, 2.75rem);
   min-width: 2.75rem;
 }
 .tagEntry {

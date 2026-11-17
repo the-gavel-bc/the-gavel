@@ -157,7 +157,7 @@ export function HomepageEditor({
           {title} ({choices[group].length}/4)
         </h2>
         {choices[group].length === 0 ? (
-          <p>No curated stories.</p>
+          <p>None picked.</p>
         ) : (
           <ol>
             {choices[group].map((item, index) => (
@@ -200,8 +200,7 @@ export function HomepageEditor({
   return (
     <>
       <p>
-        Choose a lead and up to four stories per group. Each story can appear
-        once. Gaps use the newest published stories.
+        Pick a lead and up to four stories per group. Gaps fill with the newest.
       </p>
       <section aria-label="Lead story">
         <h2>Lead story</h2>
@@ -220,7 +219,7 @@ export function HomepageEditor({
             </button>
           </p>
         ) : (
-          <p>No curated lead.</p>
+          <p>None picked.</p>
         )}
       </section>
       {showGroup("Featured News", "featured")}

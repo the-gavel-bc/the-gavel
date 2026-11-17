@@ -23,7 +23,7 @@
 .filters input,
 .filters select {
   max-width: 100%;
-  min-height: 2.75rem;
+  min-height: var(--dash-control, 2.75rem);
 }
 .apply {
   background: var(--color-brand);
@@ -33,7 +33,7 @@
   cursor: pointer;
   font: inherit;
   font-weight: 600;
-  min-height: 2.75rem;
+  min-height: var(--dash-control, 2.75rem);
   padding: 0 var(--space-6);
 }
 .apply:hover {
@@ -42,7 +42,7 @@
 .archives {
   align-items: center;
   display: inline-flex;
-  min-height: 2.75rem;
+  min-height: var(--dash-control, 2.75rem);
 }
 .rows {
   display: grid;
@@ -76,7 +76,7 @@
   display: inline-flex;
   flex-shrink: 0;
   font-weight: 600;
-  min-height: 2.75rem;
+  min-height: var(--dash-control, 2.75rem);
   padding: 0 var(--space-4);
   text-decoration: none;
 }
