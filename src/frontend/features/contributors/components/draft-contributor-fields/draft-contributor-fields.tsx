@@ -42,14 +42,9 @@ export function DraftContributorFields({
       tabIndex={-1}
       className={styles.fields}
       aria-invalid={Boolean(error)}
-      aria-describedby={`draft-contributors-hint${error ? " draft-contributors-error" : ""}`}
+      aria-describedby={error ? "draft-contributors-error" : undefined}
     >
       <legend>Contributors</legend>
-      <p id="draft-contributors-hint">
-        Up to 32 credits. Search for staff, or type a name to add a one-off
-        credit that appears only on this article. Credits do not grant editing
-        access.
-      </p>
       {value.map((credit, index) => (
         <div key={keys[index] ?? `external-${index}`} className={styles.credit}>
           <ContributorCombobox

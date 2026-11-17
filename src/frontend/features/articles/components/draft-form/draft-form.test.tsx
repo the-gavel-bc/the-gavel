@@ -118,21 +118,25 @@ it("requires title and section, then focuses a safe error summary", async () => 
   expect(screen.queryByLabelText(/Slug/)).not.toBeInTheDocument();
   expect(mocks.create).not.toHaveBeenCalled();
 });
-it("cancel leaves at once when clean and asks first when edited", async () => {
-  const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+it("cancel leaves at once when clean and asks in the page when edited", async () => {
   render(<DraftForm initialDraft={baseDraft} options={options} />);
   await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
-  expect(confirm).not.toHaveBeenCalled();
+  expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
   expect(mocks.push).toHaveBeenCalledWith("/dashboard");
   mocks.push.mockClear();
   await userEvent.type(screen.getByLabelText(/Title/), " edited");
   await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
-  expect(confirm).toHaveBeenCalledOnce();
+  expect(
+    await screen.findByRole("alertdialog", { name: "Discard your changes?" }),
+  ).toBeVisible();
+  await userEvent.click(screen.getByRole("button", { name: "Keep editing" }));
+  expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
   expect(mocks.push).not.toHaveBeenCalled();
-  confirm.mockReturnValue(true);
   await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
-  expect(mocks.push).toHaveBeenCalledWith("/dashboard");
-  confirm.mockRestore();
+  await userEvent.click(
+    await screen.findByRole("button", { name: "Discard changes" }),
+  );
+  await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/dashboard"));
 });
 it("preserves the title if address allocation fails", async () => {
   mocks.create.mockResolvedValue({ ok: false, code: "slug_conflict" });
