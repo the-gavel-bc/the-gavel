@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { DraftInput } from "@/shared/articles/draft-contract/draft-contract";
 import type { DraftOptions } from "@/backend/articles/draft-options/draft-options";
 import styles from "./draft-metadata-fields.module.css";
@@ -27,48 +28,68 @@ const fields = [
     required: false,
   },
 ] as const;
-export function DraftMetadataFields({
-  draft,
-  options,
-  errors,
-  onChange,
-}: {
+type Key = (typeof fields)[number]["key"];
+type Common = {
   draft: DraftInput;
-  options: DraftOptions;
   errors: Record<string, string>;
   onChange: (draft: DraftInput) => void;
-}) {
+};
+
+function TextFields({
+  draft,
+  errors,
+  onChange,
+  keys,
+  children,
+}: Common & { keys: Key[]; children?: ReactNode }) {
   return (
     <div className={styles.fields}>
-      {fields.map(({ key, label, hint, required }) => {
-        const Control =
-          key === "excerpt" || key === "metaDescription" ? "textarea" : "input";
-        return (
-          <div key={key} data-wide={key !== "seoKeyphrase" || undefined}>
-            <label htmlFor={`draft-${key}`}>{label}</label>
-            <Control
-              id={`draft-${key}`}
-              value={draft[key] ?? ""}
-              required={required}
-              aria-invalid={Boolean(errors[key])}
-              aria-describedby={`draft-${key}-hint${errors[key] ? ` draft-${key}-error` : ""}`}
-              onChange={(event) =>
-                onChange({
-                  ...draft,
-                  [key]:
-                    !required && event.target.value === ""
-                      ? null
-                      : event.target.value,
-                })
-              }
-            />
-            <p id={`draft-${key}-hint`} className={styles.hint}>
-              {hint}
-            </p>
-            {errors[key] && <p id={`draft-${key}-error`}>{errors[key]}</p>}
-          </div>
-        );
-      })}
+      {fields
+        .filter((field) => keys.includes(field.key))
+        .map(({ key, label, hint, required }) => {
+          const Control =
+            key === "excerpt" || key === "metaDescription"
+              ? "textarea"
+              : "input";
+          return (
+            <div key={key} data-wide>
+              <label htmlFor={`draft-${key}`}>{label}</label>
+              <Control
+                id={`draft-${key}`}
+                value={draft[key] ?? ""}
+                required={required}
+                aria-invalid={Boolean(errors[key])}
+                aria-describedby={`draft-${key}-hint${errors[key] ? ` draft-${key}-error` : ""}`}
+                onChange={(event) =>
+                  onChange({
+                    ...draft,
+                    [key]:
+                      !required && event.target.value === ""
+                        ? null
+                        : event.target.value,
+                  })
+                }
+              />
+              <p id={`draft-${key}-hint`} className={styles.hint}>
+                {hint}
+              </p>
+              {errors[key] && <p id={`draft-${key}-error`}>{errors[key]}</p>}
+            </div>
+          );
+        })}
+      {children}
+    </div>
+  );
+}
+
+// Title, excerpt and section: the details that stay at the top of the editor.
+export function DraftMetadataFields({
+  options,
+  ...common
+}: Common & { options: DraftOptions }) {
+  const { draft, errors, onChange } = common;
+  return (
+    <TextFields {...common} keys={["title", "excerpt"]}>
       <div>
         <label htmlFor="draft-sectionId">Section (required)</label>
         <select
@@ -100,6 +121,11 @@ export function DraftMetadataFields({
           <p id="draft-sectionId-error">{errors.sectionId}</p>
         )}
       </div>
-    </div>
+    </TextFields>
   );
+}
+
+// Search details come last in the editor, after the image.
+export function DraftSeoFields(common: Common) {
+  return <TextFields {...common} keys={["seoKeyphrase", "metaDescription"]} />;
 }

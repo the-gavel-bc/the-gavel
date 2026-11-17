@@ -32,7 +32,7 @@ function Form() {
     </>
   );
 }
-it("repairs an unavailable credit without renumbering existing credits", async () => {
+it("repairs an unavailable credit, orders by position and renumbers on every change", async () => {
   render(<Form />);
   expect(screen.getByLabelText("Contributor 1")).toHaveValue(
     "Unavailable contributor: missing (unavailable)",
@@ -46,29 +46,61 @@ it("repairs an unavailable credit without renumbering existing credits", async (
     screen.getByRole("button", { name: "Add contributor" }),
   );
   await userEvent.selectOptions(screen.getByLabelText("Role 2"), "editor");
-  await userEvent.clear(screen.getByLabelText("Display order 2"));
-  await userEvent.type(screen.getByLabelText("Display order 2"), "7");
-  expect(
+  const credits = () =>
     JSON.parse(
       screen.getByRole("status", { name: "Selected credits" }).textContent!,
-    ),
-  ).toEqual([
-    { profileId: "guest", role: "creative", displayOrder: 7 },
-    { profileId: "guest", role: "editor", displayOrder: 7 },
+    );
+  expect(credits()).toEqual([
+    { profileId: "guest", role: "creative", displayOrder: 0 },
+    { profileId: "guest", role: "editor", displayOrder: 1 },
   ]);
+  // There is no display-order field; the top row is first.
+  expect(screen.queryByLabelText(/Display order/)).not.toBeInTheDocument();
+  await userEvent.click(
+    screen.getByRole("button", { name: "Move contributor 2 up" }),
+  );
+  expect(credits()).toEqual([
+    { profileId: "guest", role: "creative", displayOrder: 1 },
+    { profileId: "guest", role: "editor", displayOrder: 0 },
+  ]);
+  expect(screen.getByLabelText("Role 1")).toHaveValue("editor");
+  expect(
+    screen.getByRole("button", { name: "Move contributor 1 up" }),
+  ).toBeDisabled();
+  expect(
+    screen.getByRole("button", { name: "Move contributor 2 down" }),
+  ).toBeDisabled();
   await userEvent.click(
     screen.getByRole("button", { name: "Remove contributor 1" }),
   );
-  expect(
-    JSON.parse(
-      screen.getByRole("status", { name: "Selected credits" }).textContent!,
-    ),
-  ).toEqual([{ profileId: "guest", role: "editor", displayOrder: 7 }]);
+  expect(credits()).toEqual([
+    { profileId: "guest", role: "creative", displayOrder: 0 },
+  ]);
 });
-it("allows removal with an empty catalog and caps addition at 32", () => {
+it("shows credits in stored display order and caps the list at 5", async () => {
+  const many = Array.from({ length: 5 }, (_, i) => ({
+    profileId: "guest",
+    role: (["writer", "editor", "creative"] as const)[i % 3],
+    displayOrder: 4 - i,
+  }));
   render(
     <DraftContributorFields
-      value={Array.from({ length: 32 }, (_, i) => ({
+      value={many}
+      options={options}
+      onChange={() => {}}
+    />,
+  );
+  // The lowest stored order is shown first (the last credit here).
+  expect(screen.getByLabelText("Role 1")).toHaveValue("editor");
+  expect(screen.getByLabelText("Role 5")).toHaveValue("writer");
+  expect(
+    screen.getByRole("button", { name: "Add contributor" }),
+  ).toBeDisabled();
+});
+it("allows removal with an empty catalog and caps addition at 5", () => {
+  render(
+    <DraftContributorFields
+      value={Array.from({ length: 5 }, (_, i) => ({
         profileId: `missing-${i}`,
         role: "writer",
         displayOrder: 0,

@@ -28,8 +28,33 @@
   border-radius: 12px;
   display: grid;
   gap: var(--space-3);
-  grid-template-columns: minmax(0, 1fr) 9rem 6rem auto;
+  grid-template-columns: 2rem minmax(0, 1fr) 9rem auto auto;
   padding: var(--space-3) var(--space-4);
+}
+.badge {
+  align-items: center;
+  background: var(--color-paper);
+  border: 1px solid var(--dash-line, #c9cfdb);
+  border-radius: 50%;
+  display: inline-flex;
+  font-size: 0.875rem;
+  font-weight: 700;
+  height: 2rem;
+  justify-content: center;
+  /* Lines the number up with the controls, below the labels. */
+  margin-top: calc(0.875rem * 1.5 + var(--space-1));
+  width: 2rem;
+}
+.shift {
+  display: flex;
+  gap: var(--space-1);
+  margin-top: calc(0.875rem * 1.5 + var(--space-1));
+}
+.shift button {
+  height: var(--dash-control, 2.75rem);
+  min-height: 0;
+  min-width: var(--dash-control, 2.75rem);
+  padding: 0;
 }
 .field {
   display: grid;
@@ -64,11 +89,15 @@
 }
 @media (max-width: 48rem) {
   .credit {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 2rem 1fr 1fr;
   }
-  .credit > :first-child,
+  .credit > :nth-child(2) {
+    grid-column: 2 / -1;
+  }
+  .shift,
   .credit > button {
-    grid-column: 1 / -1;
+    grid-column: 2 / -1;
+    margin-top: 0;
   }
 }
 .combobox {
