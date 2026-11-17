@@ -25,29 +25,24 @@ test("member edits their own profile and generated slug persists", async ({
   await page.getByLabel("Public biography").fill("A public biography.");
   await page.getByRole("button", { name: "Save profile" }).click();
   await expect(page.getByText("Profile saved.")).toBeVisible();
-  await expect(
-    page.getByText(`Author URL: /authors/profile-writer-${info.project.name}`),
-  ).toBeVisible();
+  await expect(page.getByText(/Author URL/)).toHaveCount(0);
   await page.reload();
   await expect(page.getByLabel("Public display name")).toHaveValue(name);
   await expect(page.getByLabel("Public biography")).toHaveValue(
     "A public biography.",
   );
 });
-test("published author slug stays fixed; signed-out users are redirected", async ({
+test("published author can rename; signed-out users are redirected", async ({
   context,
   page,
 }) => {
   await setLocalSession(context, fixture.users.author);
   await page.goto("/dashboard/profile");
-  const url = await page.getByText(/^Author URL:/).textContent();
-  await expect(
-    page.getByText("Your author URL is fixed after publication."),
-  ).toBeVisible();
+  // The URL is not shown; the database keeps a published author's URL fixed.
+  await expect(page.getByText(/author URL/i)).toHaveCount(0);
   await page.getByLabel("Public display name").fill("Published Profile Writer");
   await page.getByRole("button", { name: "Save profile" }).click();
   await expect(page.getByText("Profile saved.")).toBeVisible();
-  await expect(page.getByText(url ?? "missing", { exact: true })).toBeVisible();
   await context.clearCookies();
   await page.goto("/dashboard/profile");
   await expect(page).toHaveURL(/sign-in/);

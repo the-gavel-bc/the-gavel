@@ -5,7 +5,6 @@ import { requireActiveMembership } from "@/backend/auth/access/access";
 import { getAdminArticlesPage } from "@/backend/articles/admin-article-queries/admin-article-queries";
 import { getAdminHomepageCuration } from "@/backend/homepage/homepage-curation/homepage-curation";
 import { HomepageEditor } from "@/frontend/features/homepage/components/admin-homepage/homepage-editor";
-import { GuardedDashboardLink } from "@/frontend/components/dashboard/guarded-dashboard-link/guarded-dashboard-link";
 
 const querySchema = z.strictObject({
   search: z.string().optional(),
@@ -52,11 +51,6 @@ export default async function AdminHomepagePage({
   return (
     <>
       <h1>Homepage curation</h1>
-      <p>
-        <GuardedDashboardLink href="/dashboard/admin/articles">
-          Article management
-        </GuardedDashboardLink>
-      </p>
       <HomepageEditor
         curation={curation}
         candidates={candidates}
