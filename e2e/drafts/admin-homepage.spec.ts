@@ -54,9 +54,7 @@ test("administrator sees published candidates; author cannot open curation", asy
   await expect(page.getByText("Administrator access required.")).toBeVisible();
   await setLocalSession(context, fixture.users.admin);
   await page.goto("/dashboard/admin/homepage");
-  await expect(
-    page.getByRole("heading", { name: "Homepage" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Homepage" })).toBeVisible();
   await expect(
     page
       .getByRole("region", { name: "Published stories" })
