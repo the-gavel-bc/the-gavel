@@ -60,7 +60,7 @@
   grid-template-columns: 1fr auto;
   padding: var(--space-3) var(--space-4);
   position: sticky;
-  z-index: 2;
+  z-index: 5;
 }
 .saveLeft {
   grid-area: left;
