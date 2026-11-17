@@ -1,61 +1,65 @@
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
-import { z } from "zod";
 import { requireActiveMembership } from "@/backend/auth/access/access";
-import { getAdminArticlesPage } from "@/backend/articles/admin-article-queries/admin-article-queries";
+import { getHomepageImageUrls } from "@/backend/homepage/homepage-curation/homepage-images";
+import { listHomepageStoriesAction } from "@/backend/homepage/homepage-curation/homepage-stories-action";
 import { getAdminHomepageCuration } from "@/backend/homepage/homepage-curation/homepage-curation";
 import { HomepageEditor } from "@/frontend/features/homepage/components/admin-homepage/homepage-editor";
 
-const querySchema = z.strictObject({
-  search: z.string().optional(),
-  cursor: z.string().optional(),
-});
-export default async function AdminHomepagePage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
+export default async function AdminHomepagePage() {
   const access = await requireActiveMembership();
   if (access.role !== "administrator")
     return (
       <>
-        <h1>Homepage curation</h1>
+        <h1>Homepage</h1>
         <p role="alert">Administrator access required.</p>
         <Link href="/dashboard">My articles</Link>
       </>
     );
-  let curation, candidates;
-  const input = await searchParams;
+  let curation, library, images;
   try {
-    const query = querySchema.parse(input);
-    [curation, candidates] = await Promise.all([
+    [curation, library] = await Promise.all([
       getAdminHomepageCuration(),
-      getAdminArticlesPage({
-        status: "published",
-        search: query.search,
-        cursor: query.cursor,
-      }),
+      listHomepageStoriesAction({}),
     ]);
+    if (!library.ok) throw new Error("Unable to load stories.");
+    const saved = curation.saved;
+    images = await getHomepageImageUrls(
+      [saved.lead, ...saved.featured, ...saved.readThis]
+        .filter((story) => story !== null)
+        .map((story) => story.id),
+    );
   } catch (error) {
     unstable_rethrow(error);
     return (
       <>
-        <h1>Homepage curation</h1>
+        <h1>Homepage</h1>
         <p role="alert">Unable to load homepage selections or stories.</p>
         <Link href="/dashboard/admin/homepage" prefetch={false}>
-          Reset catalog
+          Try again
         </Link>
       </>
     );
   }
+  const withImage = (story: {
+    id: string;
+    title: string;
+    status: "draft" | "published" | "archived";
+  }) => ({
+    ...story,
+    imageUrl: images[story.id] ?? null,
+  });
   return (
     <>
-      <h1>Homepage curation</h1>
+      <h1>Homepage</h1>
       <HomepageEditor
-        curation={curation}
-        candidates={candidates}
-        search={typeof input.search === "string" ? input.search.trim() : ""}
-        hasCursor={typeof input.cursor === "string"}
+        version={curation.version}
+        saved={{
+          lead: curation.saved.lead ? withImage(curation.saved.lead) : null,
+          featured: curation.saved.featured.map(withImage),
+          readThis: curation.saved.readThis.map(withImage),
+        }}
+        library={{ items: library.items, nextCursor: library.nextCursor }}
       />
     </>
   );

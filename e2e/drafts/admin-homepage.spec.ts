@@ -27,6 +27,9 @@ test("administrator saves ordered published homepage selections", async ({
   await page.getByLabel("Search titles").fill("own 21");
   await page.getByRole("button", { name: "Search", exact: true }).click();
   await expect(
+    page.getByRole("region", { name: "Published stories" }).getByText(featured),
+  ).toBeVisible();
+  await expect(
     page.getByRole("region", { name: "Lead story" }).getByText(lead),
   ).toBeVisible();
   await page
@@ -41,11 +44,6 @@ test("administrator saves ordered published homepage selections", async ({
   await expect(
     page.getByRole("region", { name: "Featured News" }).getByText(featured),
   ).toBeVisible();
-  await expect(
-    page
-      .getByRole("region", { name: "Current saved homepage preview" })
-      .getByText(`Lead: ${lead}`),
-  ).toBeVisible();
 });
 test("administrator sees published candidates; author cannot open curation", async ({
   context,
@@ -57,7 +55,7 @@ test("administrator sees published candidates; author cannot open curation", asy
   await setLocalSession(context, fixture.users.admin);
   await page.goto("/dashboard/admin/homepage");
   await expect(
-    page.getByRole("heading", { name: "Homepage curation" }),
+    page.getByRole("heading", { name: "Homepage" }),
   ).toBeVisible();
   await expect(
     page
