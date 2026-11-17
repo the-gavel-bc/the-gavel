@@ -3,7 +3,9 @@ import { unstable_rethrow } from "next/navigation";
 import { requireActiveMembership } from "@/backend/auth/access/access";
 import {
   listMembers,
+  memberRoleSchema,
   memberStateSchema,
+  staffSummary,
 } from "@/backend/memberships/member-directory/member-directory";
 import { AdminMemberList } from "@/frontend/features/memberships/components/admin-members/admin-member-list";
 
@@ -23,8 +25,9 @@ export default async function AdminMembersPage({
     );
   const input = await searchParams;
   let page;
+  let summary;
   try {
-    page = await listMembers(input);
+    [page, summary] = await Promise.all([listMembers(input), staffSummary()]);
   } catch (error) {
     unstable_rethrow(error);
     return (
@@ -40,23 +43,21 @@ export default async function AdminMembersPage({
     );
   }
   const state = memberStateSchema.safeParse(input.state);
+  const role = memberRoleSchema.safeParse(input.role);
   return (
     <>
       <h1>Memberships</h1>
       <p>
-        Approve only people who have signed in with a confirmed BC Google
-        account.
-      </p>
-      <p>
-        <Link href="/dashboard/admin/articles">Article management</Link>
-      </p>
-      <p>
         <Link href="/dashboard/admin/members/audit">Membership activity</Link>
       </p>
       <AdminMemberList
-        key={state.success ? state.data : "all"}
         page={page}
-        state={state.success ? state.data : "all"}
+        summary={summary}
+        filters={{
+          state: state.success ? state.data : "all",
+          role: role.success ? role.data : null,
+          search: typeof input.q === "string" ? input.q.trim() : "",
+        }}
         currentUserId={access.userId}
       />
     </>

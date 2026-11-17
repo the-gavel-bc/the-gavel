@@ -4,17 +4,17 @@ import { PublicShell } from "@/frontend/components/site/public-shell/public-shel
 import { Button } from "@/frontend/components/ui/button/button";
 import { getCurrentAccess } from "@/backend/auth/access/access";
 import { signOut } from "@/backend/auth/actions/actions";
-export const metadata = excludedMetadata("Access pending");
+export const metadata = excludedMetadata("Access not approved");
 export default async function AccessPendingPage() {
   const access = await getCurrentAccess();
   if (access.status === "signedOut") redirect("/sign-in");
   if (access.status === "active") redirect("/dashboard");
   return (
     <PublicShell>
-      <h1>Access pending</h1>
+      <h1>Access not approved</h1>
       <p>
-        Dashboard access requires an approved Boston College Google account.
-        Contact a publication administrator for help.
+        This Boston College account is not on the staff list. Ask a publication
+        administrator to add your BC email, then sign in again.
       </p>
       <form action={signOut}>
         <Button type="submit">Sign out</Button>

@@ -110,6 +110,7 @@ export function draftListFixture(
   return {
     users,
     pendingMemberId: uuid(base + 5),
+    pendingMemberUser: base + 5,
     pendingMemberEmail: `aaaa-task9-${project}@bc.edu`,
     id,
     label,

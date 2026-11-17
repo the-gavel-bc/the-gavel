@@ -34,13 +34,25 @@ export async function getCurrentAccess(): Promise<AccessState> {
     user.email.split("@")[1].toLowerCase() !== "bc.edu"
   )
     return { status: "pending" };
-  const { data: membership, error } = await client
-    .from("memberships")
-    .select("role, active")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const readMembership = () =>
+    client
+      .from("memberships")
+      .select("role, active")
+      .eq("user_id", user.id)
+      .maybeSingle();
+  let { data: membership, error } = await readMembership();
   if (error) throw new Error("Unable to verify membership access.");
-  if (!membership?.active) return { status: "pending" };
+  if (!membership?.active) {
+    // An administrator may have listed this address ahead of time; the first
+    // eligible sign-in turns that listing into a membership. Nothing is
+    // stored for people who are not listed.
+    const { data: claimed, error: claimError } =
+      await client.rpc("claim_invitation");
+    if (claimError || claimed !== true) return { status: "pending" };
+    ({ data: membership, error } = await readMembership());
+    if (error) throw new Error("Unable to verify membership access.");
+    if (!membership?.active) return { status: "pending" };
+  }
   const { data: profiles, error: profileError } =
     await client.rpc("current_profile");
   if (profileError) throw new Error("Unable to verify membership access.");

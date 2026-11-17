@@ -10,3 +10,109 @@
   display: grid;
   gap: 0.25rem;
 }
+
+/* Directory built for 100+ staff: counts, a collapsible add form, and one
+   compact row per person (identity, role and state tags, then controls). */
+.counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0 0 var(--space-4);
+  padding: 0;
+}
+.counts a {
+  background: var(--color-paper);
+  border: 1px solid var(--dash-line, #e3e6ee);
+  border-radius: 999px;
+  color: inherit;
+  display: inline-block;
+  padding: var(--space-2) var(--space-4);
+  text-decoration: none;
+}
+.counts a:hover {
+  background: var(--dash-soft, #f3f5fa);
+}
+.add {
+  background: var(--color-paper);
+  border: 1px solid var(--dash-line, #e3e6ee);
+  border-radius: 12px;
+  margin-block: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+}
+.add > summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+.addForm {
+  display: grid;
+  gap: var(--space-3);
+  margin-block-start: var(--space-3);
+}
+.addForm label {
+  display: grid;
+  gap: var(--space-1);
+}
+.addForm textarea {
+  width: 100%;
+}
+.addRow {
+  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.hint {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  margin: 0;
+}
+.people {
+  display: grid;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.person {
+  align-items: center;
+  background: var(--color-paper);
+  border: 1px solid var(--dash-line, #e3e6ee);
+  border-radius: 10px;
+  display: grid;
+  gap: var(--space-2) var(--space-4);
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  padding: var(--space-3) var(--space-4);
+}
+.identity h2 {
+  font-size: 1rem;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.identity p {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+}
+.person [data-role="administrator"] {
+  background: #e7edfb;
+  color: #1e3a8a;
+}
+.person .controls {
+  margin: 0;
+}
+.problem {
+  flex-basis: 100%;
+}
+@media (max-width: 48rem) {
+  .person {
+    grid-template-columns: 1fr;
+  }
+}

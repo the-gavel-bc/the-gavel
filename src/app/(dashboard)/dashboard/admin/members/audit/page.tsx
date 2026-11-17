@@ -7,6 +7,10 @@ const labels = {
   "membership.approved": "Approved membership",
   "membership.role_changed": "Changed membership role",
   "membership.deactivated": "Deactivated membership",
+  "membership.invited": "Added to the staff list",
+  "membership.invitation_changed": "Changed a listed role",
+  "membership.invitation_removed": "Removed from the staff list",
+  "membership.claimed": "Signed in for the first time",
 } as const;
 const date = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
