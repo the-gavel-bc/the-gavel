@@ -2,6 +2,7 @@ import { ArticlePageLink } from "../article-page-link/article-page-link";
 import { LinkButton } from "@/frontend/components/ui/link-button/link-button";
 import type { ArticlePage } from "@/backend/articles/draft-queries/draft-queries";
 import { ArticleRowActions } from "../article-row-actions/article-row-actions";
+import type { StaffRole } from "@/shared/articles/article-permissions/article-permissions";
 import { StatusBadge } from "../status-badge/status-badge";
 import toolbar from "../admin-articles/admin-articles.module.css";
 import styles from "./article-list.module.css";
@@ -55,8 +56,10 @@ export function ArticleList({
   page,
   status = "all",
   search = "",
+  role,
 }: {
   page: ArticlePage;
+  role?: StaffRole;
   status?: Status;
   search?: string;
 }) {
@@ -88,7 +91,9 @@ export function ArticleList({
             <li key={article.id} className={styles.row}>
               <h2>{article.title}</h2>
               <p className={styles.metadata}>
-                <StatusBadge status={article.status} />
+                <StatusBadge
+                  status={article.inReview ? "inReview" : article.status}
+                />
                 <span>{article.sectionName}</span>
                 <span>
                   Updated{" "}
@@ -97,7 +102,14 @@ export function ArticleList({
                   </time>
                 </span>
               </p>
-              <ArticleRowActions article={article} admin={false} />
+              {article.status === "draft" &&
+                !article.inReview &&
+                article.reviewNote && (
+                  <p className={styles.metadata}>
+                    Returned by an editor: {article.reviewNote}
+                  </p>
+                )}
+              <ArticleRowActions article={article} admin={false} role={role} />
             </li>
           ))}
         </ul>

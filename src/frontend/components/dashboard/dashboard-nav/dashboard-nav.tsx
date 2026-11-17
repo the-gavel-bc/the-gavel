@@ -8,6 +8,7 @@ const workspace = [
   { href: "/dashboard", label: "My articles", exact: true },
   { href: "/dashboard/profile", label: "Profile" },
 ];
+const review = { href: "/dashboard/review", label: "Review queue" };
 const admin = [
   { href: "/dashboard/admin/articles", label: "Administration" },
   { href: "/dashboard/admin/audit", label: "Article activity" },
@@ -45,7 +46,14 @@ function Group({ items, pathname }: { items: Item[]; pathname: string }) {
   );
 }
 
-export function DashboardNav({ isAdmin }: { isAdmin: boolean }) {
+export function DashboardNav({
+  isAdmin,
+  canReview = isAdmin,
+}: {
+  isAdmin: boolean;
+  /** Editors and administrators see the review queue. */
+  canReview?: boolean;
+}) {
   const pathname = usePathname() ?? "";
   const nav = useRef<HTMLElement>(null);
   // Keeps the current page visible in the horizontally scrolling mobile list.
@@ -59,7 +67,12 @@ export function DashboardNav({ isAdmin }: { isAdmin: boolean }) {
       <p className={styles.heading} aria-hidden="true">
         Workspace
       </p>
-      <Group items={workspace} pathname={pathname} />
+      <Group
+        items={
+          canReview ? [workspace[0], review, ...workspace.slice(1)] : workspace
+        }
+        pathname={pathname}
+      />
       {isAdmin ? (
         <>
           <p className={styles.heading} aria-hidden="true">

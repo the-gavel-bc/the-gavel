@@ -27,7 +27,8 @@
 .row:hover {
   border-color: var(--dash-field, #848d9c);
 }
-.row h2 {
+.row h2,
+.row h3 {
   font-family: var(--font-display, var(--font-editorial));
   font-size: 1.25rem;
   grid-column: 1;

@@ -10,6 +10,8 @@ const mocks = vi.hoisted(() => ({
   publish: vi.fn(),
   archive: vi.fn(),
   restore: vi.fn(),
+  submit: vi.fn(),
+  returned: vi.fn(),
   refresh: vi.fn(),
 }));
 vi.mock(
@@ -18,6 +20,8 @@ vi.mock(
     publishArticleAction: mocks.publish,
     archiveArticleAction: mocks.archive,
     restoreArticleAction: mocks.restore,
+    submitArticleAction: mocks.submit,
+    returnArticleAction: mocks.returned,
   }),
 );
 vi.mock("next/navigation", () => ({
@@ -211,4 +215,56 @@ it("restores an archive with confirmation and exact uncertain retry", async () =
     mocks.restore.mock.calls[0][0],
   );
   await waitFor(() => expect(mocks.refresh).toHaveBeenCalledOnce());
+});
+it("lets an author submit for review but never publish", async () => {
+  mocks.submit.mockResolvedValue({
+    ok: true,
+    articleId,
+    status: "draft",
+    version: 2,
+    updatedAt: "2026-10-22T12:00:00.123456Z",
+    replayed: false,
+    changed: true,
+  });
+  render(
+    <ArticleLifecycleControls
+      articleId={articleId}
+      version={1}
+      status="draft"
+      capabilities={{ submit: true }}
+      disabled={false}
+    />,
+  );
+  expect(
+    screen.queryByRole("button", { name: "Publish article" }),
+  ).not.toBeInTheDocument();
+  await userEvent.click(
+    screen.getByRole("button", { name: "Submit for review" }),
+  );
+  await waitFor(() =>
+    expect(mocks.submit).toHaveBeenCalledWith(
+      expect.objectContaining({ articleId, expectedVersion: 1 }),
+    ),
+  );
+});
+it("returns an article to its author with a note", async () => {
+  mocks.returned.mockResolvedValue({ ok: false, code: "conflict" });
+  render(
+    <ArticleLifecycleControls
+      articleId={articleId}
+      version={3}
+      status="draft"
+      capabilities={{ publish: true, returnToAuthor: true }}
+      disabled={false}
+    />,
+  );
+  await userEvent.click(
+    screen.getByRole("button", { name: "Return to author" }),
+  );
+  await waitFor(() =>
+    expect(mocks.returned).toHaveBeenCalledWith(
+      expect.objectContaining({ expectedVersion: 3, note: "Please revise." }),
+    ),
+  );
+  expect(mocks.publish).not.toHaveBeenCalled();
 });

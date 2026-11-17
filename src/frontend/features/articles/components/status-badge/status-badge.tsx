@@ -1,6 +1,11 @@
 import styles from "./status-badge.module.css";
 
-const labels = { draft: "Draft", published: "Published", archived: "Archived" };
+const labels = {
+  draft: "Draft",
+  inReview: "In review",
+  published: "Published",
+  archived: "Archived",
+};
 
 export function StatusBadge({ status }: { status: keyof typeof labels }) {
   return (

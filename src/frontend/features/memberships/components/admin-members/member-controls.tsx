@@ -9,7 +9,7 @@ import { Button } from "@/frontend/components/ui/button/button";
 import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import styles from "./admin-members.module.css";
 
-type Role = "author" | "administrator";
+type Role = "author" | "editor" | "administrator";
 type Failure =
   | "invalid_input"
   | "forbidden"
@@ -74,7 +74,7 @@ export function MemberControls({
     if (blocked || role === member.role) return;
     if (
       isSelf &&
-      role === "author" &&
+      role !== "administrator" &&
       !(await confirm({
         title: "Demote your own account?",
         message:
@@ -184,6 +184,7 @@ export function MemberControls({
         disabled={blocked}
       >
         <option value="author">Author</option>
+        <option value="editor">Editor</option>
         <option value="administrator">Administrator</option>
       </select>
       {inactive ? (

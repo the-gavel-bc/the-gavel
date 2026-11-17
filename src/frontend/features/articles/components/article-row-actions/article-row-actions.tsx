@@ -10,6 +10,10 @@ import {
   restoreArticleAction,
 } from "@/backend/articles/article-lifecycle/article-lifecycle-actions";
 import { deleteArticleAction } from "@/backend/articles/article-deletion/article-deletion-actions";
+import {
+  articleCapabilities,
+  type StaffRole,
+} from "@/shared/articles/article-permissions/article-permissions";
 import styles from "./article-row-actions.module.css";
 
 type Status = "draft" | "published" | "archived";
@@ -33,10 +37,28 @@ const message = (code: string) =>
 export function ArticleRowActions({
   article,
   admin,
+  role,
 }: {
-  article: { id: string; title: string; status: Status; version: number };
+  article: {
+    id: string;
+    title: string;
+    status: Status;
+    version: number;
+    inReview?: boolean;
+  };
   admin: boolean;
+  /** The caller's role on their own list; decides which actions to offer. */
+  role?: StaffRole;
 }) {
+  const caps = role
+    ? articleCapabilities({
+        role,
+        isOwner: true,
+        status: article.status,
+        inReview: Boolean(article.inReview),
+        publishedByMe: role === "editor",
+      })
+    : null;
   const router = useRouter();
   const { confirm, confirmDialog } = useConfirm();
   const [pending, setPending] = useState(false);
@@ -108,7 +130,7 @@ export function ArticleRowActions({
 
   return (
     <div className={styles.actions}>
-      {article.status !== "archived" && (
+      {article.status !== "archived" && (!caps || caps.edit) && (
         <Link
           className={styles.edit}
           href={`/dashboard/articles/${article.id}`}
@@ -118,7 +140,17 @@ export function ArticleRowActions({
           {article.status === "draft" ? "Edit draft" : "Edit article"}
         </Link>
       )}
-      {article.status === "published" && (
+      {caps && !caps.edit && article.status !== "archived" && (
+        <Link
+          className={styles.edit}
+          href={`/dashboard/articles/${article.id}`}
+          prefetch={false}
+          aria-label={`View article: ${article.title}`}
+        >
+          View
+        </Link>
+      )}
+      {article.status === "published" && (!caps || caps.archive) && (
         <Button
           type="button"
           variant="danger"

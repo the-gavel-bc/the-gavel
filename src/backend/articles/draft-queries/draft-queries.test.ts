@@ -57,6 +57,8 @@ describe("own article page", () => {
           sectionName: "News",
           version: 2,
           updatedAt,
+          inReview: false,
+          reviewNote: null,
         },
       ]);
       expect(decodeDraftCursor(result.nextCursor)).toEqual({
@@ -67,7 +69,7 @@ describe("own article page", () => {
       const url = new URL(String(http.network.mock.calls[0][0]));
       expect(url.searchParams.get("owner_profile_id")).toBe(`eq.${profileId}`);
       expect(url.searchParams.get("select")).toBe(
-        "id,title,slug,status,section_id,edit_version,updated_at,section:sections!articles_section_id_fkey(name)",
+        "id,title,slug,status,section_id,edit_version,updated_at,review_requested_at,review_note,section:sections!articles_section_id_fkey(name)",
       );
       // No filters unless asked for.
       expect(url.searchParams.get("status")).toBeNull();

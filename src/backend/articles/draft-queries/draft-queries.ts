@@ -13,6 +13,10 @@ import {
   searchSchema,
   statusSchema,
 } from "../admin-article-queries/admin-article-queries";
+import {
+  articleCapabilities,
+  type ArticleCapabilities,
+} from "../../../shared/articles/article-permissions/article-permissions";
 import { connection } from "next/server";
 import { z } from "zod";
 import { requireActiveMembership } from "@/backend/auth/access/access";
@@ -33,6 +37,10 @@ export type ArticleSummary = {
   sectionName: string;
   version: number;
   updatedAt: string;
+  /** Submitted for an editor's review and not yet resolved. */
+  inReview: boolean;
+  /** The editor's note when the article was last returned. */
+  reviewNote: string | null;
 };
 export type ArticlePage = {
   items: ArticleSummary[];
@@ -56,8 +64,16 @@ const summaryRow = z.object({
   updated_at: z.custom<string>(isDatabaseTimestamp),
 });
 // The list also names each article's section.
+const reviewColumns = {
+  review_requested_at: z.custom<string>(isDatabaseTimestamp).nullish(),
+  review_note: z.string().max(500).nullish(),
+  owner_profile_id: z.custom<string>(isDraftUuid).optional(),
+  published_by_profile_id: z.custom<string>(isDraftUuid).nullish(),
+};
 const listRow = summaryRow.extend({
   section: z.object({ name: z.string().max(160) }),
+  review_requested_at: reviewColumns.review_requested_at,
+  review_note: reviewColumns.review_note,
 });
 
 async function reader() {
@@ -84,7 +100,7 @@ export async function getMyArticlesPage(input: {
     let query = client
       .from("articles")
       .select(
-        "id,title,slug,status,section_id,edit_version,updated_at,section:sections!articles_section_id_fkey(name)",
+        "id,title,slug,status,section_id,edit_version,updated_at,review_requested_at,review_note,section:sections!articles_section_id_fkey(name)",
       )
       // My Articles stays owner-filtered even for administrators; RLS alone allows more.
       .eq("owner_profile_id", access.profileId)
@@ -115,6 +131,8 @@ export async function getMyArticlesPage(input: {
       sectionName: row.section.name,
       version: row.edit_version,
       updatedAt: row.updated_at,
+      inReview: Boolean(row.review_requested_at),
+      reviewNote: row.review_note ?? null,
     }));
     const last = items.at(-1);
     return {
@@ -129,6 +147,7 @@ export async function getMyArticlesPage(input: {
   }
 }
 
+export type ArticleReview = { requestedAt: string | null; note: string | null };
 export type DraftDetailResult =
   | {
       kind: "editable";
@@ -136,6 +155,8 @@ export type DraftDetailResult =
       articleId: string;
       version: number;
       updatedAt: string;
+      review: ArticleReview;
+      capabilities: ArticleCapabilities;
       draft: DraftInput;
       unavailableSelections: {
         sectionId: string | null;
@@ -145,11 +166,23 @@ export type DraftDetailResult =
       };
     }
   | { kind: "readOnly"; status: "archived" }
+  // Readable but not editable by this member (for example an author's own
+  // article while it waits for review, or an editor's own publication).
+  | {
+      kind: "viewOnly";
+      status: "draft" | "published";
+      articleId: string;
+      version: number;
+      title: string;
+      review: ArticleReview;
+      capabilities: ArticleCapabilities;
+    }
   | {
       kind: "unsupportedContent";
       status: "draft" | "published";
       articleId: string;
       version: number;
+      capabilities: ArticleCapabilities;
     }
   | { kind: "notFound" };
 
@@ -185,15 +218,29 @@ export async function getDraftEditorData(
     let query = client
       .from("articles")
       .select(
-        "id,title,slug,status,section_id,edit_version,updated_at,excerpt,content,seo_keyphrase,meta_description,article_categories(category_id),article_tags(tag_id),article_contributors(profile_id,contribution_role,display_order)",
+        "id,title,slug,status,section_id,edit_version,updated_at,owner_profile_id,review_requested_at,review_note,published_by_profile_id,excerpt,content,seo_keyphrase,meta_description,article_categories(category_id),article_tags(tag_id),article_contributors(profile_id,contribution_role,display_order)",
       )
       .eq("id", articleId);
-    if (access.role !== "administrator")
+    // Authors see only their own articles; editors and administrators rely on
+    // the database, which exposes just what their role may read.
+    if (access.role === "author")
       query = query.eq("owner_profile_id", access.profileId);
     const { data, error } = await query.maybeSingle();
     if (error) throw error;
     if (!data) return { detail: { kind: "notFound" }, options: null };
     const summary = summaryRow.parse(data);
+    const extra = z.object(reviewColumns).parse(data);
+    const review: ArticleReview = {
+      requestedAt: extra.review_requested_at ?? null,
+      note: extra.review_note ?? null,
+    };
+    const capabilities = articleCapabilities({
+      role: access.role,
+      isOwner: extra.owner_profile_id === access.profileId,
+      status: summary.status,
+      inReview: review.requestedAt !== null,
+      publishedByMe: extra.published_by_profile_id === access.profileId,
+    });
     if (summary.status === "archived")
       return {
         detail: { kind: "readOnly", status: summary.status },
@@ -206,6 +253,20 @@ export async function getDraftEditorData(
           status: summary.status,
           articleId: summary.id,
           version: summary.edit_version,
+          capabilities,
+        },
+        options: null,
+      };
+    if (!capabilities.edit)
+      return {
+        detail: {
+          kind: "viewOnly",
+          status: summary.status,
+          articleId: summary.id,
+          version: summary.edit_version,
+          title: summary.title,
+          review,
+          capabilities,
         },
         options: null,
       };
@@ -236,6 +297,8 @@ export async function getDraftEditorData(
       articleId: summary.id,
       version: summary.edit_version,
       updatedAt: summary.updated_at,
+      review,
+      capabilities,
       draft,
       unavailableSelections: {
         sectionId: options.sections.some(

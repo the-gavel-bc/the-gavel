@@ -13,7 +13,7 @@ export const memberStateSchema = z.enum([
   "invited",
 ]);
 export type MemberState = z.infer<typeof memberStateSchema>;
-export const memberRoleSchema = z.enum(["author", "administrator"]);
+export const memberRoleSchema = z.enum(["author", "editor", "administrator"]);
 export type MemberSummary = {
   /** Stable row key: the member's user id, or the listing id before sign-in. */
   key: string;
@@ -21,7 +21,7 @@ export type MemberSummary = {
   invitationId: string | null;
   email: string;
   displayName: string | null;
-  role: "author" | "administrator";
+  role: "author" | "editor" | "administrator";
   state: "active" | "inactive" | "invited";
   version: number;
   eligible: boolean;
@@ -29,6 +29,7 @@ export type MemberSummary = {
 export type MemberPage = { items: MemberSummary[]; nextCursor: string | null };
 export type StaffSummary = {
   administrators: number;
+  editors: number;
   authors: number;
   invited: number;
   inactive: number;
@@ -152,6 +153,7 @@ export async function staffSummary(): Promise<StaffSummary> {
     .array(
       z.object({
         administrators: z.number().int(),
+        editors: z.number().int(),
         authors: z.number().int(),
         invited: z.number().int(),
         inactive: z.number().int(),

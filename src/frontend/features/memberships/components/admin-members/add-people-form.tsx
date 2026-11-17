@@ -15,7 +15,9 @@ import styles from "./admin-members.module.css";
 export function AddPeopleForm() {
   const router = useRouter();
   const [text, setText] = useState("");
-  const [role, setRole] = useState<"author" | "administrator">("author");
+  const [role, setRole] = useState<"author" | "editor" | "administrator">(
+    "author",
+  );
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<InvitationResult | null>(null);
   const [problem, setProblem] = useState("");
@@ -84,11 +86,14 @@ export function AddPeopleForm() {
           <select
             value={role}
             onChange={(event) =>
-              setRole(event.target.value as "author" | "administrator")
+              setRole(
+                event.target.value as "author" | "editor" | "administrator",
+              )
             }
             disabled={pending || Boolean(retry)}
           >
             <option value="author">Author</option>
+            <option value="editor">Editor</option>
             <option value="administrator">Administrator</option>
           </select>
         </label>

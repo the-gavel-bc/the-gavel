@@ -22,6 +22,8 @@ const row = {
   sectionName: "News",
   version: 1,
   updatedAt: "2026-10-22T12:00:00.123456Z",
+  inReview: false,
+  reviewNote: null,
 } as const;
 it("shows an explicit empty state with a keyboard-accessible create link", async () => {
   render(<ArticleList page={{ items: [], nextCursor: null }} />);

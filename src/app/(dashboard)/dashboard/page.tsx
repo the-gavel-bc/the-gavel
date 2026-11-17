@@ -13,7 +13,7 @@ export default async function DashboardPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requireActiveMembership();
+  const access = await requireActiveMembership();
   const { cursor, status: rawStatus, search: rawSearch } = await searchParams;
   const statuses = ["all", "draft", "published", "archived"] as const;
   const status =
@@ -75,6 +75,7 @@ export default async function DashboardPage({
       />
       <ArticleList
         key={`${status}:${search}`}
+        role={access.role}
         page={page}
         status={status}
         search={search}

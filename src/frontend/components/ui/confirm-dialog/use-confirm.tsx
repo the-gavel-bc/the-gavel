@@ -9,6 +9,9 @@ export type ConfirmOptions = {
   cancelLabel?: string;
   /** Destructive confirmations use the danger style. */
   danger?: boolean;
+  /** Asks for a required written note (used with `ask`). */
+  noteLabel?: string;
+  noteMax?: number;
 };
 
 // An in-page replacement for window.confirm. Native dialogs are dismissed
@@ -19,32 +22,48 @@ export type ConfirmOptions = {
 //   ...render {confirmDialog} once in the component.
 export function useConfirm() {
   const [options, setOptions] = useState<ConfirmOptions | null>(null);
-  const resolver = useRef<((answer: boolean) => void) | null>(null);
+  const resolver = useRef<
+    ((answer: { ok: boolean; note: string }) => void) | null
+  >(null);
+  const [note, setNote] = useState("");
   const opener = useRef<HTMLElement | null>(null);
   const cancelButton = useRef<HTMLButtonElement>(null);
   const titleId = useId();
   const messageId = useId();
 
-  const settle = useCallback((answer: boolean) => {
-    resolver.current?.(answer);
+  const settle = useCallback((ok: boolean, text = "") => {
+    resolver.current?.({ ok, note: text.trim() });
     resolver.current = null;
     setOptions(null);
     opener.current?.focus();
   }, []);
 
-  const confirm = useCallback((next: ConfirmOptions) => {
+  const open = useCallback((next: ConfirmOptions) => {
     // A second request while one is open answers the first with "no".
-    resolver.current?.(false);
+    resolver.current?.({ ok: false, note: "" });
     opener.current = document.activeElement as HTMLElement | null;
+    setNote("");
     setOptions(next);
-    return new Promise<boolean>((resolve) => {
+    return new Promise<{ ok: boolean; note: string }>((resolve) => {
       resolver.current = resolve;
     });
   }, []);
+  const confirm = useCallback(
+    async (next: ConfirmOptions) => (await open(next)).ok,
+    [open],
+  );
+  /** Like confirm, but also collects a required note; null when declined. */
+  const ask = useCallback(
+    async (next: ConfirmOptions) => {
+      const answer = await open(next);
+      return answer.ok ? answer.note : null;
+    },
+    [open],
+  );
 
   useEffect(() => {
     if (!options) return;
-    cancelButton.current?.focus();
+    if (!options.noteLabel) cancelButton.current?.focus();
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
@@ -71,6 +90,18 @@ export function useConfirm() {
       >
         <h2 id={titleId}>{options.title}</h2>
         <p id={messageId}>{options.message}</p>
+        {options.noteLabel && (
+          <label className={styles.note}>
+            <span>{options.noteLabel}</span>
+            <textarea
+              autoFocus
+              rows={3}
+              maxLength={options.noteMax ?? 500}
+              value={note}
+              onChange={(event) => setNote(event.target.value)}
+            />
+          </label>
+        )}
         <div className={styles.actions}>
           <button
             ref={cancelButton}
@@ -84,7 +115,8 @@ export function useConfirm() {
             type="button"
             className={styles.confirm}
             data-danger={options.danger || undefined}
-            onClick={() => settle(true)}
+            disabled={Boolean(options.noteLabel) && note.trim() === ""}
+            onClick={() => settle(true, note)}
           >
             {options.confirmLabel ?? "Confirm"}
           </button>
@@ -93,5 +125,5 @@ export function useConfirm() {
     </div>
   ) : null;
 
-  return { confirm, confirmDialog };
+  return { confirm, ask, confirmDialog };
 }

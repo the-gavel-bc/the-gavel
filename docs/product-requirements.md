@@ -63,12 +63,13 @@ Categories organize editorial navigation. Tags describe specific topics and may 
 ## Content lifecycle
 
 ```text
-Draft -> Published -> Archived -> Permanently deleted
+Draft -> (In review) -> Published -> Archived -> Permanently deleted
 ```
 
-- Authors may create, edit, publish, and archive only articles they own.
+- Authors create and edit only articles they own, then submit them for review. A submitted draft is locked for its author until an editor returns it.
+- Editors copy-edit submitted drafts, then publish them or return them to the author with a note. Editors may publish their own articles directly and archive only articles they published.
 - Additional credited contributors do not gain edit permission.
-- Administrators may manage every article and restore archived articles.
+- Administrators may manage every article, edit published articles, and restore archived articles.
 - Only administrators may permanently delete an archived article.
 - Permanent deletion requires explicit confirmation and an audit event.
 - Media is deleted only when no retained article references it.
@@ -84,14 +85,21 @@ Draft -> Published -> Archived -> Permanently deleted
 ### Author
 
 - Must use an approved `bc.edu` Google account.
-- Create articles and manage only articles they own.
-- Publish immediately; editorial approval is not required for the MVP.
+- Create and edit drafts they own, and submit them for review.
+- Cannot publish, archive, or edit published articles. While a draft is in review they cannot edit it.
 - Manage their public biography and profile image.
 - Cannot manage roles or permanently delete content.
 
+### Editor
+
+- Everything an author can do.
+- Reads, edits, publishes, or returns (with a required note) any article in review.
+- Publishes their own articles without review.
+- Archives only the articles they published. Cannot edit published articles, restore, delete, or manage taxonomy, homepage, site information, or memberships.
+
 ### Administrator
 
-- All author abilities across all content.
+- All editor abilities across all content, including editing published articles.
 - Approve, deactivate, and assign application memberships.
 - Manage contributors, taxonomy, homepage selections, editable site information, archives, and permanent deletion.
 - Application-administrator status does not automatically grant GitHub, Vercel, Supabase, Google Cloud, DNS, or source-code access.
@@ -100,7 +108,8 @@ Draft -> Published -> Archived -> Permanently deleted
 
 - Anonymous readers receive only published, non-archived content.
 - An unapproved or non-`bc.edu` Google account cannot enter the dashboard.
-- Authors cannot read or mutate another author's non-public article through the UI, server interface, or Supabase API.
+- Authors cannot read or mutate another author's non-public article through the UI, server interface, or Supabase API. Editors read only articles in review, their own, and ones they published.
+- Authors cannot publish or archive. Editors cannot edit published articles or archive other people's publications.
 - Authors cannot grant roles or permanently delete articles.
 - Administrators can manage all content and memberships.
 - Section/category/tag relationships remain valid and navigable.

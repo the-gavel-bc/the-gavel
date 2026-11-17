@@ -17,6 +17,7 @@ const stateLabels = {
 const roleLabels = {
   author: "Author",
   administrator: "Administrator",
+  editor: "Editor",
 } as const;
 
 function initials(person: MemberSummary) {
@@ -57,6 +58,7 @@ export function AdminMemberList({
       label: "All",
       count:
         summary.administrators +
+        summary.editors +
         summary.authors +
         summary.invited +
         summary.inactive,
@@ -68,6 +70,12 @@ export function AdminMemberList({
       count: summary.administrators,
       href: href("active", "administrator"),
       active: filters.state === "active" && filters.role === "administrator",
+    },
+    {
+      label: "Editors",
+      count: summary.editors,
+      href: href("active", "editor"),
+      active: filters.state === "active" && filters.role === "editor",
     },
     {
       label: "Authors",

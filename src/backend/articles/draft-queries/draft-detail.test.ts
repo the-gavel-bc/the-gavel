@@ -29,6 +29,7 @@ const row = {
   section_id: baseDraft.sectionId,
   edit_version: 2,
   updated_at: updatedAt,
+  owner_profile_id: profileId,
   excerpt: null,
   content: null,
   seo_keyphrase: null,
@@ -107,14 +108,23 @@ it("returns archived articles without exposing editable content", async () => {
   });
   expect(http.network).toHaveBeenCalledOnce();
 });
-it("returns a supported published article as editable", async () => {
+it("shows an author their published article read-only", async () => {
   http.respond({ ...row, status: "published" });
-  for (let i = 0; i < 4; i++) http.respond([]);
   expect(await getDraftDetail(articleId)).toMatchObject({
-    kind: "editable",
+    kind: "viewOnly",
     status: "published",
     articleId,
     version: 2,
+    capabilities: { edit: false, archive: false },
+  });
+});
+it("shows an author their submitted draft read-only until an editor acts", async () => {
+  http.respond({ ...row, review_requested_at: updatedAt });
+  expect(await getDraftDetail(articleId)).toMatchObject({
+    kind: "viewOnly",
+    status: "draft",
+    review: { requestedAt: updatedAt },
+    capabilities: { edit: false, submit: false },
   });
 });
 it("preserves an unsupported published body without editable controls", async () => {
@@ -128,6 +138,7 @@ it("preserves an unsupported published body without editable controls", async ()
     status: "published",
     articleId,
     version: 2,
+    capabilities: expect.any(Object),
   });
   expect(http.network).toHaveBeenCalledOnce();
 });
@@ -138,6 +149,7 @@ it("returns unsupported legacy body without exposing it", async () => {
     status: "draft",
     articleId,
     version: 2,
+    capabilities: expect.any(Object),
   });
   expect(http.network).toHaveBeenCalledOnce();
 });
@@ -226,7 +238,7 @@ it("does not reuse private catalogs between users or requests", async () => {
   for (let i = 0; i < 4; i++) http.respond([]);
   const first = await getDraftEditorData(articleId);
   const other = queryTestClient();
-  other.respond(row);
+  other.respond({ ...row, owner_profile_id: articleId });
   other.respond([{ id: row.section_id, name: "Fresh section" }]);
   for (let i = 0; i < 3; i++) other.respond([]);
   mocks.client.mockResolvedValue(other.client);

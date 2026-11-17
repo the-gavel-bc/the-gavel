@@ -120,6 +120,7 @@ it("allows an unsupported published article to be archived without exposing its 
     status: "published",
     articleId: id,
     version: 4,
+    capabilities: { archive: true },
   });
   render(await Page(params));
   expect(screen.getByRole("button", { name: "Archive article" })).toBeVisible();

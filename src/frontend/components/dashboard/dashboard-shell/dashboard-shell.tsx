@@ -8,6 +8,7 @@ import { DashboardNav } from "../dashboard-nav/dashboard-nav";
 export interface DashboardShellProps extends PropsWithChildren {
   displayName: string;
   isAdmin: boolean;
+  canReview?: boolean;
   accountAction?: ReactNode;
 }
 
@@ -15,6 +16,7 @@ export function DashboardShell({
   children,
   displayName,
   isAdmin,
+  canReview,
   accountAction,
 }: DashboardShellProps) {
   return (
@@ -39,7 +41,7 @@ export function DashboardShell({
         </div>
       </header>
       <div className={styles.layout}>
-        <DashboardNav isAdmin={isAdmin} />
+        <DashboardNav isAdmin={isAdmin} canReview={canReview} />
         <main id="main-content" className={styles.main}>
           {children}
         </main>

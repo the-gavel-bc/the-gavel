@@ -8,7 +8,7 @@ alter table public.articles
   add column review_note text check (review_note is null
     or (review_note = btrim(review_note) and char_length(review_note) between 1 and 500)),
   add column published_by_profile_id uuid references public.profiles(id);
-grant select (review_requested_at, review_note) on public.articles to authenticated;
+grant select (review_requested_at, review_note, published_by_profile_id) on public.articles to authenticated;
 create index articles_review_queue_idx on public.articles (review_requested_at)
   where status = 'draft' and review_requested_at is not null;
 

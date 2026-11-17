@@ -8,7 +8,7 @@ export type ActiveMembership = {
   userId: string;
   profileId: string;
   displayName: string;
-  role: "author" | "administrator";
+  role: "author" | "editor" | "administrator";
 };
 export type AccessState =
   { status: "signedOut" } | { status: "pending" } | ActiveMembership;
