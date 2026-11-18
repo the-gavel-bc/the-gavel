@@ -47,3 +47,10 @@
 - Keep a short `STATUS.md` for active multi-session work with the current phase, branch, stack position, and approved decisions. Start a resumed session by reading that file when present.
 - Run fast checks such as types, lint, and unit tests during implementation. Run heavier checks such as database, concurrency, and browser suites once before the PR; after a fix, rerun only the checks that cover the changed behavior.
 - When model choice is available, use a lower-cost model for mechanical edits, formatting, and routine test scaffolding; reserve stronger models for design and code review.
+
+## Multi-agent review policy
+
+- Full codebase reviews use the specialist agents in `.claude/agents/` via the `full-codebase-review` skill, run in parallel, and report to `docs/code-reviews/`.
+- Reviewers never modify application code. Every finding needs evidence, a file path and line; speculation must be labeled; duplicates are consolidated and prioritized by impact and risk.
+- No application changes without explicit approval of specific findings. Implement only approved findings, avoid overlapping edits between agents, use Git worktrees for independent tasks, and preserve uncommitted user work.
+- Never claim tests or fixes are verified unless the checks ran. Do not commit, push, or deploy without approval.
