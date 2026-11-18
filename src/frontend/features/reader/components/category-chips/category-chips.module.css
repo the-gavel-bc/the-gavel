@@ -11,10 +11,15 @@
   align-items: center;
   min-height: 2.75rem;
   padding: 0.5rem 1rem;
-  border: 1px solid var(--reader-line);
-  border-radius: 2rem;
+  border: 1px solid #cfd5e2;
+  border-radius: 999px;
+  color: var(--reader-ink);
+  background: #fff;
   text-decoration: none;
-  font: 0.9375rem/1.4 var(--reader-sans);
+  font: 600 0.875rem/1.4 var(--reader-sans);
+  transition:
+    background var(--reader-fast) var(--reader-ease),
+    border-color var(--reader-fast) var(--reader-ease);
 }
 .chips a[aria-current="page"] {
   color: var(--reader-paper);
@@ -22,5 +27,9 @@
   border-color: var(--reader-blue);
 }
 .chips a:hover {
-  text-decoration: underline;
+  border-color: var(--reader-blue);
+  background: var(--reader-soft);
+}
+.chips a[aria-current="page"]:hover {
+  background: var(--reader-band);
 }
