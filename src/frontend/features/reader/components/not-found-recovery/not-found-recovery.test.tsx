@@ -1,6 +1,9 @@
 import { render, screen, within } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-vi.mock("next/navigation", () => ({ usePathname: () => "/missing" }));
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/missing",
+  useSearchParams: () => new URLSearchParams(),
+}));
 // The root boundary renders per request so it receives a CSP nonce.
 const connection = vi.hoisted(() => vi.fn(async () => undefined));
 vi.mock("next/server", () => ({ connection }));

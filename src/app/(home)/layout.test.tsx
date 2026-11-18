@@ -15,7 +15,10 @@ vi.mock(
     getPublicSiteNavigationForRequest: mocks.navigation,
   }),
 );
-vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/",
+  useSearchParams: () => new URLSearchParams(),
+}));
 import HomeLayout from "./layout";
 beforeEach(() => {
   vi.resetAllMocks();

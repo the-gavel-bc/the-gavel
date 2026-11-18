@@ -8,6 +8,40 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform var(--reader-slow, 500ms) var(--reader-ease, ease);
+}
+/* Skeleton: the frame shimmers until the photo paints over it. */
+.loading {
+  background:
+    linear-gradient(
+        90deg,
+        transparent 25%,
+        rgb(255 255 255 / 55%) 50%,
+        transparent 75%
+      )
+      0 0 / 200% 100% no-repeat,
+    var(--reader-line, #e3e6ee);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+@keyframes shimmer {
+  from {
+    background-position:
+      150% 0,
+      0 0;
+  }
+  to {
+    background-position:
+      -50% 0,
+      0 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading {
+    animation: none;
+  }
+  .frame img {
+    transition: none;
+  }
 }
 .placeholder {
   display: grid;
