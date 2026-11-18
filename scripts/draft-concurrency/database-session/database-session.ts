@@ -7,7 +7,7 @@ export class DatabaseSession {
   private child = spawn("docker", [
     "exec",
     "-i",
-    "supabase_db_the-gavel",
+    process.env.GAVEL_DB_CONTAINER ?? "supabase_db_the-gavel",
     "psql",
     "-U",
     "postgres",

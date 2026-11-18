@@ -23,8 +23,8 @@ select results_eq(
       and pg_type.typname = 'app_role'
     order by enumsortorder
   $$,
-  $$ values ('author'::name), ('administrator'::name) $$,
-  'app_role contains only author and administrator'
+  $$ values ('author'::name), ('administrator'::name), ('editor'::name) $$,
+  'app_role contains exactly author, administrator and editor'
 );
 select col_is_pk('public', 'profiles', 'id', 'profiles.id is the primary key');
 select col_is_pk(

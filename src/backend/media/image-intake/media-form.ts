@@ -1,10 +1,14 @@
 import "server-only";
 
+// A client that stops sending must not hold a processing slot indefinitely.
+export const BODY_DEADLINE_MS = 15_000;
+
 export async function readMediaFile(
   request: Request,
+  deadlineMs = BODY_DEADLINE_MS,
 ): Promise<
   | { ok: true; bytes: Uint8Array; contentType: string }
-  | { ok: false; code: "invalid_input" | "too_large" }
+  | { ok: false; code: "invalid_input" | "too_large" | "timeout" }
 > {
   const maxFileBytes = 10 * 1024 * 1024;
   const maxBodyBytes = maxFileBytes + 128 * 1024;
@@ -25,9 +29,18 @@ export async function readMediaFile(
   const chunks: Uint8Array[] = [];
   let size = 0;
   const reader = request.body.getReader();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const expired = new Promise<"timeout">((resolve) => {
+    timer = setTimeout(() => resolve("timeout"), deadlineMs);
+  });
   try {
     while (true) {
-      const { value, done } = await reader.read();
+      const next = await Promise.race([reader.read(), expired]);
+      if (next === "timeout") {
+        await reader.cancel().catch(() => {});
+        return { ok: false, code: "timeout" };
+      }
+      const { value, done } = next;
       if (done) break;
       size += value.byteLength;
       if (size > maxBodyBytes) {
@@ -64,6 +77,11 @@ export async function readMediaFile(
   } catch {
     return { ok: false, code: "invalid_input" };
   } finally {
-    reader.releaseLock();
+    clearTimeout(timer);
+    try {
+      reader.releaseLock();
+    } catch {
+      // A cancelled reader may already be released.
+    }
   }
 }

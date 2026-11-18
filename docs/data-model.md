@@ -91,6 +91,10 @@ Draft rows require both lifecycle timestamps NULL; published rows require public
 
 Authenticated eligible active members read owned articles; eligible active administrators read all. The stable fixed-search-path `private.can_read_article(uuid)` resolves ownership through private profile Auth links and current membership without exposing those links or recursing through article RLS. Anonymous readers have no article grant, even for synthetic published rows. Every application write remains denied, including administrator writes. See [article security controls](security-and-permissions.md#implemented-private-article-controls).
 
+
+### Editor role and review state
+
+Migrations `20261119010000_editor_role_enum.sql` and `20261119020000_editor_role_review.sql` add the `editor` value to `app_role` and three columns on `articles`: `review_requested_at` (set when an author submits a draft, cleared when an editor returns it; a draft with it set is "in review"), `review_note` (the editor's note, 1 to 500 trimmed characters, cleared on resubmit or publish) and `published_by_profile_id` (who published it; only that editor or an administrator may archive it, and articles published earlier have none). The `articles_review_queue_idx` partial index serves the review queue. `draft_write_receipts.operation` gains `submit` and `return`; `audit_events` gains `article.submitted` and `article.returned` (later `article.image_purged`). `private.article_authority(article, user, mode)` is the single access predicate; see [ADR 0012](decisions/0012-editor-role-and-review-state.md).
 ## Implemented article/category links
 
 `supabase/migrations/20261021020000_article_categories.sql` is authoritative for `article_categories`. Each row contains required `article_id`, `category_id`, and `section_id`, with primary key `(article_id, category_id)`. Both parent tables have unique `(id, section_id)` constraints; restrictive composite foreign keys require the link's section to match both parents. Changing either parent's section or identity while links exist is rejected, as is deleting a referenced parent. A reverse category/section index complements the article-leading primary key.
@@ -238,4 +242,4 @@ Published owners/administrators may reserve, process, finalize, attach, replace 
 
 ## Unused image expiry log
 
-`private.media_expiry_log(asset_id, article_id, object_key, expired_at)` records each automatic deletion (no grants). Migration `20261118010000_expire_unused_uploads.sql`.
+Migration `20261118010000_expire_unused_uploads.sql` adds the expiry functions; `20261120010000_media_review_hardening.sql` adds `media_assets.expiry_attempted_at` (rotates failed rows to the back of the claim window), drops the write-only `private.media_expiry_log` (the cleanup ledger already records each expired key), and adds an index on the cleanup ledger claim ordering.

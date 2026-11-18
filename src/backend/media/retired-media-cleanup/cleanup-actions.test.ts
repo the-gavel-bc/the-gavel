@@ -14,11 +14,14 @@ afterEach(() => {
   process.env = { ...old };
 });
 describe("manual cleanup", () => {
-  it("denies authors before any privileged worker runs", async () => {
-    m.access.mockResolvedValue({ status: "active", role: "author" });
-    expect(await retryMediaCleanupAction()).toEqual({ ok: false });
-    expect(m.run).not.toHaveBeenCalled();
-  });
+  it.each(["author", "editor"])(
+    "denies %ss before any privileged worker runs",
+    async (role) => {
+      m.access.mockResolvedValue({ status: "active", role });
+      expect(await retryMediaCleanupAction()).toEqual({ ok: false });
+      expect(m.run).not.toHaveBeenCalled();
+    },
+  );
   it("fails closed when production scheduling is unconfigured", async () => {
     process.env.VERCEL_ENV = "production";
     delete process.env.CRON_SECRET;

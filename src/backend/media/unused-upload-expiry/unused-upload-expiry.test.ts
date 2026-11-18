@@ -80,3 +80,37 @@ it("stops when the time budget is spent", async () => {
   await expireUnusedUploads(now);
   expect(mocks.rpc.mock.calls.length).toBeLessThanOrEqual(1);
 });
+
+it("treats Storage results as table-driven: an empty success completes, an error or throw never does", async () => {
+  const cases: [string, () => Promise<unknown>, boolean][] = [
+    [
+      "empty success (already gone)",
+      async () => ({ data: [], error: null }),
+      true,
+    ],
+    [
+      "storage error",
+      async () => ({ error: { message: "x", statusCode: "500" } }),
+      false,
+    ],
+    ["network failure", async () => Promise.reject(new Error("boom")), false],
+  ];
+  for (const [label, remove, completes] of cases) {
+    vi.resetAllMocks();
+    mocks.remove.mockImplementation(remove);
+    let claims = 0;
+    mocks.rpc.mockImplementation(async (name: string) => {
+      if (name === "claim_expired_unused_uploads")
+        return { data: ++claims === 1 ? [row(1)] : [], error: null };
+      return { data: { ok: true, replayed: false }, error: null };
+    });
+    const result = await expireUnusedUploads();
+    expect(result.deleted, label).toBe(completes ? 1 : 0);
+    expect(
+      mocks.rpc.mock.calls.some(
+        (c) => c[0] === "complete_expired_unused_upload",
+      ),
+      label,
+    ).toBe(completes);
+  }
+});

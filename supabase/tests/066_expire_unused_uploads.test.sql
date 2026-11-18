@@ -44,15 +44,14 @@ select throws_ok($$select * from public.claim_expired_unused_uploads(interval '7
 create temp table claimed as select * from public.claim_expired_unused_uploads(interval '7 days',25);
 reset role;
 select is((select array_agg(right(asset_id::text,4) order by asset_id) from claimed),
-  array['6601','6607'],
-  'only old unreferenced finalized images (and one stuck in deleting) are claimed');
+  array['6601','6606','6607'],
+  'old unreferenced images, an unfinished upload past a day, and one stuck in deleting are claimed');
 select is((select status from public.media_assets where id='60000000-0000-0000-0000-000000006601'),'deleting',
   'a claimed image is hidden pending storage deletion');
 select is((select count(*)::int from public.media_assets where id in
   ('60000000-0000-0000-0000-000000006602','60000000-0000-0000-0000-000000006603',
-   '60000000-0000-0000-0000-000000006604','60000000-0000-0000-0000-000000006605',
-   '60000000-0000-0000-0000-000000006606') and status<>'deleting'),5,
-  'main, body, revision-retained, recent and still-uploading images are untouched');
+   '60000000-0000-0000-0000-000000006604','60000000-0000-0000-0000-000000006605') and status<>'deleting'),4,
+  'main, body, revision-retained and recent images are untouched');
 
 -- Completion needs the object gone and no reference.
 insert into storage.objects(bucket_id,name,owner) values('article-media','expire/6601.webp',null);
@@ -66,14 +65,45 @@ select is(public.complete_expired_unused_upload('60000000-0000-0000-0000-0000000
 select is(public.complete_expired_unused_upload('60000000-0000-0000-0000-000000006602')->>'code','conflict',
   'completion refuses an image the article uses');
 reset role;
-select is((select count(*)::int from private.media_expiry_log where asset_id='60000000-0000-0000-0000-000000006607'),1,
-  'the expiry is recorded');
+select is((select count(*)::int from public.media_assets where id='60000000-0000-0000-0000-000000006607'),0,
+  'the expired row is deleted');
 
 -- Archived articles keep their media; locked rows are skipped.
 update public.articles set status='archived',published_at=now(),archived_at=now() where id=(select article_id from expire_target);
 set local role service_role;
 select is((select count(*)::int from public.claim_expired_unused_uploads(interval '7 days',25)),0,
   'archived articles keep their images');
+reset role;
+
+-- Archived articles' old images must not starve the window for live articles.
+create temp table starve as select
+  (public.create_article_draft('80000000-0000-0000-0000-000000006610',pg_temp.draft_input())->>'articleId')::uuid archived_id,
+  (public.create_article_draft('80000000-0000-0000-0000-000000006611',pg_temp.draft_input())->>'articleId')::uuid live_id;
+grant select on starve to service_role;
+insert into public.media_assets(id,article_id,uploader_user_id,request_id,object_key,status,
+  byte_size,width,height,sha256,finalized_at,created_at)
+select gen_random_uuid(),archived_id,'00000000-0000-0000-0000-000000000002',gen_random_uuid(),'starve/'||n||'.webp','finalized',
+  1234,120,90,repeat('b',64),now()-interval '30 days',now()-interval '30 days'
+from starve cross join generate_series(1,110) n;
+insert into public.media_assets(id,article_id,uploader_user_id,request_id,object_key,status,
+  byte_size,width,height,sha256,finalized_at,created_at)
+select '60000000-0000-0000-0000-000000006620',live_id,'00000000-0000-0000-0000-000000000002',gen_random_uuid(),'starve/live.webp','finalized',
+  1234,120,90,repeat('c',64),now()-interval '10 days',now()-interval '10 days' from starve;
+update public.articles set status='archived',published_at=now(),archived_at=now() where id=(select archived_id from starve);
+set local role service_role;
+select is((select count(*)::int from public.claim_expired_unused_uploads(interval '7 days',25)
+  where asset_id='60000000-0000-0000-0000-000000006620'),1,
+  'old images on an archived article do not starve a live article''s image');
+reset role;
+
+-- A recent unfinished upload is left alone; a failed row rotates to the back.
+insert into public.media_assets(id,article_id,uploader_user_id,request_id,object_key,status,created_at)
+select '60000000-0000-0000-0000-000000006630',live_id,'00000000-0000-0000-0000-000000000002',gen_random_uuid(),'starve/pending.webp','pending',now()-interval '2 hours' from starve;
+set local role service_role;
+select is((select count(*)::int from public.claim_expired_unused_uploads(interval '7 days',25)
+  where asset_id='60000000-0000-0000-0000-000000006630'),0,'an unfinished upload under a day old is not claimed');
+select is((select count(*)::int from public.claim_expired_unused_uploads(interval '7 days',25)
+  where asset_id='60000000-0000-0000-0000-000000006620'),0,'a row already claimed this hour is not claimed again');
 reset role;
 select * from finish();
 rollback;

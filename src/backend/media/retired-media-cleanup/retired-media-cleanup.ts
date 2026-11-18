@@ -9,6 +9,8 @@ const uuid = z.custom<string>(isDraftUuid);
 // than claiming erasure; raise the budget or schedule runs more often then.
 const SWEEP_BUDGET_MS = 40_000;
 const PREFIX_BATCH = 20;
+// Concurrent finish_media_cleanup calls per batch.
+export const FINISH_CONCURRENCY = 10;
 const KEY_BATCH = 100;
 const prefixes = z
   .array(
@@ -171,15 +173,21 @@ async function performSweep(
     } catch {
       removed = false;
     }
-    const finished = await Promise.all(
-      keyClaims.map((claim) =>
-        client.rpc("finish_media_cleanup", {
-          p_object_key: claim.object_key,
-          p_claim_token: claim.claim_token,
-          p_success: removed,
-        }),
-      ),
-    );
+    // Bounded concurrency: a full batch must not open a hundred database
+    // requests at once.
+    const finished: Awaited<ReturnType<typeof client.rpc>>[] = [];
+    for (let i = 0; i < keyClaims.length; i += FINISH_CONCURRENCY)
+      finished.push(
+        ...(await Promise.all(
+          keyClaims.slice(i, i + FINISH_CONCURRENCY).map((claim) =>
+            client.rpc("finish_media_cleanup", {
+              p_object_key: claim.object_key,
+              p_claim_token: claim.claim_token,
+              p_success: removed,
+            }),
+          ),
+        )),
+      );
     if (!removed || finished.some((f) => f.error || f.data !== true))
       failed = true;
   }

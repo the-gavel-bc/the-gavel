@@ -17,6 +17,7 @@ const messages: Record<string, string> = {
   invalid_image: "That image could not be read. Try a different file.",
   too_large: "Choose an image of 3 MB or less.",
   forbidden: "Your access no longer permits profile changes.",
+  rate_limited: "Too many photo changes. Wait a minute, then try again.",
   unavailable: "The photo could not be saved. Try again.",
 };
 

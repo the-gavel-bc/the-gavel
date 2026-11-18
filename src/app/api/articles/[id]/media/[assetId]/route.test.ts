@@ -342,3 +342,82 @@ it.each(["begin", "finalize"])(
     }
   },
 );
+
+it("refuses a cross-origin browser upload before doing any work", async () => {
+  const base = await uploadRequest();
+  const crossSite = new Request(base.url, {
+    method: "POST",
+    body: await base.arrayBuffer(),
+    headers: {
+      "content-type": base.headers.get("content-type")!,
+      origin: "https://evil.example",
+      host: "localhost",
+    },
+  });
+  const response = await POST(crossSite, routeParams);
+  expect(response.status).toBe(403);
+  expect(mocks.acquire).not.toHaveBeenCalled();
+  expect(mocks.trustedClient).not.toHaveBeenCalled();
+});
+
+it.each([
+  ["pending membership", { status: "pending" }, 403],
+  ["signed out", { status: "signedOut" }, 403],
+])(
+  "denies %s before touching the database or Storage",
+  async (_label, access, status) => {
+    mocks.access.mockResolvedValue(access);
+    const response = await POST(await uploadRequest(), routeParams);
+    expect(response.status).toBe(status);
+    expect(mocks.userClient).not.toHaveBeenCalled();
+    expect(mocks.acquire).not.toHaveBeenCalled();
+    expect(mocks.upload).not.toHaveBeenCalled();
+  },
+);
+
+it.each(["author", "editor"])(
+  "a %s cannot process another member's reservation",
+  async (role) => {
+    mocks.access.mockResolvedValue({
+      status: "active",
+      userId: "00000000-0000-0000-0000-000000000009",
+      profileId: "10000000-0000-0000-0000-000000000009",
+      role,
+    });
+    const response = await POST(await uploadRequest(), routeParams);
+    expect(response.status).toBe(404);
+    expect(mocks.acquire).not.toHaveBeenCalled();
+    expect(mocks.upload).not.toHaveBeenCalled();
+  },
+);
+
+it("lets an administrator process another member's reservation", async () => {
+  mocks.access.mockResolvedValue({
+    status: "active",
+    userId: "00000000-0000-0000-0000-000000000009",
+    profileId: "10000000-0000-0000-0000-000000000009",
+    role: "administrator",
+  });
+  const response = await POST(await uploadRequest(), routeParams);
+  expect(response.status).toBe(200);
+});
+
+it("answers 408 when the body stops arriving", async () => {
+  const stalled = new Request("http://localhost/api/articles/media", {
+    method: "POST",
+    headers: { "content-type": "multipart/form-data; boundary=x" },
+    body: new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new Uint8Array([1]));
+      },
+    }),
+    duplex: "half",
+  } as RequestInit);
+  vi.useFakeTimers();
+  const pending = POST(stalled, routeParams);
+  await vi.advanceTimersByTimeAsync(16_000);
+  const response = await pending;
+  vi.useRealTimers();
+  expect(response.status).toBe(408);
+  expect(mocks.release).toHaveBeenCalled();
+});
