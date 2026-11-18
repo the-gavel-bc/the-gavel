@@ -1,3 +1,5 @@
+"use client";
+import { useRef, useState } from "react";
 import styles from "./search-form.module.css";
 export function SearchForm({
   id,
@@ -10,6 +12,10 @@ export function SearchForm({
   invalid?: boolean;
   navigation?: boolean;
 }) {
+  // Navigation search collapses to an icon; the first press opens the field.
+  // Without JavaScript an empty press submits and lands on the search page.
+  const [open, setOpen] = useState(false);
+  const input = useRef<HTMLInputElement>(null);
   return (
     <form
       role="search"
@@ -17,12 +23,28 @@ export function SearchForm({
       action="/search"
       method="get"
       className={navigation ? styles.navigation : styles.form}
+      data-open={(navigation && open) || undefined}
+      onKeyDown={(event) => {
+        if (!navigation || event.key !== "Escape" || !open) return;
+        setOpen(false);
+        input.current?.blur();
+      }}
+      onBlur={(event) => {
+        if (
+          navigation &&
+          !event.currentTarget.contains(event.relatedTarget) &&
+          !input.current?.value
+        )
+          setOpen(false);
+      }}
     >
       <label className={navigation ? styles.srOnly : styles.label} htmlFor={id}>
         Search stories
       </label>
       <div className={styles.controls}>
         <input
+          ref={input}
+          onFocus={navigation ? () => setOpen(true) : undefined}
           id={id}
           type="search"
           name="q"
@@ -32,7 +54,17 @@ export function SearchForm({
           aria-invalid={invalid || undefined}
           aria-describedby={navigation ? undefined : `${id}-help`}
         />
-        <button type="submit">
+        <button
+          type="submit"
+          aria-expanded={navigation ? open : undefined}
+          aria-controls={navigation ? id : undefined}
+          onClick={(event) => {
+            if (!navigation || (open && input.current?.value.trim())) return;
+            event.preventDefault();
+            setOpen(true);
+            input.current?.focus();
+          }}
+        >
           {navigation ? (
             <>
               {/* Compact icon button in the navigation band; the name stays "Search". */}

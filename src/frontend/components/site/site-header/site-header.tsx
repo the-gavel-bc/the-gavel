@@ -6,7 +6,7 @@ import styles from "./site-header.module.css";
 export function SiteHeader({ sections = [] }: { sections?: PublicSection[] }) {
   return (
     <header className={styles.header}>
-      <div className={styles.inner}>
+      <div className={styles.masthead}>
         <Link className={styles.identity} href="/">
           {/* Plain img: next/image adds an inline style attribute the CSP blocks. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}

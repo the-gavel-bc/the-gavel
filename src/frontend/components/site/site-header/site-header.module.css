@@ -1,17 +1,23 @@
+/* No box of its own, so the navigation band can stick against the whole page. */
 .header {
-  border-top: 4px solid var(--reader-ink, #14161c);
+  display: contents;
 }
-.inner {
-  width: min(72rem, calc(100% - 2rem));
-  margin-inline: auto;
+.masthead {
+  border-top: 4px solid var(--reader-ink, #14161c);
+  padding-inline: 1rem;
   display: flex;
   justify-content: center;
   padding-block: clamp(1rem, 3vw, 2rem);
 }
 .identity {
   display: block;
-  width: min(36rem, 100%);
+  width: clamp(16rem, 38vw, 32rem);
+  max-width: 100%;
   border-radius: 0.25rem;
+  transition: opacity var(--reader-fast, 180ms);
+}
+.identity:hover {
+  opacity: 0.85;
 }
 .identity img {
   display: block;
