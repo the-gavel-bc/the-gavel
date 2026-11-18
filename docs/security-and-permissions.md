@@ -40,7 +40,7 @@ Membership approval/promotion, last-eligible-administrator counting and trusted-
 | Read another author's drafts/archives           |     No |                       No |         Only in review[1] |                  Yes |
 | Create an article                               |     No |                      Yes |                       Yes |                  Yes |
 | Edit an article                                 |     No | Own draft, not in review | Own draft or in review[1] | Any, incl. published |
-| Submit a draft for review                       |     No |               Owner only |                Not needed |                  Any |
+| Submit a draft for review                       |     No |               Owner only |                Not needed |           Not needed |
 | Return an article in review to its author       |     No |                       No |                       Yes |                  Yes |
 | Publish an article                              |     No |                       No | Own draft or in review[1] |                  Any |
 | Archive an article                              |     No |                       No |  Only ones they published |                  Any |
@@ -51,7 +51,7 @@ Membership approval/promotion, last-eligible-administrator counting and trusted-
 | Manage taxonomy, homepage, and site information |     No |                       No |                        No |                  Yes |
 | Review audit history                            |     No |                       No |                        No |                  Yes |
 
-[1] "In review" means a draft with `review_requested_at` set. The decision lives in one private predicate, `private.article_authority(article, user, mode)`, which every article read, save, media and lifecycle function calls; the interface only mirrors it (`article-permissions.ts`). Review state is a pair of columns on drafts rather than a new article status, so every published-only public boundary is unchanged. See the [editor role plan](superpowers/plans/2026-11-19-editor-role.md).
+[1] "In review" means a draft with `review_requested_at` set and status `draft`; editors also read articles they published, but not archived or published articles they did not publish (public readers use the public routes). The decision lives in one private predicate, `private.article_authority(article, user, mode)`, which every article read, save, media and lifecycle function calls; the interface only mirrors it (`article-permissions.ts`). Review state is a pair of columns on drafts rather than a new article status, so every published-only public boundary is unchanged. See the [editor role plan](superpowers/plans/2026-11-19-editor-role.md).
 
 Additional credits never imply ownership. Each article has one designated owner.
 
@@ -351,3 +351,7 @@ Only the signed-in active member can set or remove their own photo; the database
 ## Automatic expiry of unused images
 
 `claim_expired_unused_uploads` and `complete_expired_unused_upload` are executable only by the service role and are called by the daily `/api/internal/unused-upload-cleanup` cron route (production only, `CRON_SECRET` bearer, constant-time comparison). An image is claimed only when it was finalized over 7 days ago, no current body or main image and no retained revision references it, its article is a draft or published, and neither the article nor the image row is locked (claims use `skip locked`, in the same article-then-image order as manual removal). Completion re-checks every condition and requires the Storage object to be gone before deleting the row; the key registry and cleanup ledger keep monitoring the location for late writes. Pending or uploading assets are claimed after 1 day (they are never visible and hold private bytes); a row attempted within the last hour is not re-claimed, and only draft and published articles' rows are candidates, so skipped rows cannot starve the window. Archived articles' media is never touched. `submit_article` refuses while an upload is unfinished. The asset rule (uploader or administrator) lives in `private.can_use_asset`. Administrators can take down an image that only history references with `purge_article_image` (audited as `article.image_purged`).
+
+## Area 1 review follow-ups (authentication and access)
+
+Findings and decisions are in [docs/code-reviews/AREA-1-AUTH-REPORT.md](code-reviews/AREA-1-AUTH-REPORT.md). Implemented: the editor read scope above, error handling in the sign-in callback, a second membership read when `claim_invitation` reports false (another request claimed first), cause-neutral wording on the access-pending page, and a session-expiry hint on the editor's save failure. Open items needing a decision outside the code: confirm in staging what Google identity data carries for non-Workspace accounts with a bc.edu address and decide whether to require the `hd` claim; rate limit `/api/session/desk` at the platform.
