@@ -13,8 +13,9 @@ export default async function AccessPendingPage() {
     <PublicShell>
       <h1>Access not approved</h1>
       <p>
-        This Boston College account is not on the staff list. Ask a publication
-        administrator to add your BC email, then sign in again.
+        This Boston College account does not have staff access. Ask a
+        publication administrator to add or reactivate your BC email, then sign
+        in again.
       </p>
       <form action={signOut}>
         <Button type="submit">Sign out</Button>

@@ -68,3 +68,46 @@ it("handles missing OAuth code without exchanging it", async () => {
   );
   expect(mocks.exchange).not.toHaveBeenCalled();
 });
+it("honors a safe dashboard destination for an active member", async () => {
+  const response = await GET(
+    new Request(
+      "https://publication.example.test/auth/callback?code=c&next=/dashboard/articles/abc",
+    ),
+  );
+  expect(response.headers.get("location")).toBe(
+    "https://publication.example.test/dashboard/articles/abc",
+  );
+});
+it("ignores the destination for people without access", async () => {
+  mocks.access.mockResolvedValue({ status: "pending" });
+  const response = await GET(
+    new Request(
+      "https://publication.example.test/auth/callback?code=c&next=/dashboard/admin/members",
+    ),
+  );
+  expect(response.headers.get("location")).toBe(
+    "https://publication.example.test/access-pending",
+  );
+});
+it("returns to sign-in with the generic error when the access check throws", async () => {
+  mocks.access.mockRejectedValue(
+    new Error("Unable to verify membership access."),
+  );
+  const response = await GET(
+    new Request("https://publication.example.test/auth/callback?code=c"),
+  );
+  expect(response.status).toBeGreaterThanOrEqual(300);
+  expect(response.headers.get("location")).toBe(
+    "https://publication.example.test/sign-in?error=callback",
+  );
+  expect(response.headers.get("cache-control")).toContain("no-store");
+});
+it("treats a session that is signed out after the exchange as an error", async () => {
+  mocks.access.mockResolvedValue({ status: "signedOut" });
+  const response = await GET(
+    new Request("https://publication.example.test/auth/callback?code=c"),
+  );
+  expect(response.headers.get("location")).toBe(
+    "https://publication.example.test/sign-in?error=callback",
+  );
+});

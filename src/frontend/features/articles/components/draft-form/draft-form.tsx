@@ -51,7 +51,7 @@ const messages: Record<DraftErrorCode, string> = {
   unavailable:
     "We could not confirm the save. Retry the original save to confirm it. Newer edits stay in this tab.",
   forbidden:
-    "Your access does not currently allow saving. Your input is still here.",
+    "Your access does not currently allow saving. If your session expired, sign in again in another tab and retry. Your input is still here.",
   not_found: "This article is no longer available. Your input is still here.",
   conflict:
     "This article changed elsewhere. Your input is still here; reload to review the latest version.",

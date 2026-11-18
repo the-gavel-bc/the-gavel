@@ -46,9 +46,10 @@ export async function getCurrentAccess(): Promise<AccessState> {
     // An administrator may have listed this address ahead of time; the first
     // eligible sign-in turns that listing into a membership. Nothing is
     // stored for people who are not listed.
-    const { data: claimed, error: claimError } =
-      await client.rpc("claim_invitation");
-    if (claimError || claimed !== true) return { status: "pending" };
+    const { error: claimError } = await client.rpc("claim_invitation");
+    if (claimError) return { status: "pending" };
+    // `false` also means another request claimed the listing a moment ago, so
+    // read the membership again before deciding.
     ({ data: membership, error } = await readMembership());
     if (error) throw new Error("Unable to verify membership access.");
     if (!membership?.active) return { status: "pending" };

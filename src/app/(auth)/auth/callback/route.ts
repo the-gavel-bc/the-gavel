@@ -12,13 +12,18 @@ export async function GET(request: Request) {
   if (code) {
     const { error } = await client.auth.exchangeCodeForSession(code);
     if (!error) {
-      const access = await getCurrentAccess();
-      destination =
-        access.status === "active"
-          ? safeDashboardPath(url.searchParams.get("next"))
-          : access.status === "pending"
-            ? "/access-pending"
-            : destination;
+      try {
+        const access = await getCurrentAccess();
+        destination =
+          access.status === "active"
+            ? safeDashboardPath(url.searchParams.get("next"))
+            : access.status === "pending"
+              ? "/access-pending"
+              : destination;
+      } catch {
+        // A transient lookup failure sends the person back to sign in with
+        // the generic message rather than a raw 500.
+      }
     }
   }
   const response = NextResponse.redirect(new URL(destination, env.SITE_URL));

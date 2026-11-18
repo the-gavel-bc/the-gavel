@@ -79,6 +79,23 @@ describe("membership access", () => {
     });
     expect(mocks.rpc).toHaveBeenCalledWith("claim_invitation");
   });
+  it("re-reads the membership when the claim reports false but another request just claimed", async () => {
+    mocks.membership
+      .mockResolvedValueOnce({ data: null, error: null })
+      .mockResolvedValueOnce({
+        data: { role: "author", active: true },
+        error: null,
+      });
+    // beforeEach already answers claim_invitation with false.
+    expect(await getCurrentAccess()).toMatchObject({
+      status: "active",
+      role: "author",
+    });
+  });
+  it("stays pending when the claim is false and nothing was claimed", async () => {
+    mocks.membership.mockResolvedValue({ data: null, error: null });
+    expect(await getCurrentAccess()).toEqual({ status: "pending" });
+  });
   it("treats a failed claim as not approved", async () => {
     mocks.membership.mockResolvedValue({ data: null, error: null });
     mocks.rpc.mockResolvedValue({ data: null, error: { message: "x" } });
@@ -116,7 +133,7 @@ describe("membership access", () => {
       );
     },
   );
-  it.each(["author", "administrator"])(
+  it.each(["author", "editor", "administrator"])(
     "returns scoped active %s access",
     async (role) => {
       mocks.membership.mockResolvedValue({
