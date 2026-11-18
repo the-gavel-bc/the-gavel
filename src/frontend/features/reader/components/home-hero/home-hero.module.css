@@ -7,6 +7,11 @@
   color: #fff;
   text-decoration: none;
   overflow: hidden;
+  border-radius: var(--reader-radius);
+  background: var(--reader-night);
+}
+.story:hover .image img {
+  transform: scale(1.03);
 }
 .image {
   aspect-ratio: 3 / 2;
@@ -34,6 +39,7 @@
 .story:hover .title {
   text-decoration: underline;
   text-underline-offset: 0.15em;
+  text-decoration-thickness: 2px;
 }
 .story .date {
   color: #fff;
@@ -50,13 +56,23 @@
   font: 0.75rem/1.5 var(--reader-sans);
   overflow-wrap: anywhere;
 }
+/* Section label as a pill, as in the demo's hero. */
 .section {
   display: inline-flex;
   align-items: center;
   min-height: 2.75rem;
-  color: var(--reader-blue);
+  margin-bottom: 0.5rem;
+  padding: 0 1rem;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--reader-blue);
   font: 700 0.75rem/1.4 var(--reader-sans);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  text-underline-offset: 0.2em;
+  text-decoration: none;
+  transition: background var(--reader-fast) var(--reader-ease);
+}
+.section:hover {
+  background: var(--reader-band);
+  text-decoration: underline;
 }
