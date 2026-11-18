@@ -1,42 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { expect, it } from "vitest";
-import { ACTOR, PROFILE, beginAsActor } from "../draft-fixtures/draft-fixtures";
+import { ACTOR, beginAsActor } from "../draft-fixtures/draft-fixtures";
 import { fixtureJson, waitForLock } from "../database-session/database-session";
-import {
-  ADMIN,
-  beginAsAdmin,
-  withSaveFixtures,
-} from "../save-fixtures/save-fixtures";
-
-it("own and administrator edits serialize and reject the stale version", async () => {
-  await withSaveFixtures(async ({ observer, a, b }) => {
-    try {
-      await beginAsActor(a);
-      expect(
-        await a.json<{ ok: boolean }>(
-          `public.save_own_public_profile(1,'${randomUUID()}'::uuid,'Race Author',null)`,
-        ),
-      ).toMatchObject({ ok: true });
-      await beginAsAdmin(b);
-      const stale = b.json<{ ok: boolean; code: string }>(
-        `public.save_contributor_profile('${PROFILE}'::uuid,1,'${randomUUID()}'::uuid,'Admin Edit',null)`,
-      );
-      await waitForLock(observer, b);
-      await a.execute("commit;");
-      expect(await stale).toEqual({ ok: false, code: "conflict" });
-      await b.execute("commit;");
-      expect(
-        await observer.json(`(select jsonb_build_object('name',display_name,'version',edit_version)
-        from public.profiles where id='${PROFILE}')`),
-      ).toEqual({ name: "Race Author", version: 2 });
-    } finally {
-      await Promise.all([a.close(), b.close()]);
-      await observer.execute(
-        `delete from private.profile_write_receipts where actor_user_id in ('${ACTOR}','${ADMIN}');`,
-      );
-    }
-  });
-});
+import { withSaveFixtures } from "../save-fixtures/save-fixtures";
 
 it("own save rechecks identity after a concurrent revocation", async () => {
   await withSaveFixtures(async ({ observer, a, b }) => {

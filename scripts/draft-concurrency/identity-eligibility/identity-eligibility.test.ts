@@ -24,7 +24,7 @@ async function withAdministrators(run: (sessions: Sessions) => Promise<void>) {
     try {
       await observer.execute(`update public.memberships set active=false,revoked_at=now()
           where role='administrator' and user_id<>'${ADMIN}';
-        update public.memberships set active=true,role='administrator' where user_id='${ACTOR}';`);
+        update public.memberships set active=true,revoked_at=null,role='administrator' where user_id='${ACTOR}';`);
       await run(sessions);
     } finally {
       // Closing tolerates exited sessions and releases any pending lock waits.

@@ -59,7 +59,7 @@ export async function withDraftFixtures(
       insert into auth.users(id,email,email_confirmed_at,raw_app_meta_data) values('${ACTOR}','gavel-draft-race@bc.edu',now(),'{"provider":"google"}');
       insert into public.profiles(id,auth_user_id,display_name,slug) values('${PROFILE}','${ACTOR}','Synthetic Race Author','synthetic-race-author');
       insert into public.profiles(id,display_name,slug) values('${GUEST}','Synthetic Race Guest','synthetic-race-guest');
-      insert into public.memberships(user_id,active,approved_by,approved_at) values('${ACTOR}',true,'00000000-0000-0000-0000-000000000004',now());
+      insert into public.memberships(user_id,role,active,approved_by,approved_at) values('${ACTOR}','administrator',true,'00000000-0000-0000-0000-000000000004',now());
       insert into public.sections(id,name,slug) values('${SECTION}','Synthetic Race Section','synthetic-race-section');
       insert into public.categories(id,section_id,name,slug) values('${CATEGORY}','${SECTION}','Synthetic Race Category','synthetic-race-category');
       commit;`);
