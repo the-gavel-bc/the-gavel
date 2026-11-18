@@ -1,0 +1,19 @@
+# Deferred and open review items
+
+Items found by a review that were deliberately not done, with the reason, so they are not lost. Update this file when an item is done, rejected, or re-decided. Source reports: [REVIEW-REPORT.md](REVIEW-REPORT.md) (media), [AREA-1-AUTH-REPORT.md](AREA-1-AUTH-REPORT.md) (authentication and access).
+
+| Area | Item | Why not done | What would settle it |
+| --- | --- | --- | --- |
+| Media | Browser (Playwright) test of the editor upload flow | The e2e fixtures have no editor account, and the suite needs the isolated local Supabase on port 54321 | Add an editor user to the e2e fixtures; test: author submits, upload control locked; editor uploads on the submitted article |
+| Media | Screen for `purge_article_image` | Rare takedown tool; the owner accepted a database-level tool for now | Runbook `docs/runbooks/purge-article-image.md` is written; build an admin screen if takedowns become routine |
+| Media | The daily cleanup still re-sweeps every retired key forever | Indexed and concurrency-capped, but the policy change (stop re-sweeping old successes) needs real ledger sizes | Revisit when the ledger holds tens of thousands of keys; measure a full sweep against its 40 s budget |
+| Media | `list_unused_article_uploads` has no interface caller | Kept as a documented database function with tests; removing it is a separate migration | Drop the function and its tests if no screen is planned |
+| Media | Raw per-reviewer reports for the media run were not saved | The first run captured them in chat only | Later runs save raw reports under `docs/code-reviews/raw/` in the reviewer's checkout |
+| Auth | Session expiry mid-edit reads as lost access (LOGIC-002) | A full fix needs a distinct signed-out result in every draft action and a preserved redirect target; only a message hint was added | Add an `unauthenticated` result code, pass a validated `next` through sign-in |
+| Auth | Google `hd` claim is never verified (SEC-002) | Depends on what Google sends for non-Workspace accounts with a bc.edu address; cannot be settled from the code, and requiring a missing claim would lock people out | In staging, sign in with such an account and inspect `auth.identities.identity_data`; then require `hd` if present |
+| Auth | `/api/session/desk` forwards junk-cookie requests to Supabase Auth (SEC-004) | No data exposure; the proper control is a platform rate limit | Add a Vercel firewall rate limit for that path |
+| Auth | Dashboard nav may not update after a mid-session role change (LOGIC-005) | Needs a runtime check; every page and action rechecks, so there is no access gain | Playwright with two contexts: demote in one, navigate in the other |
+| Auth | Invite form hint for skipped (already listed) addresses (LOGIC-004) | Copy on the access-pending page was fixed; the form hint touches the staff UI | Show "already a member, reactivate from the list" for skipped entries |
+| Auth | Admin page unit tests for homepage, media cleanup, site, taxonomy, members audit (TEST-002) | Large test-only batch; guard tests for the actions were done first | One denial test per page (author, editor, pending) |
+| Auth | `claim_invitation` pgTAP branches, revocation-mid-session browser test, eligibility parity table, CSP header e2e assertions, dashboard layout nav test, sign-in and access-pending tests (TEST-003 to 010) | Test-only; lower risk than the fixes, and several need the e2e stack | See AREA-1-AUTH-REPORT.md for each assertion |
+| Local database tests | pgTAP files `027`, `056`, `057`, `058` fail on the long-lived local database | They depend on leftover local data and fixtures (profile names, taxonomy rows, ineligible identities); they failed before this work | Run `pnpm test:db:clean` on a freshly reset database |
