@@ -76,10 +76,11 @@ export function PublishedStoryCatalog({
               <strong>{article.title}</strong>
               <button
                 type="button"
+                aria-label={`Set ${article.title} as lead`}
                 disabled={blocked || selectedIds.includes(article.id)}
                 onClick={() => add(article, "lead")}
               >
-                Set {article.title} as lead
+                Set as lead
               </button>
               <button
                 type="button"
@@ -88,18 +89,20 @@ export function PublishedStoryCatalog({
                   selectedIds.includes(article.id) ||
                   featuredCount >= 4
                 }
+                aria-label={`Add ${article.title} to Featured News`}
                 onClick={() => add(article, "featured")}
               >
-                Add {article.title} to Featured News
+                Featured News
               </button>
               <button
                 type="button"
                 disabled={
                   blocked || selectedIds.includes(article.id) || readCount >= 4
                 }
+                aria-label={`Add ${article.title} to Read This`}
                 onClick={() => add(article, "readThis")}
               >
-                Add {article.title} to Read This
+                Read This
               </button>
             </li>
           ))}

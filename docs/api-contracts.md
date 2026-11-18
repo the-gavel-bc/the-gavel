@@ -8,6 +8,23 @@
 
 `list_public_articles(scope, primary, secondary, limit, cursor)` returns bounded published-only cards for latest, section, section/category, tag, and owner-or-contributor author scopes. Limits are 1–24; the server adapter defaults to 12. Cards contain title, excerpt, publication timestamp, public section/owner/writer fields and a finalized main-image descriptor. They omit article bodies and private metadata. Cursors bind scope and filters, preserve timestamp microseconds, and are not authorization; malformed or mismatched requests return `invalid`. Database failures and invalid results return `unavailable`. New requests recheck publication and may see changes between pages. The server uses the cookie-free, no-store public client. See the [Task 3 plan](superpowers/plans/2026-11-09-public-article-list.md).
 
+## Reader navigation endpoints
+
+Added by the [reader refresh plan](superpowers/plans/2026-11-13-reader-refresh.md#follow-ups-2026-11-13).
+
+- **`GET /api/public/search/suggestions?q=`:** typeahead for the navigation search.
+  - It calls `suggest_public_articles(p_query)`: published titles that contain the typed text, case-insensitive, newest first, at most 6. Partial words match, and typed `%` and `_` are literal.
+  - The query is normalized like search and must be at least 2 characters. Each call spends one ticket from the shared public search budget (120 per server minute).
+  - Cards go through the same allowlisted `homepage_card_map` projection as search; the route returns only `{title, slug, section}`.
+  - `ok` returns `{kind: "ok", items: [{title, slug, section}]}` with `Cache-Control: public, max-age=30, s-maxage=30`.
+  - `invalid` returns 400, `rate_limited` returns 429 with `Retry-After`, and `unavailable` returns 503; all three are `private, no-store`.
+  - The client waits for a 300ms pause and at least 2 characters, and aborts stale requests.
+  - Full-text `/search` stays whole-word.
+- **`GET /api/session/desk`:** tells the reader whether to show the staff desk shortcut.
+  - It returns `{desk: null}`, or `{desk: {displayName, role}}` for the caller's own active membership. Responses are always `private, no-store`.
+  - Requests without a Supabase auth cookie are answered without contacting Supabase.
+  - The route handler can persist a refreshed session cookie. That's why the check lives here and not in public Server Components, which skip session refresh.
+
 ## Public tag archive resolution
 
 `getPublicTagArchive(slug,cursor?)` resolves a unique tag through the existing anonymous tags policy, selecting only name/slug and validating the bounded response. It then uses the unchanged tag scope of `list_public_articles` with twelve-card pages. Missing tags produce a real route 404; existing tags with no public matches produce an empty archive. Malformed/cross-tag cursors produce safe recovery and noindex, while backend/response errors are unavailable/noindex. Metadata/page share only the current request's result. Tags have no active flag; publication, active section/owner and association filtering remain authoritative in the list SQL. No public association-table read or write grant is added. See the [Task 14 plan](superpowers/plans/2026-11-10-public-tag-archives.md).

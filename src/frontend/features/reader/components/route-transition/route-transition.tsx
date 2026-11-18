@@ -1,34 +1,48 @@
 "use client";
-import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import styles from "./route-transition.module.css";
+import { PageSkeleton, type SkeletonKind } from "./page-skeletons";
 
-type Kind = "article" | "list";
+type Kind = SkeletonKind;
+// Typical navigations take well under a second (70–190ms measured on a
+// production build), so the skeleton is reserved for genuinely slow loads.
+const SHOW_AFTER_MS = 1500;
 // Clears a skeleton that outlives a stalled or cancelled navigation.
 const STALE_AFTER_MS = 8000;
 
-// Which skeleton an internal navigation to `url` should show, or null when the
+// Which page-shaped skeleton an internal navigation to `url` should show, or null when the
 // browser handles it (new tab, download, another origin or the same page).
 export function skeletonFor(url: URL, current: URL): Kind | null {
   if (url.origin !== current.origin) return null;
   if (url.pathname === current.pathname && url.search === current.search)
     return null;
   if (/^\/(dashboard|sign-in|api)(\/|$)/.test(url.pathname)) return null;
-  return url.pathname.startsWith("/articles/") ? "article" : "list";
+  const path = url.pathname;
+  if (path === "/") return "home";
+  if (path.startsWith("/articles/")) return "article";
+  if (path.startsWith("/authors/")) return "author";
+  if (path === "/search") return "search";
+  if (path === "/about" || path === "/letters/how-to-submit") return "page";
+  // Sections, categories, tags and letters share the archive layout.
+  return "archive";
 }
+
+// Path and query of the page on screen. The App Router updates the URL in the
+// same commit that renders the destination, so a changed URL means the new
+// page is visible. (A layout's `children` is a stable router placeholder, so
+// it cannot signal arrival; that bug showed skeletons over loaded pages.)
+const here = () => location.pathname + location.search;
+const SETTLE_POLL_MS = 50;
 
 // Reader routes resolve eligibility before streaming, so they have no route
 // loading boundary (that would turn later 404s into 200s). This shows a
-// page-shaped skeleton on the client the moment a reader follows a link,
-// until the next route renders. Status codes are unaffected.
+// page-shaped skeleton on the client when a followed link takes longer than
+// SHOW_AFTER_MS, until the next route renders. Status codes are unaffected.
 export function RouteTransition({ children }: { children: ReactNode }) {
-  const pathname = usePathname() ?? "";
-  const search = useSearchParams()?.toString() ?? "";
-  const route = `${pathname}?${search}`;
   const [pending, setPending] = useState<{ from: string; kind: Kind } | null>(
     null,
   );
-  const showing = pending?.from === route ? pending.kind : null;
+  const [shown, setShown] = useState<object | null>(null);
+  const showing = pending && shown === pending ? pending.kind : null;
 
   useEffect(() => {
     const start = (target: string) => {
@@ -36,7 +50,7 @@ export function RouteTransition({ children }: { children: ReactNode }) {
         new URL(target, location.href),
         new URL(location.href),
       );
-      if (kind) setPending({ from: route, kind });
+      if (kind) setPending({ from: here(), kind });
     };
     const onClick = (event: MouseEvent) => {
       if (
@@ -65,67 +79,44 @@ export function RouteTransition({ children }: { children: ReactNode }) {
           )}`,
         );
     };
+    // A page restored from the back/forward cache must not resume a skeleton
+    // from the full-page navigation that left it.
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) setPending(null);
+    };
     document.addEventListener("click", onClick);
     document.addEventListener("submit", onSubmit);
+    window.addEventListener("pageshow", onPageShow);
     return () => {
       document.removeEventListener("click", onClick);
       document.removeEventListener("submit", onSubmit);
+      window.removeEventListener("pageshow", onPageShow);
     };
-  }, [route]);
+  }, []);
 
   useEffect(() => {
-    if (!showing) return;
-    const timer = setTimeout(() => setPending(null), STALE_AFTER_MS);
-    return () => clearTimeout(timer);
-  }, [showing]);
+    if (!pending) return;
+    const settle = () => {
+      if (here() !== pending.from) setPending(null);
+    };
+    // ponytail: polls the URL every 50ms while a navigation is pending; the
+    // Navigation API's currententrychange can replace it once widely shipped.
+    const poll = setInterval(settle, SETTLE_POLL_MS);
+    const show = setTimeout(() => {
+      if (here() === pending.from) setShown(pending);
+    }, SHOW_AFTER_MS);
+    const stale = setTimeout(() => setPending(null), STALE_AFTER_MS);
+    return () => {
+      clearInterval(poll);
+      clearTimeout(show);
+      clearTimeout(stale);
+    };
+  }, [pending]);
 
   return (
     <>
       {showing && <PageSkeleton kind={showing} />}
-      {/* Keyed by route so each new page replays the entrance fade. */}
-      <div key={route} className={styles.page} hidden={!!showing}>
-        {children}
-      </div>
+      <div hidden={!!showing}>{children}</div>
     </>
-  );
-}
-
-export function PageSkeleton({ kind }: { kind: Kind }) {
-  return (
-    <div className={styles.skeleton} aria-busy="true">
-      <p role="status" className={styles.srOnly}>
-        Loading
-      </p>
-      {kind === "article" ? (
-        <div className={styles.article} aria-hidden="true">
-          <span className={`${styles.bone} ${styles.pill}`} />
-          <span className={`${styles.bone} ${styles.headline}`} />
-          <span
-            className={`${styles.bone} ${styles.headline} ${styles.short}`}
-          />
-          <span className={`${styles.bone} ${styles.line} ${styles.meta}`} />
-          <span className={`${styles.bone} ${styles.media}`} />
-          {Array.from({ length: 6 }, (_, index) => (
-            <span key={index} className={`${styles.bone} ${styles.line}`} />
-          ))}
-        </div>
-      ) : (
-        <div aria-hidden="true">
-          <span className={`${styles.bone} ${styles.heading}`} />
-          <div className={styles.grid}>
-            {Array.from({ length: 8 }, (_, index) => (
-              <div key={index} className={styles.card}>
-                <span className={`${styles.bone} ${styles.media}`} />
-                <span className={`${styles.bone} ${styles.pill}`} />
-                <span className={`${styles.bone} ${styles.line}`} />
-                <span
-                  className={`${styles.bone} ${styles.line} ${styles.short}`}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
   );
 }

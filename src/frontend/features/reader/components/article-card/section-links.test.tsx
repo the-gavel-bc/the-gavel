@@ -2,7 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 import type { PublicArticle } from "@/backend/public-articles/public-article/public-article";
 import { ArticleCard } from "./article-card";
-import { HomeHero } from "../home-hero/home-hero";
+import { ArchiveLead } from "../archive-grid/archive-lead";
 import { HomeSection } from "../home-section/home-section";
 import { ArticleHeader } from "../article-header/article-header";
 import { ArchiveHeader } from "../archive-header/archive-header";
@@ -64,7 +64,7 @@ beforeEach(() =>
 );
 it.each([
   ["card", () => <ArticleCard article={card} />],
-  ["archive hero", () => <HomeHero article={card} showSection />],
+  ["archive lead", () => <ArchiveLead article={card} />],
   ["article header", () => <ArticleHeader article={article} />],
   ["archive breadcrumb", () => <ArchiveHeader archive={archive} />],
   ["footer", () => <SiteFooter sections={[section]} />],
@@ -107,4 +107,38 @@ it("keeps letters navigation categories under the section path", () => {
       screen.getByRole("navigation", { name: "Primary navigation" }),
     ).getByRole("link", { name: section.name }),
   ).toHaveAttribute("data-active", "true");
+});
+it("puts a plain-text byline beside the date: writers first, else the owner", () => {
+  const view = render(<ArticleHeader article={article} />);
+  expect(screen.getByText(`By ${article.owner.displayName}`)).toBeVisible();
+  view.rerender(
+    <ArticleHeader
+      article={{
+        ...article,
+        contributors: [
+          {
+            displayName: "Second",
+            slug: "second",
+            role: "writer",
+            displayOrder: 2,
+          },
+          {
+            displayName: "Editor",
+            slug: "editor",
+            role: "editor",
+            displayOrder: 1,
+          },
+          {
+            displayName: "First",
+            slug: "first",
+            role: "writer",
+            displayOrder: 1,
+          },
+        ] as typeof article.contributors,
+      }}
+    />,
+  );
+  expect(screen.getByText("By First, Second")).toBeVisible();
+  // Author links stay in the credits block only.
+  expect(screen.queryByRole("link", { name: "First" })).toBeNull();
 });

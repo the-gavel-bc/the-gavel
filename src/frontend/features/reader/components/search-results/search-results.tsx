@@ -20,7 +20,7 @@ export function SearchResults({
 }) {
   return (
     <div className={styles.page}>
-      <h1>Search articles</h1>
+      <h1>Search stories</h1>
       <SearchForm
         id="article-search-query"
         query={query}
@@ -60,8 +60,8 @@ export function SearchResults({
             <>
               <p>
                 {result.items.length}{" "}
-                {result.items.length === 1 ? "story" : "stories"} on this page.
-                Newest first.
+                {result.items.length === 1 ? "story" : "stories"} on this page,
+                newest first.
               </p>
               <ArticleGrid>
                 {result.items.map((article) => (
@@ -69,6 +69,7 @@ export function SearchResults({
                     key={article.id}
                     article={article}
                     headingLevel={3}
+                    highlight={result.query}
                   />
                 ))}
               </ArticleGrid>

@@ -24,6 +24,10 @@
 .fields > legend + * {
   clear: both;
 }
+/* Nested groups (categories, tags, contributors) keep clear of neighbours. */
+.fields fieldset {
+  margin-block-start: var(--space-4);
+}
 .errors {
   background: var(--dash-danger-soft, #fdf1f0);
   border-left: 4px solid var(--dash-danger, #b3261e);
@@ -76,12 +80,23 @@
   .fields {
     padding: var(--space-4);
   }
+  /* One compact row, so the bar covers as little of the form as possible. */
   .saveBar {
     bottom: 0;
     border-radius: 12px 12px 0 0;
+    flex-wrap: nowrap;
+    padding-block: var(--space-2);
+  }
+  .saveText {
+    flex: 1;
+    font-size: 0.875rem;
+  }
+  /* The visibility note is dropped here; the save status stays. */
+  .saveText p:not([role="status"]) {
+    display: none;
   }
   .saveBar > button {
-    width: 100%;
+    flex: none;
   }
 }
 .newPhoto {

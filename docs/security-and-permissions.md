@@ -123,6 +123,15 @@ The [accepted Phase 4 editorial contract](superpowers/specs/2026-11-01-editorial
 - Encode untrusted text for its output context.
 - Validate redirect targets and allow only intended local or approved external destinations.
 
+### Reader desk shortcut (2026-11-13)
+
+Public pages stay session-independent. A client component asks `GET /api/session/desk` whether to show a "Your desk" link:
+
+- It reveals only the caller's own display name and role, and only for an active membership. Signed-out, pending and error cases all return `{desk: null}`.
+- Responses are `private, no-store`.
+- The link is a convenience; `/dashboard` still enforces access itself.
+- Public reader Server Components still never read the session, so no unsaved refresh-token rotation can happen there.
+
 ## Upload controls
 
 Phase 4 Task 3's additive migrations reserve article media through a checked owner/administrator RPC. Authenticated callers cannot directly insert, update, or delete media rows or finalize them; the finalization RPC is service-role-only and independently checks the claimed actor, article, validated metadata, and trusted Storage object. The private bucket exposes finalized reads only to eligible article owners/administrators through Storage RLS. The server-only image processor bounds multipart and decoded JPEG/PNG/WebP inputs, re-encodes to metadata-stripped WebP, and records a SHA-256 digest. Sharp is an explicit dependency because actual decoding and re-encoding are required. The upload route verifies the active actor and reserved article before opening the privileged Storage client and never returns the service key or object path. Uncertain finalization leaves the object in the private bucket for safe retry. A separate checked main-image RPC requires a finalized asset on the same article, validates alt/credit, and blocks direct link writes; a restrictive foreign key prevents deletion while attached. Dashboard attachment and cleanup are still being built.

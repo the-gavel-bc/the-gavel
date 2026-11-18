@@ -78,3 +78,7 @@
 .content :global(.ProseMirror-focused .ProseMirror-gapcursor) {
   display: block;
 }
+.editor > p:first-child {
+  font-weight: 700;
+  margin: 0;
+}

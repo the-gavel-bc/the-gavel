@@ -1,5 +1,5 @@
 import styles from "./public-shell.module.css";
-import { Suspense, type PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react";
 import { RouteTransition } from "@/frontend/features/reader/components/route-transition/route-transition";
 import { SiteFooter } from "../site-footer/site-footer";
 import { SiteHeader } from "../site-header/site-header";
@@ -25,10 +25,7 @@ export function PublicShell({
       <SkipLink />
       <SiteHeader sections={sections} />
       <main className={styles.main} id="main-content" tabIndex={-1}>
-        {/* Search params need a Suspense boundary; the fallback is the page itself. */}
-        <Suspense fallback={children}>
-          <RouteTransition>{children}</RouteTransition>
-        </Suspense>
+        <RouteTransition>{children}</RouteTransition>
       </main>
       <SiteFooter
         sections={sections}

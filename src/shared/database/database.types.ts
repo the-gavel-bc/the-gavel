@@ -1088,6 +1088,7 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: string;
       };
+      suggest_public_articles: { Args: { p_query: string }; Returns: Json };
       update_category_taxonomy: {
         Args: {
           p_active: boolean;

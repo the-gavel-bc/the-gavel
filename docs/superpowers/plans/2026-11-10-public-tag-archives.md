@@ -19,7 +19,6 @@ Status: implemented and locally verified on `feat/public-tag-archives`, based on
 
 Rollback: revert application readers/presentation changes; no stored data, schema or grants change. Human visual/accessibility review remains separate.
 
-
 ## Verification record
 
 - RED: new query/route modules were absent and the existing grid crashed on sectionless context. GREEN: 23 focused query/route/presentation cases passed, including section/category regressions. `pnpm test --maxWorkers=2` then passed all 736 unit/component tests.

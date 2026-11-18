@@ -3,9 +3,12 @@ import styles from "./reader-states.module.css";
 export function ReaderState({
   kind,
   retryHref,
+  action,
 }: {
   kind: "empty" | "unavailable";
   retryHref?: string;
+  // A way forward from an empty page, such as the parent section.
+  action?: { href: string; label: string };
 }) {
   return (
     <section
@@ -24,6 +27,9 @@ export function ReaderState({
       </p>
       {kind === "unavailable" && retryHref && (
         <Link href={retryHref}>Try again</Link>
+      )}
+      {kind === "empty" && action && (
+        <Link href={action.href}>{action.label} →</Link>
       )}
     </section>
   );

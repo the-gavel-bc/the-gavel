@@ -30,8 +30,6 @@
 }
 .heading a:hover {
   color: var(--reader-blue);
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
 }
 .heading a svg {
   width: 1.25em;

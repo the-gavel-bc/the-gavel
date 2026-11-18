@@ -9,7 +9,8 @@ import styles from "./admin-articles.module.css";
 const date = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
   timeStyle: "short",
-  timeZone: "UTC",
+  // Staff work in Boston: Eastern time, labelled "ET".
+  timeZone: "America/New_York",
 });
 
 export function AdminArticleMeta({
@@ -37,7 +38,7 @@ export function AdminArticleMeta({
         <dt>Updated</dt>
         <dd>
           <time dateTime={article.updatedAt}>
-            {date.format(new Date(article.updatedAt))} UTC
+            {date.format(new Date(article.updatedAt))} ET
           </time>
         </dd>
       </div>

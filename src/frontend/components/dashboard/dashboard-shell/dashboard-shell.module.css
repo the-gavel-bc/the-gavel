@@ -202,6 +202,19 @@
   opacity: 0.6;
 }
 
+/* Destructive actions: outlined red, set apart from the primary fill. */
+:where(.main) :where(button[data-variant="danger"]:not([class])) {
+  border-color: var(--dash-danger);
+  color: var(--dash-danger);
+}
+:where(.main) :where(button[data-variant="danger"]:not([class])):hover {
+  background: var(--dash-danger-soft);
+}
+/* Neighbouring actions never touch. */
+:where(.main) :where(button:not([class])) + :where(button:not([class])) {
+  margin-inline-start: var(--space-2);
+}
+
 /* Feedback */
 :where(.main) :where(p[role="status"]:not(:empty)) {
   background: var(--dash-soft);

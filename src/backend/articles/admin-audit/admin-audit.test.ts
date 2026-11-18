@@ -39,6 +39,7 @@ beforeEach(() => {
 
 it("returns safe summaries and a filter-bound keyset cursor", async () => {
   http.respond([row, { ...row, event_id: profileId }]);
+  http.respond([{ id: profileId, title: "Budget vote" }]);
   const page = await listAuditEvents({
     action: "article.archived",
     pageSize: 1,
@@ -51,6 +52,7 @@ it("returns safe summaries and a filter-bound keyset cursor", async () => {
       createdAt: updatedAt,
       actorLabel: "Editor",
       articleExists: true,
+      articleTitle: "Budget vote",
     },
   ]);
   expect(page.nextCursor).toEqual(expect.any(String));
@@ -67,7 +69,11 @@ it("returns safe summaries and a filter-bound keyset cursor", async () => {
     action: "article.archived",
     cursor: page.nextCursor,
   });
-  expect(JSON.parse(String(http.network.mock.calls[1][1]?.body))).toMatchObject(
+  // Call 1 was the title lookup for the first page: ids only, title only.
+  const titles = new URL(String(http.network.mock.calls[1][0]));
+  expect(titles.pathname).toContain("/articles");
+  expect(titles.searchParams.get("select")).toBe("id,title");
+  expect(JSON.parse(String(http.network.mock.calls[2][1]?.body))).toMatchObject(
     {
       p_before_at: updatedAt,
       p_before_id: articleId,
@@ -115,4 +121,14 @@ it("rejects raw or unexpected database fields in displayed events", async () => 
   await expect(listAuditEvents({})).rejects.toThrow(
     "Unable to load article activity.",
   );
+});
+
+it("keeps the activity list when the title lookup fails", async () => {
+  http.respond([row]);
+  http.respond({ message: "denied" }, 500);
+  const page = await listAuditEvents({ pageSize: 1 });
+  expect(page.items[0]).toMatchObject({
+    resourceId: profileId,
+    articleTitle: null,
+  });
 });

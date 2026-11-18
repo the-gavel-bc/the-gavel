@@ -23,7 +23,8 @@
 .header ol a:hover {
   text-decoration: underline;
 }
-.header li + li::before {
+/* Breadcrumb separators only; category chips below are a separate list. */
+.header ol > li + li::before {
   content: "/";
   margin-right: 0.5rem;
   color: var(--reader-muted);

@@ -263,7 +263,13 @@ export function HomepageEditor({
       )}
       <section aria-label="Current saved homepage preview">
         <h2>Current saved preview</h2>
-        <p>Lead: {curation.effective.lead?.title ?? "No published stories"}</p>
+        <p>
+          Lead: {curation.effective.lead?.title ?? "No published stories"}
+          {/* With no saved pick, the homepage falls back to the newest story. */}
+          {!curation.saved.lead && curation.effective.lead
+            ? " (automatic: newest story)"
+            : ""}
+        </p>
         <p>
           Featured News:{" "}
           {curation.effective.featured.map((a) => a.title).join(", ") || "None"}

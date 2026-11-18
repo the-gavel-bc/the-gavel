@@ -456,6 +456,7 @@ export function DraftForm({
       {command.article && (
         <ArticleMedia
           initialFile={pendingPhoto}
+          published={status === "published"}
           article={command.article}
           initialImage={initialImage ?? null}
           disabled={
@@ -497,7 +498,7 @@ export function DraftForm({
           onBusyChange={setCleanupBusy}
         />
       )}
-      <div className={styles.saveBar}>
+      <div className={styles.saveBar} data-draft-save-bar="">
         <div className={styles.saveText}>
           <p role="status">
             {editorFailure ? "Body needs attention before saving." : saveStatus}

@@ -85,13 +85,14 @@
   overflow-wrap: anywhere;
   transition: background var(--reader-fast, 180ms);
 }
+/* Darker fills, not lighter: white text stays above 4.5:1 on them. */
 .links a:hover {
-  background: rgb(255 255 255 / 20%);
+  background: rgb(20 22 28 / 16%);
 }
 /* Current page: a filled pill plus an underline, so it isn't colour alone. */
 .links a[aria-current],
 .links a[data-active] {
-  background: rgb(255 255 255 / 22%);
+  background: rgb(20 22 28 / 24%);
   text-decoration: underline;
   text-underline-offset: 0.35em;
   text-decoration-thickness: 2px;
@@ -117,9 +118,6 @@
   border-radius: 999px;
   list-style: none;
   transition: background var(--reader-fast, 180ms);
-}
-.categories summary:hover {
-  background: rgb(255 255 255 / 20%);
 }
 .categories summary::-webkit-details-marker {
   display: none;
@@ -164,13 +162,13 @@
   letter-spacing: 0;
   white-space: nowrap;
 }
+/* Only the name changes: no highlighted block in the dropdown. */
 .categories ul a:hover,
 .categories ul a[aria-current] {
   color: var(--reader-blue, #1e4aa8);
-  background: var(--reader-soft, #eef2fc);
-}
-.categories ul a[aria-current] {
+  background: none;
   text-decoration: underline;
+  text-underline-offset: 0.3em;
 }
 .bar .links a:focus-visible,
 .bar :is(summary, input, button):focus-visible {
@@ -197,15 +195,29 @@
   .bar {
     position: sticky;
     top: 0;
+    /* A darker edge keeps the band distinct over the blue Featured band. */
+    border-bottom: 1px solid rgb(20 22 28 / 22%);
   }
   .menu[open] > .toggle {
     display: none;
   }
+  /* While search is open, the row glides left so the field can grow right. */
+  .inner > * {
+    transition: transform var(--reader-medium, 260ms) var(--reader-ease, ease);
+  }
+  .inner:has(form[data-open][data-direction="right"]) > * {
+    transform: translateX(calc(-1 * var(--search-shift, 0px)));
+  }
+  /* Flush with the link so the pointer can move into it without closing. */
   .categories ul {
     position: absolute;
-    top: calc(100% + 0.25rem);
+    top: 100%;
     left: 0;
     z-index: 10;
+  }
+  .categories[data-align="end"] ul {
+    right: 0;
+    left: auto;
   }
 }
 /* Mobile: a compact bar with the menu button left and search right; the
@@ -244,14 +256,61 @@
     padding-inline: 0.5rem;
     font-size: 0.875rem;
   }
+  /* Section link fills the row; the caret sits at its right edge; the open
+     category list drops below as an indented list inside the menu panel. */
+  .section {
+    position: relative;
+  }
+  .section > a {
+    flex: 1;
+    padding-right: 3.25rem;
+  }
   .categories {
-    flex-basis: auto;
+    flex-basis: 100%;
+  }
+  .categories summary {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 2.75rem;
   }
   .categories ul {
-    margin-block-end: 0.75rem;
+    min-width: 0;
+    margin: 0 0 0.75rem;
+    padding: 0.25rem 0;
+    border-top: 0;
+    border-left: 2px solid rgb(255 255 255 / 45%);
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
   }
   .categories ul a {
+    min-height: 2.75rem;
+    padding-inline: 1rem;
+    color: #fff;
+    font-size: 0.9375rem;
+    font-weight: 600;
     white-space: normal;
+  }
+  .categories ul a:hover,
+  .categories ul a[aria-current] {
+    color: #fff;
+    text-decoration: underline;
+  }
+  .bar .categories ul a:focus-visible {
+    outline-color: #fff;
+  }
+}
+/* With scripting on, the server-rendered open menu would sit in the page
+   flow until hydration collapses it, shifting everything below. Hide it
+   until then; without JavaScript it stays open and usable. */
+@media (max-width: 44.999rem) and (scripting: enabled) {
+  .menu:not([data-enhanced]) > nav {
+    display: none;
+  }
+  .menu:not([data-enhanced]) .burger span {
+    opacity: 1;
+    transform: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {

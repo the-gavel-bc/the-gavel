@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 import { SearchForm } from "./search-form";
 it("submits a labeled native GET query without retaining a cursor", () => {
@@ -49,6 +49,8 @@ it("opens the navigation field on the first press instead of submitting", () => 
   fireEvent.change(input, { target: { value: "" } });
   fireEvent.keyDown(input, { key: "Escape" });
   expect(button).toHaveAttribute("aria-expanded", "false");
+  // Focus returns to the search button instead of dropping to the page.
+  expect(button).toHaveFocus();
 });
 
 it("keeps the page search a plain submit form", () => {
@@ -56,4 +58,48 @@ it("keeps the page search a plain submit form", () => {
   expect(screen.getByRole("button", { name: "Search" })).not.toHaveAttribute(
     "aria-expanded",
   );
+});
+
+it("suggests stories while typing and links straight to them", async () => {
+  vi.useFakeTimers();
+  const fetch = vi.fn<(url: string) => Promise<Response>>(async () =>
+    Response.json({
+      kind: "ok",
+      items: [{ title: "Budget vote", slug: "budget-vote", section: "News" }],
+    }),
+  );
+  vi.stubGlobal("fetch", fetch);
+  try {
+    render(<SearchForm id="nav-search" navigation />);
+    const input = screen.getByRole("searchbox", { name: "Search stories" });
+    act(() => input.focus());
+    fireEvent.change(input, { target: { value: "b" } });
+    await act(() => vi.advanceTimersByTimeAsync(400));
+    expect(fetch).not.toHaveBeenCalled();
+    fireEvent.change(input, { target: { value: "bu" } });
+    fireEvent.change(input, { target: { value: "bud" } });
+    expect(screen.getByRole("status")).toHaveTextContent("Searching");
+    await act(() => vi.advanceTimersByTimeAsync(400));
+    // Debounced: only the settled query is requested.
+    expect(fetch).toHaveBeenCalledOnce();
+    expect(fetch.mock.calls[0]![0]).toBe(
+      "/api/public/search/suggestions?q=bud",
+    );
+    expect(screen.getByRole("status")).toHaveTextContent("1 story");
+    expect(screen.getByRole("link", { name: /Budget vote/ })).toHaveAttribute(
+      "href",
+      "/articles/budget-vote",
+    );
+    expect(
+      screen.getByRole("link", { name: "See all results" }),
+    ).toHaveAttribute("href", "/search?q=bud");
+    fireEvent.keyDown(input, { key: "ArrowDown" });
+    expect(screen.getByRole("link", { name: /Budget vote/ })).toHaveFocus();
+    fireEvent.keyDown(document.activeElement!, { key: "Escape" });
+    expect(screen.queryByRole("status")).toBeNull();
+    expect(screen.getByRole("button", { name: "Search" })).toHaveFocus();
+  } finally {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  }
 });

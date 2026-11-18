@@ -21,7 +21,6 @@ Status: implemented and locally verified on `feat/search-index-foundation`, base
 
 Technical references: PostgreSQL documents [expression-index maintenance](https://www.postgresql.org/docs/17/indexes-expressional.html), [native GIN array containment](https://www.postgresql.org/docs/17/gin.html#GIN-BUILTIN-OPCLASSES), [configured parser/dictionary output](https://www.postgresql.org/docs/17/textsearch-debugging.html), and [vector/lexeme limits](https://www.postgresql.org/docs/17/textsearch-limitations.html). The large-document choice is recorded in [ADR 0010](../../decisions/0010-private-search-lexeme-indexes.md); Task 17 must use the same normalization and containment semantics.
 
-
 ## Verification record
 
 - RED: new extraction assertions failed on the pre-migration schema. Focused extraction/candidate/mutation coverage then passed; a compound-word compatibility regression failed before correcting normalized-word validation. Initial SQL fixtures needed a larger high-vocabulary sample and an explicit polymorphic array cast; no production assertion was weakened.

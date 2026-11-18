@@ -20,7 +20,6 @@ Status: implemented and locally verified on `feat/public-author-pages`, based on
 
 Rollback: revert application consumers/reader; no stored data, schema, authorization or lifecycle migration changes.
 
-
 ## Verification record
 
 - RED: the new query/route/biography suites failed because implementation modules were missing. GREEN: sixteen focused cases passed, including existing archive-grid behavior. `pnpm test --maxWorkers=2` passed all 747 unit/component tests.

@@ -9,6 +9,10 @@ import {
   loadDraftOptions,
   type DraftOptions,
 } from "../draft-options/draft-options";
+import {
+  searchSchema,
+  statusSchema,
+} from "../admin-article-queries/admin-article-queries";
 import { connection } from "next/server";
 import { z } from "zod";
 import { requireActiveMembership } from "@/backend/auth/access/access";
@@ -26,6 +30,7 @@ export type ArticleSummary = {
   slug: string;
   status: "draft" | "published" | "archived";
   sectionId: string;
+  sectionName: string;
   version: number;
   updatedAt: string;
 };
@@ -35,6 +40,10 @@ export type ArticlePage = {
 };
 const pageInput = z.strictObject({
   cursor: z.string().optional(),
+  // Same filters as Article management. The cursor is not bound to them: the
+  // page link carries both, and every row is the caller's own article.
+  status: statusSchema.default("all"),
+  search: searchSchema.optional(),
   pageSize: z.number().int().min(1).max(50).default(20),
 });
 const summaryRow = z.object({
@@ -46,6 +55,10 @@ const summaryRow = z.object({
   edit_version: z.number().int().min(1).max(2147483647),
   updated_at: z.custom<string>(isDatabaseTimestamp),
 });
+// The list also names each article's section.
+const listRow = summaryRow.extend({
+  section: z.object({ name: z.string().max(160) }),
+});
 
 async function reader() {
   await connection();
@@ -56,6 +69,8 @@ async function reader() {
 export async function getMyArticlesPage(input: {
   cursor?: string;
   pageSize?: number;
+  status?: string;
+  search?: string;
 }): Promise<ArticlePage> {
   const parsed = pageInput.safeParse(input);
   const cursor =
@@ -68,12 +83,19 @@ export async function getMyArticlesPage(input: {
   try {
     let query = client
       .from("articles")
-      .select("id,title,slug,status,section_id,edit_version,updated_at")
+      .select(
+        "id,title,slug,status,section_id,edit_version,updated_at,section:sections!articles_section_id_fkey(name)",
+      )
       // My Articles stays owner-filtered even for administrators; RLS alone allows more.
       .eq("owner_profile_id", access.profileId)
       .order("updated_at", { ascending: false })
       .order("id", { ascending: false })
       .limit(parsed.data.pageSize + 1);
+    if (parsed.data.status !== "all")
+      query = query.eq("status", parsed.data.status);
+    // searchSchema allows only letters, digits, spaces, ' and -.
+    if (parsed.data.search)
+      query = query.ilike("title", `%${parsed.data.search}%`);
     if (cursor)
       query = query.or(
         `updated_at.lt.${cursor.updatedAt},and(updated_at.eq.${cursor.updatedAt},id.lt.${cursor.id})`,
@@ -81,7 +103,7 @@ export async function getMyArticlesPage(input: {
     const { data, error } = await query;
     if (error) throw error;
     const rows = z
-      .array(summaryRow)
+      .array(listRow)
       .max(parsed.data.pageSize + 1)
       .parse(data);
     const items = rows.slice(0, parsed.data.pageSize).map((row) => ({
@@ -90,6 +112,7 @@ export async function getMyArticlesPage(input: {
       slug: row.slug,
       status: row.status,
       sectionId: row.section_id,
+      sectionName: row.section.name,
       version: row.edit_version,
       updatedAt: row.updated_at,
     }));

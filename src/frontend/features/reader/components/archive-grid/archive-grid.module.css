@@ -4,9 +4,11 @@
   padding: 2rem 1rem 3rem;
   overflow-wrap: anywhere;
 }
+/* Spans the page, like the heading and the cards below it. */
 .lead {
-  max-width: 54rem;
-  margin: 0 auto 3rem;
+  margin-bottom: 3rem;
+  padding-bottom: 3rem;
+  border-bottom: 1px solid var(--reader-line);
 }
 .newest {
   margin-top: 2rem;

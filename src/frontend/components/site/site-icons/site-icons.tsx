@@ -21,12 +21,6 @@ function Icon({ children, ...props }: SVGProps<SVGSVGElement>) {
   );
 }
 
-export const CalendarIcon = () => (
-  <Icon>
-    <rect x="3" y="5" width="18" height="16" rx="2" />
-    <path d="M3 10h18M8 3v4M16 3v4" />
-  </Icon>
-);
 export const MailIcon = () => (
   <Icon>
     <rect x="3" y="5" width="18" height="14" rx="2" />

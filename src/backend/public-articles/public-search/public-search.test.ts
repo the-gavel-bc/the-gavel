@@ -4,7 +4,7 @@ vi.mock(
   "@/backend/infrastructure/supabase/public-reader/public-reader",
   () => ({ createPublicReaderClient: () => ({ rpc: mocks.rpc }) }),
 );
-import { searchPublicArticles } from "./public-search";
+import { searchPublicArticles, suggestPublicArticles } from "./public-search";
 const q = "Boston College";
 const card = {
   id: "5d000000-0000-0000-0000-000000000001",
@@ -130,4 +130,27 @@ it("rejects duplicate/out-of-order cards and cursors that do not describe the fi
       kind: "unavailable",
     });
   }
+});
+
+it("suggests from normalized typed text and rejects unusable input without a call", async () => {
+  mocks.abort.mockResolvedValue({
+    data: { kind: "ok", items: [card] },
+    error: null,
+  });
+  expect(await suggestPublicArticles("  Bost\u00a0 ")).toEqual({
+    kind: "ok",
+    items: [card],
+  });
+  expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith("suggest_public_articles", {
+    p_query: "Bost",
+  });
+  mocks.rpc.mockClear();
+  expect(await suggestPublicArticles("b")).toEqual({ kind: "invalid" });
+  expect(await suggestPublicArticles(42)).toEqual({ kind: "invalid" });
+  expect(mocks.rpc).not.toHaveBeenCalled();
+  mocks.abort.mockResolvedValue({
+    data: { kind: "ok", items: [{ ...card, body: "secret" }] },
+    error: null,
+  });
+  expect(await suggestPublicArticles("Bost")).toEqual({ kind: "unavailable" });
 });

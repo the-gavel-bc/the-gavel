@@ -174,7 +174,12 @@ export function MemberControls({
           >
             Change role for {member.email}
           </button>
-          <button type="button" onClick={deactivate} disabled={blocked}>
+          <button
+            type="button"
+            data-variant="danger"
+            onClick={deactivate}
+            disabled={blocked}
+          >
             Deactivate {member.email}
           </button>
         </div>

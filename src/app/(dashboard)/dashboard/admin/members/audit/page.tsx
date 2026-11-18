@@ -11,7 +11,8 @@ const labels = {
 const date = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
   timeStyle: "short",
-  timeZone: "UTC",
+  // Staff work in Boston: Eastern time, labelled "ET".
+  timeZone: "America/New_York",
 });
 
 export default async function MemberAuditPage({
@@ -58,7 +59,7 @@ export default async function MemberAuditPage({
               <strong>{labels[event.action]}</strong> for{" "}
               {event.targetEmail || "Former member"} by {event.actorLabel} on{" "}
               <time dateTime={event.createdAt}>
-                {date.format(new Date(event.createdAt))} UTC
+                {date.format(new Date(event.createdAt))} ET
               </time>
             </li>
           ))}

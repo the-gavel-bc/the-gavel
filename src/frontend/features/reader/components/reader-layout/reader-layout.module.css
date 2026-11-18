@@ -28,7 +28,9 @@
      creating a scroll container. */
   overflow-x: clip;
 }
-.surface a:focus-visible {
+/* :where keeps this a low-specificity default, so components on dark or blue
+   backgrounds (Featured band, footer) can set a white ring. */
+:where(.surface) a:focus-visible {
   outline: 3px solid var(--reader-blue);
   outline-offset: 4px;
 }

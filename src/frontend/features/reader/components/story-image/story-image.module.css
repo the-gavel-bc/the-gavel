@@ -21,7 +21,9 @@
       )
       0 0 / 200% 100% no-repeat,
     var(--reader-line, #e3e6ee);
-  animation: shimmer 1.4s ease-in-out infinite;
+  /* Finite: an endless loop keeps repainting behind loaded photos. It ends
+     with the highlight parked off-frame. */
+  animation: shimmer 1.4s ease-in-out 4 forwards;
 }
 @keyframes shimmer {
   from {

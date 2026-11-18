@@ -16,6 +16,14 @@
 .button:hover {
   background: var(--color-brand-dark);
 }
+.button[data-variant="danger"] {
+  background: var(--color-paper);
+  border-color: var(--dash-danger, #b3261e);
+  color: var(--dash-danger, #b3261e);
+}
+.button[data-variant="danger"]:hover {
+  background: var(--dash-danger-soft, #fdf1f0);
+}
 .button:disabled {
   cursor: not-allowed;
   opacity: 0.6;

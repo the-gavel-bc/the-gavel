@@ -24,7 +24,6 @@ Status: implemented and locally verified on `feat/public-article-page`, based on
 3. Review once; use a disposable populated production app for responsive/no-JS, owner-versus-anonymous parity, draft/archive 404, unsafe-body unavailable and edit/archive/restore freshness.
 4. Run production build and relevant regressions, remove test fixtures/services, update authoritative docs/status, commit focused changes and open a main-targeting draft PR.
 
-
 ## Verification record
 
 - Focused RED: the route and related-helper tests initially failed because their implementation modules did not exist. GREEN: 14 initial query/page cases passed; an additional related presentation/metadata fallback case passed in the six-case route rerun.

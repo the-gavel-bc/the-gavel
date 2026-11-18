@@ -140,6 +140,7 @@ export function ContributorControls({
           {contributor && (
             <button
               type="button"
+              data-variant="danger"
               onClick={deactivate}
               disabled={blocked || contributor.referencedLive}
             >
