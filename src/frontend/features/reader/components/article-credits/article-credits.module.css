@@ -2,8 +2,18 @@
   display: grid;
   gap: 0.75rem;
   padding-block: 1.25rem;
+  margin-block: 1.5rem 2rem;
   border-block: 1px solid var(--reader-line);
-  font-size: 0.9375rem;
+  font: 0.9375rem/1.5 var(--reader-sans);
+}
+.credits a {
+  color: var(--reader-blue);
+  font-weight: 600;
+  text-decoration: none;
+}
+.credits a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 .credits div {
   display: flex;

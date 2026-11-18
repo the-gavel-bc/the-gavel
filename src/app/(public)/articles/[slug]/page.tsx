@@ -40,6 +40,7 @@ export default async function ArticlePage({ params }: Props) {
   const related = await getArticleContext(article.id, article.section.slug);
   return (
     <div className={styles.page}>
+      <div className={styles.progress} aria-hidden="true" />
       <article aria-label={article.title} className={styles.article}>
         <ArticleHeader article={article} />
         <ArticleCredits article={article} />

@@ -6,8 +6,10 @@
   padding-top: 1.5rem;
 }
 .context h2 {
-  font-family: var(--reader-serif);
-  font-size: 1.5rem;
+  margin: 0 0 0.75rem;
+  font: 700 0.75rem/1.4 var(--reader-sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 .context nav {
   display: flex;
@@ -17,9 +19,62 @@
 .context ul {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem 1.25rem;
+  gap: 0.5rem;
+  margin: 0;
   list-style: none;
   padding: 0;
+}
+/* Topic chips, as in the demo. */
+.context nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  border: 1px solid #cfd5e2;
+  border-radius: 999px;
+  color: var(--reader-ink);
+  background: #fff;
+  font: 600 0.875rem/1.3 var(--reader-sans);
+  text-decoration: none;
+  transition:
+    background var(--reader-fast) var(--reader-ease),
+    border-color var(--reader-fast) var(--reader-ease);
+}
+.context nav a:hover {
+  border-color: var(--reader-blue);
+  background: var(--reader-soft);
+}
+.bio {
+  padding: 1.5rem;
+  border-radius: var(--reader-radius);
+  background: var(--reader-soft);
+}
+.bio h2 {
+  font: 700 1.375rem/1.3 var(--reader-display);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.context aside > h2 {
+  padding-top: 2rem;
+  border-top: 2px solid var(--reader-ink);
+  font: 700 clamp(1.5rem, 3vw, 2.125rem)/1.2 var(--reader-display);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.search {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  border: 1px solid var(--reader-blue);
+  border-radius: 999px;
+  color: var(--reader-blue);
+  font: 600 0.9375rem/1.3 var(--reader-sans);
+  text-decoration: none;
+  transition: background var(--reader-fast) var(--reader-ease);
+}
+.search:hover {
+  background: var(--reader-soft);
 }
 .bio {
   max-width: 68ch;

@@ -6,7 +6,9 @@ import styles from "./article-header.module.css";
 export function ArticleHeader({ article }: { article: PublicArticle }) {
   return (
     <header className={styles.header}>
-      <Link href={sectionHref(article.section)}>{article.section.name}</Link>
+      <Link className={styles.kicker} href={sectionHref(article.section)}>
+        {article.section.name}
+      </Link>
       <h1>{article.title}</h1>
       {article.excerpt && <p className={styles.dek}>{article.excerpt}</p>}
       <p className={styles.date}>
