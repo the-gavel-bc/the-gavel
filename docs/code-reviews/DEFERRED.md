@@ -19,3 +19,21 @@ Items found by a review that were deliberately not done, with the reason, so the
 | Local database tests | pgTAP files `027`, `056`, `057`, `058` fail on the long-lived local database | They depend on leftover local data and fixtures (profile names, taxonomy rows, ineligible identities); they failed before this work | Run `pnpm test:db:clean` on a freshly reset database |
 | CI | The dependency scan ("Scan all dependencies") fails on every PR since a new `picomatch` advisory (GHSA-fc5q-39xc-vjpf, versions <= 4.0.7, no patched version, reached only through dev tooling: vitest, vite) | Not caused by any change here; fixing it is an owner decision under ADRs 0004 and 0005 (temporary audit exception) | Add a documented, time-boxed audit exception for that advisory, or override the transitive dependency when a patched version ships |
 | Staff | All area 2 findings | Review only so far; see [AREA-2-STAFF-REPORT.md](AREA-2-STAFF-REPORT.md) | Owner approval of the batches in that plan |
+
+## Decided not to change (so they are not re-raised)
+
+| Area | Item | Decision and reason |
+| --- | --- | --- |
+| Media | `save_*` and the lifecycle function evaluate `article_authority` inside a `WHERE ... FOR UPDATE` (ARCH-008) | Accepted. After a lock wait the expected-version check, not the predicate, rejects stale writes; covered by the versioned conflict tests. Recorded in ADR 0012. |
+| Media | `article_authority` does not itself check Auth eligibility (SEC-005) | Accepted with a documented precondition: callers prove eligibility, because checking inside would turn an ineligible identity's `forbidden` into `not_found`. Guarded by pgTAP `069`. Recorded in ADR 0012. |
+| Media | Reviewer claim that editors cannot cancel uploads (TEST-002) | Rejected: the cancel path is `mark_article_image_for_removal`, which uses `article_authority`. |
+| Media | Reviewer claim of a dead `listUnusedArticleUploads` TypeScript action (LOGIC-006) | Rejected: no such action exists; only the database function remains (see the table above). |
+| Media | Cleanup and expiry cron routes return 404 outside production (preview deployments have no coverage) | Left as is: scheduled deletion jobs must not run against preview data. Revisit only if a staging environment with real storage is added. |
+| Media | Media changes on published articles are administrator-only | Decided (owner delegated, chosen for security): recorded in ADR 0012. |
+| Auth | Submit-for-review rule differs between SQL (any owner) and the interface (authors only) | Decided: leave SQL permissive (harmless, owner only) and offer submit to authors only, since editors and administrators publish directly. The permission matrix now says "not needed". |
+
+## What each review implemented
+
+- Media (quick run, 4 reviewers): every finding that was verified real was implemented, except the items in the first table. Nothing was skipped for being low impact; the deferred items were deferred for dependencies (e2e stack, real data sizes) or because they need an owner decision.
+- Area 1 (authentication and access): the real defects were fixed (editor read scope, callback errors, lost claim race, wording). The remaining Low and test-only findings were deferred and are listed above; none of them is a security gap.
+- Area 2 (staff and roles): reviewed only; nothing implemented yet. See AREA-2-STAFF-REPORT.md.

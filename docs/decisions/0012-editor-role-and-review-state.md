@@ -34,3 +34,5 @@ Decisions taken after the media review (see [plans](../code-reviews/plans/README
 - Public profile photos require an active membership; administrators can remove any photo.
 - `article_authority` deliberately does not check Auth eligibility; callers hold that precondition and the pgTAP scan test `069` guards the callers. Doing it in the predicate would turn an ineligible identity's "forbidden" into "not_found".
 - `save_*` and the lifecycle function evaluate the predicate in a `WHERE ... FOR UPDATE`; after a wait the version check, not the predicate, rejects stale writes. Accepted: tested by the versioned conflict cases.
+
+Items found by later reviews that were deferred or deliberately left unchanged are tracked in [docs/code-reviews/DEFERRED.md](../code-reviews/DEFERRED.md).
