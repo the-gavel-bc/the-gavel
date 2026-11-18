@@ -101,5 +101,13 @@ select ok(not has_function_privilege('authenticated','private.article_authority(
 select pg_temp.act_as('4'); set local role authenticated;
 select is((select editors from public.staff_summary()),(select count(*)::integer from public.memberships where active and role='editor'),'staff summary counts editors');
 reset role;
+-- An article that was submitted, published by an administrator, then archived is
+-- not readable by editors through the private table (they read only what is in review or what they published).
+select is(pg_temp.call('4','publish','a3')->>'ok','true','administrator publishes the submitted article');
+select is(pg_temp.call('4','archive','a3')->>'ok','true','administrator archives it');
+select pg_temp.act_as('3'); set local role authenticated;
+select is((select count(*)::integer from public.articles where id=(select id from t where label='a3')),0,
+  'an editor cannot read an archived article they did not publish');
+reset role;
 select * from finish();
 rollback;
