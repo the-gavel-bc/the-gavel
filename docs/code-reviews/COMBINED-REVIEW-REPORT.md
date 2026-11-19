@@ -16,13 +16,13 @@ Corrections to earlier notes: the `picomatch` dependency advisory is no longer r
 | 5 | Public reader and search | Reviewed (this report) | this file |
 | 10 | Database layer overall | Reviewed (this report) | this file |
 | 11 | CI, deployment and dependencies | Reviewed (this report) | this file |
-| 6 | Homepage curation | **Not reviewed yet** | none |
-| 7 | Taxonomy and tags | **Not reviewed yet** | none |
-| 8 | Profiles and one-off credits | **Not reviewed yet** | none |
-| 9 | Site information and the admin audit log | **Not reviewed yet** | none |
-| 12 | Design system and accessibility sweep | **Not reviewed yet** | none |
+| 6 | Homepage curation | Reviewed | [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md) |
+| 7 | Taxonomy and tags | Reviewed | [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md) |
+| 8 | Profiles and one-off credits | Reviewed | [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md) |
+| 9 | Site information and the admin audit log | Reviewed | [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md) |
+| 12 | Design system and accessibility sweep | Reviewed | [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md) |
 
-Notes: areas 7 and 8 were touched indirectly (the `tags` and `profiles` read policies appear in C-10 and C-11) but their code and tests were not reviewed. Area 12 was only touched through the editor (area 4).
+Notes: every area in the list has now been reviewed at least once (quick runs, static reading). Areas 6 to 9 and 12 are in [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md). The `tags` and `profiles` read policies (C-10, C-11) are reported once, in this file. Reviews so far were static: no query plans, browser runs or screen reader checks were done.
 
 ## Bugs in code written this week (fix first)
 
@@ -104,4 +104,4 @@ Article, list, search, suggestion, sitemap and homepage RPCs and routes (publish
 
 ## Not examined
 
-Hosted Vercel and Supabase settings (signup, backups, point-in-time recovery, environment scoping, alerts, exposed schemas); runtime behavior (no suites, builds or query plans were run by reviewers); homepage curation, taxonomy, profiles, site information and the admin audit (areas 6 to 9); the design-system sweep (area 12).
+Hosted Vercel and Supabase settings (signup, backups, point-in-time recovery, environment scoping, alerts, exposed schemas); runtime behavior (no suites, builds or query plans were run by reviewers); rendered visuals and screen reader behavior for every area.
