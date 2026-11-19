@@ -95,13 +95,13 @@ test("authorized reader sees saved body text and image without JavaScript", asyn
   }
 });
 
-test("unused uploads survive reload and can be explicitly discarded after publication", async ({
+test("leftover images survive reload and can be explicitly deleted after publication", async ({
   context,
   page,
 }) => {
   await setLocalSession(context, fixture.users.author);
   await page.goto(`/dashboard/articles/${fixture.id(21)}`);
-  const cleanup = page.getByRole("region", { name: "Unused uploads" });
+  const cleanup = page.getByRole("region", { name: "Leftover images" });
   // Publication requires body text and a finalized main image, independent of the unused file.
   const body = page.getByRole("textbox", { name: "Article body" });
   await body.press("ControlOrMeta+End");
@@ -152,23 +152,23 @@ test("unused uploads survive reload and can be explicitly discarded after public
     page.getByRole("img", { name: "Unsaved local graphic" }),
   ).toBeVisible();
   await expect(
-    cleanup.getByRole("button", { name: "Discard unused upload" }),
+    cleanup.getByRole("button", { name: "Delete image" }),
   ).toHaveCount(0);
   await page.getByRole("img", { name: "Unsaved local graphic" }).click();
   await page.getByRole("button", { name: "Remove selected image" }).click();
   page.on("dialog", (dialog) => dialog.accept());
   await page.reload();
   await expect(
-    cleanup.getByRole("button", { name: "Discard unused upload" }),
+    cleanup.getByRole("button", { name: "Delete image" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Publish article" }).click();
   await expect(
     page.getByRole("heading", { name: "Edit published article" }),
   ).toBeVisible();
-  await cleanup.getByRole("button", { name: "Discard unused upload" }).click();
-  await expect(cleanup.getByText("Unused upload discarded.")).toBeVisible();
+  await cleanup.getByRole("button", { name: "Delete image" }).click();
+  await expect(cleanup.getByText("Image deleted.")).toBeVisible();
   await page.reload();
   await expect(
-    cleanup.getByRole("button", { name: "Discard unused upload" }),
+    cleanup.getByRole("button", { name: "Delete image" }),
   ).toHaveCount(0);
 });

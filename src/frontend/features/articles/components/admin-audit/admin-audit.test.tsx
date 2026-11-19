@@ -86,3 +86,26 @@ it("marks the current filter pill and links every other action", () => {
     within(pills).getByRole("link", { name: "Published" }),
   ).toHaveAttribute("href", "/dashboard/admin/audit?action=article.published");
 });
+
+it("has a search box that keeps the action, and carries the search to pills and paging", () => {
+  render(
+    <AdminAudit
+      action="article.archived"
+      search="budget"
+      page={{ items: [], nextCursor: null }}
+    />,
+  );
+  const box = screen.getByRole("searchbox", { name: "Search activity" });
+  expect(box).toHaveValue("budget");
+  expect(screen.getByRole("link", { name: "Published" })).toHaveAttribute(
+    "href",
+    "/dashboard/admin/audit?action=article.published&search=budget",
+  );
+  expect(screen.getByRole("link", { name: "All" })).toHaveAttribute(
+    "href",
+    "/dashboard/admin/audit?search=budget",
+  );
+  expect(
+    screen.getByText("No article activity matches this search."),
+  ).toBeVisible();
+});

@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { ArticlePageLink } from "../article-page-link/article-page-link";
 import { LinkButton } from "@/frontend/components/ui/link-button/link-button";
 import type { ArticlePage } from "@/backend/articles/draft-queries/draft-queries";
+import { ArticleRowActions } from "../article-row-actions/article-row-actions";
 import { StatusBadge } from "../status-badge/status-badge";
 import toolbar from "../admin-articles/admin-articles.module.css";
 import styles from "./article-list.module.css";
@@ -68,7 +68,11 @@ export function ArticleList({
   return (
     <section aria-label="Your articles" className={styles.listing}>
       <div className={styles.actions}>
-        <LinkButton href="/dashboard/articles/new" prefetch={false}>
+        <LinkButton
+          href="/dashboard/articles/new"
+          prefetch={false}
+          className={styles.create}
+        >
           Create draft
         </LinkButton>
       </div>
@@ -93,16 +97,7 @@ export function ArticleList({
                   </time>
                 </span>
               </p>
-              {article.status !== "archived" && (
-                <Link
-                  href={`/dashboard/articles/${article.id}`}
-                  prefetch={false}
-                  className={styles.action}
-                  aria-label={`${article.status === "draft" ? "Edit draft" : "Edit article"}: ${article.title}`}
-                >
-                  {article.status === "draft" ? "Edit draft" : "Edit article"}
-                </Link>
-              )}
+              <ArticleRowActions article={article} admin={false} />
             </li>
           ))}
         </ul>

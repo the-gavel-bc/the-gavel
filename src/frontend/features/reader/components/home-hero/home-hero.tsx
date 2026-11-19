@@ -1,9 +1,15 @@
 import Link from "next/link";
 import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
 import { StoryImage } from "../story-image/story-image";
-import { PreviewMeta } from "../preview-meta/preview-meta";
 import styles from "./home-hero.module.css";
-// Lead story: image with the headline and date overlaid, as on the live site.
+
+const longDate = new Intl.DateTimeFormat("en-US", {
+  dateStyle: "long",
+  timeZone: "UTC",
+});
+
+// Lead story: the biggest thing on the page. Full-bleed image with the
+// section pill, headline and date over it, beside the Latest column.
 export function HomeHero({ article }: { article: PublicArticleCard }) {
   return (
     <article className={styles.hero}>
@@ -14,11 +20,11 @@ export function HomeHero({ article }: { article: PublicArticleCard }) {
       >
         <StoryImage article={article} eager className={styles.image} />
         <div className={styles.overlay}>
+          <span className={styles.pill}>{article.section.name}</span>
           <h2 className={styles.title}>{article.title}</h2>
-          {article.excerpt && (
-            <p className={styles.excerpt}>{article.excerpt}</p>
-          )}
-          <PreviewMeta article={article} className={styles.meta} />
+          <time className={styles.date} dateTime={article.publishedAt}>
+            {longDate.format(new Date(article.publishedAt))}
+          </time>
         </div>
       </Link>
     </article>

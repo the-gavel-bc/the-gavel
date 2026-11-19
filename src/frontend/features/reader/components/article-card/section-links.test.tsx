@@ -108,9 +108,11 @@ it("keeps letters navigation categories under the section path", () => {
     ).getByRole("link", { name: section.name }),
   ).toHaveAttribute("data-active", "true");
 });
-it("puts a plain-text byline beside the date: writers first, else the owner", () => {
+it("puts a linked byline beside the date: writers first, else the owner", () => {
   const view = render(<ArticleHeader article={article} />);
-  expect(screen.getByText(`By ${article.owner.displayName}`)).toBeVisible();
+  expect(
+    screen.getByRole("link", { name: article.owner.displayName }),
+  ).toHaveAttribute("href", `/authors/${article.owner.slug}`);
   view.rerender(
     <ArticleHeader
       article={{
@@ -138,7 +140,14 @@ it("puts a plain-text byline beside the date: writers first, else the owner", ()
       }}
     />,
   );
-  expect(screen.getByText("By First, Second")).toBeVisible();
-  // Author links stay in the credits block only.
-  expect(screen.queryByRole("link", { name: "First" })).toBeNull();
+  const byline = screen.getByText(/^By/);
+  expect(byline).toHaveTextContent("By First, Second");
+  expect(screen.getByRole("link", { name: "First" })).toHaveAttribute(
+    "href",
+    "/authors/first",
+  );
+  expect(screen.getByRole("link", { name: "Second" })).toHaveAttribute(
+    "href",
+    "/authors/second",
+  );
 });

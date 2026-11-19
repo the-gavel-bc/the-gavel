@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/frontend/components/ui/button/button";
@@ -43,6 +44,7 @@ export function ArticleLifecycleControls({
   onBusyChange?: (busy: boolean) => void;
 }) {
   const router = useRouter();
+  const { confirm, confirmDialog } = useConfirm();
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<ArticleLifecycleResult | null>(null);
   const [retryCommand, setRetryCommand] =
@@ -71,13 +73,23 @@ export function ArticleLifecycleControls({
     };
     if (
       !retryCommand &&
-      !window.confirm(
-        status === "draft"
-          ? "Publish this article now?"
-          : status === "archived"
-            ? "Restore this article to Published?"
-            : "Archive this article? It will leave public circulation.",
-      )
+      !(await confirm({
+        title:
+          status === "draft"
+            ? "Publish this article now?"
+            : status === "archived"
+              ? "Restore this article to Published?"
+              : "Archive this article?",
+        message:
+          status === "draft"
+            ? "Readers will be able to see it."
+            : status === "archived"
+              ? "It will be visible to readers again."
+              : "It will leave public circulation.",
+        confirmLabel: verb,
+        cancelLabel: "Cancel",
+        danger: status === "published",
+      }))
     )
       return;
     busy.current = true;
@@ -152,6 +164,7 @@ export function ArticleLifecycleControls({
           )}
         </div>
       )}
+      {confirmDialog}
     </section>
   );
 }

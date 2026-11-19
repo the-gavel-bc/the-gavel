@@ -1,4 +1,5 @@
 "use client";
+import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GuardedDashboardLink } from "@/frontend/components/dashboard/guarded-dashboard-link/guarded-dashboard-link";
@@ -30,6 +31,7 @@ export function ArticleDeletion({
   version: number;
 }) {
   const router = useRouter();
+  const { confirm, confirmDialog } = useConfirm();
   const [confirmation, setConfirmation] = useState("");
   const [pending, setPending] = useState(false);
   const [retry, setRetry] = useState<DeletionCommand | null>(null);
@@ -79,14 +81,25 @@ export function ArticleDeletion({
       <button
         type="button"
         disabled={confirmation !== "DELETE" || pending || Boolean(retry)}
-        onClick={() =>
+        onClick={async () => {
+          if (
+            !(await confirm({
+              title: "Permanently delete this article?",
+              message:
+                "The article and its revision history are removed. This cannot be undone.",
+              confirmLabel: "Delete permanently",
+              cancelLabel: "Cancel",
+              danger: true,
+            }))
+          )
+            return;
           void run({
             articleId,
             expectedVersion: version,
             requestId: crypto.randomUUID(),
             confirm: true,
-          })
-        }
+          });
+        }}
       >
         Permanently delete article
       </button>
@@ -111,8 +124,15 @@ export function ArticleDeletion({
           {["conflict", "request_conflict"].includes(result.code) && (
             <button
               type="button"
-              onClick={() => {
-                if (window.confirm("Reload this article?"))
+              onClick={async () => {
+                if (
+                  await confirm({
+                    title: "Reload this article?",
+                    message: "Anything not saved will be lost.",
+                    confirmLabel: "Reload",
+                    cancelLabel: "Cancel",
+                  })
+                )
                   window.location.reload();
               }}
             >
@@ -121,6 +141,7 @@ export function ArticleDeletion({
           )}
         </div>
       )}
+      {confirmDialog}
     </section>
   );
 }

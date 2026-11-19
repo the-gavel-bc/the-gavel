@@ -1,4 +1,5 @@
 .tag {
+  grid-column: 1 / -1;
   align-items: end;
   display: flex;
   flex-wrap: wrap;
@@ -8,10 +9,18 @@
   display: grid;
   gap: var(--space-1);
 }
+/* The wrapper disappears into the row's grid: the buttons sit beside the name,
+   and the edit panel and messages take the full row beneath it. */
 .manage {
-  display: grid;
-  gap: var(--space-2);
-  justify-items: end;
+  display: contents;
+}
+.manage > * {
+  grid-column: 1 / -1;
+}
+.manage > .actions {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
 }
 .actions {
   display: flex;
@@ -39,4 +48,11 @@
 .panel > p {
   flex-basis: 100%;
   margin: 0;
+}
+@media (max-width: 40rem) {
+  .manage > .actions {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: start;
+  }
 }

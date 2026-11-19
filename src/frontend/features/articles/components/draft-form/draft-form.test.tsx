@@ -7,6 +7,10 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
+vi.mock(
+  "@/frontend/components/ui/confirm-dialog/use-confirm",
+  () => import("@/frontend/components/ui/confirm-dialog/use-confirm.window"),
+);
 import { baseDraft } from "@/shared/articles/draft-contract/draft-test-cases";
 const mocks = vi.hoisted(() => ({
   create: vi.fn(),
@@ -118,25 +122,22 @@ it("requires title and section, then focuses a safe error summary", async () => 
   expect(screen.queryByLabelText(/Slug/)).not.toBeInTheDocument();
   expect(mocks.create).not.toHaveBeenCalled();
 });
-it("cancel leaves at once when clean and asks in the page when edited", async () => {
+it("cancel leaves at once when clean and asks first when edited", async () => {
+  const confirm = vi.fn(() => false);
+  vi.stubGlobal("confirm", confirm);
   render(<DraftForm initialDraft={baseDraft} options={options} />);
   await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
-  expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+  expect(confirm).not.toHaveBeenCalled();
   expect(mocks.push).toHaveBeenCalledWith("/dashboard");
   mocks.push.mockClear();
   await userEvent.type(screen.getByLabelText(/Title/), " edited");
   await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
-  expect(
-    await screen.findByRole("alertdialog", { name: "Discard your changes?" }),
-  ).toBeVisible();
-  await userEvent.click(screen.getByRole("button", { name: "Keep editing" }));
-  expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+  expect(confirm).toHaveBeenCalledOnce();
   expect(mocks.push).not.toHaveBeenCalled();
+  confirm.mockReturnValue(true);
   await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
-  await userEvent.click(
-    await screen.findByRole("button", { name: "Discard changes" }),
-  );
   await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/dashboard"));
+  vi.unstubAllGlobals();
 });
 it("preserves the title if address allocation fails", async () => {
   mocks.create.mockResolvedValue({ ok: false, code: "slug_conflict" });
@@ -445,7 +446,7 @@ it.each(["draft", "published"] as const)(
       screen.getByRole("button", { name: "Start deferred image write" }),
     ).toBeVisible();
     expect(
-      await screen.findByRole("region", { name: "Unused uploads" }),
+      await screen.findByRole("region", { name: "Leftover images" }),
     ).toBeVisible();
     await waitFor(() =>
       expect(mocks.unused).toHaveBeenCalledWith(baseDraft.sectionId),
@@ -481,7 +482,7 @@ it("holds save, editing, lifecycle, and navigation guards during explicit cleanu
     />,
   );
   await userEvent.click(
-    await screen.findByRole("button", { name: "Discard unused upload" }),
+    await screen.findByRole("button", { name: "Delete image" }),
   );
   expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
   expect(
@@ -519,7 +520,7 @@ it("keeps lifecycle, save and navigation guarded across uncertain cleanup until 
     />,
   );
   await userEvent.click(
-    await screen.findByRole("button", { name: "Discard unused upload" }),
+    await screen.findByRole("button", { name: "Delete image" }),
   );
   await screen.findByRole("button", { name: "Retry cleanup" });
   expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
@@ -532,7 +533,7 @@ it("keeps lifecycle, save and navigation guarded across uncertain cleanup until 
   expect(event.defaultPrevented).toBe(true);
   mocks.unused.mockResolvedValue({ ok: true, items: [], nextCursor: null });
   await userEvent.click(
-    screen.getByRole("button", { name: "Refresh unused uploads" }),
+    screen.getByRole("button", { name: "Check for leftover images" }),
   );
   await screen.findByText(/Refreshing does not confirm deletion/);
   expect(

@@ -36,15 +36,6 @@ export function ArticleCredits({ article }: { article: PublicArticle }) {
           )
         );
       })}
-      {/* Ownership is explicit; it does not invent a writer credit. */}
-      <div>
-        <dt>Article owner</dt>
-        <dd>
-          <Link href={`/authors/${article.owner.slug}`}>
-            {article.owner.displayName}
-          </Link>
-        </dd>
-      </div>
     </dl>
   );
 }

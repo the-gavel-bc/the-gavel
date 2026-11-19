@@ -1,4 +1,5 @@
 "use client";
+import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDraftNavigationGuard } from "@/frontend/components/dashboard/draft-navigation-guard/draft-navigation-guard";
@@ -25,6 +26,7 @@ export function SiteInformationForm({
   information: SiteInformation;
 }) {
   const router = useRouter();
+  const { confirm, confirmDialog } = useConfirm();
   const [mission, setMission] = useState(information.mission ?? "");
   const [contactEmail, setContactEmail] = useState(
     information.contactEmail ?? "",
@@ -211,11 +213,15 @@ export function SiteInformationForm({
           {["conflict", "request_conflict"].includes(result.code) && (
             <button
               type="button"
-              onClick={() => {
+              onClick={async () => {
                 if (
-                  window.confirm(
-                    "Reload site information? Unsaved changes will be lost.",
-                  )
+                  await confirm({
+                    title: "Reload site information?",
+                    message: "Unsaved changes will be lost.",
+                    confirmLabel: "Reload",
+                    cancelLabel: "Keep editing",
+                    danger: true,
+                  })
                 )
                   window.location.reload();
               }}
@@ -226,6 +232,7 @@ export function SiteInformationForm({
         </div>
       )}
       <noscript>Enable JavaScript to save site information.</noscript>
+      {confirmDialog}
     </form>
   );
 }

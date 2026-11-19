@@ -13,9 +13,9 @@ insert into public.audit_events(id,actor_user_id,action,resource_type,resource_i
     'article.archived','article','50000000-0000-0000-0000-000000000081','2026-01-03T00:00:00Z');
 
 select has_function('public','list_article_audit_events',
-  array['integer','text','timestamp with time zone','uuid'], 'bounded audit reader exists');
+  array['integer','text','timestamp with time zone','uuid','text'], 'bounded audit reader exists');
 select ok(not has_function_privilege('anon',
-  'public.list_article_audit_events(integer,text,timestamp with time zone,uuid)','EXECUTE'),
+  'public.list_article_audit_events(integer,text,timestamp with time zone,uuid,text)','EXECUTE'),
   'anonymous has no audit RPC grant');
 
 set local role authenticated;

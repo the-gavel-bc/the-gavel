@@ -1,5 +1,16 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
+vi.mock("next/navigation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/navigation")>()),
+  useRouter: () => ({ refresh: vi.fn() }),
+}));
+vi.mock(
+  "@/backend/articles/article-lifecycle/article-lifecycle-actions",
+  () => ({ archiveArticleAction: vi.fn(), restoreArticleAction: vi.fn() }),
+);
+vi.mock("@/backend/articles/article-deletion/article-deletion-actions", () => ({
+  deleteArticleAction: vi.fn(),
+}));
 import DashboardLayout from "./layout";
 import DashboardPage from "./page";
 const access = vi.hoisted(() => vi.fn());

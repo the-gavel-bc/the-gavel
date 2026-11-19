@@ -117,11 +117,11 @@ it("renders semantic article, attribution, authorized media, safe body and scope
     "Written by",
     "Edited by",
     "Creative contributors",
-    "Article owner",
     "Photo: Photographer",
   ])
     expect(screen.getByText(text)).toBeVisible();
-  for (const person of [article.owner, ...article.contributors])
+  expect(screen.queryByText("Article owner")).not.toBeInTheDocument();
+  for (const person of article.contributors)
     expect(
       screen.getAllByRole("link", { name: person.displayName })[0],
     ).toHaveAttribute("href", `/authors/${person.slug}`);
@@ -174,10 +174,9 @@ it("omits empty optional groups rather than fabricating a byline, biography or i
   expect(
     screen.queryByRole("heading", { name: "Keep reading" }),
   ).not.toBeInTheDocument();
-  expect(screen.getByRole("link", { name: "Search stories" })).toHaveAttribute(
-    "href",
-    "/search",
-  );
+  expect(
+    screen.queryByRole("link", { name: "Search stories" }),
+  ).not.toBeInTheDocument();
 });
 it("offers safe not-found and unexpected-error recovery", () => {
   const { unmount } = render(<NotFound />);

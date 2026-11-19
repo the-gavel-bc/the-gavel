@@ -20,8 +20,17 @@
 .progress {
   display: none;
 }
+/* The bar tracks the article itself: empty when its top reaches the top of
+   the window, full when its end reaches the bottom of the window, so related
+   stories and the footer below do not count as reading. */
 @media (prefers-reduced-motion: no-preference) {
-  @supports (animation-timeline: scroll()) {
+  @supports (animation-timeline: view()) {
+    .page {
+      timeline-scope: --read;
+    }
+    .article {
+      view-timeline: --read block;
+    }
     .progress {
       position: fixed;
       inset: 0 0 auto;
@@ -32,7 +41,8 @@
       background: #1f2380;
       transform-origin: left;
       animation: read linear both;
-      animation-timeline: scroll(root);
+      animation-timeline: --read;
+      animation-range: contain 0% contain 100%;
     }
   }
 }

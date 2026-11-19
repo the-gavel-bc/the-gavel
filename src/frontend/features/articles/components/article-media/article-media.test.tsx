@@ -1,6 +1,10 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
+vi.mock(
+  "@/frontend/components/ui/confirm-dialog/use-confirm",
+  () => import("@/frontend/components/ui/confirm-dialog/use-confirm.window"),
+);
 import { ArticleMedia } from "./article-media";
 
 const article = {
@@ -62,10 +66,8 @@ it("discards a finalized upload that was never attached", async () => {
     new File(["synthetic"], "unused.png", { type: "image/png" }),
   );
   await screen.findByText("Image ready to attach.");
-  await user.click(
-    screen.getByRole("button", { name: "Discard unused upload" }),
-  );
-  expect(await screen.findByText("Unused upload removed.")).toBeInTheDocument();
+  await user.click(screen.getByRole("button", { name: "Delete image" }));
+  expect(await screen.findByText("Image deleted.")).toBeInTheDocument();
   expect(mocks.removeUnused).toHaveBeenCalledWith(assetId);
   expect(mocks.setImage).not.toHaveBeenCalled();
 });
@@ -125,7 +127,7 @@ it("keeps a failed cleanup reachable for retry", async () => {
   ).toBeVisible();
   expect(screen.getByLabelText("Image file")).toBeDisabled();
   await user.click(screen.getByRole("button", { name: "Retry cleanup" }));
-  expect(await screen.findByText("Unused upload removed.")).toBeVisible();
+  expect(await screen.findByText("Image deleted.")).toBeVisible();
   expect(mocks.removeUnused).toHaveBeenCalledTimes(2);
 });
 
@@ -340,7 +342,7 @@ it("retains a pending attachment asset and blocks competing mutations until retr
     screen.queryByRole("button", { name: "Upload image" }),
   ).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Attach image" })).toBeDisabled();
-  const discard = screen.getByRole("button", { name: "Discard unused upload" });
+  const discard = screen.getByRole("button", { name: "Delete image" });
   expect(discard).toBeDisabled();
   fireEvent.click(discard);
   expect(mocks.removeUnused).not.toHaveBeenCalled();
@@ -352,9 +354,7 @@ it("retains a pending attachment asset and blocks competing mutations until retr
   expect(mocks.setImage).toHaveBeenNthCalledWith(2, command);
   expect(screen.getByLabelText("Alt text")).toHaveValue("Submitted alt");
   expect(screen.getByLabelText("Image credit")).toHaveValue("Newer credit");
-  expect(
-    screen.queryByRole("button", { name: "Discard unused upload" }),
-  ).toBeNull();
+  expect(screen.queryByRole("button", { name: "Delete image" })).toBeNull();
   expect(mocks.request).toHaveBeenCalledOnce();
   expect(mocks.removeUnused).not.toHaveBeenCalled();
 });

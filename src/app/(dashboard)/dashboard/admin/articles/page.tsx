@@ -18,7 +18,7 @@ export default async function AdminArticlesPage({
         <Link href="/dashboard">My articles</Link>
       </>
     );
-  const { deleted, ...input } = await searchParams;
+  const { deleted, from, ...input } = await searchParams;
   let page;
   try {
     page = await getAdminArticlesPage(input);
@@ -56,6 +56,7 @@ export default async function AdminArticlesPage({
         page={page}
         status={status}
         search={search}
+        from={from === "draft" || from === "published" ? from : "all"}
       />
     </>
   );

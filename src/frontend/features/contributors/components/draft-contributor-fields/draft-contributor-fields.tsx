@@ -45,69 +45,87 @@ export function DraftContributorFields({
       aria-describedby={error ? "draft-contributors-error" : undefined}
     >
       <legend>Contributors</legend>
-      {value.map((credit, index) => (
-        <div key={keys[index] ?? `external-${index}`} className={styles.credit}>
-          <ContributorCombobox
-            index={index}
-            selected={
-              choices.find((p) => p.id === credit.profileId) ?? {
-                id: credit.profileId,
-                displayName: `Unavailable contributor: ${credit.profileId}`,
-                slug: "unavailable",
+      <div className={styles.body}>
+        {value.map((credit, index) => (
+          <div
+            key={keys[index] ?? `external-${index}`}
+            className={styles.credit}
+          >
+            <ContributorCombobox
+              index={index}
+              selected={
+                choices.find((p) => p.id === credit.profileId) ?? {
+                  id: credit.profileId,
+                  displayName: `Unavailable contributor: ${credit.profileId}`,
+                  slug: "unavailable",
+                }
               }
-            }
-            onSelect={(choice) => {
-              onOption?.(choice);
-              setAdded((rows) =>
-                rows.some((p) => p.id === choice.id) ? rows : [...rows, choice],
-              );
-              update(index, { profileId: choice.id });
-            }}
-          />
-          <label htmlFor={`credit-${index}-role`}>Role {index + 1}</label>
-          <select
-            id={`credit-${index}-role`}
-            value={credit.role}
-            onChange={(e) =>
-              update(index, {
-                role: e.target.value as DraftContributor["role"],
-              })
-            }
-          >
-            <option value="writer">Writer</option>
-            <option value="editor">Editor</option>
-            <option value="creative">Creative</option>
-          </select>
-          <label htmlFor={`credit-${index}-order`}>
-            Display order {index + 1}
-          </label>
-          <input
-            id={`credit-${index}-order`}
-            type="number"
-            min={0}
-            max={2147483647}
-            step={1}
-            value={Number.isNaN(credit.displayOrder) ? "" : credit.displayOrder}
-            onChange={(e) =>
-              update(index, {
-                displayOrder:
-                  e.target.value === "" ? NaN : Number(e.target.value),
-              })
-            }
-          />
-          <Button
-            type="button"
-            onClick={() => {
-              setKeys((rows) => rows.filter((_, i) => i !== index));
-              onChange(value.filter((_, i) => i !== index));
-            }}
-          >
-            Remove contributor {index + 1}
-          </Button>
-        </div>
-      ))}
+              onSelect={(choice) => {
+                onOption?.(choice);
+                setAdded((rows) =>
+                  rows.some((p) => p.id === choice.id)
+                    ? rows
+                    : [...rows, choice],
+                );
+                update(index, { profileId: choice.id });
+              }}
+            />
+            <div className={styles.field}>
+              <label htmlFor={`credit-${index}-role`}>
+                Role <span className={styles.srOnly}>{index + 1}</span>
+              </label>
+              <select
+                id={`credit-${index}-role`}
+                value={credit.role}
+                onChange={(e) =>
+                  update(index, {
+                    role: e.target.value as DraftContributor["role"],
+                  })
+                }
+              >
+                <option value="writer">Writer</option>
+                <option value="editor">Editor</option>
+                <option value="creative">Creative</option>
+              </select>
+            </div>
+            <div className={styles.field}>
+              <label htmlFor={`credit-${index}-order`}>
+                Display order <span className={styles.srOnly}>{index + 1}</span>
+              </label>
+              <input
+                id={`credit-${index}-order`}
+                type="number"
+                min={0}
+                max={2147483647}
+                step={1}
+                value={
+                  Number.isNaN(credit.displayOrder) ? "" : credit.displayOrder
+                }
+                onChange={(e) =>
+                  update(index, {
+                    displayOrder:
+                      e.target.value === "" ? NaN : Number(e.target.value),
+                  })
+                }
+              />
+            </div>
+            <Button
+              type="button"
+              variant="danger"
+              aria-label={`Remove contributor ${index + 1}`}
+              onClick={() => {
+                setKeys((rows) => rows.filter((_, i) => i !== index));
+                onChange(value.filter((_, i) => i !== index));
+              }}
+            >
+              Remove
+            </Button>
+          </div>
+        ))}
+      </div>
       <Button
         type="button"
+        variant="secondary"
         disabled={value.length >= 32}
         onClick={() => {
           setKeys((rows) => [...rows, `added-${nextKey.current++}`]);

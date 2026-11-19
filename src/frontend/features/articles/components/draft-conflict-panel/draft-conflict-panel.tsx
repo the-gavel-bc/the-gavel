@@ -1,4 +1,5 @@
 "use client";
+import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import { useEffect, useRef, useState } from "react";
 import {
   reviewDraftAction,
@@ -35,6 +36,7 @@ export function DraftConflictPanel({
   const [loadingId, setLoading] = useState<string | null>(null);
   const loading = loadingId === articleId;
   const [reloadError, setReloadError] = useState(false);
+  const { confirm, confirmDialog } = useConfirm();
   const [previous, setPrevious] = useState<{
     input: DraftInput;
     options: DraftOptions;
@@ -73,13 +75,18 @@ export function DraftConflictPanel({
     result?.ok && result.detail.kind === "editable" && result.options
       ? { detail: result.detail, options: result.options }
       : null;
-  function load() {
+  async function load() {
     if (
       disabled ||
       !editable ||
-      !window.confirm(
-        `Load the saved version of “${editable.detail.draft.title}”? This replaces your current unsaved changes. A reference of your last valid input stays in this tab; unsupported body edits are not copied.`,
-      )
+      !(await confirm({
+        title: `Load the saved version of “${editable.detail.draft.title}”?`,
+        message:
+          "This replaces your current unsaved changes. A reference of your last valid input stays in this tab; unsupported body edits are not copied.",
+        confirmLabel: "Load saved version",
+        cancelLabel: "Keep my changes",
+        danger: true,
+      }))
     )
       return;
     const input = structuredClone(local);
@@ -124,7 +131,7 @@ export function DraftConflictPanel({
             input={editable.detail.draft}
             options={editable.options}
           />
-          <Button type="button" disabled={disabled} onClick={load}>
+          <Button type="button" disabled={disabled} onClick={() => void load()}>
             Load latest saved version
           </Button>
         </div>
@@ -145,6 +152,7 @@ export function DraftConflictPanel({
           <DraftSnapshot input={previous.input} options={previous.options} />
         </details>
       )}
+      {confirmDialog}
     </section>
   );
 }

@@ -29,13 +29,20 @@
   display: inline-flex;
   align-items: center;
   min-height: 2.75rem;
+  padding-inline: 1.25rem;
+  border: 1px solid var(--reader-blue);
+  border-radius: 999px;
   color: var(--reader-blue);
-  text-underline-offset: 0.2em;
+  font: 700 0.9375rem/1.2 var(--reader-sans);
+  text-decoration: none;
   max-width: 100%;
-  transition: color var(--reader-fast) var(--reader-ease);
+  transition:
+    background var(--reader-fast) var(--reader-ease),
+    color var(--reader-fast) var(--reader-ease);
 }
 .page a:hover {
-  color: var(--reader-band);
+  background: var(--reader-blue);
+  color: #fff;
 }
 .page nav {
   display: flex;

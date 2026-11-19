@@ -30,8 +30,14 @@ export type AuditEvent = {
 };
 export type AuditPage = { items: AuditEvent[]; nextCursor: string | null };
 
+export const auditSearchSchema = z
+  .string()
+  .trim()
+  .max(80)
+  .refine((value) => !value || /^[\p{L}\p{N} '\-,./]+$/u.test(value));
 const inputSchema = z.strictObject({
   action: auditActionSchema.optional(),
+  search: auditSearchSchema.optional(),
   cursor: z.string().optional(),
   pageSize: z.number().int().min(1).max(50).default(20),
 });
@@ -48,6 +54,7 @@ type Cursor = {
   id: string;
   createdAt: string;
   action: AuditAction | null;
+  search: string | null;
 };
 
 function encodeCursor(value: Omit<Cursor, "version">): string {
@@ -67,13 +74,19 @@ function decodeCursor(value: string): Cursor | null {
       return null;
     const cursor = parsed as Record<string, unknown>;
     if (
-      Object.keys(cursor).length !== 4 ||
+      Object.keys(cursor).length !== 5 ||
       cursor.version !== 1 ||
       !isDraftUuid(cursor.id) ||
       !isDatabaseTimestamp(cursor.createdAt) ||
       !(
         cursor.action === null ||
         auditActionSchema.safeParse(cursor.action).success
+      ) ||
+      !(
+        cursor.search === null ||
+        (typeof cursor.search === "string" &&
+          cursor.search.length > 0 &&
+          auditSearchSchema.safeParse(cursor.search).success)
       )
     )
       return null;
@@ -87,10 +100,11 @@ export async function listAuditEvents(input: unknown): Promise<AuditPage> {
   const parsed = inputSchema.safeParse(input);
   if (!parsed.success) throw new Error("Invalid audit request.");
   const { action, pageSize } = parsed.data;
+  const search = parsed.data.search || null;
   const cursor = parsed.data.cursor ? decodeCursor(parsed.data.cursor) : null;
   if (
     parsed.data.cursor !== undefined &&
-    (!cursor || cursor.action !== (action ?? null))
+    (!cursor || cursor.action !== (action ?? null) || cursor.search !== search)
   )
     throw new Error("Invalid audit request.");
 
@@ -103,6 +117,7 @@ export async function listAuditEvents(input: unknown): Promise<AuditPage> {
     const { data, error } = await client.rpc("list_article_audit_events", {
       p_limit: pageSize + 1,
       p_action: action ?? undefined,
+      p_search: search ?? undefined,
       p_before_at: cursor?.createdAt,
       p_before_id: cursor?.id,
     });
@@ -145,6 +160,7 @@ export async function listAuditEvents(input: unknown): Promise<AuditPage> {
               id: last.id,
               createdAt: last.createdAt,
               action: action ?? null,
+              search,
             })
           : null,
     };

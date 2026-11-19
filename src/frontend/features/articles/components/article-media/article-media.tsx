@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/frontend/components/ui/button/button";
 import type { DraftArticle } from "@/frontend/features/articles/draft-save-state/draft-save-state";
@@ -50,6 +51,7 @@ export function ArticleMedia({
   published?: boolean;
 }) {
   const [image, setImage] = useState(initialImage);
+  const { confirm, confirmDialog } = useConfirm();
   const fileInput = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(initialFile ?? null);
   const [assetId, setAssetId] = useState<string | null>(null);
@@ -277,11 +279,11 @@ export function ArticleMedia({
     if (!target || disabled || busy || conflict || pendingWrite) return;
     setBusy(true);
     setError("");
-    setStatus("Discarding unused upload…");
+    setStatus("Deleting image…");
     try {
       const result = await removeUnusedArticleImage(target);
       if (!result.ok) {
-        setError(`Unused upload could not be removed (${result.code}). Retry.`);
+        setError(`Image could not be deleted (${result.code}). Retry.`);
         return;
       }
       setAssetId(null);
@@ -294,9 +296,9 @@ export function ArticleMedia({
         setCredit("");
         setCaption("");
       }
-      setStatus("Unused upload removed.");
+      setStatus("Image deleted.");
     } catch {
-      setError("Unused upload could not be removed. Retry.");
+      setError("Image could not be deleted. Retry.");
     } finally {
       setBusy(false);
     }
@@ -406,9 +408,21 @@ export function ArticleMedia({
           <Button
             type="button"
             disabled={mutationLocked}
-            onClick={() => void discardUpload()}
+            onClick={async () => {
+              if (
+                await confirm({
+                  title: "Discard this upload?",
+                  message:
+                    "The uploaded image is removed. This cannot be undone.",
+                  confirmLabel: "Discard upload",
+                  cancelLabel: "Keep",
+                  danger: true,
+                })
+              )
+                void discardUpload();
+            }}
           >
-            Discard unused upload
+            Delete image
           </Button>
         )}
         {cleanupAssetId && (
@@ -443,13 +457,17 @@ export function ArticleMedia({
             type="button"
             variant="danger"
             disabled={mutationLocked}
-            onClick={() => {
-              // Readers see a published article's photo, so confirm first.
+            onClick={async () => {
               if (
-                published &&
-                !window.confirm(
-                  "Remove the main image from this published article? Readers will stop seeing it.",
-                )
+                !(await confirm({
+                  title: "Remove the main image?",
+                  message: published
+                    ? "Readers will stop seeing it on this published article."
+                    : "The image is removed from this draft.",
+                  confirmLabel: "Remove image",
+                  cancelLabel: "Keep",
+                  danger: true,
+                }))
               )
                 return;
               void commit({
@@ -467,6 +485,7 @@ export function ArticleMedia({
       {busy && <progress aria-label="Image operation in progress" />}
       {status && <p role="status">{status}</p>}
       {error && <p role="alert">{error}</p>}
+      {confirmDialog}
     </section>
   );
 }

@@ -1,6 +1,10 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
+vi.mock(
+  "@/frontend/components/ui/confirm-dialog/use-confirm",
+  () => import("@/frontend/components/ui/confirm-dialog/use-confirm.window"),
+);
 import { UnusedArticleUploads } from "./unused-article-uploads";
 const mocks = vi.hoisted(() => ({ list: vi.fn(), remove: vi.fn() }));
 vi.mock(
@@ -32,13 +36,13 @@ beforeEach(() => {
 it("discovers after reload and discards only on explicit click", async () => {
   const view = render(<UnusedArticleUploads {...props} />);
   const button = await screen.findByRole("button", {
-    name: "Discard unused upload",
+    name: "Delete image",
   });
   expect(mocks.remove).not.toHaveBeenCalled();
   await userEvent.click(button);
   expect(mocks.remove).toHaveBeenCalledWith(assetId);
   expect(props.onBusyChange.mock.calls).toEqual([[true], [false]]);
-  expect(screen.getByText("Unused upload discarded.")).toBeVisible();
+  expect(screen.getByText("Image deleted.")).toBeVisible();
   view.unmount();
   expect(mocks.remove).toHaveBeenCalledTimes(1);
 });
@@ -46,27 +50,27 @@ it("hides unsaved body references and disables cleanup with held uploads or unre
   const view = render(
     <UnusedArticleUploads {...props} localAssetIds={new Set([assetId])} />,
   );
-  await screen.findByText(/No unused uploads/);
+  await screen.findByText(/No leftover images/);
   expect(
-    screen.queryByRole("button", { name: "Discard unused upload" }),
+    screen.queryByRole("button", { name: "Delete image" }),
   ).not.toBeInTheDocument();
   view.rerender(<UnusedArticleUploads {...props} disabled />);
   expect(
-    await screen.findByRole("button", { name: "Discard unused upload" }),
+    await screen.findByRole("button", { name: "Delete image" }),
   ).toBeDisabled();
 });
 it("retains uncertain cleanup for explicit retry and explains an absent refreshed row", async () => {
   mocks.remove.mockResolvedValue({ ok: false, code: "unavailable" });
   render(<UnusedArticleUploads {...props} />);
   await userEvent.click(
-    await screen.findByRole("button", { name: "Discard unused upload" }),
+    await screen.findByRole("button", { name: "Delete image" }),
   );
   expect(
     await screen.findByRole("button", { name: "Retry cleanup" }),
   ).toBeEnabled();
   mocks.list.mockResolvedValue({ ok: true, items: [], nextCursor: null });
   await userEvent.click(
-    screen.getByRole("button", { name: "Refresh unused uploads" }),
+    screen.getByRole("button", { name: "Check for leftover images" }),
   );
   expect(
     await screen.findByText(/Refreshing does not confirm deletion/),
@@ -95,7 +99,7 @@ it("shows deleting retries, pages beyond locally hidden rows, and refreshes afte
     nextCursor: null,
   });
   await userEvent.click(
-    await screen.findByRole("button", { name: "Next unused uploads" }),
+    await screen.findByRole("button", { name: "More leftover images" }),
   );
   expect(mocks.list).toHaveBeenLastCalledWith(articleId, assetId);
   view.rerender(<UnusedArticleUploads {...props} refreshKey="2:false:false" />);
@@ -107,16 +111,16 @@ it("shows deleting retries, pages beyond locally hidden rows, and refreshes afte
 it("shows safe load and stale-reference failures", async () => {
   mocks.list.mockResolvedValueOnce({ ok: false, code: "forbidden" });
   render(<UnusedArticleUploads {...props} />);
-  expect(await screen.findByRole("alert")).toHaveTextContent("Unable to load");
+  expect(await screen.findByRole("alert")).toHaveTextContent("Unable to check");
   await userEvent.click(
-    screen.getByRole("button", { name: "Refresh unused uploads" }),
+    screen.getByRole("button", { name: "Check for leftover images" }),
   );
   mocks.remove.mockResolvedValue({ ok: false, code: "conflict" });
   await userEvent.click(
-    await screen.findByRole("button", { name: "Discard unused upload" }),
+    await screen.findByRole("button", { name: "Delete image" }),
   );
   expect(
-    await screen.findByText(/no longer available for unused cleanup/),
+    await screen.findByText(/no longer available to delete/),
   ).toBeVisible();
 });
 it("holds busy guards until cleanup completes", async () => {
@@ -129,12 +133,10 @@ it("holds busy guards until cleanup completes", async () => {
   );
   render(<UnusedArticleUploads {...props} />);
   await userEvent.click(
-    await screen.findByRole("button", { name: "Discard unused upload" }),
+    await screen.findByRole("button", { name: "Delete image" }),
   );
   expect(props.onBusyChange).toHaveBeenLastCalledWith(true);
-  expect(
-    screen.getByRole("button", { name: "Discard unused upload" }),
-  ).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Delete image" })).toBeDisabled();
   await act(async () => finish({ ok: true, assetId }));
   expect(props.onBusyChange).toHaveBeenLastCalledWith(false);
 });
