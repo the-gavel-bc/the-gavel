@@ -8,7 +8,8 @@ export function Button({
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   // "danger" marks destructive actions: outlined red, never the primary fill.
-  variant?: "danger";
+  // "secondary" is the quiet outlined style for the lesser of two actions.
+  variant?: "danger" | "secondary";
 }) {
   const classes = [styles.button, className].filter(Boolean).join(" ");
   return (

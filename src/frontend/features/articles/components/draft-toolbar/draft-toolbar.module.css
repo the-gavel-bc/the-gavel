@@ -37,7 +37,7 @@
   border-radius: 8px;
   color: var(--color-ink);
   font: inherit;
-  min-height: 2.75rem;
+  min-height: var(--dash-control, 2.75rem);
   padding: var(--space-2) var(--space-3);
   width: 100%;
 }

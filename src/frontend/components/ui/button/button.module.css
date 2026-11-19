@@ -8,13 +8,20 @@
   display: inline-flex;
   font-weight: 700;
   justify-content: center;
-  min-height: 2.75rem;
-  padding: var(--space-2) var(--space-6);
+  min-height: var(--dash-control, 2.75rem);
+  padding: var(--space-2) var(--dash-pill-pad, var(--space-6));
   text-decoration: none;
   transition: background-color 150ms ease;
 }
 .button:hover {
   background: var(--color-brand-dark);
+}
+.button[data-variant="secondary"] {
+  background: var(--color-paper);
+  color: var(--color-brand);
+}
+.button[data-variant="secondary"]:hover {
+  background: var(--dash-soft, #eef2fc);
 }
 .button[data-variant="danger"] {
   background: var(--color-paper);

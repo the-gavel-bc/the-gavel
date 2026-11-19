@@ -165,6 +165,17 @@ export function DraftForm({
     event.preventDefault();
     await save(pendingPhoto);
   }
+  // Cancel leaves the editor without saving. Saved versions are untouched.
+  function cancelEditing() {
+    if (
+      (command.dirty || mediaDirty || bodyMediaDirty) &&
+      !window.confirm(
+        "Discard your unsaved changes? Anything not saved will be lost.",
+      )
+    )
+      return;
+    router.push("/dashboard");
+  }
   async function save(photo: File | null) {
     if (
       cleanupBusy ||
@@ -509,34 +520,44 @@ export function DraftForm({
               : "Your draft stays private."}
           </p>
         </div>
-        <Button
-          type="submit"
-          disabled={
-            !ready ||
-            lifecycleBusy ||
-            cleanupBusy ||
-            mediaBusy ||
-            command.phase === "saving" ||
-            command.phase === "saved" ||
-            command.phase === "conflict" ||
-            (!command.pending && recoveryBlocked) ||
-            (!command.pending &&
-              (Boolean(editorFailure) ||
-                categories.loading ||
-                categories.error ||
-                !catalog.options.sections.length))
-          }
-        >
-          {command.phase === "uncertain"
-            ? "Retry original save"
-            : command.phase === "saving"
-              ? "Saving…"
-              : command.article
-                ? status === "published"
-                  ? "Save article"
-                  : "Save draft"
-                : "Create draft"}
-        </Button>
+        <div className={styles.saveActions}>
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={command.phase === "saving"}
+            onClick={cancelEditing}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={
+              !ready ||
+              lifecycleBusy ||
+              cleanupBusy ||
+              mediaBusy ||
+              command.phase === "saving" ||
+              command.phase === "saved" ||
+              command.phase === "conflict" ||
+              (!command.pending && recoveryBlocked) ||
+              (!command.pending &&
+                (Boolean(editorFailure) ||
+                  categories.loading ||
+                  categories.error ||
+                  !catalog.options.sections.length))
+            }
+          >
+            {command.phase === "uncertain"
+              ? "Retry original save"
+              : command.phase === "saving"
+                ? "Saving…"
+                : command.article
+                  ? status === "published"
+                    ? "Save article"
+                    : "Save draft"
+                  : "Create draft"}
+          </Button>
+        </div>
       </div>
       {command.article && (
         <ArticleLifecycleControls

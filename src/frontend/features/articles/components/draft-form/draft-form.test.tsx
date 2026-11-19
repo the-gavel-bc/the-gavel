@@ -118,6 +118,22 @@ it("requires title and section, then focuses a safe error summary", async () => 
   expect(screen.queryByLabelText(/Slug/)).not.toBeInTheDocument();
   expect(mocks.create).not.toHaveBeenCalled();
 });
+it("cancel leaves at once when clean and asks first when edited", async () => {
+  const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+  render(<DraftForm initialDraft={baseDraft} options={options} />);
+  await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+  expect(confirm).not.toHaveBeenCalled();
+  expect(mocks.push).toHaveBeenCalledWith("/dashboard");
+  mocks.push.mockClear();
+  await userEvent.type(screen.getByLabelText(/Title/), " edited");
+  await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+  expect(confirm).toHaveBeenCalledOnce();
+  expect(mocks.push).not.toHaveBeenCalled();
+  confirm.mockReturnValue(true);
+  await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+  expect(mocks.push).toHaveBeenCalledWith("/dashboard");
+  confirm.mockRestore();
+});
 it("preserves the title if address allocation fails", async () => {
   mocks.create.mockResolvedValue({ ok: false, code: "slug_conflict" });
   render(<DraftForm initialDraft={baseDraft} options={options} />);
