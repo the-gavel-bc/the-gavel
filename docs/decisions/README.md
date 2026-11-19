@@ -27,3 +27,4 @@ Copy [template.md](template.md) to `0001-descriptive-title.md`, increasing the n
 
 - [0011: Admit public search inside the database](0011-database-public-search-admission.md) — Accepted for Phase 5 Task 17; hosted timeout/capacity proof pending
 - [0012: Editor role and review as draft state](0012-editor-role-and-review-state.md) — Accepted
+- [0013: Publication date as an optional Eastern calendar date](0013-publication-date.md) — Accepted
