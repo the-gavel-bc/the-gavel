@@ -34,6 +34,7 @@ const row = {
   content: null,
   seo_keyphrase: null,
   meta_description: null,
+  publication_date: null,
   article_categories: [],
   article_tags: [],
   article_contributors: [],
@@ -266,4 +267,13 @@ it.each([
   http.respond(value);
   expect((await getDraftEditorData(articleId)).options).toBeNull();
   expect(http.network).toHaveBeenCalledOnce();
+});
+it("carries a stored publication date into the editor input", async () => {
+  http.respond({ ...row, publication_date: "2026-01-15" });
+  for (let i = 0; i < 4; i++) http.respond([]);
+  const result = await getDraftDetail(articleId);
+  expect(result).toMatchObject({
+    kind: "editable",
+    draft: { publicationDate: "2026-01-15" },
+  });
 });

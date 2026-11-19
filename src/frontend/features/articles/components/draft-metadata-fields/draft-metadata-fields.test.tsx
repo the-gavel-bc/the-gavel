@@ -71,3 +71,25 @@ it("shows the search details on their own and keeps NULL when cleared", async ()
   await userEvent.clear(screen.getByLabelText(/SEO keyphrase/));
   expect(onChange.mock.lastCall?.[0].seoKeyphrase).toBeNull();
 });
+
+it("offers an optional publication date that cannot be set in the future", async () => {
+  const onChange = vi.fn();
+  render(
+    <DraftMetadataFields
+      draft={{ ...baseDraft, publicationDate: "2026-01-15" }}
+      options={options}
+      errors={{ publicationDate: "The date cannot be in the future." }}
+      onChange={onChange}
+    />,
+  );
+  const field = screen.getByLabelText(/Publication date/);
+  expect(field).toHaveAttribute("type", "date");
+  expect(field).toHaveValue("2026-01-15");
+  expect(field).toHaveAttribute("max");
+  expect(field).toHaveAttribute("aria-invalid", "true");
+  expect(field).toHaveAccessibleDescription(
+    /Readers see this date[\s\S]*cannot be in the future/,
+  );
+  await userEvent.clear(field);
+  expect(onChange.mock.lastCall?.[0].publicationDate).toBeNull();
+});

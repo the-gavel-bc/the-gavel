@@ -1,5 +1,9 @@
 import { draftJsonbByteLength } from "./draft-json";
 import { isValidDraftLink } from "./draft-link";
+import {
+  isCalendarDate,
+  publicationDateError,
+} from "../publication-date/publication-date";
 export { draftJsonbByteLength, isValidDraftLink };
 
 export type DraftMark =
@@ -42,6 +46,8 @@ export type DraftInput = {
   categoryIds: string[];
   tagIds: string[];
   contributors: DraftContributor[];
+  /** YYYY-MM-DD in Eastern time; absent or null means the day it is published. */
+  publicationDate?: string | null;
 };
 export const DRAFT_ERROR_CODES = [
   "invalid_input",
@@ -129,6 +135,8 @@ export function draftMetadataErrors(
     if (!scalar(value[field], max, true))
       errors[field] =
         `Use up to ${max} characters without leading or trailing whitespace, or leave this field empty.`;
+  const dateError = publicationDateError(value.publicationDate);
+  if (dateError) errors.publicationDate = dateError;
   return errors;
 }
 
@@ -293,18 +301,22 @@ export function checkDraftInput(value: unknown): DraftCheckResult {
     bytes === null ||
     bytes > 1100000 ||
     !isObject(value) ||
-    !keys(value, [
-      "schemaVersion",
-      "title",
-      "sectionId",
-      "excerpt",
-      "content",
-      "seoKeyphrase",
-      "metaDescription",
-      "categoryIds",
-      "tagIds",
-      "contributors",
-    ]) ||
+    !keys(
+      value,
+      [
+        "schemaVersion",
+        "title",
+        "sectionId",
+        "excerpt",
+        "content",
+        "seoKeyphrase",
+        "metaDescription",
+        "categoryIds",
+        "tagIds",
+        "contributors",
+      ],
+      ["publicationDate"],
+    ) ||
     value.schemaVersion !== 1
   )
     return invalid;
@@ -352,6 +364,12 @@ export function checkDraftInput(value: unknown): DraftCheckResult {
       (value.content.version !== 1 && value.content.version !== 2))
   )
     return { ok: false, code: "unsupported_content" };
+  if (
+    value.publicationDate !== undefined &&
+    value.publicationDate !== null &&
+    !isCalendarDate(value.publicationDate)
+  )
+    return invalid;
   if (!isValidDraftDocument(value.content)) return invalid;
   contributors.sort((a, b) =>
     a.profileId < b.profileId
@@ -377,6 +395,11 @@ export function checkDraftInput(value: unknown): DraftCheckResult {
       categoryIds: sortedIds[0],
       tagIds: sortedIds[1],
       contributors,
+      // Stripped when absent so the canonical form (and fingerprints) of
+      // older clients' payloads do not change.
+      ...(typeof value.publicationDate === "string"
+        ? { publicationDate: value.publicationDate }
+        : {}),
     },
   };
 }

@@ -22,7 +22,7 @@ Success means readers can reliably discover and read articles, approved members 
 - One administrator-selected lead story and a configurable Featured News group, with newest-article fallbacks.
 - Homepage curation uses one lead, up to four Featured News stories, and up to four Read This stories. Any published article may be selected, with no story repeated across slots. Missing or archived selections fall back to the newest published stories not already reserved or shown. The owner confirmed these rules on 2026-11-07.
 - Homepage groups for News, Features, Opinions, Culture, Sports, and Allston–Brighton.
-- Published article pages with title, owner/writer credits, publication date, main graphic and credit, rich article body, contributor credits, author biography, categories, tags, same-section related stories, search, and recent stories.
+- Published article pages with title, owner/writer credits, publication date (set by the editor, defaulting to the day it is published, never in the future), main graphic and credit, rich article body, contributor credits, author biography, categories, tags, same-section related stories, search, and recent stories.
 - Section, category, tag, author, search, and Letter to the Editor archive pages with pagination.
 - Public author pages with biography, optional profile image, and published articles.
 - About page containing publication history and mission.
