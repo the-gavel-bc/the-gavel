@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { ContributorCombobox } from "./contributor-combobox";
 import type {
   DraftInput,
@@ -8,6 +8,7 @@ import type { DraftOptions } from "@/backend/articles/draft-options/draft-option
 import { Button } from "@/frontend/components/ui/button/button";
 import { MAX_CONTRIBUTORS } from "@/frontend/features/articles/draft-selections/draft-selections";
 import styles from "./draft-contributor-fields.module.css";
+type Credits = DraftInput["contributors"];
 export function DraftContributorFields({
   value,
   options,
@@ -15,10 +16,10 @@ export function DraftContributorFields({
   onChange,
   onOption,
 }: {
-  value: DraftInput["contributors"];
+  value: Credits;
   options: DraftOptions["contributors"];
   error?: string;
-  onChange: (value: DraftInput["contributors"]) => void;
+  onChange: (update: (current: Credits) => Credits) => void;
   onOption?: (contributor: DraftOptions["contributors"][number]) => void;
 }) {
   const [added, setAdded] = useState<DraftOptions["contributors"]>([]);
@@ -26,13 +27,45 @@ export function DraftContributorFields({
     value.map((_, index) => `initial-${index}`),
   );
   const nextKey = useRef(0);
+  const fieldset = useRef<HTMLFieldSetElement>(null);
+  const focusKey = useRef<string | null>(null);
+  const [notice, setNotice] = useState<{
+    sequence: number;
+    message: string;
+  } | null>(null);
+  const currentKeys = useRef(keys);
+  function replaceKeys(next: string[]) {
+    currentKeys.current = next;
+    setKeys(next);
+  }
+  function announce(message: string) {
+    setNotice((previous) => ({
+      sequence: (previous?.sequence ?? 0) + 1,
+      message,
+    }));
+  }
+  const rowKey = (index: number) => keys[index] ?? `external-${index}`;
+
+  useLayoutEffect(() => {
+    const key = focusKey.current;
+    if (!key) return;
+    focusKey.current = null;
+    const target = fieldset.current?.querySelector<HTMLElement>(
+      key === "add" ? "[data-add-contributor]" : `[data-credit-key="${key}"]`,
+    );
+    (
+      target?.querySelector<HTMLInputElement>("input:not(:disabled)") ?? target
+    )?.focus();
+  });
   const choices = [
     ...options,
     ...added.filter((p) => !options.some((option) => option.id === p.id)),
   ];
-  function update(index: number, patch: Partial<DraftContributor>) {
-    onChange(
-      value.map((credit, i) =>
+  function update(key: string, patch: Partial<DraftContributor>) {
+    const index = currentKeys.current.indexOf(key);
+    if (index < 0) return;
+    onChange((current) =>
+      current.map((credit, i) =>
         i === index ? { ...credit, ...patch } : credit,
       ),
     );
@@ -50,7 +83,7 @@ export function DraftContributorFields({
             ? Infinity
             : value[b].displayOrder) || a - b,
     );
-  const renumbered = (indices: number[], from: DraftContributor[] = value) =>
+  const renumbered = (indices: number[], from: Credits) =>
     from.map((credit, i) => ({ ...credit, displayOrder: indices.indexOf(i) }));
   function move(position: number, offset: -1 | 1) {
     const next = [...order];
@@ -58,18 +91,28 @@ export function DraftContributorFields({
       next[position + offset],
       next[position],
     ];
-    onChange(renumbered(next));
+    focusKey.current = rowKey(order[position]);
+    announce(`Contributor moved to position ${position + offset + 1}.`);
+    onChange((current) => renumbered(next, current));
   }
   function remove(index: number) {
-    setKeys((rows) => rows.filter((_, i) => i !== index));
-    const remaining = value.filter((_, i) => i !== index);
-    const next = order
-      .filter((i) => i !== index)
-      .map((i) => (i > index ? i - 1 : i));
-    onChange(renumbered(next, remaining));
+    const position = order.indexOf(index);
+    const remainingOrder = order.filter((i) => i !== index);
+    const nearest =
+      remainingOrder[Math.min(position, remainingOrder.length - 1)];
+    focusKey.current = nearest === undefined ? "add" : rowKey(nearest);
+    announce(`Contributor ${position + 1} removed.`);
+    replaceKeys(value.map((_, i) => rowKey(i)).filter((_, i) => i !== index));
+    onChange((current) =>
+      renumbered(
+        remainingOrder.map((i) => (i > index ? i - 1 : i)),
+        current.filter((_, i) => i !== index),
+      ),
+    );
   }
   return (
     <fieldset
+      ref={fieldset}
       id="draft-contributors"
       tabIndex={-1}
       className={styles.fields}
@@ -80,9 +123,12 @@ export function DraftContributorFields({
       <div className={styles.body}>
         {order.map((index, position) => {
           const credit = value[index];
+          const key = rowKey(index);
           return (
             <div
-              key={keys[index] ?? `external-${index}`}
+              key={key}
+              data-credit-key={key}
+              tabIndex={-1}
               className={styles.credit}
             >
               <span className={styles.badge} aria-hidden="true">
@@ -91,11 +137,13 @@ export function DraftContributorFields({
               <ContributorCombobox
                 index={position}
                 selected={
-                  choices.find((p) => p.id === credit.profileId) ?? {
-                    id: credit.profileId,
-                    displayName: `Unavailable contributor: ${credit.profileId}`,
-                    slug: "unavailable",
-                  }
+                  credit.profileId
+                    ? (choices.find((p) => p.id === credit.profileId) ?? {
+                        id: credit.profileId,
+                        displayName: "Unavailable contributor",
+                        slug: "",
+                      })
+                    : null
                 }
                 onSelect={(choice) => {
                   onOption?.(choice);
@@ -104,7 +152,7 @@ export function DraftContributorFields({
                       ? rows
                       : [...rows, choice],
                   );
-                  update(index, { profileId: choice.id });
+                  update(key, { profileId: choice.id });
                 }}
               />
               <div className={styles.field}>
@@ -115,7 +163,7 @@ export function DraftContributorFields({
                   id={`credit-${index}-role`}
                   value={credit.role}
                   onChange={(e) =>
-                    update(index, {
+                    update(key, {
                       role: e.target.value as DraftContributor["role"],
                     })
                   }
@@ -160,6 +208,7 @@ export function DraftContributorFields({
       <Button
         type="button"
         variant="secondary"
+        data-add-contributor=""
         disabled={value.length >= MAX_CONTRIBUTORS}
         title={
           value.length >= MAX_CONTRIBUTORS
@@ -167,17 +216,24 @@ export function DraftContributorFields({
             : undefined
         }
         onClick={() => {
-          setKeys((rows) => [...rows, `added-${nextKey.current++}`]);
+          const key = `added-${nextKey.current++}`;
+          focusKey.current = key;
+          replaceKeys([...value.map((_, index) => rowKey(index)), key]);
           const created: DraftContributor = {
-            profileId: options[0]?.id ?? "",
+            profileId: "",
             role: "writer",
             displayOrder: value.length,
           };
-          onChange(renumbered([...order, value.length], [...value, created]));
+          onChange((current) =>
+            renumbered([...order, current.length], [...current, created]),
+          );
         }}
       >
         Add contributor
       </Button>
+      <p role="status" className={styles.srOnly}>
+        {notice && <span key={notice.sequence}>{notice.message}</span>}
+      </p>
       {error && <p id="draft-contributors-error">{error}</p>}
     </fieldset>
   );

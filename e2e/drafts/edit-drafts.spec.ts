@@ -227,7 +227,7 @@ test("published content is editable; archived and legacy content stay read-only;
     await page.goto(`/dashboard/articles/${fixture.id(21)}`);
     await expect(
       page.getByRole("option", {
-        name: `Unavailable section: ${fixture.id(99)}`,
+        name: "Unavailable section",
       }),
     ).toHaveCount(1);
     await expect(page.getByLabel("Title (required)")).toBeEnabled();

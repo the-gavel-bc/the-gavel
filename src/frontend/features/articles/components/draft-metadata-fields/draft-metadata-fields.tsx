@@ -109,9 +109,7 @@ export function DraftMetadataFields({
           <option value="">Choose a section</option>
           {draft.sectionId &&
             !options.sections.some((s) => s.id === draft.sectionId) && (
-              <option value={draft.sectionId}>
-                Unavailable section: {draft.sectionId}
-              </option>
+              <option value={draft.sectionId}>Unavailable section</option>
             )}
           {options.sections.map((section) => (
             <option key={section.id} value={section.id}>

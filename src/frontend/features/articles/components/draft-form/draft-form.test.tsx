@@ -220,6 +220,10 @@ it("blocks submission after the editor rejects a paste instead of saving the old
   expect(leaving.defaultPrevented).toBe(true);
 });
 it("requires deliberate removal of unavailable selections and submits selected credits/tags", async () => {
+  mocks.searchPeople.mockResolvedValue({
+    ok: true,
+    items: [{ id: baseDraft.sectionId, displayName: "Guest", slug: "guest" }],
+  });
   mocks.create.mockResolvedValue({ ok: false, code: "slug_conflict" });
   render(
     <DraftForm
@@ -243,6 +247,10 @@ it("requires deliberate removal of unavailable selections and submits selected c
   await userEvent.type(screen.getByLabelText("Add tag"), "Topic{Enter}");
   await userEvent.click(
     screen.getByRole("button", { name: "Add contributor" }),
+  );
+  await userEvent.type(screen.getByLabelText("Contributor 1"), "Guest");
+  await userEvent.click(
+    await screen.findByRole("option", { name: "Guest (guest)" }),
   );
   await userEvent.click(screen.getByRole("button", { name: "Create draft" }));
   await waitFor(() =>
@@ -1001,9 +1009,7 @@ it("retains an uncertain guest request when adding a row after two-credit recove
       mocks.createGuest.mock.calls[0][0],
     );
     expect(screen.getByLabelText("Role 2")).toHaveValue("editor");
-    expect(screen.getByLabelText("Contributor 3")).toHaveValue(
-      "First Guest (first-guest)",
-    );
+    expect(screen.getByLabelText("Contributor 3")).toHaveValue("");
   } finally {
     confirm.mockRestore();
   }
@@ -1080,4 +1086,18 @@ it("ignores a pending tag response after explicitly adopting a conflict snapshot
   } finally {
     confirm.mockRestore();
   }
+});
+
+it("blocks saving an empty contributor row until it is filled or removed", async () => {
+  render(<DraftForm initialDraft={baseDraft} options={options} />);
+  await userEvent.click(
+    screen.getByRole("button", { name: "Add contributor" }),
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Create draft" }));
+  expect(
+    screen.getByRole("group", { name: "Contributors" }),
+  ).toHaveAccessibleDescription(
+    "Choose a contributor for each row or remove the empty row.",
+  );
+  expect(mocks.create).not.toHaveBeenCalled();
 });

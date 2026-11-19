@@ -66,8 +66,10 @@ it("discards a finalized upload that was never attached", async () => {
     new File(["synthetic"], "unused.png", { type: "image/png" }),
   );
   await screen.findByText("Image ready to attach.");
-  await user.click(screen.getByRole("button", { name: "Delete image" }));
-  expect(await screen.findByText("Image deleted.")).toBeInTheDocument();
+  const discard = screen.getByRole("button", { name: "Discard upload" });
+  expect(discard).toHaveAttribute("data-variant", "danger");
+  await user.click(discard);
+  expect(await screen.findByText("Upload discarded.")).toBeInTheDocument();
   expect(mocks.removeUnused).toHaveBeenCalledWith(assetId);
   expect(mocks.setImage).not.toHaveBeenCalled();
 });
@@ -127,7 +129,7 @@ it("keeps a failed cleanup reachable for retry", async () => {
   ).toBeVisible();
   expect(screen.getByLabelText("Image file")).toBeDisabled();
   await user.click(screen.getByRole("button", { name: "Retry cleanup" }));
-  expect(await screen.findByText("Image deleted.")).toBeVisible();
+  expect(await screen.findByText("Upload discarded.")).toBeVisible();
   expect(mocks.removeUnused).toHaveBeenCalledTimes(2);
 });
 
@@ -147,11 +149,13 @@ it("offers reload after a version conflict instead of a stale retry", async () =
       onCommit={vi.fn()}
     />,
   );
-  await user.click(screen.getByRole("button", { name: "Remove image" }));
+  await user.click(screen.getByRole("button", { name: "Remove main image" }));
   expect(
     await screen.findByRole("button", { name: "Reload draft" }),
   ).toBeVisible();
-  expect(screen.getByRole("button", { name: "Remove image" })).toBeDisabled();
+  expect(
+    screen.getByRole("button", { name: "Remove main image" }),
+  ).toBeDisabled();
   expect(screen.getByRole("alert")).toHaveTextContent("Reload to review");
   expect(
     screen.queryByRole("button", { name: "Retry image change" }),
@@ -212,11 +216,13 @@ it("blocks image mutations while the draft has unsaved changes", async () => {
       onCommit={vi.fn()}
     />,
   );
-  expect(screen.getByRole("button", { name: "Remove image" })).toBeDisabled();
+  expect(
+    screen.getByRole("button", { name: "Remove main image" }),
+  ).toBeDisabled();
   expect(
     screen.getByText(/Save your draft changes before managing its image/),
   ).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: "Remove image" }));
+  fireEvent.click(screen.getByRole("button", { name: "Remove main image" }));
   expect(mocks.setImage).not.toHaveBeenCalled();
 });
 
@@ -237,7 +243,7 @@ it("clears the media navigation guard after a confirmed unlink", async () => {
       onDirtyChange={onDirtyChange}
     />,
   );
-  await user.click(screen.getByRole("button", { name: "Remove image" }));
+  await user.click(screen.getByRole("button", { name: "Remove main image" }));
   expect(await screen.findByText("Image removed.")).toBeInTheDocument();
   expect(onDirtyChange).toHaveBeenLastCalledWith(false);
 });
@@ -297,7 +303,9 @@ it("replays the full image command despite changed metadata, props and disabled 
   rerender(
     <ArticleMedia {...props} article={{ ...article, version: 9 }} disabled />,
   );
-  expect(screen.getByRole("button", { name: "Remove image" })).toBeDisabled();
+  expect(
+    screen.getByRole("button", { name: "Remove main image" }),
+  ).toBeDisabled();
   const retry = screen.getByRole("button", { name: "Retry image change" });
   expect(retry).toBeEnabled();
   await user.click(retry);
@@ -335,14 +343,16 @@ it("retains a pending attachment asset and blocks competing mutations until retr
     target: { value: "  Submitted credit  " },
   });
   await user.click(screen.getByRole("button", { name: "Attach image" }));
-  expect(await screen.findByRole("alert")).toHaveTextContent("unavailable");
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "Original image change is still unconfirmed.",
+  );
   const command = mocks.setImage.mock.calls[0][0];
   expect(screen.getByLabelText("Image file")).toBeDisabled();
   expect(
     screen.queryByRole("button", { name: "Upload image" }),
   ).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Attach image" })).toBeDisabled();
-  const discard = screen.getByRole("button", { name: "Delete image" });
+  const discard = screen.getByRole("button", { name: "Discard upload" });
   expect(discard).toBeDisabled();
   fireEvent.click(discard);
   expect(mocks.removeUnused).not.toHaveBeenCalled();
@@ -354,7 +364,7 @@ it("retains a pending attachment asset and blocks competing mutations until retr
   expect(mocks.setImage).toHaveBeenNthCalledWith(2, command);
   expect(screen.getByLabelText("Alt text")).toHaveValue("Submitted alt");
   expect(screen.getByLabelText("Image credit")).toHaveValue("Newer credit");
-  expect(screen.queryByRole("button", { name: "Delete image" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Discard upload" })).toBeNull();
   expect(mocks.request).toHaveBeenCalledOnce();
   expect(mocks.removeUnused).not.toHaveBeenCalled();
 });
@@ -376,8 +386,10 @@ it("retries an unlink independently of newer image metadata and keeps those edit
     onDirtyChange,
   };
   const { rerender } = render(<ArticleMedia {...props} />);
-  await user.click(screen.getByRole("button", { name: "Remove image" }));
-  expect(await screen.findByRole("alert")).toHaveTextContent("unavailable");
+  await user.click(screen.getByRole("button", { name: "Remove main image" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "Original image change is still unconfirmed.",
+  );
   const command = mocks.setImage.mock.calls[0][0];
   expect(command).toEqual({
     articleId: article.id,
@@ -433,20 +445,24 @@ it.each(["forbidden", "not_found"] as const)(
         onBusyChange={onBusyChange}
       />,
     );
-    await user.click(screen.getByRole("button", { name: "Remove image" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("unavailable");
+    await user.click(screen.getByRole("button", { name: "Remove main image" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Original image change is still unconfirmed.",
+    );
     const command = mocks.setImage.mock.calls[0][0];
     await user.click(
       screen.getByRole("button", { name: "Retry image change" }),
     );
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      `Original image change is still unconfirmed (${code})`,
+      "Original image change is still unconfirmed.",
     );
     expect(
       screen.getByRole("button", { name: "Retry image change" }),
     ).toBeEnabled();
     expect(screen.queryByRole("button", { name: "Reload draft" })).toBeNull();
-    expect(screen.getByRole("button", { name: "Remove image" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Remove main image" }),
+    ).toBeDisabled();
     expect(
       screen.getByText("Attached image: Current — The Gavel"),
     ).toBeVisible();
@@ -482,8 +498,10 @@ it("clears a first-attempt access denial without claiming a commit", async () =>
       onBusyChange={onBusyChange}
     />,
   );
-  await user.click(screen.getByRole("button", { name: "Remove image" }));
-  expect(await screen.findByRole("alert")).toHaveTextContent("forbidden");
+  await user.click(screen.getByRole("button", { name: "Remove main image" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "You no longer have access to change this image.",
+  );
   expect(
     screen.queryByRole("button", { name: "Retry image change" }),
   ).toBeNull();
@@ -512,8 +530,10 @@ it("offers reload when an uncertain retry reaches the definitive version conflic
       onBusyChange={onBusyChange}
     />,
   );
-  await user.click(screen.getByRole("button", { name: "Remove image" }));
-  expect(await screen.findByRole("alert")).toHaveTextContent("unavailable");
+  await user.click(screen.getByRole("button", { name: "Remove main image" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "Original image change is still unconfirmed.",
+  );
   const command = mocks.setImage.mock.calls[0][0];
   await user.click(screen.getByRole("button", { name: "Retry image change" }));
   expect(await screen.findByRole("alert")).toHaveTextContent(
@@ -523,7 +543,9 @@ it("offers reload when an uncertain retry reaches the definitive version conflic
   expect(
     screen.queryByRole("button", { name: "Retry image change" }),
   ).toBeNull();
-  expect(screen.getByRole("button", { name: "Remove image" })).toBeDisabled();
+  expect(
+    screen.getByRole("button", { name: "Remove main image" }),
+  ).toBeDisabled();
   expect(mocks.setImage).toHaveBeenNthCalledWith(2, command);
   expect(onCommit).not.toHaveBeenCalled();
   expect(onBusyChange).toHaveBeenLastCalledWith(false);
@@ -661,7 +683,7 @@ it("asks before removing a published article's photo, and marks it destructive",
         onCommit={vi.fn()}
       />,
     );
-    const remove = screen.getByRole("button", { name: "Remove image" });
+    const remove = screen.getByRole("button", { name: "Remove main image" });
     expect(remove).toHaveAttribute("data-variant", "danger");
     fireEvent.click(remove);
     expect(confirm).toHaveBeenCalledOnce();

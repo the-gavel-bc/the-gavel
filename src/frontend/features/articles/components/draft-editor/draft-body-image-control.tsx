@@ -7,6 +7,7 @@ import { Button } from "@/frontend/components/ui/button/button";
 import type { DraftFailure } from "@/shared/articles/draft-contract/draft-contract";
 import { requestArticleImageUpload } from "@/backend/media/media-actions/media-actions";
 import { removeUnusedArticleImage } from "@/backend/media/media-removal/media-removal";
+import { uploadReservationMessage } from "../article-media/upload-reservation-message";
 
 export function DraftBodyImageControl({
   articleId,
@@ -68,7 +69,7 @@ export function DraftBodyImageControl({
       if (fileInput.current) fileInput.current.value = "";
       return true;
     }
-    setError(`Image cleanup failed (${result.code}). Retry cleanup.`);
+    setError("Could not discard the upload. Retry cleanup.");
     return false;
   }
 
@@ -84,7 +85,7 @@ export function DraftBodyImageControl({
       const reserved = await requestArticleImageUpload(articleId, retryId);
       if (!reserved.ok) {
         if (reserved.code !== "unavailable") setRequestId(null);
-        setError(`Image upload could not start (${reserved.code}). Retry.`);
+        setError(uploadReservationMessage(reserved.code));
         return;
       }
       const form = new FormData();
@@ -135,7 +136,7 @@ export function DraftBodyImageControl({
     setBusy(true);
     setError("");
     try {
-      await cleanup(target);
+      if (await cleanup(target)) setStatus("Upload discarded.");
     } catch {
       setError("Image cleanup could not be confirmed. Retry cleanup.");
     } finally {
@@ -257,13 +258,14 @@ export function DraftBodyImageControl({
           </Button>
           <Button
             type="button"
+            variant="danger"
             disabled={locked}
             onClick={async () => {
               if (
                 !(await confirm({
                   title: "Remove this image from the body?",
                   message: "Save the draft to keep this change.",
-                  confirmLabel: "Remove image",
+                  confirmLabel: "Remove body image",
                   cancelLabel: "Keep",
                   danger: true,
                 }))
@@ -276,13 +278,14 @@ export function DraftBodyImageControl({
               );
             }}
           >
-            Remove selected image
+            Remove body image
           </Button>
         </>
       )}
       {(assetId || cleanupId) && (
         <Button
           type="button"
+          variant="danger"
           disabled={locked}
           onClick={async () => {
             if (
@@ -298,7 +301,7 @@ export function DraftBodyImageControl({
               void discard();
           }}
         >
-          Delete image
+          Discard upload
         </Button>
       )}
       <p role="status">{status}</p>

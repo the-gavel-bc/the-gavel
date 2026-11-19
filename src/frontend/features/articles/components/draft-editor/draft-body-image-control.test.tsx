@@ -111,9 +111,9 @@ it("updates and removes a selected image without accepting a URL", async () => {
       screen.getByRole("button", { name: "Update selected image" }),
     );
     expect(editor.getJSON().content?.[0].attrs?.alt).toBe("Updated");
-    fireEvent.click(
-      screen.getByRole("button", { name: "Remove selected image" }),
-    );
+    const remove = screen.getByRole("button", { name: "Remove body image" });
+    expect(remove).toHaveAttribute("data-variant", "danger");
+    fireEvent.click(remove);
     await waitFor(() =>
       expect(
         editor.getJSON().content?.some((node) => node.type === "image"),
@@ -167,6 +167,14 @@ it("keeps a throttled body upload retryable with the same reservation", async ()
     fireEvent.click(screen.getByRole("button", { name: "Upload body image" }));
     await screen.findByText("Image ready to insert.");
     expect(reserve.mock.calls[1]).toEqual(reserve.mock.calls[0]);
+    remove.mockResolvedValue({ ok: true });
+    const discard = screen.getByRole("button", { name: "Discard upload" });
+    expect(discard).toHaveAttribute("data-variant", "danger");
+    fireEvent.click(discard);
+    expect(await screen.findByText("Upload discarded.")).toBeVisible();
+    expect(
+      screen.queryByText("Image ready to insert."),
+    ).not.toBeInTheDocument();
   } finally {
     vi.unstubAllGlobals();
   }

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { beforeEach, expect, it, vi } from "vitest";
@@ -35,7 +35,7 @@ function Form() {
 it("repairs an unavailable credit, orders by position and renumbers on every change", async () => {
   render(<Form />);
   expect(screen.getByLabelText("Contributor 1")).toHaveValue(
-    "Unavailable contributor: missing (unavailable)",
+    "Unavailable contributor",
   );
   await userEvent.clear(screen.getByLabelText("Contributor 1"));
   await userEvent.type(screen.getByLabelText("Contributor 1"), "Guest");
@@ -44,6 +44,13 @@ it("repairs an unavailable credit, orders by position and renumbers on every cha
   );
   await userEvent.click(
     screen.getByRole("button", { name: "Add contributor" }),
+  );
+  const blank = screen.getByRole("combobox", { name: "Contributor 2" });
+  expect(blank).toHaveFocus();
+  expect(blank).toHaveValue("");
+  await userEvent.type(blank, "Guest");
+  await userEvent.click(
+    await screen.findByRole("option", { name: "Guest (guest)" }),
   );
   await userEvent.selectOptions(screen.getByLabelText("Role 2"), "editor");
   const credits = () =>
@@ -64,6 +71,10 @@ it("repairs an unavailable credit, orders by position and renumbers on every cha
     { profileId: "guest", role: "editor", displayOrder: 0 },
   ]);
   expect(screen.getByLabelText("Role 1")).toHaveValue("editor");
+  expect(screen.getByRole("combobox", { name: "Contributor 1" })).toHaveFocus();
+  expect(
+    screen.getByText("Contributor moved to position 1."),
+  ).toBeInTheDocument();
   expect(
     screen.getByRole("button", { name: "Move contributor 1 up" }),
   ).toBeDisabled();
@@ -76,6 +87,12 @@ it("repairs an unavailable credit, orders by position and renumbers on every cha
   expect(credits()).toEqual([
     { profileId: "guest", role: "creative", displayOrder: 0 },
   ]);
+  expect(screen.getByRole("combobox", { name: "Contributor 1" })).toHaveFocus();
+  expect(screen.getByText("Contributor 1 removed.")).toBeInTheDocument();
+  await userEvent.click(
+    screen.getByRole("button", { name: "Remove contributor 1" }),
+  );
+  expect(screen.getByRole("button", { name: "Add contributor" })).toHaveFocus();
 });
 it("shows credits in stored display order and caps the list at 5", async () => {
   const many = Array.from({ length: 5 }, (_, i) => ({
@@ -255,7 +272,57 @@ it("creates a searchable blank credit when no profiles exist", async () => {
   await userEvent.click(
     screen.getByRole("button", { name: "Add contributor" }),
   );
-  expect(mocks.create).toHaveBeenCalledWith([
+  expect(mocks.create.mock.lastCall?.[0]([])).toEqual([
     { profileId: "", role: "writer", displayOrder: 0 },
+  ]);
+});
+
+it("keeps two credits whose creation results arrive in the same render", async () => {
+  const finish: Array<(value: unknown) => void> = [];
+  mocks.search.mockResolvedValue({ ok: true, items: [] });
+  mocks.create.mockImplementation(
+    () => new Promise((resolve) => finish.push(resolve)),
+  );
+  render(<Form />);
+  await userEvent.clear(screen.getByLabelText("Contributor 1"));
+  await userEvent.type(screen.getByLabelText("Contributor 1"), "First Writer");
+  await userEvent.click(
+    await screen.findByRole("option", {
+      name: "Add 'First Writer' as a one-off credit",
+    }),
+  );
+  await userEvent.click(
+    screen.getByRole("button", { name: "Add contributor" }),
+  );
+  await userEvent.type(screen.getByLabelText("Contributor 2"), "Second Writer");
+  await userEvent.click(
+    await screen.findByRole("option", {
+      name: "Add 'Second Writer' as a one-off credit",
+    }),
+  );
+  await act(async () => {
+    finish[0]({
+      ok: true,
+      id: "first",
+      displayName: "First Writer",
+      slug: "first",
+      created: true,
+      replayed: false,
+    });
+    finish[1]({
+      ok: true,
+      id: "second",
+      displayName: "Second Writer",
+      slug: "second",
+      created: true,
+      replayed: false,
+    });
+  });
+  const credits = JSON.parse(
+    screen.getByRole("status", { name: "Selected credits" }).textContent!,
+  );
+  expect(credits.map((credit: DraftContributor) => credit.profileId)).toEqual([
+    "first",
+    "second",
   ]);
 });

@@ -152,6 +152,6 @@ it("offers deliberate repair controls for unavailable selections", async () => {
     },
   });
   render(await Page(params));
-  expect(screen.getByLabelText(`Unavailable category: ${id}`)).toBeChecked();
+  expect(screen.getByLabelText("Unavailable category 1")).toBeChecked();
   expect(screen.getByRole("button", { name: "Save draft" })).toBeVisible();
 });

@@ -412,8 +412,11 @@ export function DraftForm({
               },
             }))
           }
-          onChange={(contributors) =>
-            update((current) => ({ ...current, contributors }))
+          onChange={(changeCredits) =>
+            update((current) => ({
+              ...current,
+              contributors: changeCredits(current.contributors),
+            }))
           }
         />
         <DraftEditor

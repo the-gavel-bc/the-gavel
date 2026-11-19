@@ -114,7 +114,7 @@ test("section changes retain categories until explicit replacement and preserve 
     { exact: true },
   );
   await expect(replacement).toBeVisible();
-  const old = page.getByLabel(`Unavailable category: ${fixture.id(97)}`, {
+  const old = page.getByLabel("Unavailable category 1", {
     exact: true,
   });
   await expect(old).toBeChecked();
@@ -176,10 +176,9 @@ for (const actor of ["author", "admin"] as const)
       );
       page.once("dialog", (dialog) => dialog.accept());
       await page.reload();
-      const missing = page.getByLabel(
-        `Unavailable category: ${fixture.id(97)}`,
-        { exact: true },
-      );
+      const missing = page.getByLabel("Unavailable category 1", {
+        exact: true,
+      });
       await expect(missing).toBeChecked();
       await missing.click();
       await expect(missing).toHaveCount(0);
