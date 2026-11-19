@@ -20,6 +20,7 @@ create function pg_temp.attach_photo(asset uuid,version integer,request uuid def
  asset,case when asset is null then null else 'Public photo' end,
  case when asset is null then null else 'The Gavel' end,case when asset is null then null else 'Public caption' end);
 $$;
+grant execute on function pg_temp.attach_photo(uuid, integer, uuid) to authenticated;
 set local role authenticated;
 select is(pg_temp.attach_photo('61000000-0000-0000-0000-000000000060',1)->>'version','2','published initial attachment increments version');
 reset role;
@@ -32,10 +33,12 @@ create function pg_temp.user_photo(operation text) returns jsonb language sql as
  when 'admit' then public.admit_article_image_upload('60000000-0000-0000-0000-000000000060',(select asset_id from photo_target))
  else pg_temp.attach_photo((select asset_id from photo_target),2) end;
 $$;
+grant execute on function pg_temp.user_photo(text) to authenticated;
 create function pg_temp.trusted_photo(operation text,actor uuid) returns jsonb language sql as $$
  select case operation when 'begin' then public.begin_article_image_upload(actor,(select asset_id from photo_target))
  else public.finalize_article_image_upload(actor,(select asset_id from photo_target),repeat('b',64),12,2,2) end;
 $$;
+grant execute on function pg_temp.trusted_photo(text, uuid) to service_role;
 select ok(not has_function_privilege('anon',signature,'execute'),'anonymous denied '||signature)
  from unnest(array['public.request_article_image_upload(uuid,uuid)','public.admit_article_image_upload(uuid,uuid)',
  'public.set_article_main_image(uuid,integer,uuid,uuid,text,text,text)',

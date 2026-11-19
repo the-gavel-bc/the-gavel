@@ -77,6 +77,12 @@ The following requirements continue to govern later tables and operations:
 - Protect privileged database functions with fixed search paths, explicit grants, validated inputs, and review.
 - Enforce ownership, lifecycle, and relational integrity in the database as well as application logic.
 
+### Default privileges and catalog checks
+
+Application migrations create objects as `postgres`. New tables, sequences and functions in `public` and `private` require explicit grants for `anon` and `authenticated`. The `postgres` global function default also removes implicit PUBLIC execution, which schema-specific defaults cannot undo. The service role's defaults, Supabase platform-owner defaults, and existing object grants keep their current settings.
+
+Internal private tables use RLS without direct-access policies. Existing owner-run security definer functions still access those tables. The catalog checks cover RLS, empty search paths, anonymous execute signatures and write grants, and default privileges on new application objects. See [testing](testing.md#ci-and-security-gates).
+
 ### Implemented taxonomy controls
 
 `sections`, `categories`, and `tags` ship with RLS and SELECT-only grants for anonymous and authenticated roles. There are no application insert/update/delete grants or mutation policies, even for administrators. Privileged test fixtures do not represent application write access.

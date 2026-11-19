@@ -100,6 +100,10 @@ These are unimplemented coverage tasks, not confirmed runtime defects or claims 
 
 ## CI and security gates
 
+The migration order check compares the checked-out Git tree with the PR base SHA or the previous `main` commit. It rejects missing or renamed base migrations, duplicate versions, and new versions that do not exceed the latest base version. Run `node scripts/ci-supabase/check-migration-order.mjs <base> <head>` from the repository root. For this to block pre-merge conflicts when main advances, configure the workflow as a strict required check that requires the branch to be up to date. Until that setting is verified, rerun the check against current main before merging. Retargeting a PR also requires a fresh check against the new base.
+
+The database suite's `071_catalog_invariants.test.sql` checks RLS on application tables, empty search paths on security definers, the anonymous RPC allowlist and write denials, and effective grants on new objects.
+
 Before startup, `node scripts/ci-supabase/prepare-database-port.mjs` probes TCP ports 15422–15431 with Docker-compatible wildcard binding and writes the first available port to `[db].port` in the disposable CI checkout. Startup, reset and type generation then read the same configuration. The helper requires `CI=true`; checked-in developer ports and API port 54321 retain their existing values. Busy candidates are skipped, while exhaustion or unexpected bind/configuration errors fail before startup. Focused coverage: `pnpm exec vitest run scripts/ci-supabase`.
 
 The Supabase startup step keeps successful output private and prints the last 80 redacted diagnostic lines on failure, preserving the original nonzero exit code. Clean-start verification must use the CLI migration runner as well as any transactional upgrade checks; an external `psql --single-transaction` wrapper can hide missing transaction boundaries in migration files.

@@ -6,6 +6,7 @@ update public.memberships set role='administrator' where user_id='00000000-0000-
 create function pg_temp.search_input(word text default 'Oldbodyalpha',head text default 'Searchheadalpha') returns jsonb language sql as $$
  select pg_temp.draft_input(jsonb_build_object('title',head,'content',jsonb_build_object('format','gavel-draft','version',1,'document',jsonb_build_object('type','doc','content',jsonb_build_array(jsonb_build_object('type','paragraph','content',jsonb_build_array(jsonb_build_object('type','text','text',word))))))));
 $$;
+grant execute on function pg_temp.search_input(text, text) to authenticated;
 create temp table search_target as select (public.create_article_draft('8a000000-0000-0000-0000-000000000045',pg_temp.search_input())->>'articleId')::uuid id;
 create temp table search_outcomes(label text primary key,result jsonb);
 grant select on search_target to authenticated;

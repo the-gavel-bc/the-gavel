@@ -16,4 +16,6 @@ insert into public.profiles(id,display_name,slug,active) values
 create function pg_temp.draft_input(p_patch jsonb default '{}') returns jsonb language sql as $$
 select '{"schemaVersion":1,"title":"Synthetic Draft","sectionId":"20000000-0000-0000-0000-000000000051","excerpt":null,"content":null,"seoKeyphrase":null,"metaDescription":null,"categoryIds":[],"tagIds":[],"contributors":[]}'::jsonb || p_patch;
 $$;
+-- Test cases call the fixture builder after switching to authenticated.
+grant execute on function pg_temp.draft_input(jsonb) to authenticated;
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',true);

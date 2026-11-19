@@ -17,6 +17,7 @@ select article_id,'60000000-0000-0000-0000-000000000931','Newsroom','The Gavel' 
 create function pg_temp.restore(v integer,r uuid) returns jsonb language sql as $$
   select public.restore_article((select article_id from restore_target),v,r);
 $$;
+grant execute on function pg_temp.restore(integer, uuid) to authenticated;
 create temp table restore_results(label text primary key,result jsonb);
 grant select,insert on restore_results to authenticated;
 

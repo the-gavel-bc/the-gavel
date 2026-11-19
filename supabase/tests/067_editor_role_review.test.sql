@@ -10,6 +10,7 @@ grant execute on function pg_temp.act_as(text) to authenticated;
 create function pg_temp.body() returns jsonb language sql as $$
   select jsonb_build_object('content','{"format":"gavel-draft","version":1,"document":{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Story"}]}]}}'::jsonb);
 $$;
+grant execute on function pg_temp.body() to authenticated;
 -- ready(n, owner): a publication-ready draft owned by that user.
 create function pg_temp.ready(n integer, u text) returns uuid language plpgsql as $$
 declare a uuid;

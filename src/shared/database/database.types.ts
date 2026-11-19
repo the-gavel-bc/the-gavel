@@ -843,15 +843,6 @@ export type Database = {
         Args: { p_success: boolean; p_token: string };
         Returns: boolean;
       };
-      finish_retired_article_scan: {
-        Args: {
-          p_article_id: string;
-          p_claim_token: string;
-          p_count: number;
-          p_success: boolean;
-        };
-        Returns: boolean;
-      };
       finish_retired_article_scan_v2: {
         Args: {
           p_article_id: string;
@@ -1052,18 +1043,6 @@ export type Database = {
       purge_article_image: {
         Args: { p_article_id: string; p_asset_id: string };
         Returns: Json;
-      };
-      record_media_cleanup_health: {
-        Args: { p_success: boolean };
-        Returns: boolean;
-      };
-      register_retired_media_key: {
-        Args: {
-          p_article_id: string;
-          p_asset_id: string;
-          p_claim_token: string;
-        };
-        Returns: boolean;
       };
       register_retired_media_keys: {
         Args: {

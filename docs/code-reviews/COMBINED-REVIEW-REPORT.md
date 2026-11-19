@@ -25,9 +25,9 @@ Corrections to earlier notes: the `picomatch` dependency advisory is no longer r
 | C-10 | Medium | Anonymous callers can read the whole `tags` table, so tags created on drafts or in-review articles leak and `/tags/<slug>` returns 200 for a tag no published article uses. | 5/sec-1, 10/sec-3 | Plan |
 | C-11 | Medium | `profiles_authenticated_read` has no member or eligibility check, so any Google-signed-in outsider (if hosted signup allows it) can list credit-only profile names and bios, including people credited on unpublished drafts; the anon column grant also exposes account ids and join dates. | 10/sec-2, 5/sec-3 | Plan |
 | C-12 | Medium | Search and typeahead share one global 120-per-minute budget, both callable with the anon key, and hold an advisory lock for the whole request. One script can make search return rate-limited for every reader; the sitemap budget has the same weakness. | 5/sec-2, 5/perf-1, 10/sec-1, 10/arch-2 | Plan (separate budgets and try-lock); edge rate limits deferred |
-| C-13 | Low | 14 private tables have row-level security off (including the invitations table with email addresses); safety rests on missing grants. No default-privilege revoke and no catalog-wide allowlist test. | 10/sec-5, 10/sec-4, 10/arch-6, 10/arch-7 | Cheap |
+| C-13 | Low | 14 private tables have row-level security off (including the invitations table with email addresses); safety rests on missing grants. No default-privilege revoke and no catalog-wide allowlist test. | 10/sec-5, 10/sec-4, 10/arch-6, 10/arch-7 | Implemented locally (Batch 3) |
 | C-14 | Low | Public image and photo cache for 5 minutes, so takedowns lag; the photo route skips the magic-byte check article media gets; a random query string bypasses the CDN cache and each miss downloads from Storage. | 5/sec-4,5,7, 5/perf-3 | Plan |
-| C-15 | Info | Dead `security definer` functions (`record_media_cleanup_health`, two v1 retired-media functions); `graphql_public` exposed in `config.toml`. | 10/sec-6, 10/arch-10, 10/arch-11 | Cheap (drop functions); config needs the hosted check |
+| C-15 | Info | Dead `security definer` functions (`record_media_cleanup_health`, two v1 retired-media functions); `graphql_public` exposed in `config.toml`. | 10/sec-6, 10/arch-10, 10/arch-11 | Obsolete RPCs removed locally (Batch 3); hosted config deferred |
 
 ## Database and architecture
 
@@ -37,7 +37,7 @@ Corrections to earlier notes: the `picomatch` dependency advisory is no longer r
 | C-17 | Medium | `allocate_article_slug` takes a global advisory lock on every create and save, held to commit, even when the title is unchanged. | 3/arch-6 | Plan |
 | C-18 | Medium | `article_revisions` stores a full snapshot (up to 2 MiB) per save and per transition, including no-content transitions, has no reader and no retention; receipts and ledgers have no cleanup. | 3/arch-7,8, 10/arch-8 | Plan |
 | C-19 | Medium | About 12 tables have ON DELETE RESTRICT foreign keys to `auth.users`, so an Auth user who wrote anything cannot be deleted; no erasure policy is decided. | 10/arch-3 | Deferred (owner decision) |
-| C-20 | Medium | The stored-input rebuild is copied in three functions and save bodies are largely duplicated; whole-body function regeneration across about 130 migrations has no CI guard (a hotfix stamped earlier than a recent migration would be overwritten on reset). | 3/arch-3, 10/arch-5 | Plan (helper function and a migration-order check) |
+| C-20 | Medium | The stored-input rebuild is copied in three functions and save bodies are largely duplicated; whole-body function regeneration across about 130 migrations has no CI guard (a hotfix stamped earlier than a recent migration would be overwritten on reset). | 3/arch-3, 10/arch-5 | Migration-order check implemented locally (Batch 3); shared helper deferred |
 | C-21 | Low | Permanent legacy-slug branches, audit-action constraint re-validation under lock on each new action, docs drift (`api-contracts` says the editor UI "remains planned"; no release unit for migrations 20261119 to 20261121). | 3/arch-9,11, 10/arch-9 | Cheap (docs), Deferred (constraint) |
 
 ## Public reader and performance
