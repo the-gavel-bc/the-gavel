@@ -68,9 +68,40 @@ select is(pg_temp.call('3','return','a1',null,null)->>'code','invalid_input','re
 select is(pg_temp.call('3','return','a1',null,'Fix the lede')->>'ok','true','editor returns with a note');
 select is((select review_note from public.articles where id=(select id from t where label='a1')),'Fix the lede','note stored');
 select is(pg_temp.call('2','save','a1')->>'ok','true','author edits again after return');
+-- Save while the owner may edit; replay the same receipt after submission.
+select pg_temp.act_as('2');
+create temp table saved_before_submit as
+  select id, edit_version, gen_random_uuid() as request_id from public.articles where id=(select id from t where label='a1');
+grant select on saved_before_submit to authenticated;
+set local role authenticated;
+select is((select public.save_article_draft(id,edit_version,request_id,pg_temp.draft_input(pg_temp.body())) from saved_before_submit)->>'ok','true','author saves before resubmitting');
+reset role;
+-- A historical save receipt used a canonical input that still included slug.
+insert into private.draft_write_receipts(actor_user_id,request_id,operation,article_id,
+  expected_version,payload_hash,result_version,result_updated_at,changed)
+select auth.uid(),'80000000-0000-0000-0000-000000006750','save',a.id,s.edit_version,
+  private.draft_request_hash('save',a.id,s.edit_version,
+    private.check_draft_input_with_slug(pg_temp.draft_input(pg_temp.body()||jsonb_build_object('slug',a.slug)))->'value'),
+  a.edit_version,a.updated_at,true
+from public.articles a join saved_before_submit s using (id);
 select is(pg_temp.call('2','submit','a1')->>'ok','true','author resubmits');
+select pg_temp.act_as('2');
+set local role authenticated;
+select is((select public.save_article_draft(id,edit_version,request_id,pg_temp.draft_input(pg_temp.body())) from saved_before_submit)->>'replayed','true','original author receives their exact save receipt after resubmitting');
+select is((select public.save_article_draft(id,edit_version,request_id,pg_temp.draft_input(pg_temp.body()||'{"title":"Different payload"}')) from saved_before_submit)->>'code','request_conflict','receipt rejects a changed payload');
+select is((select public.save_article_draft(a.id,s.edit_version,'80000000-0000-0000-0000-000000006750',
+  pg_temp.draft_input(pg_temp.body()||jsonb_build_object('slug',a.slug)))
+  from saved_before_submit s join public.articles a on a.id=s.id)->>'replayed','true',
+  'historical slug-bearing save receipt replays after submission');
+reset role;
 select is((select review_note from public.articles where id=(select id from t where label='a1')),null,'note cleared on resubmit');
 select is(pg_temp.call('3','publish','a1')->>'ok','true','editor publishes a submitted article');
+select ok((select review_requested_at is null and review_note is null from public.articles where id=(select id from t where label='a1')),'publish clears review metadata');
+select throws_ok(
+  $$update public.articles set review_requested_at=now() where id=(select id from t where label='a1')$$,
+  '23514', null, 'non-drafts cannot carry review metadata'
+);
+
 select is((select published_by_profile_id from public.articles where id=(select id from t where label='a1')),
   '10000000-0000-0000-0000-000000000003'::uuid,'publisher recorded');
 select is(pg_temp.call('3','save_pub','a1')->>'code','not_found','editor cannot edit a published article');
@@ -108,6 +139,11 @@ select is(pg_temp.call('4','archive','a3')->>'ok','true','administrator archives
 select pg_temp.act_as('3'); set local role authenticated;
 select is((select count(*)::integer from public.articles where id=(select id from t where label='a3')),0,
   'an editor cannot read an archived article they did not publish');
+reset role;
+update public.memberships set active=false where user_id='00000000-0000-0000-0000-000000000002';
+select pg_temp.act_as('2');
+set local role authenticated;
+select is((select public.save_article_draft(id,edit_version,request_id,pg_temp.draft_input(pg_temp.body())) from saved_before_submit)->>'code','forbidden','revocation denies replay');
 reset role;
 select * from finish();
 rollback;
