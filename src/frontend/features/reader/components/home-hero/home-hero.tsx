@@ -5,7 +5,7 @@ import styles from "./home-hero.module.css";
 
 const longDate = new Intl.DateTimeFormat("en-US", {
   dateStyle: "long",
-  timeZone: "UTC",
+  timeZone: "America/New_York",
 });
 
 // Lead story: the biggest thing on the page. Full-bleed image with the

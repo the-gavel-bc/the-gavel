@@ -108,6 +108,16 @@ it("keeps letters navigation categories under the section path", () => {
     ).getByRole("link", { name: section.name }),
   ).toHaveAttribute("data-active", "true");
 });
+it.each([
+  ["2026-11-10T02:30:00.123456Z", "November 9, 2026"],
+  ["2026-01-15T17:00:00Z", "January 15, 2026"],
+])(
+  "shows the Eastern publication day for %s and retains its timestamp",
+  (publishedAt, label) => {
+    render(<ArticleHeader article={{ ...article, publishedAt }} />);
+    expect(screen.getByText(label)).toHaveAttribute("datetime", publishedAt);
+  },
+);
 it("puts a linked byline beside the date: writers first, else the owner", () => {
   const view = render(<ArticleHeader article={article} />);
   expect(

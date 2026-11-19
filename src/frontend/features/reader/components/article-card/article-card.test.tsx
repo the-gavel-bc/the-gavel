@@ -32,7 +32,7 @@ describe("reader primitives", () => {
     // credit and no separate author link.
     expect(screen.getByText("Writer")).toBeVisible();
     expect(screen.queryByRole("link", { name: "Writer" })).toBeNull();
-    expect(screen.getByText("Nov 9, 2026")).toHaveAttribute(
+    expect(screen.getByText("Nov 8, 2026")).toHaveAttribute(
       "datetime",
       article.publishedAt,
     );

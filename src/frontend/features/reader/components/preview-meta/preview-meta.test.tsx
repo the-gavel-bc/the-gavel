@@ -3,7 +3,7 @@ import { expect, it } from "vitest";
 import { PreviewMeta } from "./preview-meta";
 
 const owner = { displayName: "Owner Name", slug: "owner" };
-it("shows writers and the UTC date side by side", () => {
+it("shows writers and the Eastern publication date side by side", () => {
   render(
     <PreviewMeta
       article={{
@@ -12,14 +12,14 @@ it("shows writers and the UTC date side by side", () => {
           { displayName: "Avery Quinn", slug: "avery" },
           { displayName: "Sam Lee", slug: "sam" },
         ],
-        publishedAt: "2026-11-13T23:30:00.000000Z",
+        publishedAt: "2026-11-10T02:30:00.000000Z",
       }}
     />,
   );
   expect(screen.getByText("Avery Quinn, Sam Lee")).toBeVisible();
-  expect(screen.getByText("Nov 13, 2026")).toHaveAttribute(
+  expect(screen.getByText("Nov 9, 2026")).toHaveAttribute(
     "datetime",
-    "2026-11-13T23:30:00.000000Z",
+    "2026-11-10T02:30:00.000000Z",
   );
   expect(screen.queryByText("Owner Name")).toBeNull();
 });

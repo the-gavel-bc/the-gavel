@@ -4,7 +4,7 @@ import styles from "./preview-meta.module.css";
 const formatDate = (iso: string) =>
   new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
-    timeZone: "UTC",
+    timeZone: "America/New_York",
   }).format(new Date(iso));
 
 // Small byline and date, side by side, under a preview's image. Plain text:

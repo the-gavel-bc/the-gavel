@@ -19,7 +19,7 @@ it("renders escaped sitemap XML without caching", async () => {
       { url: "https://gavel.example/?a=1&b=<2>" },
       {
         url: "https://gavel.example/articles/story",
-        lastModified: "2026-11-01T12:00:00.123456Z",
+        lastModified: "2026-11-10T02:30:00.123456Z",
       },
     ],
   });
@@ -37,7 +37,7 @@ it("renders escaped sitemap XML without caching", async () => {
     "<loc>https://gavel.example/?a=1&amp;b=&lt;2&gt;</loc>",
   );
   expect(body).toContain(
-    "<url><loc>https://gavel.example/articles/story</loc><lastmod>2026-11-01T12:00:00.123456Z</lastmod></url>",
+    "<url><loc>https://gavel.example/articles/story</loc><lastmod>2026-11-10T02:30:00.123456Z</lastmod></url>",
   );
 });
 

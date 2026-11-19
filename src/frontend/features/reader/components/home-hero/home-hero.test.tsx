@@ -9,7 +9,7 @@ const card = (n: number): PublicArticleCard => ({
   slug: `story-${n}`,
   title: `Story ${n}`,
   excerpt: "A long excerpt that should not appear on the lead.",
-  publishedAt: "2026-11-16T12:00:00.000000Z",
+  publishedAt: "2026-11-10T02:30:00.000000Z",
   section: { name: "National", slug: "national" },
   owner: { displayName: "Owner", slug: "owner" },
   writers: [{ displayName: "Writer", slug: "writer" }],
@@ -24,15 +24,26 @@ it("shows the lead as one big link with a section pill, headline and date", () =
   expect(
     screen.getByRole("heading", { level: 2, name: "Story 1" }),
   ).toBeVisible();
-  expect(screen.getByText("November 16, 2026")).toBeVisible();
+  expect(screen.getByText("November 9, 2026")).toHaveAttribute(
+    "datetime",
+    card(1).publishedAt,
+  );
   expect(screen.queryByText(/long excerpt/)).not.toBeInTheDocument();
 });
 
 it("lists Latest with a visible heading, headline and date only", () => {
-  render(<HomeLatest articles={[card(2), card(3)]} />);
+  const midday = { ...card(3), publishedAt: "2026-01-15T17:00:00Z" };
+  render(<HomeLatest articles={[card(2), midday]} />);
   expect(screen.getByRole("heading", { name: "Latest" })).toBeVisible();
   expect(screen.getAllByRole("listitem")).toHaveLength(2);
-  expect(screen.getAllByText("November 16, 2026")).toHaveLength(2);
+  expect(screen.getByText("November 9, 2026")).toHaveAttribute(
+    "datetime",
+    card(2).publishedAt,
+  );
+  expect(screen.getByText("January 15, 2026")).toHaveAttribute(
+    "datetime",
+    midday.publishedAt,
+  );
   expect(screen.queryByText(/long excerpt/)).not.toBeInTheDocument();
   expect(screen.queryByText("Writer")).not.toBeInTheDocument();
 });
