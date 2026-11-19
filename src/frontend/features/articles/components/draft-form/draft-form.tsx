@@ -496,7 +496,7 @@ export function DraftForm({
               : "Your draft stays private."}
           </p>
         </div>
-        <div className={styles.saveActions}>
+        <div className={styles.saveLeft}>
           <Button
             type="button"
             variant="secondary"
@@ -527,34 +527,34 @@ export function DraftForm({
               }
             />
           )}
-          <Button
-            type="submit"
-            disabled={
-              !ready ||
-              lifecycleBusy ||
-              mediaBusy ||
-              command.phase === "saving" ||
-              command.phase === "saved" ||
-              command.phase === "conflict" ||
-              (!command.pending && recoveryBlocked) ||
-              (!command.pending &&
-                (Boolean(editorFailure) ||
-                  categories.loading ||
-                  categories.error ||
-                  !catalog.options.sections.length))
-            }
-          >
-            {command.phase === "uncertain"
-              ? "Retry original save"
-              : command.phase === "saving"
-                ? "Saving…"
-                : command.article
-                  ? status === "published"
-                    ? "Save article"
-                    : "Save draft"
-                  : "Create draft"}
-          </Button>
         </div>
+        <Button
+          type="submit"
+          disabled={
+            !ready ||
+            lifecycleBusy ||
+            mediaBusy ||
+            command.phase === "saving" ||
+            command.phase === "saved" ||
+            command.phase === "conflict" ||
+            (!command.pending && recoveryBlocked) ||
+            (!command.pending &&
+              (Boolean(editorFailure) ||
+                categories.loading ||
+                categories.error ||
+                !catalog.options.sections.length))
+          }
+        >
+          {command.phase === "uncertain"
+            ? "Retry original save"
+            : command.phase === "saving"
+              ? "Saving…"
+              : command.article
+                ? status === "published"
+                  ? "Save article"
+                  : "Save draft"
+                : "Create draft"}
+        </Button>
       </div>
       <p>
         <GuardedDashboardLink href="/dashboard">
