@@ -11,6 +11,7 @@ import {
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { Button } from "@/frontend/components/ui/button/button";
+import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import { DraftMetadataFields } from "../draft-metadata-fields/draft-metadata-fields";
 import type {
   DraftInput,
@@ -134,6 +135,7 @@ export function DraftForm({
     command.update(value);
   };
   const router = useRouter();
+  const { confirm, confirmDialog } = useConfirm();
   const summary = useRef<HTMLDivElement>(null);
   const ready = useSyncExternalStore(subscribeReady, clientReady, serverReady);
   const hasSelectionErrors = Object.keys(selectionErrors).length > 0;
@@ -166,12 +168,16 @@ export function DraftForm({
     await save(pendingPhoto);
   }
   // Cancel leaves the editor without saving. Saved versions are untouched.
-  function cancelEditing() {
+  async function cancelEditing() {
     if (
       (command.dirty || mediaDirty || bodyMediaDirty) &&
-      !window.confirm(
-        "Discard your unsaved changes? Anything not saved will be lost.",
-      )
+      !(await confirm({
+        title: "Discard your changes?",
+        message: "Anything you have not saved will be lost.",
+        confirmLabel: "Discard changes",
+        cancelLabel: "Keep editing",
+        danger: true,
+      }))
     )
       return;
     router.push("/dashboard");
@@ -525,7 +531,7 @@ export function DraftForm({
             type="button"
             variant="secondary"
             disabled={command.phase === "saving"}
-            onClick={cancelEditing}
+            onClick={() => void cancelEditing()}
           >
             Cancel
           </Button>
@@ -586,6 +592,7 @@ export function DraftForm({
           Back to My articles
         </GuardedDashboardLink>
       </p>
+      {confirmDialog}
     </form>
   );
 }

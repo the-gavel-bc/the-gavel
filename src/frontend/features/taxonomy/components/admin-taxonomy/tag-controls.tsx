@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import type { TaxonomyItem } from "@/backend/taxonomy/admin-taxonomy/admin-taxonomy";
+import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import { CurationFeedback } from "./curation-feedback";
 import { useCuration } from "./use-curation";
 import styles from "./taxonomy-controls.module.css";
@@ -16,6 +17,7 @@ export function TagControls({
   const [target, setTarget] = useState("");
   const [problem, setProblem] = useState("");
   const state = useCuration();
+  const { confirm, confirmDialog } = useConfirm();
   const normalized = name.replace(/\s+/gu, " ").trim();
   function rename() {
     if (state.blocked || normalized === item.name) return;
@@ -31,13 +33,17 @@ export function TagControls({
       name: normalized,
     });
   }
-  function merge() {
+  async function merge() {
     if (state.blocked || !target) return;
     const into = others.find((tag) => tag.id === target);
     if (
-      !window.confirm(
-        `Merge "${item.name}" into "${into?.name}"? Every story keeps one copy of the surviving tag, and "${item.name}" is removed.`,
-      )
+      !(await confirm({
+        title: `Merge "${item.name}" into "${into?.name}"?`,
+        message: `Every story keeps one copy of "${into?.name}", and "${item.name}" is removed.`,
+        confirmLabel: "Merge",
+        cancelLabel: "Cancel",
+        danger: true,
+      }))
     )
       return;
     void state.run({
@@ -47,9 +53,18 @@ export function TagControls({
       targetId: target,
     });
   }
-  function remove() {
+  async function remove() {
     if (state.blocked) return;
-    if (!window.confirm(`Delete the unused tag "${item.name}"?`)) return;
+    if (
+      !(await confirm({
+        title: `Delete "${item.name}"?`,
+        message: "No story uses this tag. This cannot be undone.",
+        confirmLabel: "Delete",
+        cancelLabel: "Keep",
+        danger: true,
+      }))
+    )
+      return;
     void state.run({
       kind: "deleteTag",
       requestId: crypto.randomUUID(),
@@ -94,7 +109,7 @@ export function TagControls({
           </label>
           <button
             type="button"
-            onClick={merge}
+            onClick={() => void merge()}
             disabled={state.blocked || !target}
             aria-label={`Merge ${item.name}`}
           >
@@ -105,7 +120,7 @@ export function TagControls({
         <button
           type="button"
           data-variant="danger"
-          onClick={remove}
+          onClick={() => void remove()}
           disabled={state.blocked}
           aria-label={`Delete ${item.name}`}
         >
@@ -114,6 +129,7 @@ export function TagControls({
       )}
       {problem && <p role="alert">{problem}</p>}
       <CurationFeedback state={state} />
+      {confirmDialog}
     </section>
   );
 }

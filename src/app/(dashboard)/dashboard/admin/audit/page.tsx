@@ -46,9 +46,6 @@ export default async function AdminAuditPage({
   return (
     <>
       <h1>Article activity</h1>
-      <p>
-        <Link href="/dashboard/admin/articles">Article management</Link>
-      </p>
       <AdminAudit
         key={action.success ? action.data : "all"}
         page={page}

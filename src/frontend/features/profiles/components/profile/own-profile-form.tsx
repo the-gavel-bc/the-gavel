@@ -1,6 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ProfilePhotoControl } from "./profile-photo-control";
 import type { OwnProfile } from "@/backend/profiles/own-profile/own-profile";
 import { saveOwnProfileAction } from "@/backend/profiles/own-profile/own-profile-actions";
 import type {
@@ -22,7 +23,6 @@ export function OwnProfileForm({ profile }: { profile: OwnProfile }) {
   const [name, setName] = useState(profile.displayName);
   const [biography, setBiography] = useState(profile.biography ?? "");
   const [version, setVersion] = useState(profile.version);
-  const [slug, setSlug] = useState(profile.slug);
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<OwnProfileResult | null>(null);
   const [retry, setRetry] = useState<OwnProfileCommand | null>(null);
@@ -49,7 +49,6 @@ export function OwnProfileForm({ profile }: { profile: OwnProfile }) {
     busy.current = false;
     if (next.ok) {
       setVersion(next.version);
-      setSlug(next.slug);
       router.refresh();
     }
   }
@@ -77,12 +76,6 @@ export function OwnProfileForm({ profile }: { profile: OwnProfile }) {
   }
   return (
     <form onSubmit={save}>
-      <p>Author URL: /authors/{slug}</p>
-      <p>
-        {profile.slugFrozen
-          ? "Your author URL is fixed after publication."
-          : "Your author URL follows your display name until publication."}
-      </p>
       <label>
         Public display name
         <input
@@ -103,7 +96,7 @@ export function OwnProfileForm({ profile }: { profile: OwnProfile }) {
           onChange={(event) => setBiography(event.target.value)}
         />
       </label>
-      <p>Profile image editing is not available yet.</p>
+      <ProfilePhotoControl name={name} photoUrl={profile.photoUrl} />
       <button type="submit" disabled={blocked}>
         Save profile
       </button>

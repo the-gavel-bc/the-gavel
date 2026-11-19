@@ -63,3 +63,61 @@ Each is its own slice with its own migration, so any one can be reviewed or reve
 **Slice 3 (one-off credits):** migrations `20261116020000_one_off_credits.sql` and `20261116020100_remove_contributor_admin.sql`. Design choice (flag for the owner): credits stay as profile rows without an account instead of a new text column, because creating, saving, snapshots, revisions, restore and the public projections all carry credits as profile references; replacing that contract would rewrite about ten SQL functions plus the shared draft contract. The visible behavior asked for is delivered: typed names are one-offs (never matched or reused by name, not searchable), guest author pages are retired (404, no sitemap entry, no archive), and bylines show plain-text names. The administrator Contributors page and its RPCs were removed. The projection changes patch existing function definitions in place and the migration fails if any expected pattern is missing. Orphaned credit-only rows are not deleted (revisions may refer to them). Tests: pgTAP 042, 047 and 058 updated and a new byline-slug assertion; unit tests for credits rendering; removed tests for the retired admin surface. 058 tests 8 and 9 failed before and after this change on the seeded disposable database.
 
 **Slice 4 (taxonomy administration):** migration `20261116030000_taxonomy_create_and_tags.sql` adds `create_taxonomy`, `rename_tag`, `merge_tags`, `delete_unused_tag`, audit actions and the tag "in use" flag. Rename, reorder (navigation order field) and deactivate for sections and categories already existed and are unchanged. **Open decision for the owner:** the owner's answer allowed deactivating anything, but the existing rule blocks deactivating a section or category while published or archived stories use it, because an inactive section hides its stories from readers. That rule is kept; allowing it with a warning is a small follow-up. Other limits: tag merge targets are the tags on the current page (50 per page); old revisions may still name a merged or deleted tag. Tests: pgTAP 063 (26 checks) with the existing 026; unit tests for the action, schemas and controls.
+
+## Round 2 (2026-11-17): desk polish tasks
+
+Owner feedback after reviewing the stack. Built on branch `feat/desk-polish`, one commit per task. The `pro-ui-ux-max` skill was not available in this session, so the design pass follows the existing design tokens and the earlier audit.
+
+| Task                    | Scope                                                                                                                                                         | Acceptance                                                                                                                                                                                    |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T0 In-page confirmation | A shared accessible confirmation dialog (native `<dialog>`) replaces `window.confirm` in the editor Cancel, memberships, taxonomy and tags.                   | Cancel never flickers: native dialogs are auto-dismissed by automated browsers and some embedded views, which made Cancel do nothing. Keyboard: Escape cancels, focus returns to the trigger. |
+| T1 Memberships redesign | Search bar on top; filter pills with **All** first and the default; cleaner one-row-per-person layout; role change and removal tucked into a compact control. | `All` pill is active with no query; each pill shows a count; search keeps the active pill; no "Membership activity" link on this page.                                                        |
+| T2 Per-person activity  | A person's name links to that person's activity page.                                                                                                         | The page lists only that person's events (listing, role changes, claim, deactivation), including events from before they signed in.                                                           |
+| T3 Taxonomy page        | Remove the "Article management" link; creating a section can add its first category in the same step; cleaner rows.                                           | Optional category name creates the category under the new section; partial failure is reported honestly.                                                                                      |
+| T4 Delete taxonomy      | Delete sections and categories with confirmation.                                                                                                             | Blocked while any story (any status) uses the item; a section deletes with its categories only when none of them is in use; audited; exact retries replay.                                    |
+| T5 Editor text          | Remove the contributors explainer text in the editor.                                                                                                         | Field labels unchanged.                                                                                                                                                                       |
+| T6 Profile photo        | A person can add a photo on their profile; it shows in the author About section.                                                                              | Image type and size checked on the server; only the owner can change it; public sees only a finalized photo; removal supported.                                                               |
+
+Design risks: T4 deletes data, so it is limited to unused items and is irreversible except by recreating; T6 adds storage, so it reuses the existing image processing, bucket policy style and request receipts rather than a new service.
+
+**Round 2 notes:** photos are stored in the database (small, no Storage policy) rather than a new bucket. The in-page confirmation replaces `window.confirm` in the editor Cancel, memberships, taxonomy and tags only; other screens (homepage, lifecycle, media, deletion, profile reload, navigation guard) still use the browser dialog. Taxonomy deletion is blocked while any story of any status uses the item, and a section is deleted together with its (unused) categories. Per-person activity is `?user=<member id or listing id>` on the activity page.
+
+## Round 3 (2026-11-17): homepage curation redesign (plan only, not built)
+
+Done already in this round: the in-page "Article management" links are removed (homepage, activity and media pages; the sidebar keeps them), and the author URL text is removed from the profile form. The sidebar's "Article activity" entry is untouched; there was no in-page activity link to remove.
+
+**Goal:** the admin homepage page looks like the real homepage and has almost no text. Curators arrange stories in horizontal rows, using arrows, drag, or search-and-add.
+
+**Layout (top to bottom)**
+
+1. **Lead** slot: one large card (image, title, section), same proportions as the live hero.
+2. **Featured News** row: four slots in a horizontal strip, like the live featured band.
+3. **Read This** row: four slots in a strip.
+4. **Stories library:** a search field and a horizontal strip of published stories with left and right arrows to page through them (replacing the vertical text list and Next/First page buttons).
+5. **Save bar** (sticky): "Unsaved changes", Discard and Save. The long explanatory paragraphs, the "No curated stories" text and the saved-preview block go away; a slot's empty state is a dashed "Add story" tile.
+
+**Interactions**
+
+- Each filled card shows a left arrow, a right arrow (shift order within its row; disabled at the ends) and a remove button. These are the keyboard and touch path, so every action works without dragging.
+- Drag a card to reorder inside a row or to move it between Featured, Read This and Lead; drop on a full row is refused with a short message; dropping on Lead swaps the old lead into the dragged card's slot. Uses the browser's native drag and drop, no new dependency.
+- Library cards: click "Add" for a small menu (Lead, Featured News, Read This), or drag the card into a slot or empty tile.
+- Arrow buttons keep stable accessible names for tests: "Move X left in Featured News", "Move X right in Featured News", "Remove X from Featured News", "Set X as lead", "Add X to Featured News", "Add X to Read This". A polite live region announces moves and drops.
+
+**Unchanged:** the save contract (expected version, request id, exact retry, conflict reload, one story once, up to four per row, published only) and the navigation guard. No schema or API contract change beyond the open question below.
+
+**Slices (each reviewed once before the next)**
+
+- **H1 Layout and slots:** page structure, slot cards, arrows and remove, sticky save bar, text removed. Acceptance: existing save, retry and conflict behaviour and tests still pass; rows scroll horizontally at phone width.
+- **H2 Library strip:** search, arrow paging, Add menu. Acceptance: search keeps its character limits; adding respects the four-per-row and once-only rules; paging never loses unsaved selections.
+- **H3 Drag and drop:** reorder, move between rows, swap on lead, announcements. Acceptance: touch devices still work through the arrows; drop refusals are explained.
+- **H4 Tests and docs:** unit tests for move/swap/limits, browser spec update (arrow names), design-system note, screenshots of desktop and phone.
+
+**Open decisions for the owner**
+
+1. **Images on cards.** The live homepage is image-led. Admin cards need each story's main image, which the curation and story-list queries do not return today. Recommended: add the main-image id to those two reads (small SQL change, existing authorized preview route serves the image). Alternative: text-only cards with section and date.
+2. **Drop on a full row:** refuse (recommended) or replace the last card.
+3. **Library size:** show 12 stories per page in the strip (recommended) or keep the current page size.
+
+**Design risks:** drag and drop is not accessible alone, so arrows are mandatory and tested; horizontal strips can hide cards on small screens, so arrows stay visible and keyboard focus scrolls the card into view; reordering must never lose the version/request-id retry guarantees.
+
+**Round 3 built (2026-11-17), recommended decisions used:** cards show the story's main image (read through `article_main_images` and the public image route, no SQL change; a story without one shows a plain tile); a drop on a full row is refused with a message; the library shows 12 stories per page. The library loads pages with a server action and keeps pages already seen, so the arrows move back without refetching and staged choices are never lost. Arrangement rules (add, remove, shift, drag, lead swap, four-per-row, once-only) are pure functions with unit tests. The save contract, version, request id, retry and conflict handling are unchanged; Reload now uses the in-page confirmation. The page title is now "Homepage" and the saved-preview block is gone. Native HTML drag and drop is used; touch devices rely on the arrow and add buttons.

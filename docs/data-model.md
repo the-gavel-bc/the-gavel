@@ -231,3 +231,7 @@ The caption migration adds nullable `article_main_images.caption`. Main-photo wr
 ## Published main-photo mutations
 
 Published owners/administrators may reserve, process, finalize, attach, replace and remove main images using the existing media tables and caption-aware versioned RPC. Article identity, publication timestamp and ownership remain fixed. Changes capture a revision and audit atomically; retained revision media references continue blocking cleanup even after replacement/removal. New finalized assets stay private until a current published reference exists. No new table or retention period is introduced.
+
+## Profile photos
+
+`private.profile_photos(profile_id, bytes, updated_at)` holds one processed WebP per profile (at most 512 KB; deleted with the profile). It has no direct grants. `public.profiles.photo_updated_at` records when it last changed and is readable by anonymous and authenticated roles, like other public profile fields. Migration `20261117030000_profile_photos.sql`.

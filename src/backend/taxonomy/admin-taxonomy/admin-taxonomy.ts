@@ -17,6 +17,8 @@ export type TaxonomyItem = {
   active: boolean | null;
   version: number | null;
   referencedLive: boolean;
+  /** Any story, of any status, uses it: it cannot be deleted. */
+  inUse: boolean;
 };
 export type TaxonomyPage = { items: TaxonomyItem[]; nextCursor: string | null };
 const uuid = z.custom<string>(isDraftUuid);
@@ -34,6 +36,7 @@ const rowSchema = z.object({
   active: z.boolean().nullable(),
   edit_version: z.number().int().positive().nullable(),
   referenced_live: z.boolean(),
+  in_use: z.boolean(),
 });
 function decodeCursor(value: string, kind: TaxonomyKind): string | null {
   if (!value || value.length > 512 || !/^[A-Za-z0-9_-]+$/u.test(value))
@@ -99,6 +102,7 @@ export async function listAdminTaxonomy(input: unknown): Promise<TaxonomyPage> {
       active: row.active,
       version: row.edit_version,
       referencedLive: row.referenced_live,
+      inUse: row.in_use,
     }));
     const last = items.at(-1);
     return {

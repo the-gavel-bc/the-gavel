@@ -40,7 +40,10 @@ it("shows a native action filter and empty state", async () => {
   expect(
     screen.getByRole("heading", { name: "Article activity" }),
   ).toBeVisible();
-  expect(screen.getByLabelText("Action")).toHaveValue("article.archived");
+  expect(screen.getByRole("link", { name: "Archived" })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
   expect(
     screen.getByText("No article activity matches this filter."),
   ).toBeVisible();

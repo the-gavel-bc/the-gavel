@@ -1,31 +1,35 @@
 "use client";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { PublishedStoryCatalog } from "./published-story-catalog";
 import { useDraftNavigationGuard } from "@/frontend/components/dashboard/draft-navigation-guard/draft-navigation-guard";
-import type { AdminArticlePage } from "@/backend/articles/admin-article-queries/admin-article-queries";
-import type {
-  HomepageArticle,
-  HomepageCuration,
-} from "@/backend/homepage/homepage-curation/homepage-curation";
+import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
+import { Button } from "@/frontend/components/ui/button/button";
+import type { LibraryPage } from "@/backend/homepage/homepage-curation/homepage-stories-action";
 import { saveHomepageAction } from "@/backend/homepage/homepage-curation/homepage-actions";
 import type {
   HomepageCommand,
   HomepageResult,
 } from "@/shared/homepage/homepage-curation/homepage-command";
+import {
+  addStory,
+  choiceKey,
+  groupLabel,
+  placeStory,
+  removeStory,
+  ROW_LIMIT,
+  selectedStories,
+  shiftStory,
+  type Choices,
+  type Group,
+  type Place,
+  type RowGroup,
+  type Story,
+} from "./homepage-arrangement";
+import { SlotBoard } from "./slot-board";
+import { StoryLibrary } from "./story-library";
+import type { DragHandlers, DragState } from "./story-card";
+import styles from "./homepage-editor.module.css";
 
-type Choices = {
-  lead: HomepageArticle | null;
-  featured: HomepageArticle[];
-  readThis: HomepageArticle[];
-};
-function choiceKey(value: Choices) {
-  return JSON.stringify([
-    value.lead?.id ?? null,
-    value.featured.map((item) => item.id),
-    value.readThis.map((item) => item.id),
-  ]);
-}
 const messages = {
   invalid_input:
     "Select distinct published stories within the slot limits. Remove archived selections before saving.",
@@ -37,78 +41,95 @@ const messages = {
   unavailable:
     "The result is uncertain. Retry the original request to confirm it.",
 };
+
 export function HomepageEditor({
-  curation,
-  candidates,
-  search,
-  hasCursor = false,
+  version: initialVersion,
+  saved,
+  library,
 }: {
-  curation: HomepageCuration;
-  candidates: AdminArticlePage;
-  search: string;
-  hasCursor?: boolean;
+  version: number;
+  saved: Choices;
+  library: LibraryPage;
 }) {
   const router = useRouter();
-  const [choices, setChoices] = useState<Choices>(curation.saved);
-  const [version, setVersion] = useState(curation.version);
+  const { confirm, confirmDialog } = useConfirm();
+  const [choices, setChoices] = useState<Choices>(saved);
+  // What is saved on the server; Discard returns here.
+  const [baseline, setBaseline] = useState<Choices>(saved);
+  const [version, setVersion] = useState(initialVersion);
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<HomepageResult | null>(null);
   const [retry, setRetry] = useState<HomepageCommand | null>(null);
   const [notice, setNotice] = useState("");
+  const [announcement, setAnnouncement] = useState("");
+  const [drag, setDrag] = useState<DragState>(null);
+  // The ref is what drop reads: a drop can arrive before the state update
+  // from dragstart has rendered.
+  const dragRef = useRef<DragState>(null);
   const busy = useRef(false);
-  const [acknowledged, setAcknowledged] = useState(() =>
-    choiceKey(curation.saved),
-  );
-  useDraftNavigationGuard(
-    choiceKey(choices) !== acknowledged || pending || Boolean(retry),
-  );
+  const dirty = choiceKey(choices) !== choiceKey(baseline);
+  useDraftNavigationGuard(dirty || pending || Boolean(retry));
   const blocked = pending || Boolean(retry);
-  const selected = [
-    ...(choices.lead ? [choices.lead] : []),
-    ...choices.featured,
-    ...choices.readThis,
-  ];
-  function add(
-    article: HomepageArticle,
-    group: "lead" | "featured" | "readThis",
-  ) {
-    if (blocked) return;
-    if (selected.some((item) => item.id === article.id)) {
-      setNotice("A story can appear only once.");
-      return;
-    }
-    if (group !== "lead" && choices[group].length >= 4) {
-      setNotice("Each group can contain up to four stories.");
+  const selected = selectedStories(choices);
+
+  function apply(outcome: { choices: Choices; error?: string }, said: string) {
+    if (outcome.error) {
+      setNotice(outcome.error);
+      setAnnouncement(outcome.error);
       return;
     }
     setNotice("");
     setResult(null);
-    setChoices((current) =>
-      group === "lead"
-        ? { ...current, lead: article }
-        : { ...current, [group]: [...current[group], article] },
+    setChoices(outcome.choices);
+    setAnnouncement(said);
+  }
+  function add(story: Story, group: Group) {
+    if (blocked) return;
+    apply(
+      addStory(choices, story, group),
+      `${story.title} added to ${groupLabel[group]}.`,
     );
   }
-  function remove(group: "lead" | "featured" | "readThis", index: number) {
+  function remove(group: Group, index: number) {
     if (blocked) return;
-    setChoices((current) =>
-      group === "lead"
-        ? { ...current, lead: null }
-        : { ...current, [group]: current[group].filter((_, i) => i !== index) },
+    const story = group === "lead" ? choices.lead : choices[group][index];
+    setNotice("");
+    setResult(null);
+    setChoices(removeStory(choices, group, index));
+    if (story)
+      setAnnouncement(`${story.title} removed from ${groupLabel[group]}.`);
+  }
+  function shift(group: RowGroup, index: number, offset: -1 | 1) {
+    if (blocked) return;
+    const next = shiftStory(choices, group, index, offset);
+    if (next === choices) return;
+    setResult(null);
+    setChoices(next);
+    setAnnouncement(
+      `${choices[group][index].title} moved ${offset < 0 ? "left" : "right"} to position ${index + offset + 1} of ${choices[group].length} in ${groupLabel[group]}.`,
     );
-    setResult(null);
   }
-  function move(group: "featured" | "readThis", index: number, offset: number) {
-    if (blocked) return;
-    setChoices((current) => {
-      const items = [...current[group]];
-      const target = index + offset;
-      if (target < 0 || target >= items.length) return current;
-      [items[index], items[target]] = [items[target], items[index]];
-      return { ...current, [group]: items };
-    });
-    setResult(null);
-  }
+  const handlers: DragHandlers = {
+    start: (story, from) => {
+      dragRef.current = { story, from };
+      setDrag({ story, from });
+    },
+    end: () => {
+      dragRef.current = null;
+      setDrag(null);
+    },
+    drop: (to: Place) => {
+      const current = dragRef.current;
+      dragRef.current = null;
+      setDrag(null);
+      if (!current || blocked) return;
+      apply(
+        placeStory(choices, current.story, current.from, to),
+        `${current.story.title} placed in ${groupLabel[to.group]}.`,
+      );
+    },
+  };
+
   async function run(command: HomepageCommand) {
     if (busy.current) return;
     busy.current = true;
@@ -129,9 +150,7 @@ export function HomepageEditor({
     setPending(false);
     busy.current = false;
     if (next.ok) {
-      setAcknowledged(
-        JSON.stringify([command.lead, command.featured, command.readThis]),
-      );
+      setBaseline(choices);
       setVersion(next.version);
       router.refresh();
     }
@@ -150,147 +169,109 @@ export function HomepageEditor({
       readThis: choices.readThis.map((item) => item.id),
     });
   }
-  function showGroup(title: string, group: "featured" | "readThis") {
-    return (
-      <section aria-label={title}>
-        <h2>
-          {title} ({choices[group].length}/4)
-        </h2>
-        {choices[group].length === 0 ? (
-          <p>None picked.</p>
-        ) : (
-          <ol>
-            {choices[group].map((item, index) => (
-              <li key={item.id}>
-                {item.title}{" "}
-                {item.status !== "published" && (
-                  <strong>({item.status}; remove before saving)</strong>
-                )}
-                <button
-                  type="button"
-                  disabled={blocked || index === 0}
-                  onClick={() => move(group, index, -1)}
-                  aria-label={`Move ${item.title} up in ${title}`}
-                >
-                  Move up
-                </button>
-                <button
-                  type="button"
-                  disabled={blocked || index === choices[group].length - 1}
-                  onClick={() => move(group, index, 1)}
-                  aria-label={`Move ${item.title} down in ${title}`}
-                >
-                  Move down
-                </button>
-                <button
-                  type="button"
-                  disabled={blocked}
-                  onClick={() => remove(group, index)}
-                  aria-label={`Remove ${item.title} from ${title}`}
-                >
-                  Remove
-                </button>
-              </li>
-            ))}
-          </ol>
-        )}
-      </section>
-    );
+  function discard() {
+    if (blocked) return;
+    setChoices(baseline);
+    setResult(null);
+    setNotice("");
+    setAnnouncement("Changes discarded.");
   }
+  async function reload() {
+    if (
+      await confirm({
+        title: "Reload homepage selections?",
+        message: "Your unsaved changes will be lost.",
+        confirmLabel: "Reload",
+        cancelLabel: "Keep editing",
+        danger: true,
+      })
+    )
+      window.location.reload();
+  }
+
+  const full: Group[] = (["featured", "readThis"] as const).filter(
+    (group) => choices[group].length >= ROW_LIMIT,
+  );
   return (
-    <>
-      <p>
-        Pick a lead and up to four stories per group. Gaps fill with the newest.
-      </p>
-      <section aria-label="Lead story">
-        <h2>Lead story</h2>
-        {choices.lead ? (
-          <p>
-            {choices.lead.title}{" "}
-            {choices.lead.status !== "published" && (
-              <strong>({choices.lead.status}; remove before saving)</strong>
-            )}
-            <button
-              type="button"
-              disabled={blocked}
-              onClick={() => remove("lead", 0)}
-            >
-              Remove lead
-            </button>
-          </p>
-        ) : (
-          <p>None picked.</p>
-        )}
-      </section>
-      {showGroup("Featured News", "featured")}
-      {showGroup("Read This", "readThis")}
-      <button type="button" disabled={blocked} onClick={save}>
-        Save homepage selections
-      </button>
-      {pending && <p role="status">Saving selections…</p>}
-      {result?.ok && <p role="status">Homepage selections saved.</p>}
-      {result && !result.ok && (
-        <div role="alert">
-          <p>{messages[result.code]}</p>
-          {retry && (
-            <button
-              type="button"
-              disabled={pending}
-              onClick={() => void run(retry)}
-            >
-              Retry original request
-            </button>
-          )}
-          {["conflict", "request_conflict", "invalid_input"].includes(
-            result.code,
-          ) && (
-            <button
-              type="button"
-              onClick={() => {
-                if (
-                  window.confirm(
-                    "Reload homepage selections? Unsaved changes will be lost.",
-                  )
-                )
-                  window.location.reload();
-              }}
-            >
-              Reload selections
-            </button>
-          )}
-        </div>
-      )}
-      <section aria-label="Current saved homepage preview">
-        <h2>Current saved preview</h2>
-        <p>
-          Lead: {curation.effective.lead?.title ?? "No published stories"}
-          {/* With no saved pick, the homepage falls back to the newest story. */}
-          {!curation.saved.lead && curation.effective.lead
-            ? " (automatic: newest story)"
-            : ""}
-        </p>
-        <p>
-          Featured News:{" "}
-          {curation.effective.featured.map((a) => a.title).join(", ") || "None"}
-        </p>
-        <p>
-          Read This:{" "}
-          {curation.effective.readThis.map((a) => a.title).join(", ") || "None"}
-        </p>
-      </section>
-      <PublishedStoryCatalog
-        candidates={candidates}
-        search={search}
-        hasCursor={hasCursor}
+    <div className={styles.page}>
+      <SlotBoard
+        choices={choices}
+        blocked={blocked}
+        drag={drag}
+        handlers={handlers}
+        onShift={shift}
+        onRemove={remove}
+      />
+      <StoryLibrary
+        initial={library}
         blocked={blocked}
         selectedIds={selected.map((item) => item.id)}
-        featuredCount={choices.featured.length}
-        readCount={choices.readThis.length}
-        notice={notice}
-        setNotice={setNotice}
-        add={add}
+        full={full}
+        handlers={handlers}
+        onAdd={add}
+        onNotice={setNotice}
       />
+      <p role="status" aria-live="polite" className={styles.srOnly}>
+        {announcement}
+      </p>
+      {(dirty || pending || result || notice) && (
+        <div className={styles.saveBar} data-dirty={dirty || undefined}>
+          <div className={styles.saveText}>
+            {notice && <p role="alert">{notice}</p>}
+            {pending && <p role="status">Saving selections…</p>}
+            {result?.ok && !dirty && (
+              <p role="status">Homepage selections saved.</p>
+            )}
+            {result && !result.ok && (
+              <div role="alert">
+                <p>{messages[result.code]}</p>
+                {retry && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    disabled={pending}
+                    onClick={() => void run(retry)}
+                  >
+                    Retry original request
+                  </Button>
+                )}
+                {["conflict", "request_conflict", "invalid_input"].includes(
+                  result.code,
+                ) && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => void reload()}
+                  >
+                    Reload selections
+                  </Button>
+                )}
+              </div>
+            )}
+            {!notice && !pending && !result && dirty && <p>Unsaved changes</p>}
+          </div>
+          <div className={styles.saveActions}>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={blocked || !dirty}
+              onClick={discard}
+            >
+              Discard
+            </Button>
+            <Button
+              type="button"
+              disabled={blocked || !dirty}
+              onClick={save}
+              aria-label="Save homepage selections"
+            >
+              Save
+            </Button>
+          </div>
+        </div>
+      )}
+      {confirmDialog}
       <noscript>Enable JavaScript to manage homepage selections.</noscript>
-    </>
+    </div>
   );
 }

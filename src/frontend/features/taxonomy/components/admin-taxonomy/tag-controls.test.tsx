@@ -25,13 +25,10 @@ const tag = {
   active: null,
   version: null,
   referencedLive: true,
+  inUse: true,
 };
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.stubGlobal(
-    "confirm",
-    vi.fn(() => true),
-  );
   mocks.action.mockResolvedValue({ ok: true });
 });
 
@@ -51,10 +48,11 @@ it("merges a used tag only after confirmation and offers no delete", async () =>
   render(<TagControls item={tag} others={[{ id: other, name: "Beta" }]} />);
   expect(screen.queryByRole("button", { name: /Delete/ })).toBeNull();
   await userEvent.selectOptions(screen.getByLabelText("Merge into"), other);
-  vi.mocked(window.confirm).mockReturnValueOnce(false);
   await userEvent.click(screen.getByRole("button", { name: "Merge Alpha" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Cancel" }));
   expect(mocks.action).not.toHaveBeenCalled();
   await userEvent.click(screen.getByRole("button", { name: "Merge Alpha" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Merge" }));
   expect(mocks.action).toHaveBeenCalledWith(
     expect.objectContaining({ kind: "mergeTags", id, targetId: other }),
   );
@@ -67,6 +65,7 @@ it("deletes only unused tags and retries an uncertain request unchanged", async 
   render(<TagControls item={{ ...tag, referencedLive: false }} others={[]} />);
   expect(screen.queryByLabelText("Merge into")).toBeNull();
   await userEvent.click(screen.getByRole("button", { name: "Delete Alpha" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Delete" }));
   await userEvent.click(
     await screen.findByRole("button", { name: "Retry original request" }),
   );
@@ -101,4 +100,43 @@ it("refuses an empty name", async () => {
   await userEvent.click(screen.getByRole("button", { name: "Create section" }));
   expect(screen.getByRole("alert")).toBeVisible();
   expect(mocks.action).not.toHaveBeenCalled();
+});
+
+it("creates a section and then its first category", async () => {
+  mocks.action.mockResolvedValueOnce({ ok: true, id: other });
+  mocks.action.mockResolvedValueOnce({ ok: true });
+  render(<CreateTaxonomyForm kind="section" sections={[]} nextOrder={2} />);
+  await userEvent.type(screen.getByLabelText("New section name"), "Features");
+  await userEvent.click(screen.getByLabelText("Also create a first category"));
+  await userEvent.type(
+    screen.getByLabelText("First category name"),
+    "Profiles",
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Create section" }));
+  await waitFor(() => expect(mocks.action).toHaveBeenCalledTimes(2));
+  expect(mocks.action.mock.calls[0][0]).toMatchObject({
+    kind: "createSection",
+    name: "Features",
+    navigationOrder: 2,
+  });
+  expect(mocks.action.mock.calls[1][0]).toMatchObject({
+    kind: "createCategory",
+    name: "Profiles",
+    sectionId: other,
+  });
+});
+
+it("reports a failed first category without hiding the created section", async () => {
+  mocks.action.mockResolvedValueOnce({ ok: true, id: other });
+  mocks.action.mockResolvedValueOnce({ ok: false, code: "conflict" });
+  render(<CreateTaxonomyForm kind="section" sections={[]} nextOrder={0} />);
+  await userEvent.type(screen.getByLabelText("New section name"), "Features");
+  await userEvent.click(screen.getByLabelText("Also create a first category"));
+  await userEvent.type(
+    screen.getByLabelText("First category name"),
+    "Profiles",
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Create section" }));
+  expect(await screen.findByRole("alert")).toBeVisible();
+  expect(screen.getByText('Section "Features" created.')).toBeVisible();
 });

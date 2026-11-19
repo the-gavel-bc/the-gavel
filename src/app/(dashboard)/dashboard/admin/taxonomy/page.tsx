@@ -5,7 +5,7 @@ import {
   listAdminTaxonomy,
   taxonomyKindSchema,
 } from "@/backend/taxonomy/admin-taxonomy/admin-taxonomy";
-import list from "@/frontend/components/dashboard/admin-list/admin-list.module.css";
+import styles from "@/frontend/features/taxonomy/components/admin-taxonomy/taxonomy-list.module.css";
 import { TaxonomyControls } from "@/frontend/features/taxonomy/components/admin-taxonomy/taxonomy-controls";
 import { TagControls } from "@/frontend/features/taxonomy/components/admin-taxonomy/tag-controls";
 import { CreateTaxonomyForm } from "@/frontend/features/taxonomy/components/admin-taxonomy/create-taxonomy-form";
@@ -68,26 +68,26 @@ export default async function AdminTaxonomyPage({
   return (
     <>
       <h1>Taxonomy</h1>
-      <p>
-        <Link href="/dashboard/admin/articles">Article management</Link>
-      </p>
-      <form
-        action="/dashboard/admin/taxonomy"
-        method="get"
-        className={list.toolbar}
-      >
-        <label htmlFor="taxonomy-kind">
-          Catalog
-          <select id="taxonomy-kind" name="kind" defaultValue={kind}>
-            <option value="section">Sections</option>
-            <option value="category">Categories</option>
-            <option value="tag">Tags</option>
-          </select>
-        </label>
-        <button type="submit">Show catalog</button>
-      </form>
+      <nav aria-label="Taxonomy catalog" className={styles.tabs}>
+        {(
+          [
+            ["section", "Sections"],
+            ["category", "Categories"],
+            ["tag", "Tags"],
+          ] as const
+        ).map(([value, label]) => (
+          <Link
+            key={value}
+            href={`/dashboard/admin/taxonomy?kind=${value}`}
+            prefetch={false}
+            aria-current={kind === value ? "page" : undefined}
+          >
+            {label}
+          </Link>
+        ))}
+      </nav>
       {kind === "tag" ? (
-        <p>
+        <p className={styles.note}>
           Members create tags in the article editor. Rename a tag, merge
           duplicates, or delete a tag no story uses.
         </p>
@@ -103,25 +103,27 @@ export default async function AdminTaxonomyPage({
       {page.items.length === 0 ? (
         <p>No items in this catalog.</p>
       ) : (
-        <ul className={list.rows}>
+        <ul className={styles.items}>
           {items.map((item) => (
-            <li key={item.id} className={list.row}>
-              <h2>{item.name}</h2>
-              <p className={list.meta}>
-                {item.active !== null && (
-                  <span
-                    className={list.badge}
-                    data-state={item.active ? "active" : "inactive"}
-                  >
-                    {item.active ? "Active" : "Inactive"}
-                  </span>
-                )}
-                <span>Slug: {item.slug}</span>
-                {item.parentName && <span>Section: {item.parentName}</span>}
-                {kind === "tag" && (
-                  <span>{item.referencedLive ? "In use" : "Unused"}</span>
-                )}
-              </p>
+            <li key={item.id} className={styles.item}>
+              <div>
+                <h2>{item.name}</h2>
+                <p className={styles.meta}>
+                  {item.active !== null && (
+                    <span
+                      className={styles.chip}
+                      data-state={item.active ? "active" : "inactive"}
+                    >
+                      {item.active ? "Active" : "Inactive"}
+                    </span>
+                  )}
+                  <span>Slug: {item.slug}</span>
+                  {item.parentName && <span>Section: {item.parentName}</span>}
+                  {kind === "tag" && (
+                    <span>{item.referencedLive ? "In use" : "Unused"}</span>
+                  )}
+                </p>
+              </div>
               {kind === "tag" ? (
                 <TagControls
                   key={`${item.id}:${item.name}:${item.referencedLive}`}

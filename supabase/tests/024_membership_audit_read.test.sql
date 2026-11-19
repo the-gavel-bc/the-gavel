@@ -10,9 +10,9 @@ values('70000000-0000-0000-0000-000000000095',
   '00000000-0000-0000-0000-000000000002','2030-01-01T00:00:00Z');
 
 select has_function('public','list_membership_audit_events',
-  array['integer','timestamp with time zone','uuid'],'member audit reader exists');
+  array['integer','timestamp with time zone','uuid','uuid'],'member audit reader exists');
 select ok(not has_function_privilege('anon',
-  'public.list_membership_audit_events(integer,timestamp with time zone,uuid)',
+  'public.list_membership_audit_events(integer,timestamp with time zone,uuid,uuid)',
   'EXECUTE'),'anonymous cannot call member audit reader');
 set local role authenticated;
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',true);

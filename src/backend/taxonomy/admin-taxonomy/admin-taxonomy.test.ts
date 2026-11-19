@@ -28,6 +28,7 @@ const row = {
   active: true,
   edit_version: 1,
   referenced_live: false,
+  in_use: false,
 };
 beforeEach(() => {
   vi.clearAllMocks();

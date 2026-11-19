@@ -2,14 +2,16 @@ import { curationMessages, type useCuration } from "./use-curation";
 
 export function CurationFeedback({
   state,
+  showSaved = true,
 }: {
   state: ReturnType<typeof useCuration>;
+  showSaved?: boolean;
 }) {
   const { pending, result, retry, run, reload } = state;
   return (
     <>
       {pending && <p role="status">Saving…</p>}
-      {result?.ok && <p role="status">Saved.</p>}
+      {showSaved && result?.ok && <p role="status">Saved.</p>}
       {result && !result.ok && (
         <div role="alert">
           <p>{curationMessages[result.code]}</p>

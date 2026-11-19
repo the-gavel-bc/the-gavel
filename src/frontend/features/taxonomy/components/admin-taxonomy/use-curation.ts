@@ -26,8 +26,10 @@ export function useCuration(onDone?: () => void) {
   const [result, setResult] = useState<CurationResult | null>(null);
   const [retry, setRetry] = useState<TaxonomyCuration | null>(null);
   const busy = useRef(false);
-  async function run(command: TaxonomyCuration) {
-    if (busy.current) return;
+  async function run(
+    command: TaxonomyCuration,
+  ): Promise<CurationResult | null> {
+    if (busy.current) return null;
     busy.current = true;
     setPending(true);
     setResult(null);
@@ -45,6 +47,7 @@ export function useCuration(onDone?: () => void) {
       onDone?.();
       router.refresh();
     }
+    return next;
   }
   return {
     pending,

@@ -21,23 +21,21 @@ test("administrator filters and pages article activity with keyboard controls", 
   await expect(
     page.getByRole("heading", { name: "Article activity" }),
   ).toBeVisible();
-  await page.getByLabel("Action").selectOption("article.archived");
-  await page.getByRole("button", { name: "Apply filter" }).click();
-  await expect(
-    page.locator("ol").getByText("Archived article").first(),
-  ).toBeVisible();
-  await expect(
-    page.getByText("By Synthetic list member").first(),
-  ).toBeVisible();
+  await page
+    .getByRole("navigation", { name: "Filter activity" })
+    .getByRole("link", { name: "Archived" })
+    .click();
+  await expect(page.locator("ol").getByText("Archived").first()).toBeVisible();
+  await expect(page.getByText(/Synthetic list member ·/).first()).toBeVisible();
   const next = page.getByRole("link", { name: "Next page" });
   await next.focus();
   await expect(next).toBeFocused();
   await next.press("Enter");
   await expect(page).toHaveURL(/cursor=/);
-  await expect(page.getByLabel("Action")).toHaveValue("article.archived");
   await expect(
-    page.locator("ol").getByText("Archived article").first(),
-  ).toBeVisible();
+    page.getByRole("link", { name: "Archived", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
+  await expect(page.locator("ol").getByText("Archived").first()).toBeVisible();
 });
 
 test("author and inactive administrator cannot read the audit route", async ({

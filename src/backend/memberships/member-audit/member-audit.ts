@@ -19,6 +19,7 @@ const actionSchema = z.enum([
   "membership.claimed",
 ]);
 const inputSchema = z.strictObject({
+  user: z.custom<string>(isDraftUuid).optional(),
   cursor: z.string().optional(),
   pageSize: z.number().int().min(1).max(50).default(20),
 });
@@ -86,6 +87,7 @@ export async function listMemberAudit(
       p_limit: pageSize + 1,
       p_before_at: cursor?.createdAt,
       p_before_id: cursor?.id,
+      p_subject: parsed.data.user,
     });
     if (error) throw error;
     const rows = z

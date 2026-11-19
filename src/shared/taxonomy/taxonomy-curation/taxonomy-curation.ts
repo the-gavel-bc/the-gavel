@@ -37,6 +37,12 @@ export const taxonomyCurationSchema = z.discriminatedUnion("kind", [
     targetId: uuid,
   }),
   z.strictObject({
+    kind: z.literal("deleteTaxonomy"),
+    requestId: uuid,
+    itemKind: z.enum(["section", "category"]),
+    id: uuid,
+  }),
+  z.strictObject({
     kind: z.literal("deleteTag"),
     requestId: uuid,
     id: uuid,
@@ -53,9 +59,13 @@ const code = z.enum([
   "unavailable",
 ]);
 export type CurationResult =
-  { ok: true } | { ok: false; code: z.infer<typeof code> };
+  { ok: true; id?: string } | { ok: false; code: z.infer<typeof code> };
 const resultSchema = z.union([
-  z.looseObject({ ok: z.literal(true), replayed: z.boolean() }),
+  z.looseObject({
+    ok: z.literal(true),
+    replayed: z.boolean(),
+    id: uuid.optional(),
+  }),
   z.strictObject({ ok: z.literal(false), code }),
 ]);
 
@@ -72,5 +82,5 @@ export function parseTaxonomyCuration(
 export function parseCurationResult(input: unknown): CurationResult {
   const parsed = resultSchema.safeParse(input);
   if (!parsed.success) return { ok: false, code: "unavailable" };
-  return parsed.data.ok ? { ok: true } : parsed.data;
+  return parsed.data.ok ? { ok: true, id: parsed.data.id } : parsed.data;
 }

@@ -1,4 +1,7 @@
 .biography {
+  align-items: flex-start;
+  display: flex;
+  gap: 1.25rem;
   max-width: 68ch;
   margin-block: 1.5rem 2.5rem;
   padding: 1.5rem;
@@ -12,4 +15,17 @@
   white-space: pre-line;
   overflow-wrap: anywhere;
   font: 1.125rem/1.75 var(--reader-serif);
+}
+.photo {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  flex: none;
+  height: 6rem;
+  object-fit: cover;
+  width: 6rem;
+}
+@media (max-width: 30rem) {
+  .biography {
+    flex-direction: column;
+  }
 }

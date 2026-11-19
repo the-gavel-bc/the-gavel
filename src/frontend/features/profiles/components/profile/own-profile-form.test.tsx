@@ -5,6 +5,10 @@ const mocks = vi.hoisted(() => ({ action: vi.fn(), refresh: vi.fn() }));
 vi.mock("@/backend/profiles/own-profile/own-profile-actions", () => ({
   saveOwnProfileAction: mocks.action,
 }));
+vi.mock("@/backend/profiles/profile-photo/profile-photo-actions", () => ({
+  saveProfilePhotoAction: vi.fn(),
+  removeProfilePhotoAction: vi.fn(),
+}));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: mocks.refresh }),
 }));
@@ -15,6 +19,7 @@ const profile = {
   slug: "writer",
   version: 1,
   slugFrozen: false,
+  photoUrl: null,
 };
 beforeEach(() => vi.clearAllMocks());
 it("retains an uncertain request through denied retries", async () => {

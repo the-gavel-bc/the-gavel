@@ -33,12 +33,14 @@ it("loads only the own-profile RPC projection", async () => {
       slug_frozen: false,
     },
   ]);
+  http.respond({ photo_updated_at: "2026-11-17T10:00:00+00:00" });
   expect(await getOwnProfile()).toEqual({
     displayName: "Writer",
     slug: "writer",
     biography: null,
     version: 1,
     slugFrozen: false,
+    photoUrl: `/api/public/profiles/writer/photo?v=${Date.parse("2026-11-17T10:00:00+00:00")}`,
   });
   expect(new URL(String(http.network.mock.calls[0][0])).pathname).toContain(
     "/rpc/get_own_public_profile",

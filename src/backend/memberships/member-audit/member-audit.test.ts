@@ -86,3 +86,15 @@ it("masks database errors and unexpected actions", async () => {
     "Unable to load membership activity.",
   );
 });
+
+it("narrows activity to one person", async () => {
+  http.respond([]);
+  await listMemberAudit({ user: articleId });
+  const calls = http.network.mock.calls;
+  expect(JSON.parse(String(calls.at(-1)?.[1]?.body))).toMatchObject({
+    p_subject: articleId,
+  });
+  await expect(listMemberAudit({ user: "not-a-uuid" })).rejects.toThrow(
+    "Invalid membership audit request.",
+  );
+});

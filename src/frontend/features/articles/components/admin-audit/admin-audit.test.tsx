@@ -23,16 +23,14 @@ it("renders safe action, actor, resource and timestamp with filtered pagination"
     />,
   );
   expect(
-    within(screen.getByRole("listitem")).getByText("Archived article"),
+    within(screen.getByRole("listitem")).getByText("Archived"),
   ).toBeVisible();
-  expect(screen.getByText("By Editor")).toBeVisible();
+  expect(screen.getByText(/Editor ·/)).toBeVisible();
   expect(screen.getByText(/Nov 5, 2026/)).toHaveAttribute(
     "datetime",
     "2026-11-05T12:00:00+00:00",
   );
-  expect(
-    screen.getByRole("link", { name: "View “Budget vote”" }),
-  ).toHaveAttribute(
+  expect(screen.getByRole("link", { name: "Budget vote" })).toHaveAttribute(
     "href",
     "/dashboard/admin/articles/00000000-0000-0000-0000-000000000002",
   );
@@ -63,7 +61,28 @@ it("does not link prior activity to a deleted article", () => {
     />,
   );
   expect(
-    screen.queryByRole("link", { name: /View article/ }),
+    screen.queryByRole("link", { name: /article/i }),
   ).not.toBeInTheDocument();
-  expect(screen.getByText(/Deleted article 00000000/)).toBeVisible();
+  expect(screen.getByText("Deleted article")).toBeVisible();
+});
+
+it("marks the current filter pill and links every other action", () => {
+  render(
+    <AdminAudit
+      action="article.archived"
+      page={{ items: [], nextCursor: null }}
+    />,
+  );
+  const pills = screen.getByRole("navigation", { name: "Filter activity" });
+  expect(within(pills).getByRole("link", { name: "Archived" })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+  expect(within(pills).getByRole("link", { name: "All" })).toHaveAttribute(
+    "href",
+    "/dashboard/admin/audit",
+  );
+  expect(
+    within(pills).getByRole("link", { name: "Published" }),
+  ).toHaveAttribute("href", "/dashboard/admin/audit?action=article.published");
 });

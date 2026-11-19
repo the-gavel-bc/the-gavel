@@ -19,6 +19,7 @@ test("administrator edits existing taxonomy and sees gated tags", async ({
   await page.goto("/dashboard/admin/taxonomy");
   const name = `Synthetic ${info.project.name} taxonomy alternate`;
   const section = page.getByRole("listitem").filter({ hasText: name });
+  await section.getByRole("button", { name: `Edit ${name}` }).click();
   await expect(section.getByLabel("Name")).toBeVisible();
   await expect(section.getByLabel("Slug")).toHaveCount(0);
   await section.getByLabel("Name").fill(`${name} revised`);
@@ -27,17 +28,22 @@ test("administrator edits existing taxonomy and sees gated tags", async ({
   await expect(
     page.getByRole("heading", { name: `${name} revised` }),
   ).toBeVisible();
-  await page.getByLabel("Catalog").selectOption("category");
-  await page.getByRole("button", { name: "Show catalog" }).click();
+  await page
+    .getByRole("navigation", { name: "Taxonomy catalog" })
+    .getByRole("link", { name: "Categories" })
+    .click();
   const categoryName = `Synthetic ${info.project.name} category`;
   const category = page.getByRole("listitem").filter({ hasText: categoryName });
+  await category.getByRole("button", { name: `Edit ${categoryName}` }).click();
   await category.getByLabel("Name").fill(`${categoryName} revised`);
   await category.getByRole("button", { name: `Save ${categoryName}` }).click();
   await expect(
     page.getByRole("heading", { name: `${categoryName} revised` }),
   ).toBeVisible();
-  await page.getByLabel("Catalog").selectOption("tag");
-  await page.getByRole("button", { name: "Show catalog" }).click();
+  await page
+    .getByRole("navigation", { name: "Taxonomy catalog" })
+    .getByRole("link", { name: "Tags" })
+    .click();
   await expect(
     page.getByText(/Members create tags in the article editor/),
   ).toBeVisible();
@@ -46,7 +52,8 @@ test("administrator edits existing taxonomy and sees gated tags", async ({
       name: `Synthetic ${info.project.name} taxonomy topic`,
     }),
   ).toBeVisible();
-  await expect(page.getByRole("button", { name: /Save/ })).toHaveCount(0);
+  // Tags are renamed, merged or deleted; sections' Save controls do not appear.
+  await expect(page.getByRole("button", { name: /^Save / })).toHaveCount(0);
 });
 test("author cannot manage taxonomy and invalid cursor can be reset", async ({
   context,

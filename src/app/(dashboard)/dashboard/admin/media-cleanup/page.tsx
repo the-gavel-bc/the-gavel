@@ -53,9 +53,6 @@ export default async function MediaCleanupPage() {
         <dd>{status.lastHealthyAt ?? "No successful check yet"}</dd>
       </dl>
       <MediaCleanupControl />
-      <p>
-        <Link href="/dashboard/admin/articles">Article management</Link>
-      </p>
     </>
   );
 }

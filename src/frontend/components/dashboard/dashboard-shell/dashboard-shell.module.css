@@ -78,6 +78,15 @@
   border-color: var(--dash-line);
   font-size: 0.9375rem;
 }
+.footer a {
+  color: var(--color-muted);
+  font-weight: 600;
+  text-decoration: none;
+}
+.footer a:hover {
+  color: var(--dash-accent);
+  text-decoration: underline;
+}
 
 /* Typography */
 :where(.main) :where(h1) {
@@ -94,6 +103,34 @@
 :where(.main) :where(a) {
   color: var(--dash-accent);
   text-underline-offset: 0.2em;
+}
+/* Plain text links (back links, "Edit article"): bold, no underline until hover. */
+.main a:is(:not([class]), [class=""]) {
+  color: var(--dash-accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+.main a:is(:not([class]), [class=""]):hover {
+  text-decoration: underline;
+}
+/* "Next page" links in every list are pill buttons. */
+:where(.main) :where(nav[aria-label$=" pages"]) {
+  margin-block: var(--space-4);
+  text-align: center;
+}
+.main nav[aria-label$=" pages"] a:is(:not([class]), [class=""]) {
+  align-items: center;
+  background: var(--color-paper);
+  border: 1px solid var(--dash-line);
+  border-radius: 999px;
+  display: inline-flex;
+  min-height: var(--dash-control, 2.75rem);
+  padding: 0 var(--space-6);
+  text-decoration: none;
+}
+.main nav[aria-label$=" pages"] a:is(:not([class]), [class=""]):hover {
+  background: var(--dash-soft);
+  text-decoration: none;
 }
 
 /* Forms */

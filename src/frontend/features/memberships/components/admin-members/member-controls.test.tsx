@@ -40,10 +40,6 @@ const active = {
 } as const;
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.stubGlobal(
-    "confirm",
-    vi.fn(() => true),
-  );
 });
 
 it("changes a listed person's role and retries one uncertain request unchanged", async () => {
@@ -51,9 +47,10 @@ it("changes a listed person's role and retries one uncertain request unchanged",
     .mockResolvedValueOnce({ ok: false, code: "unavailable" })
     .mockResolvedValueOnce({ ok: true, changed: true });
   render(<MemberControls member={invited} isSelf={false} />);
+  // The save button only appears once the role differs.
   expect(
-    screen.getByRole("button", { name: "Change role for new@bc.edu" }),
-  ).toBeDisabled();
+    screen.queryByRole("button", { name: "Change role for new@bc.edu" }),
+  ).not.toBeInTheDocument();
   await userEvent.selectOptions(
     screen.getByLabelText("Role for new@bc.edu"),
     "administrator",
@@ -78,17 +75,18 @@ it("changes a listed person's role and retries one uncertain request unchanged",
   });
 });
 
-it("removes a listed person only after confirmation", async () => {
+it("removes a listed person only after confirmation in the page", async () => {
   mocks.invitation.mockResolvedValue({ ok: true, changed: true });
   render(<MemberControls member={invited} isSelf={false} />);
-  vi.mocked(window.confirm).mockReturnValueOnce(false);
   await userEvent.click(
     screen.getByRole("button", { name: "Remove new@bc.edu" }),
   );
+  await userEvent.click(await screen.findByRole("button", { name: "Cancel" }));
   expect(mocks.invitation).not.toHaveBeenCalled();
   await userEvent.click(
     screen.getByRole("button", { name: "Remove new@bc.edu" }),
   );
+  await userEvent.click(await screen.findByRole("button", { name: "Remove" }));
   await waitFor(() =>
     expect(mocks.invitation).toHaveBeenCalledWith(
       expect.objectContaining({ kind: "remove", invitationId: id }),
@@ -99,18 +97,21 @@ it("removes a listed person only after confirmation", async () => {
 it("warns before self-deactivation and reloads after a conflict", async () => {
   mocks.member.mockResolvedValue({ ok: false, code: "conflict" });
   render(<MemberControls member={active} isSelf />);
-  vi.mocked(window.confirm)
-    .mockReturnValueOnce(false)
-    .mockReturnValueOnce(true);
   await userEvent.click(
     screen.getByRole("button", { name: "Deactivate new@bc.edu" }),
   );
+  expect(
+    await screen.findByRole("alertdialog", {
+      name: "Deactivate your own membership?",
+    }),
+  ).toBeVisible();
+  await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
   expect(mocks.member).not.toHaveBeenCalled();
   await userEvent.click(
     screen.getByRole("button", { name: "Deactivate new@bc.edu" }),
   );
-  expect(window.confirm).toHaveBeenCalledWith(
-    expect.stringContaining("own membership"),
+  await userEvent.click(
+    await screen.findByRole("button", { name: "Deactivate" }),
   );
   await userEvent.click(
     await screen.findByRole("button", { name: "Reload memberships" }),
