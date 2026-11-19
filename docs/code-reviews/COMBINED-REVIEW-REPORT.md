@@ -4,6 +4,26 @@ Quick runs (13 Sonnet reviewers, read-only) on commit `feat/publication-date` (`
 
 Corrections to earlier notes: the `picomatch` dependency advisory is no longer returned by the registry, so `pnpm audit` passes; the DEFERRED row that called it a blocker was stale. The remaining advisories are two moderate ones in production `next` (patched in 16.4.5, latest 16.4.6) and one dev-only `minimatch`.
 
+## Review coverage (all areas)
+
+| # | Area | Status | Report |
+| --- | --- | --- | --- |
+| media | Media pipeline (uploads, expiry, cleanup, profile photos) | Reviewed and fixed | [REVIEW-REPORT.md](REVIEW-REPORT.md), [FINAL-IMPLEMENTATION-REPORT.md](FINAL-IMPLEMENTATION-REPORT.md) |
+| 1 | Authentication and access | Reviewed, real defects fixed, rest deferred | [AREA-1-AUTH-REPORT.md](AREA-1-AUTH-REPORT.md) |
+| 2 | Staff and roles | Reviewed, nothing implemented yet | [AREA-2-STAFF-REPORT.md](AREA-2-STAFF-REPORT.md) |
+| 3 | Article lifecycle and drafts | Reviewed (this report) | this file |
+| 4 | Article editor UI | Reviewed (this report) | this file |
+| 5 | Public reader and search | Reviewed (this report) | this file |
+| 10 | Database layer overall | Reviewed (this report) | this file |
+| 11 | CI, deployment and dependencies | Reviewed (this report) | this file |
+| 6 | Homepage curation | **Not reviewed yet** | none |
+| 7 | Taxonomy and tags | **Not reviewed yet** | none |
+| 8 | Profiles and one-off credits | **Not reviewed yet** | none |
+| 9 | Site information and the admin audit log | **Not reviewed yet** | none |
+| 12 | Design system and accessibility sweep | **Not reviewed yet** | none |
+
+Notes: areas 7 and 8 were touched indirectly (the `tags` and `profiles` read policies appear in C-10 and C-11) but their code and tests were not reviewed. Area 12 was only touched through the editor (area 4).
+
 ## Bugs in code written this week (fix first)
 
 | ID | Sev | Finding | Source | Status |
