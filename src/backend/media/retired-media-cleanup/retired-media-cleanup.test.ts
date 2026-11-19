@@ -13,7 +13,10 @@ vi.mock("@/backend/infrastructure/supabase/media-admin/media-admin", () => ({
     },
   }),
 }));
-import { runRetiredMediaCleanup } from "./retired-media-cleanup";
+import {
+  FINISH_CONCURRENCY,
+  runRetiredMediaCleanup,
+} from "./retired-media-cleanup";
 const article = "85000000-0000-4000-8000-000000000001";
 const asset = "85000000-0000-4000-8000-000000000002";
 const token = "85000000-0000-4000-8000-000000000003";
@@ -230,4 +233,33 @@ describe("retired media cleanup", () => {
         });
     },
   );
+  it("never runs more than the cap of key-finish calls at once", async () => {
+    let inFlight = 0;
+    let peak = 0;
+    const keys = Array.from({ length: 35 }, (_, n) => ({
+      object_key: `${article}/${n}.webp`,
+      claim_token: token,
+    }));
+    let served = false;
+    const base = m.rpc.getMockImplementation()!;
+    m.rpc.mockImplementation(async (name: string, args: unknown) => {
+      if (name === "claim_media_cleanup") {
+        if (served) return { data: [], error: null };
+        served = true;
+        return { data: keys, error: null };
+      }
+      if (name === "finish_media_cleanup") {
+        inFlight += 1;
+        peak = Math.max(peak, inFlight);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        inFlight -= 1;
+        return { data: true, error: null };
+      }
+      return base(name, args);
+    });
+    m.remove.mockResolvedValue({ error: null });
+    await runRetiredMediaCleanup();
+    expect(peak).toBeGreaterThan(1);
+    expect(peak).toBeLessThanOrEqual(FINISH_CONCURRENCY);
+  });
 });

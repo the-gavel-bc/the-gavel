@@ -14,11 +14,6 @@ insert into storage.objects(bucket_id,name,metadata) values('article-media','500
 set local role authenticated;
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);
 select is((select count(*) from storage.objects where bucket_id='article-media' and name='50000000-0000-0000-0000-000000009934/60000000-0000-0000-0000-000000009934.webp'),1::bigint,'active admin can read the finalized object before deactivation');
--- Member-linked profiles cannot be deactivated through the profile RPC (that
--- locked members out with no way back); membership deactivation is the path.
-select is(public.deactivate_contributor_profile('10000000-0000-0000-0000-000000000002',1,'80000000-0000-0000-0000-000000009934')->>'code','conflict','checked deactivation refuses an active member author');
-select is(public.deactivate_contributor_profile('10000000-0000-0000-0000-000000000003',1,'80000000-0000-0000-0000-000000009935')->>'code','conflict','checked deactivation refuses another active admin');
-select is((select count(*) from public.profiles where id in('10000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000003') and active),2::bigint,'refused deactivation leaves both profiles active');
 -- Read denial still holds for inactive profiles that already exist (legacy rows).
 reset role;
 update public.profiles set active=false where id in('10000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000003');

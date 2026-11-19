@@ -107,6 +107,18 @@ export async function POST(
   context: { params: Promise<{ id: string; assetId: string }> },
 ) {
   try {
+    // A cookie-authenticated multipart POST gets no framework origin check, so
+    // refuse a browser request that names another origin.
+    const origin = request.headers.get("origin");
+    if (origin !== null) {
+      let sameOrigin = false;
+      try {
+        sameOrigin = new URL(origin).host === request.headers.get("host");
+      } catch {
+        // An unparseable Origin is treated as cross-origin.
+      }
+      if (!sameOrigin) return reply(403, { ok: false, code: "forbidden" });
+    }
     const { id: articleId, assetId } = await context.params;
     if (!isDraftUuid(articleId) || !isDraftUuid(assetId))
       return reply(400, { ok: false, code: "invalid_input" });
@@ -169,7 +181,11 @@ export async function POST(
       if (checked.data.replayed)
         return reply(200, { ok: true, assetId, replayed: true });
       const file = await readMediaFile(request);
-      if (!file.ok) return reply(file.code === "too_large" ? 413 : 400, file);
+      if (!file.ok)
+        return reply(
+          file.code === "too_large" ? 413 : file.code === "timeout" ? 408 : 400,
+          file,
+        );
       const processed = await processArticleImage(file.bytes, file.contentType);
       if (!processed.ok)
         return reply(processed.code === "too_large" ? 413 : 400, processed);

@@ -57,4 +57,23 @@ describe("readMediaFile", () => {
       code: "too_large",
     });
   });
+
+  it("gives up on a body that stops arriving and reports a timeout", async () => {
+    const stalled = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new Uint8Array([1, 2, 3]));
+        // never closes
+      },
+    });
+    const result = await readMediaFile(
+      new Request("http://localhost/api/media", {
+        method: "POST",
+        headers: { "content-type": "multipart/form-data; boundary=x" },
+        body: stalled,
+        duplex: "half",
+      } as RequestInit),
+      50,
+    );
+    expect(result).toEqual({ ok: false, code: "timeout" });
+  });
 });

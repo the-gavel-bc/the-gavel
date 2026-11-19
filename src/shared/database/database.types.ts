@@ -456,6 +456,7 @@ export type Database = {
           article_id: string;
           byte_size: number | null;
           created_at: string;
+          expiry_attempted_at: string | null;
           finalized_at: string | null;
           height: number | null;
           id: string;
@@ -471,6 +472,7 @@ export type Database = {
           article_id: string;
           byte_size?: number | null;
           created_at?: string;
+          expiry_attempted_at?: string | null;
           finalized_at?: string | null;
           height?: number | null;
           id: string;
@@ -485,6 +487,7 @@ export type Database = {
           article_id?: string;
           byte_size?: number | null;
           created_at?: string;
+          expiry_attempted_at?: string | null;
           finalized_at?: string | null;
           height?: number | null;
           id?: string;
@@ -680,6 +683,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      admin_remove_profile_photo: {
+        Args: { p_profile_id: string };
+        Returns: Json;
+      };
       admit_article_image_upload: {
         Args: { p_article_id: string; p_asset_id: string };
         Returns: Json;
@@ -1037,6 +1044,10 @@ export type Database = {
           p_expected_version: number;
           p_request_id: string;
         };
+        Returns: Json;
+      };
+      purge_article_image: {
+        Args: { p_article_id: string; p_asset_id: string };
         Returns: Json;
       };
       record_media_cleanup_health: {

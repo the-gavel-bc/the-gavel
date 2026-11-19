@@ -85,6 +85,10 @@ select is(pg_temp.call('4','archive','a2')->>'ok','true','administrator archives
 select pg_temp.act_as('3'); set local role authenticated;
 select is((select count(*)::integer from public.articles where id=(select id from t where label='a3')),0,'editor cannot read unsubmitted drafts');
 reset role;
+insert into public.media_assets(id,article_id,uploader_user_id,request_id,object_key,status)
+  select '60000000-0000-0000-0000-000000006799',id,'00000000-0000-0000-0000-000000000002',gen_random_uuid(),'review/unfinished.webp','uploading' from t where label='a3';
+select is(pg_temp.call('2','submit','a3')->>'code','conflict','submit is refused while an upload is unfinished');
+delete from public.media_assets where id='60000000-0000-0000-0000-000000006799';
 select is(pg_temp.call('2','submit','a3')->>'ok','true','second author submission');
 select pg_temp.act_as('3'); set local role authenticated;
 select is((select count(*)::integer from public.articles where id=(select id from t where label='a3')),1,'editor reads submitted drafts');
@@ -95,7 +99,7 @@ select throws_ok('select * from public.list_review_articles()','42501',null,'aut
 reset role;
 select ok(not has_function_privilege('authenticated','private.article_authority(uuid,uuid,text)','EXECUTE'),'authority helper is private');
 select pg_temp.act_as('4'); set local role authenticated;
-select is((select editors from public.staff_summary()),1,'staff summary counts editors');
+select is((select editors from public.staff_summary()),(select count(*)::integer from public.memberships where active and role='editor'),'staff summary counts editors');
 reset role;
 select * from finish();
 rollback;

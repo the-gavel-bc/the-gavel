@@ -4,8 +4,9 @@ import { z } from "zod";
 import { isDraftUuid } from "@/shared/articles/draft-cursor/draft-cursor";
 import { createTrustedMediaClient } from "@/backend/infrastructure/supabase/media-admin/media-admin";
 
-// Unused article images are deleted this long after they were uploaded, once
-// nothing current or retained uses them (see the staff plan, round 6).
+// Unused finalized images are deleted this long after they were uploaded, once
+// nothing current or retained uses them. Unfinished uploads are reaped by the
+// database after a day. See docs/code-reviews/plans.
 export const RETENTION_DAYS = 7;
 const BATCH = 25;
 const BUDGET_MS = 40_000;
@@ -48,7 +49,10 @@ export async function expireUnusedUploads(
     result.claimed += rows.data.length;
     let progress = 0;
     for (const row of rows.data) {
-      const removed = await bucket.remove([row.object_key]);
+      // A thrown Storage error counts as a failed removal, not a crashed run.
+      const removed = await bucket
+        .remove([row.object_key])
+        .catch(() => ({ error: new Error("storage unavailable") }));
       const done = removed.error
         ? null
         : await client.rpc("complete_expired_unused_upload", {

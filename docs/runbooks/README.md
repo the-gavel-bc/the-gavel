@@ -16,4 +16,6 @@ Runbooks will be added and verified when the corresponding services and commands
 - Member deactivation and session response
 - Suspected malicious-content or upload response
 
+- [Purge an image from article history](purge-article-image.md) (written, not yet exercised end to end)
+
 Do not publish speculative command sequences as verified procedures.
