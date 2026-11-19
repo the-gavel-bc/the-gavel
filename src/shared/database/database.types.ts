@@ -737,6 +737,16 @@ export type Database = {
         Args: { p_display_name: string; p_request_id: string };
         Returns: Json;
       };
+      create_taxonomy: {
+        Args: {
+          p_kind: string;
+          p_name: string;
+          p_navigation_order: number;
+          p_parent_id?: string;
+          p_request_id: string;
+        };
+        Returns: Json;
+      };
       current_profile: {
         Args: Record<PropertyKey, never>;
         Returns: {
@@ -759,6 +769,10 @@ export type Database = {
           p_expected_version: number;
           p_request_id: string;
         };
+        Returns: Json;
+      };
+      delete_unused_tag: {
+        Args: { p_id: string; p_request_id: string };
         Returns: Json;
       };
       ensure_tag: { Args: { p_name: string }; Returns: Json };
@@ -948,6 +962,14 @@ export type Database = {
         Args: { p_asset_id: string };
         Returns: Json;
       };
+      merge_tags: {
+        Args: {
+          p_request_id: string;
+          p_source_id: string;
+          p_target_id: string;
+        };
+        Returns: Json;
+      };
       publish_article: {
         Args: {
           p_article_id: string;
@@ -982,6 +1004,10 @@ export type Database = {
           p_invitation_id: string;
           p_request_id: string;
         };
+        Returns: Json;
+      };
+      rename_tag: {
+        Args: { p_id: string; p_name: string; p_request_id: string };
         Returns: Json;
       };
       request_article_image_upload: {

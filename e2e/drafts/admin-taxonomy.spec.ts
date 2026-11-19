@@ -39,7 +39,7 @@ test("administrator edits existing taxonomy and sees gated tags", async ({
   await page.getByLabel("Catalog").selectOption("tag");
   await page.getByRole("button", { name: "Show catalog" }).click();
   await expect(
-    page.getByText(/Active members create tags in the article editor/),
+    page.getByText(/Members create tags in the article editor/),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", {

@@ -1,0 +1,10 @@
+.tag {
+  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.tag label {
+  display: grid;
+  gap: var(--space-1);
+}

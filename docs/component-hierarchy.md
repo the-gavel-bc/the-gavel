@@ -55,7 +55,7 @@ Newsletter signup is deferred.
 
 Task 10's administrator contributor route was removed with the one-off credits change (2026-11-16): credits typed in the editor are the only way to credit someone without an account, and there is no contributor directory to administer.
 
-Task 11 implements bounded administrator taxonomy catalogs and existing section/category controls. Tags are read-only pending normalization approval; names and navigation order can change without altering stored slugs or parent links.
+Task 11 implements bounded administrator taxonomy catalogs and existing section/category controls. Administrators can also create sections and categories and rename, merge or delete-when-unused tags (2026-11-16); names and navigation order can change without altering stored slugs or parent links.
 
 Task 12 implements `/dashboard/profile` for the caller's own public name and biography, with generated-slug display, exact retry and explicit conflict reload. Profile image selection remains unavailable until a separate profile media contract exists.
 
