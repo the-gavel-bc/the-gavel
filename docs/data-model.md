@@ -235,3 +235,7 @@ Published owners/administrators may reserve, process, finalize, attach, replace 
 ## Profile photos
 
 `private.profile_photos(profile_id, bytes, updated_at)` holds one processed WebP per profile (at most 512 KB; deleted with the profile). It has no direct grants. `public.profiles.photo_updated_at` records when it last changed and is readable by anonymous and authenticated roles, like other public profile fields. Migration `20261117030000_profile_photos.sql`.
+
+## Unused image expiry log
+
+`private.media_expiry_log(asset_id, article_id, object_key, expired_at)` records each automatic deletion (no grants). Migration `20261118010000_expire_unused_uploads.sql`.

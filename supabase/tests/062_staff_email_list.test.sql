@@ -1,5 +1,8 @@
 begin;
 select no_plan();
+create temp table audit_before as select count(*)::int n from public.audit_events
+  where action in ('membership.invited','membership.invitation_changed',
+    'membership.invitation_removed','membership.claimed');
 
 update auth.users set email='list-admin@bc.edu',email_confirmed_at=now(),
   raw_app_meta_data='{"provider":"google","providers":["google"]}'::jsonb
@@ -115,7 +118,7 @@ reset role;
 
 select is((select pg_catalog.count(*)::int from public.audit_events
   where action in ('membership.invited','membership.invitation_changed',
-    'membership.invitation_removed','membership.claimed')),5,
+    'membership.invitation_removed','membership.claimed')) - (select n from audit_before),5,
   'listing changes and claims are audited');
 -- Activity for one person includes events from before they signed in.
 select is((select pg_catalog.count(*)::int from public.list_membership_audit_events(

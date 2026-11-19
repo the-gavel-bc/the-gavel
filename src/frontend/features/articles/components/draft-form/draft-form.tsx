@@ -5,7 +5,6 @@ import {
   useSyncExternalStore,
   useState,
   useCallback,
-  useMemo,
   type FormEvent,
 } from "react";
 import dynamic from "next/dynamic";
@@ -32,7 +31,6 @@ import { GuardedDashboardLink } from "../../../../components/dashboard/guarded-d
 import { ArticleMedia } from "../article-media/article-media";
 import type { MainImage } from "@/backend/media/media-queries/media-queries";
 import { DraftReadOnlyBody } from "../draft-editor/draft-read-only-body";
-import { UnusedArticleUploads } from "../unused-article-uploads/unused-article-uploads";
 import { ArticleLifecycleControls } from "../article-lifecycle-controls/article-lifecycle-controls";
 
 const DraftEditor = dynamic(
@@ -78,23 +76,6 @@ export function DraftForm({
   const [mediaBusy, setMediaBusy] = useState(false);
   const [bodyMediaDirty, setBodyMediaDirty] = useState(false);
   const [lifecycleBusy, setLifecycleBusy] = useState(false);
-  const [cleanupBusy, setCleanupBusy] = useState(false);
-  const localAssetIds = useMemo(() => {
-    const ids = new Set<string>();
-    function visit(node: { type: string; attrs?: unknown; content?: unknown }) {
-      if (
-        node.type === "image" &&
-        node.attrs &&
-        typeof node.attrs === "object" &&
-        "assetId" in node.attrs &&
-        typeof node.attrs.assetId === "string"
-      )
-        ids.add(node.attrs.assetId.toLowerCase());
-      if (Array.isArray(node.content)) node.content.forEach(visit);
-    }
-    if (command.draft.content) visit(command.draft.content.document);
-    return ids;
-  }, [command.draft.content]);
   const { editorInvalid } = command;
   const reportEditorFailure = useCallback(
     (failure: DraftFailure) => {
@@ -155,8 +136,7 @@ export function DraftForm({
       mediaDirty ||
       mediaBusy ||
       bodyMediaDirty ||
-      lifecycleBusy ||
-      cleanupBusy,
+      lifecycleBusy,
   );
   // A photo chosen before the draft exists: the draft is created first, then
   // ArticleMedia uploads it. The editor stays mounted so the file survives.
@@ -183,12 +163,7 @@ export function DraftForm({
     router.push("/dashboard");
   }
   async function save(photo: File | null) {
-    if (
-      cleanupBusy ||
-      mediaBusy ||
-      lifecycleBusy ||
-      (recoveryBlocked && !command.pending)
-    )
+    if (mediaBusy || lifecycleBusy || (recoveryBlocked && !command.pending))
       return;
     if (
       !ready ||
@@ -300,7 +275,7 @@ export function DraftForm({
             local={command.draft}
             options={currentOptions}
             nativeInvalid={Boolean(editorFailure)}
-            disabled={Boolean(command.pending) || cleanupBusy}
+            disabled={Boolean(command.pending)}
             onBlocked={() => {
               setRecoveryBlocked(true);
               setRecoveryVisible(true);
@@ -354,7 +329,6 @@ export function DraftForm({
         disabled={
           !ready ||
           lifecycleBusy ||
-          cleanupBusy ||
           (!article && !inPlace && command.phase === "saved")
         }
         className={styles.fields}
@@ -430,7 +404,6 @@ export function DraftForm({
           disabled={
             !ready ||
             lifecycleBusy ||
-            cleanupBusy ||
             (!article && !inPlace && command.phase === "saved")
           }
           onError={reportEditorFailure}
@@ -481,8 +454,7 @@ export function DraftForm({
             Boolean(command.pending) ||
             command.phase === "saving" ||
             command.phase === "conflict" ||
-            lifecycleBusy ||
-            cleanupBusy
+            lifecycleBusy
           }
           onCommit={(result) => {
             command.acknowledgeArticle({
@@ -493,26 +465,6 @@ export function DraftForm({
           }}
           onBusyChange={setMediaBusy}
           onDirtyChange={setMediaDirty}
-        />
-      )}
-      {command.article && (
-        <UnusedArticleUploads
-          articleId={command.article.id}
-          refreshKey={`${command.article.version}:${mediaDirty}:${bodyMediaDirty}`}
-          localAssetIds={localAssetIds}
-          disabled={
-            !ready ||
-            lifecycleBusy ||
-            Boolean(command.pending) ||
-            command.phase === "saving" ||
-            command.phase === "uncertain" ||
-            command.phase === "conflict" ||
-            Boolean(editorFailure) ||
-            mediaDirty ||
-            bodyMediaDirty ||
-            recoveryBlocked
-          }
-          onBusyChange={setCleanupBusy}
         />
       )}
       <div className={styles.saveBar} data-draft-save-bar="">
@@ -527,6 +479,28 @@ export function DraftForm({
           </p>
         </div>
         <div className={styles.saveActions}>
+          {command.article && (
+            <ArticleLifecycleControls
+              compact
+              articleId={command.article.id}
+              version={command.article.version}
+              status={status}
+              onBusyChange={setLifecycleBusy}
+              disabled={
+                !ready ||
+                command.dirty ||
+                Boolean(command.pending) ||
+                Boolean(editorFailure) ||
+                mediaDirty ||
+                mediaBusy ||
+                bodyMediaDirty ||
+                recoveryBlocked ||
+                categories.loading ||
+                Boolean(categories.error) ||
+                Boolean(command.failure)
+              }
+            />
+          )}
           <Button
             type="button"
             variant="secondary"
@@ -540,7 +514,6 @@ export function DraftForm({
             disabled={
               !ready ||
               lifecycleBusy ||
-              cleanupBusy ||
               mediaBusy ||
               command.phase === "saving" ||
               command.phase === "saved" ||
@@ -565,28 +538,6 @@ export function DraftForm({
           </Button>
         </div>
       </div>
-      {command.article && (
-        <ArticleLifecycleControls
-          articleId={command.article.id}
-          version={command.article.version}
-          status={status}
-          onBusyChange={setLifecycleBusy}
-          disabled={
-            !ready ||
-            cleanupBusy ||
-            command.dirty ||
-            Boolean(command.pending) ||
-            Boolean(editorFailure) ||
-            mediaDirty ||
-            mediaBusy ||
-            bodyMediaDirty ||
-            recoveryBlocked ||
-            categories.loading ||
-            Boolean(categories.error) ||
-            Boolean(command.failure)
-          }
-        />
-      )}
       <p>
         <GuardedDashboardLink href="/dashboard">
           Back to My articles
