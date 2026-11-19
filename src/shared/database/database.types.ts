@@ -253,6 +253,7 @@ export type Database = {
           id: string;
           meta_description: string | null;
           owner_profile_id: string;
+          publication_date: string | null;
           published_at: string | null;
           published_by_profile_id: string | null;
           review_note: string | null;
@@ -274,6 +275,7 @@ export type Database = {
           id?: string;
           meta_description?: string | null;
           owner_profile_id: string;
+          publication_date?: string | null;
           published_at?: string | null;
           published_by_profile_id?: string | null;
           review_note?: string | null;
@@ -294,6 +296,7 @@ export type Database = {
           id?: string;
           meta_description?: string | null;
           owner_profile_id?: string;
+          publication_date?: string | null;
           published_at?: string | null;
           published_by_profile_id?: string | null;
           review_note?: string | null;
