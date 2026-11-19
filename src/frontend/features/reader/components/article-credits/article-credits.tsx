@@ -20,11 +20,15 @@ export function ArticleCredits({ article }: { article: PublicArticle }) {
               <dt>{label}</dt>
               <dd>
                 {contributors.map((person, index) => (
-                  <span key={person.slug}>
+                  <span key={`${person.slug ?? person.displayName}:${index}`}>
                     {index > 0 && ", "}
-                    <Link href={`/authors/${person.slug}`}>
-                      {person.displayName}
-                    </Link>
+                    {person.slug ? (
+                      <Link href={`/authors/${person.slug}`}>
+                        {person.displayName}
+                      </Link>
+                    ) : (
+                      person.displayName
+                    )}
                   </span>
                 ))}
               </dd>

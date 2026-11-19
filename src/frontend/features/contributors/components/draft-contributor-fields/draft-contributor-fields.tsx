@@ -46,10 +46,10 @@ export function DraftContributorFields({
     >
       <legend>Contributors</legend>
       <p id="draft-contributors-hint">
-        Up to 32 credits. A contributor may have different roles. Matching
-        display orders are allowed. Credits do not grant editing access.
+        Up to 32 credits. Search for staff, or type a name to add a one-off
+        credit that appears only on this article. Credits do not grant editing
+        access.
       </p>
-      {!options.length && <p>No active contributors are available.</p>}
       {value.map((credit, index) => (
         <div key={keys[index] ?? `external-${index}`} className={styles.credit}>
           <ContributorCombobox

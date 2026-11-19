@@ -31,7 +31,6 @@ describe("DashboardNav", () => {
       "Article activity",
       "Homepage",
       "Memberships",
-      "Contributors",
       "Taxonomy",
       "Site information",
       "Media cleanup",

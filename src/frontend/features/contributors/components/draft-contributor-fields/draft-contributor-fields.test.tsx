@@ -104,7 +104,7 @@ it("creates a guest with keyboard navigation and announces bounded results", asy
   await userEvent.clear(input);
   await userEvent.type(input, "New Person");
   await screen.findByRole("option", {
-    name: "Add 'New Person' as a new contributor",
+    name: "Add 'New Person' as a one-off credit",
   });
   await userEvent.keyboard("{ArrowDown}{Enter}");
   expect(
@@ -138,7 +138,7 @@ it("preserves exact request and name after an uncertain creation", async () => {
   await userEvent.type(input, "Retry Guest");
   await userEvent.click(
     await screen.findByRole("option", {
-      name: "Add 'Retry Guest' as a new contributor",
+      name: "Add 'Retry Guest' as a one-off credit",
     }),
   );
   expect(await screen.findByRole("alert")).toHaveTextContent(/retry/i);
@@ -197,7 +197,7 @@ it("keeps role edits when guest creation completes and allows adding without a c
   await userEvent.type(input, "Slow Guest");
   await userEvent.click(
     await screen.findByRole("option", {
-      name: "Add 'Slow Guest' as a new contributor",
+      name: "Add 'Slow Guest' as a one-off credit",
     }),
   );
   await userEvent.selectOptions(screen.getByLabelText("Role 1"), "editor");

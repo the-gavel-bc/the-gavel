@@ -143,4 +143,4 @@ Layout polish (2026-11-14): articles use one 46rem reading column with a plain-t
 
 Desk fixes (2026-11-14): destructive actions use an outlined red style (`Button variant="danger"`, or `data-variant="danger"` on plain dashboard buttons), never the primary fill. The editor's save bar is a single compact row on small screens, and the formatting toolbar is sticky.
 
-Desk directories (2026-11-16): Memberships, Contributors and Taxonomy share `admin-list` styles (toolbar card, card rows, state badges), matching the article lists. Desk timestamps are shown in Eastern time with an "ET" label.
+Desk directories (2026-11-16): Memberships and Taxonomy share `admin-list` styles (toolbar card, card rows, state badges), matching the article lists. Desk timestamps are shown in Eastern time with an "ET" label.

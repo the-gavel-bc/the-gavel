@@ -114,9 +114,7 @@ Phase 4 Task 3 implements `request_article_image_upload(article_id,request_id)` 
 
 ## Implemented administrator contributor operations
 
-`list_admin_contributors(p_limit,p_state,p_before_slug,p_before_id)` returns at most 51 safe profile summaries to an eligible active administrator, ordered by slug and ID. State is `all | active | inactive`; results expose public name, slug, plain biography, active/version/frozen status, a linked-account boolean, and a live-reference boolean. No private `auth_user_id` is returned.
-
-`create_guest_contributor(requestId,displayName,biography)`, `save_contributor_profile(profileId,expectedVersion,requestId,displayName,biography)`, and `deactivate_contributor_profile(profileId,expectedVersion,requestId)` accept bounded public fields only. Create always leaves `auth_user_id` null. The database derives a unique author slug from display name until first published ownership/credit, then freezes it. Deactivation fails while any published or archived article owns or credits the profile, or if it would disable the last eligible administrator. Actor, audit action, and immutable exact-retry receipt are server/database derived; changed writes atomically capture one `profile.*` event without biography text. Stale/reused requests fail safely. Direct authenticated profile writes are closed.
+`list_admin_contributors`, `save_contributor_profile`, `deactivate_contributor_profile` and the three-argument administrator `create_guest_contributor` were removed by migration `20261116020100_remove_contributor_admin.sql`. See [one-off credits](#contributor-discovery-and-guest-creation).
 
 ## Implemented own public profile operations
 
@@ -303,6 +301,8 @@ Explicit unused-image removal accepts unreferenced uploading claims. Owner/admin
 `ensure_tag(p_name text)` is authenticated-only and requires an eligible active member and active profile. It trims/collapses whitespace, accepts 1–120 characters, reuses case-insensitive names and allocates canonical collision-safe slugs. Success returns `{ok,id,name,slug,created}`; safe failures are `forbidden`, `invalid_input`, `rate_limited`, or `unavailable`. It consumes the existing 30-attempt/60-second draft quota. The editor adds at most ten tags while existing server draft validation still accepts up to 64. See the [editor plan](superpowers/plans/2026-11-12-editor-tags-contributors-photo.md).
 
 ## Contributor discovery and guest creation
+
+One-off credits (2026-11-16, migration `20261116020000_one_off_credits.sql`): a name typed in the editor creates a credit-only profile row used by that credit, never matched by name to another person or article. `search_contributors` returns only people with accounts. Credit-only people have no author page (anonymous profile reads require an account link, so `/authors/<slug>` returns 404), no sitemap entry and no author archive; public article and card projections return their `slug` as `null` and the UI shows the name as plain text.
 
 `search_contributors(p_query text)` requires active membership and returns `{ok:true,items:[{id,displayName,slug}]}` with at most ten active substring matches. `%` and `_` have literal meaning. `create_guest_contributor(p_request_id uuid,p_display_name text)` returns `{ok,id,displayName,slug,created,replayed}`; a case-insensitive active name match returns `created:false`. Names use existing administrator validation (trimmed, 1–120 characters, no controls). Exact actor/request retries replay before quota; changed payloads return `request_conflict`. Other failures are `forbidden`, `invalid_input`, `rate_limited`, `unavailable`. The administrator three-argument operation remains available under its existing permissions.
 

@@ -94,9 +94,9 @@ create temp view sitemap_items as
  select i from sitemap_proof,jsonb_array_elements(value->'items') i where label='all' and i->>'slug' like 'sm-%';
 grant select on sitemap_items to anon,authenticated;
 select is((select i from sitemap_items where i->>'slug'='sm-one') - 'id' - 'publishedAt',
- '{"slug":"sm-one","section":"sm-news","categories":["sm-cat"],"tags":["sm-tag"],"authors":["sm-guest","sm-owner"]}'::jsonb,
- 'article carries active category, tag and deduplicated owner/credited authors');
-select is((select i->'authors' from sitemap_items where i->>'slug'='sm-two'),'["sm-guest","sm-owner"]'::jsonb,'credited guest and owner listed once');
+ '{"slug":"sm-one","section":"sm-news","categories":["sm-cat"],"tags":["sm-tag"],"authors":["sm-owner"]}'::jsonb,
+ 'article carries active category, tag and owner author (credit-only names excluded)');
+select is((select i->'authors' from sitemap_items where i->>'slug'='sm-two'),'["sm-owner"]'::jsonb,'credit-only names are not author pages; owner listed once');
 select is((select count(*)::int from sitemap_items,jsonb_array_elements_text(i->'categories') c where c in ('sm-empty-cat','sm-inactive-cat','sm-hidden-cat')),0,
  'inactive and hidden-section categories never travel with listed articles');
 select is((select count(*)::int from sitemap_items,jsonb_array_elements_text(i->'tags') t where t<>'sm-tag'),0,

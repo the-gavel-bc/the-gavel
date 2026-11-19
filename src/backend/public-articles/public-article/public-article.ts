@@ -53,7 +53,8 @@ const articleSchema = z.strictObject({
     .array(
       z.strictObject({
         displayName: text(120, 1),
-        slug,
+        // Credit-only people have no author page, so no slug.
+        slug: slug.nullable(),
         role: z.enum(["writer", "editor", "creative"]),
         displayOrder: z.number().int().nonnegative(),
       }),
