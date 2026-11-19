@@ -34,6 +34,7 @@ import { GuardedDashboardLink } from "../../../../components/dashboard/guarded-d
 import { ArticleMedia } from "../article-media/article-media";
 import type { MainImage } from "@/backend/media/media-queries/media-queries";
 import { DraftReadOnlyBody } from "../draft-editor/draft-read-only-body";
+import type { ArticleCapabilities } from "@/shared/articles/article-permissions/article-permissions";
 import { ArticleLifecycleControls } from "../article-lifecycle-controls/article-lifecycle-controls";
 
 const DraftEditor = dynamic(
@@ -66,12 +67,17 @@ export function DraftForm({
   article,
   initialImage,
   status = "draft",
+  review,
+  capabilities,
 }: {
   initialDraft: DraftInput;
   options: DraftOptions;
   article?: DraftArticle;
   initialImage?: MainImage | null;
   status?: "draft" | "published";
+  /** Review state and what this member may do; absent for new drafts. */
+  review?: { requestedAt: string | null; note: string | null };
+  capabilities?: ArticleCapabilities;
 }) {
   const command = useDraftCommand(initialDraft, article, status);
   const [editorFailure, setEditorFailure] = useState<DraftFailure | null>(null);
@@ -328,6 +334,17 @@ export function DraftForm({
           </Button>
         </section>
       )}
+      {review?.requestedAt && (
+        <p role="note" className={styles.reviewNote}>
+          In review. Copy-edit this article, then publish it or return it to its
+          author with a note.
+        </p>
+      )}
+      {!review?.requestedAt && review?.note && (
+        <p role="note" className={styles.reviewNote}>
+          Returned by an editor: {review.note}
+        </p>
+      )}
       <fieldset
         disabled={
           !ready ||
@@ -493,7 +510,9 @@ export function DraftForm({
           <p>
             {status === "published"
               ? "This article remains published when you save changes."
-              : "Your draft stays private."}
+              : review?.requestedAt
+                ? "In review. Only editors can change it until it is published or returned."
+                : "Your draft stays private."}
           </p>
         </div>
         <div className={styles.saveLeft}>
@@ -511,6 +530,7 @@ export function DraftForm({
               articleId={command.article.id}
               version={command.article.version}
               status={status}
+              capabilities={capabilities}
               onBusyChange={setLifecycleBusy}
               disabled={
                 !ready ||

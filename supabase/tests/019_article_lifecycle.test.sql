@@ -1,6 +1,8 @@
 begin;
 select no_plan();
 \ir support/draft-fixtures/draft-fixtures.inc
+-- Publishing and editing published articles are editor/administrator powers; these cases act as an administrator.
+update public.memberships set role='administrator' where user_id='00000000-0000-0000-0000-000000000002';
 
 create function pg_temp.ready_input(p_patch jsonb default '{}') returns jsonb language sql as $$
 select pg_temp.draft_input(jsonb_build_object('content','{"format":"gavel-draft","version":1,"document":{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Ready story"}]}]}}'::jsonb) || p_patch);

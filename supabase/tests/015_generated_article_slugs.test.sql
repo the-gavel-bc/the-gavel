@@ -38,7 +38,7 @@ select is(public.save_article_draft((select (result->>'articleId')::uuid from re
   '80000000-0000-0000-0000-000000000310',pg_temp.draft_input('{"title":"Third Title","slug":99}'))->>'code','invalid_input','malformed old slug is rejected');
 update public.articles set status='published',published_at=now() where id=(select (result->>'articleId')::uuid from results where label='first');
 select is(public.save_article_draft((select (result->>'articleId')::uuid from results where label='first'),3,
-  '80000000-0000-0000-0000-000000000306',pg_temp.draft_input('{"title":"New public title"}'))->>'code','conflict','draft save cannot change a published article');
+  '80000000-0000-0000-0000-000000000306',pg_temp.draft_input('{"title":"New public title"}'))->>'code','not_found','draft save cannot change a published article');
 select is((select slug from public.articles where id=(select (result->>'articleId')::uuid from results where label='first')),'second-title','published slug remains fixed');
 
 insert into public.articles(id,owner_profile_id,section_id,title,slug)

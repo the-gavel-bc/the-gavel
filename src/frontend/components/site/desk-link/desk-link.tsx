@@ -3,7 +3,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import styles from "./desk-link.module.css";
 
-type Desk = { displayName: string; role: "author" | "administrator" };
+type Desk = {
+  displayName: string;
+  role: "author" | "editor" | "administrator";
+};
 
 export const initials = (name: string) =>
   name
@@ -31,7 +34,10 @@ export function DeskLink() {
     return () => controller.abort();
   }, []);
   if (!desk) return null;
-  const role = desk.role === "administrator" ? "administrator" : "author";
+  const role =
+    desk.role === "administrator" || desk.role === "editor"
+      ? desk.role
+      : "author";
   return (
     <Link
       className={styles.desk}

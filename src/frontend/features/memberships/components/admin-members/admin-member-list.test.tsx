@@ -11,7 +11,13 @@ vi.mock("next/navigation", () => ({
 }));
 import { AdminMemberList } from "./admin-member-list";
 
-const summary = { administrators: 3, authors: 97, invited: 5, inactive: 2 };
+const summary = {
+  administrators: 3,
+  editors: 0,
+  authors: 97,
+  invited: 5,
+  inactive: 2,
+};
 const person = {
   key: "90000000-0000-0000-0000-000000000005",
   userId: null,

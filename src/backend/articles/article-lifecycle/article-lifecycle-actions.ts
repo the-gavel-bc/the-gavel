@@ -12,7 +12,7 @@ import {
 
 async function transition(
   command: ArticleLifecycleCommand,
-  operation: "publish" | "archive" | "restore",
+  operation: "submit" | "return" | "publish" | "archive" | "restore",
 ): Promise<ArticleLifecycleResult> {
   const parsed = parseArticleLifecycleCommand(command);
   if (!parsed.ok) return parsed;
@@ -22,27 +22,42 @@ async function transition(
     if (operation === "restore" && access.role !== "administrator")
       return { ok: false, code: "forbidden" };
     const client = await createServerSupabaseClient();
-    const { data, error } = await client.rpc(
-      operation === "publish"
-        ? "publish_article"
-        : operation === "archive"
-          ? "archive_article"
-          : "restore_article",
-      {
-        p_article_id: parsed.value.articleId,
-        p_expected_version: parsed.value.expectedVersion,
-        p_request_id: parsed.value.requestId,
-      },
-    );
+    const args = {
+      p_article_id: parsed.value.articleId,
+      p_expected_version: parsed.value.expectedVersion,
+      p_request_id: parsed.value.requestId,
+    };
+    // The database decides who may do what; this only picks the operation.
+    const { data, error } =
+      operation === "return"
+        ? await client.rpc("return_article", {
+            ...args,
+            p_note: parsed.value.note ?? "",
+          })
+        : await client.rpc(
+            operation === "submit"
+              ? "submit_article"
+              : operation === "publish"
+                ? "publish_article"
+                : operation === "archive"
+                  ? "archive_article"
+                  : "restore_article",
+            args,
+          );
     if (error) return { ok: false, code: "unavailable" };
     const result = parseArticleLifecycleResult(
       data,
-      operation === "archive" ? "archived" : "published",
+      operation === "archive"
+        ? "archived"
+        : operation === "submit" || operation === "return"
+          ? "draft"
+          : "published",
       parsed.value.articleId,
     );
     if (result.ok) {
       try {
         revalidatePath("/dashboard");
+        revalidatePath("/dashboard/review");
         revalidatePath(`/dashboard/articles/${result.articleId}`);
       } catch {
         console.error(
@@ -75,4 +90,16 @@ export async function restoreArticleAction(
   command: ArticleLifecycleCommand,
 ): Promise<ArticleLifecycleResult> {
   return transition(command, "restore");
+}
+
+export async function submitArticleAction(
+  command: ArticleLifecycleCommand,
+): Promise<ArticleLifecycleResult> {
+  return transition(command, "submit");
+}
+
+export async function returnArticleAction(
+  command: ArticleLifecycleCommand,
+): Promise<ArticleLifecycleResult> {
+  return transition(command, "return");
 }

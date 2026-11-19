@@ -1,6 +1,8 @@
 begin;
 select no_plan();
 \ir support/draft-fixtures/draft-fixtures.inc
+-- Publishing and editing published articles are editor/administrator powers; these cases act as an administrator.
+update public.memberships set role='administrator' where user_id='00000000-0000-0000-0000-000000000002';
 create temp table cancel_target as select
   (public.create_article_draft('80000000-0000-0000-0000-000000000951',pg_temp.draft_input())->>'articleId')::uuid article_id;
 grant select on cancel_target to authenticated,service_role;

@@ -17,6 +17,7 @@ export default async function DashboardLayout({
       <DashboardShell
         displayName={access.displayName}
         isAdmin={access.role === "administrator"}
+        canReview={access.role !== "author"}
         accountAction={<DashboardSignOutForm action={signOut} />}
       >
         {children}

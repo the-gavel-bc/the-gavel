@@ -6,9 +6,9 @@ create function pg_temp.try_save(patch jsonb default '{}',v integer default 1) r
 select public.save_article_draft((select id from target),v,gen_random_uuid(),pg_temp.draft_input(patch));
 $$;
 update public.articles set status='published',published_at=now();
-select is(pg_temp.try_save('{"title":"No publish edit"}')->>'code','conflict','published article cannot be edited');
+select is(pg_temp.try_save('{"title":"No publish edit"}')->>'code','not_found','an author cannot edit a published article');
 update public.articles set status='archived',archived_at=now();
-select is(pg_temp.try_save()->>'code','conflict','archived article cannot be edited');
+select is(pg_temp.try_save()->>'code','not_found','an author cannot edit an archived article');
 update public.articles set status='draft',published_at=null,archived_at=null,content='{"legacy":"original"}';
 select is(pg_temp.try_save('{"title":"Metadata only"}')->>'code','unsupported_content','unsupported stored content blocks even metadata-only overwrite');
 select is((select content from public.articles),'{"legacy":"original"}'::jsonb,'original unsupported content preserved');

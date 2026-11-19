@@ -1,6 +1,8 @@
 begin;
 select no_plan();
 \ir support/draft-fixtures/draft-fixtures.inc
+-- Publishing and editing published articles are editor/administrator powers; these cases act as an administrator.
+update public.memberships set role='administrator' where user_id='00000000-0000-0000-0000-000000000002';
 insert into public.articles(id,owner_profile_id,section_id,title,slug,status,published_at,content)
 values ('60000000-0000-0000-0000-000000000060','10000000-0000-0000-0000-000000000002',
  '20000000-0000-0000-0000-000000000051','Published photo proof','published-photo-proof','published',now(),
@@ -78,16 +80,18 @@ select is(pg_temp.trusted_photo(op,'00000000-0000-0000-0000-000000000002')->>'co
 select is(pg_temp.trusted_photo(op,null)->>'code','forbidden','trusted missing actor denied '||op) from unnest(array['begin','finalize']) op;
 reset role;
 update public.profiles set active=true where auth_user_id='00000000-0000-0000-0000-000000000002';
--- Ownership alone does not permit processing another uploader's reservation.
+-- Neither ownership nor the editor role permits processing another uploader's reservation.
+update public.memberships set role='editor' where user_id='00000000-0000-0000-0000-000000000002';
 update public.media_assets set uploader_user_id='00000000-0000-0000-0000-000000000003' where id=(select asset_id from photo_target);
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',true);
 set local role authenticated;
 select is(pg_temp.user_photo('admit')->>'code','not_found','owner cannot process another uploader reservation');
 reset role;
 set local role service_role;
-select is(pg_temp.trusted_photo('begin','00000000-0000-0000-0000-000000000002')->>'code','conflict','owner cannot claim another uploader reservation');
+select is(pg_temp.trusted_photo('begin','00000000-0000-0000-0000-000000000002')->>'code','not_found','owner cannot claim another uploader reservation');
 select is(pg_temp.trusted_photo('finalize','00000000-0000-0000-0000-000000000002')->>'code','not_found','owner cannot finalize another uploader reservation');
 reset role;
+update public.memberships set role='administrator' where user_id='00000000-0000-0000-0000-000000000002';
 update public.media_assets set uploader_user_id='00000000-0000-0000-0000-000000000002' where id=(select asset_id from photo_target);
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);
 set local role authenticated;

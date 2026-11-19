@@ -10,13 +10,15 @@ export type ArticleLifecycleCommand = {
   articleId: string;
   expectedVersion: number;
   requestId: string;
+  /** Required when an editor returns an article to its author. */
+  note?: string;
 };
 export type ArticleLifecycleResult =
   | DraftFailure
   | {
       ok: true;
       articleId: string;
-      status: "published" | "archived";
+      status: "draft" | "published" | "archived";
       version: number;
       updatedAt: string;
       replayed: boolean;
@@ -29,12 +31,13 @@ const commandSchema = z.strictObject({
   articleId: uuid,
   expectedVersion: version,
   requestId: uuid,
+  note: z.string().trim().min(1).max(500).optional(),
 });
 const resultSchema = z.discriminatedUnion("ok", [
   z.strictObject({
     ok: z.literal(true),
     articleId: uuid,
-    status: z.enum(["published", "archived"]),
+    status: z.enum(["draft", "published", "archived"]),
     version,
     updatedAt: z.custom<string>(isDatabaseTimestamp),
     replayed: z.boolean(),
@@ -73,6 +76,7 @@ export function parseArticleLifecycleCommand(
           articleId: parsed.data.articleId.toLowerCase(),
           expectedVersion: parsed.data.expectedVersion,
           requestId: parsed.data.requestId.toLowerCase(),
+          ...(parsed.data.note ? { note: parsed.data.note } : {}),
         },
       }
     : { ok: false, code: "invalid_input" };
@@ -80,7 +84,7 @@ export function parseArticleLifecycleCommand(
 
 export function parseArticleLifecycleResult(
   value: unknown,
-  status: "published" | "archived",
+  status: "draft" | "published" | "archived",
   articleId: string,
 ): ArticleLifecycleResult {
   const parsed = resultSchema.safeParse(value);

@@ -3,7 +3,7 @@ import { isDraftUuid } from "@/shared/articles/draft-cursor/draft-cursor";
 
 const uuid = z.custom<string>(isDraftUuid);
 const version = z.number().int().positive().max(2147483647);
-const role = z.enum(["author", "administrator"]);
+const role = z.enum(["author", "editor", "administrator"]);
 const displayName = z
   .string()
   .min(1)
@@ -46,7 +46,7 @@ export type MemberResult =
   | {
       ok: true;
       targetUserId: string;
-      role: "author" | "administrator";
+      role: "author" | "editor" | "administrator";
       active: boolean;
       version: number;
       changed: boolean;

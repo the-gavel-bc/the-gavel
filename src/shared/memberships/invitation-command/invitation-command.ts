@@ -2,7 +2,7 @@ import { z } from "zod";
 import { isDraftUuid } from "@/shared/articles/draft-cursor/draft-cursor";
 
 const uuid = z.custom<string>(isDraftUuid);
-const role = z.enum(["author", "administrator"]);
+const role = z.enum(["author", "editor", "administrator"]);
 const displayName = z
   .string()
   .min(1)

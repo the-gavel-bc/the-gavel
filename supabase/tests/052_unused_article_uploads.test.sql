@@ -1,6 +1,8 @@
 begin;
 select no_plan();
 \ir support/draft-fixtures/draft-fixtures.inc
+-- Publishing and editing published articles are editor/administrator powers; these cases act as an administrator.
+update public.memberships set role='administrator' where user_id='00000000-0000-0000-0000-000000000002';
 select ok(not has_function_privilege('anon','public.list_unused_article_uploads(uuid,uuid,integer)','EXECUTE'),
   'anonymous cannot enumerate unused uploads');
 select ok(has_function_privilege('authenticated','public.list_unused_article_uploads(uuid,uuid,integer)','EXECUTE'),
