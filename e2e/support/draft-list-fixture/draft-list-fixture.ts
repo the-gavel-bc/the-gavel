@@ -1,3 +1,4 @@
+import { dbContainer } from "../db-container/db-container";
 import { execFileSync } from "node:child_process";
 import { localSupabase } from "../local-supabase/local-supabase";
 
@@ -88,7 +89,7 @@ export function draftListFixture(
       [
         "exec",
         "-i",
-        "supabase_db_the-gavel",
+        dbContainer(),
         "psql",
         "-U",
         "postgres",

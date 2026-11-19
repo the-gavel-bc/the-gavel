@@ -1,3 +1,4 @@
+import { dbContainer } from "../support/db-container/db-container";
 import { execFileSync } from "node:child_process";
 import { localSupabase } from "../support/local-supabase/local-supabase";
 export default function setup() {
@@ -7,7 +8,7 @@ export default function setup() {
     "docker",
     [
       "exec",
-      "supabase_db_the-gavel",
+      dbContainer(),
       "psql",
       "-U",
       "postgres",

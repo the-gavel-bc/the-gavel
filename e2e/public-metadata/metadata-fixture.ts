@@ -1,3 +1,4 @@
+import { dbContainer } from "../support/db-container/db-container";
 import { execFileSync } from "node:child_process";
 import { createHash, createHmac } from "node:crypto";
 import sharp from "sharp";
@@ -5,9 +6,9 @@ import type { BrowserContext } from "@playwright/test";
 const workdir = process.env.METADATA_BROWSER_WORKDIR;
 if (workdir && workdir !== "/private/tmp/gavel-task20-browser")
   throw new Error("Unexpected metadata browser project");
-const container = workdir
-  ? "supabase_db_gavel-task20-browser"
-  : "supabase_db_the-gavel";
+const container = dbContainer(
+  workdir ? "supabase_db_gavel-task20-browser" : undefined,
+);
 export const scratch = Boolean(workdir);
 export function sql(statement: string) {
   return execFileSync(

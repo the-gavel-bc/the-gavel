@@ -1,3 +1,4 @@
+import { dbContainer } from "../support/db-container/db-container";
 import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
 import { expectVisibleFocus } from "../support/focus/focus";
@@ -6,9 +7,9 @@ import { expectVisibleFocus } from "../support/focus/focus";
 const workdir = process.env.SEARCH_BROWSER_WORKDIR;
 if (workdir && workdir !== "/private/tmp/gavel-task18-browser")
   throw new Error("Unexpected search browser project");
-const container = workdir
-  ? "supabase_db_gavel-task18-browser"
-  : "supabase_db_the-gavel";
+const container = dbContainer(
+  workdir ? "supabase_db_gavel-task18-browser" : undefined,
+);
 function sql(statement: string) {
   return execFileSync(
     "docker",
