@@ -81,8 +81,8 @@ it.each([
     ),
   ).toHaveProperty(field);
 });
-it("enforces credit pair uniqueness, order range and 32-credit cap", () => {
-  const people = Array.from({ length: 33 }, (_, i) => ({
+it("enforces credit pair uniqueness, order range and 5-credit cap", () => {
+  const people = Array.from({ length: 6 }, (_, i) => ({
     id: id(100 + i),
     displayName: "Guest",
     slug: `guest-${i}`,
@@ -95,7 +95,7 @@ it("enforces credit pair uniqueness, order range and 32-credit cap", () => {
   }));
   expect(
     draftSelectionErrors(
-      { ...baseDraft, contributors: credits.slice(0, 32) },
+      { ...baseDraft, contributors: credits.slice(0, 5) },
       catalog,
     ),
   ).toEqual({});

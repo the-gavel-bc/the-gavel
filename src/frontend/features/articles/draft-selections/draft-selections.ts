@@ -1,5 +1,7 @@
 import type { DraftInput } from "../../../../shared/articles/draft-contract/draft-contract";
 import type { DraftOptions } from "../../../../backend/articles/draft-options/draft-options";
+/** One article credits at most this many people. */
+export const MAX_CONTRIBUTORS = 5;
 export function draftSelectionErrors(
   draft: DraftInput,
   options: DraftOptions,
@@ -30,7 +32,7 @@ export function draftSelectionErrors(
     (c) => `${c.profileId.toLowerCase()}:${c.role}`,
   );
   if (
-    draft.contributors.length > 32 ||
+    draft.contributors.length > MAX_CONTRIBUTORS ||
     new Set(pairs).size !== pairs.length ||
     draft.contributors.some(
       (c) =>
@@ -41,7 +43,6 @@ export function draftSelectionErrors(
         c.displayOrder > 2147483647,
     )
   )
-    errors.contributors =
-      "Choose up to 32 available credits with distinct contributor/role pairs and whole display orders from 0 to 2147483647.";
+    errors.contributors = `Choose up to ${MAX_CONTRIBUTORS} available contributors, each with a different role for the same person.`;
   return errors;
 }

@@ -894,8 +894,9 @@ it("merges new choices into the reviewed catalog without losing recovered associ
         categoryIds: [category.id],
         tagIds: [newTag.id, retainedTag.id],
         contributors: [
-          { profileId: newGuest.id, role: "writer", displayOrder: 0 },
-          recovered.contributors[0],
+          // Credits are renumbered by position: recovered first, new second.
+          { profileId: newGuest.id, role: "writer", displayOrder: 1 },
+          { ...recovered.contributors[0], displayOrder: 0 },
         ],
       },
     });

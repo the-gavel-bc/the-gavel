@@ -3,8 +3,15 @@
   gap: var(--space-3);
   margin-top: var(--space-6);
 }
-.editor .content :global(.tiptap) {
+/* The body scrolls inside its own box, so the details above it stay put. */
+.editor .content {
   border: 1px solid var(--color-muted);
+  border-radius: 8px;
+  max-height: clamp(18rem, 62dvh, 42rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.editor .content :global(.tiptap) {
   min-height: 12rem;
   padding: var(--space-4);
   overflow-wrap: anywhere;

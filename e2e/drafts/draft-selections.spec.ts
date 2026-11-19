@@ -63,9 +63,10 @@ test("creates and reopens categories tags and multiple guest credits", async ({
     await expect(
       page.getByLabel(`Contributor ${n}`, { exact: true }),
     ).toHaveValue(new RegExp(`Synthetic ${info.project.name} guest`, "i"));
-    await expect(
-      page.getByLabel(`Display order ${n}`, { exact: true }),
-    ).toHaveValue("0");
+    // Order is the row position: the first credit stays first after reload.
+    await expect(page.getByLabel(`Role ${n}`, { exact: true })).toHaveValue(
+      n === 1 ? "writer" : "editor",
+    );
   }
   await expect(
     page.getByRole("textbox", { name: "Article body" }),

@@ -11,7 +11,10 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { Button } from "@/frontend/components/ui/button/button";
 import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
-import { DraftMetadataFields } from "../draft-metadata-fields/draft-metadata-fields";
+import {
+  DraftMetadataFields,
+  DraftSeoFields,
+} from "../draft-metadata-fields/draft-metadata-fields";
 import type {
   DraftInput,
   DraftErrorCode,
@@ -467,6 +470,21 @@ export function DraftForm({
           onDirtyChange={setMediaDirty}
         />
       )}
+      <fieldset
+        disabled={
+          !ready ||
+          lifecycleBusy ||
+          (!article && !inPlace && command.phase === "saved")
+        }
+        className={styles.fields}
+      >
+        <legend>Search details</legend>
+        <DraftSeoFields
+          draft={command.draft}
+          errors={errors}
+          onChange={update}
+        />
+      </fieldset>
       <div className={styles.saveBar} data-draft-save-bar="">
         <div className={styles.saveText}>
           <p role="status">
@@ -479,6 +497,14 @@ export function DraftForm({
           </p>
         </div>
         <div className={styles.saveActions}>
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={command.phase === "saving"}
+            onClick={() => void cancelEditing()}
+          >
+            Cancel
+          </Button>
           {command.article && (
             <ArticleLifecycleControls
               compact
@@ -501,14 +527,6 @@ export function DraftForm({
               }
             />
           )}
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={command.phase === "saving"}
-            onClick={() => void cancelEditing()}
-          >
-            Cancel
-          </Button>
           <Button
             type="submit"
             disabled={

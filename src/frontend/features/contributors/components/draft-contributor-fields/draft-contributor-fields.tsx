@@ -6,6 +6,7 @@ import type {
 } from "@/shared/articles/draft-contract/draft-contract";
 import type { DraftOptions } from "@/backend/articles/draft-options/draft-options";
 import { Button } from "@/frontend/components/ui/button/button";
+import { MAX_CONTRIBUTORS } from "@/frontend/features/articles/draft-selections/draft-selections";
 import styles from "./draft-contributor-fields.module.css";
 export function DraftContributorFields({
   value,
@@ -36,6 +37,37 @@ export function DraftContributorFields({
       ),
     );
   }
+  // Credits appear in the order of their position: the top one is first. The
+  // stored display order is just that position, renumbered on every change.
+  const order = value
+    .map((_, index) => index)
+    .sort(
+      (a, b) =>
+        (Number.isNaN(value[a].displayOrder)
+          ? Infinity
+          : value[a].displayOrder) -
+          (Number.isNaN(value[b].displayOrder)
+            ? Infinity
+            : value[b].displayOrder) || a - b,
+    );
+  const renumbered = (indices: number[], from: DraftContributor[] = value) =>
+    from.map((credit, i) => ({ ...credit, displayOrder: indices.indexOf(i) }));
+  function move(position: number, offset: -1 | 1) {
+    const next = [...order];
+    [next[position], next[position + offset]] = [
+      next[position + offset],
+      next[position],
+    ];
+    onChange(renumbered(next));
+  }
+  function remove(index: number) {
+    setKeys((rows) => rows.filter((_, i) => i !== index));
+    const remaining = value.filter((_, i) => i !== index);
+    const next = order
+      .filter((i) => i !== index)
+      .map((i) => (i > index ? i - 1 : i));
+    onChange(renumbered(next, remaining));
+  }
   return (
     <fieldset
       id="draft-contributors"
@@ -46,97 +78,102 @@ export function DraftContributorFields({
     >
       <legend>Contributors</legend>
       <div className={styles.body}>
-        {value.map((credit, index) => (
-          <div
-            key={keys[index] ?? `external-${index}`}
-            className={styles.credit}
-          >
-            <ContributorCombobox
-              index={index}
-              selected={
-                choices.find((p) => p.id === credit.profileId) ?? {
-                  id: credit.profileId,
-                  displayName: `Unavailable contributor: ${credit.profileId}`,
-                  slug: "unavailable",
-                }
-              }
-              onSelect={(choice) => {
-                onOption?.(choice);
-                setAdded((rows) =>
-                  rows.some((p) => p.id === choice.id)
-                    ? rows
-                    : [...rows, choice],
-                );
-                update(index, { profileId: choice.id });
-              }}
-            />
-            <div className={styles.field}>
-              <label htmlFor={`credit-${index}-role`}>
-                Role <span className={styles.srOnly}>{index + 1}</span>
-              </label>
-              <select
-                id={`credit-${index}-role`}
-                value={credit.role}
-                onChange={(e) =>
-                  update(index, {
-                    role: e.target.value as DraftContributor["role"],
-                  })
-                }
-              >
-                <option value="writer">Writer</option>
-                <option value="editor">Editor</option>
-                <option value="creative">Creative</option>
-              </select>
-            </div>
-            <div className={styles.field}>
-              <label htmlFor={`credit-${index}-order`}>
-                Display order <span className={styles.srOnly}>{index + 1}</span>
-              </label>
-              <input
-                id={`credit-${index}-order`}
-                type="number"
-                min={0}
-                max={2147483647}
-                step={1}
-                value={
-                  Number.isNaN(credit.displayOrder) ? "" : credit.displayOrder
-                }
-                onChange={(e) =>
-                  update(index, {
-                    displayOrder:
-                      e.target.value === "" ? NaN : Number(e.target.value),
-                  })
-                }
-              />
-            </div>
-            <Button
-              type="button"
-              variant="danger"
-              aria-label={`Remove contributor ${index + 1}`}
-              onClick={() => {
-                setKeys((rows) => rows.filter((_, i) => i !== index));
-                onChange(value.filter((_, i) => i !== index));
-              }}
+        {order.map((index, position) => {
+          const credit = value[index];
+          return (
+            <div
+              key={keys[index] ?? `external-${index}`}
+              className={styles.credit}
             >
-              Remove
-            </Button>
-          </div>
-        ))}
+              <span className={styles.badge} aria-hidden="true">
+                {position + 1}
+              </span>
+              <ContributorCombobox
+                index={position}
+                selected={
+                  choices.find((p) => p.id === credit.profileId) ?? {
+                    id: credit.profileId,
+                    displayName: `Unavailable contributor: ${credit.profileId}`,
+                    slug: "unavailable",
+                  }
+                }
+                onSelect={(choice) => {
+                  onOption?.(choice);
+                  setAdded((rows) =>
+                    rows.some((p) => p.id === choice.id)
+                      ? rows
+                      : [...rows, choice],
+                  );
+                  update(index, { profileId: choice.id });
+                }}
+              />
+              <div className={styles.field}>
+                <label htmlFor={`credit-${index}-role`}>
+                  Role <span className={styles.srOnly}>{position + 1}</span>
+                </label>
+                <select
+                  id={`credit-${index}-role`}
+                  value={credit.role}
+                  onChange={(e) =>
+                    update(index, {
+                      role: e.target.value as DraftContributor["role"],
+                    })
+                  }
+                >
+                  <option value="writer">Writer</option>
+                  <option value="editor">Editor</option>
+                  <option value="creative">Creative</option>
+                </select>
+              </div>
+              <div className={styles.shift}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={position === 0}
+                  aria-label={`Move contributor ${position + 1} up`}
+                  onClick={() => move(position, -1)}
+                >
+                  <span aria-hidden="true">↑</span>
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={position === order.length - 1}
+                  aria-label={`Move contributor ${position + 1} down`}
+                  onClick={() => move(position, 1)}
+                >
+                  <span aria-hidden="true">↓</span>
+                </Button>
+              </div>
+              <Button
+                type="button"
+                variant="danger"
+                aria-label={`Remove contributor ${position + 1}`}
+                onClick={() => remove(index)}
+              >
+                Remove
+              </Button>
+            </div>
+          );
+        })}
       </div>
       <Button
         type="button"
         variant="secondary"
-        disabled={value.length >= 32}
+        disabled={value.length >= MAX_CONTRIBUTORS}
+        title={
+          value.length >= MAX_CONTRIBUTORS
+            ? `Up to ${MAX_CONTRIBUTORS} contributors.`
+            : undefined
+        }
         onClick={() => {
           setKeys((rows) => [...rows, `added-${nextKey.current++}`]);
-          onChange([
-            ...value,
-            {
-              profileId: options[0]?.id ?? "",
-              role: "writer",
-              displayOrder: 0,
-            },
-          ]);
+          const created: DraftContributor = {
+            profileId: options[0]?.id ?? "",
+            role: "writer",
+            displayOrder: value.length,
+          };
+          onChange(renumbered([...order, value.length], [...value, created]));
         }}
       >
         Add contributor
