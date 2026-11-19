@@ -167,3 +167,28 @@ describe("draft contract", () => {
     );
   });
 });
+
+describe("publication date in the draft input", () => {
+  it("accepts a real date and keeps it in the canonical value", () => {
+    const result = checkDraftInput({
+      ...baseDraft,
+      publicationDate: "2026-01-15",
+    });
+    expect(result).toMatchObject({
+      ok: true,
+      value: { publicationDate: "2026-01-15" },
+    });
+  });
+  it("treats absent and null alike and strips the key so older fingerprints still match", () => {
+    for (const draft of [baseDraft, { ...baseDraft, publicationDate: null }]) {
+      const result = checkDraftInput(draft);
+      expect(result.ok).toBe(true);
+      if (result.ok) expect("publicationDate" in result.value).toBe(false);
+    }
+  });
+  it("refuses an impossible, malformed or non-string date and never loosens other keys", () => {
+    for (const publicationDate of ["2026-02-30", "01/15/2026", 20260115, ""])
+      expect(checkDraftInput({ ...baseDraft, publicationDate }).ok).toBe(false);
+    expect(checkDraftInput({ ...baseDraft, extra: true }).ok).toBe(false);
+  });
+});

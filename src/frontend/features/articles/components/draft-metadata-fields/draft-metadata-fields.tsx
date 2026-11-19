@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { DraftInput } from "@/shared/articles/draft-contract/draft-contract";
+import { easternToday } from "@/shared/articles/publication-date/publication-date";
 import type { DraftOptions } from "@/backend/articles/draft-options/draft-options";
 import styles from "./draft-metadata-fields.module.css";
 const fields = [
@@ -119,6 +120,33 @@ export function DraftMetadataFields({
         </select>
         {errors.sectionId && (
           <p id="draft-sectionId-error">{errors.sectionId}</p>
+        )}
+      </div>
+      <div>
+        <label htmlFor="draft-publicationDate">
+          Publication date (optional)
+        </label>
+        <input
+          id="draft-publicationDate"
+          type="date"
+          value={draft.publicationDate ?? ""}
+          max={easternToday()}
+          aria-invalid={Boolean(errors.publicationDate)}
+          aria-describedby={`draft-publicationDate-hint${errors.publicationDate ? " draft-publicationDate-error" : ""}`}
+          onChange={(event) =>
+            onChange({
+              ...draft,
+              publicationDate:
+                event.target.value === "" ? null : event.target.value,
+            })
+          }
+        />
+        <p id="draft-publicationDate-hint" className={styles.hint}>
+          Readers see this date. Leave blank to use the day you publish. It
+          cannot be in the future.
+        </p>
+        {errors.publicationDate && (
+          <p id="draft-publicationDate-error">{errors.publicationDate}</p>
         )}
       </div>
     </TextFields>

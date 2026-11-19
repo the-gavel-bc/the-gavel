@@ -65,6 +65,7 @@ const result = z.discriminatedUnion("ok", [
           "content",
           "seoKeyphrase",
           "metaDescription",
+          "publicationDate",
           "categoryIds",
           "tagIds",
           "contributors",

@@ -218,7 +218,7 @@ export async function getDraftEditorData(
     let query = client
       .from("articles")
       .select(
-        "id,title,slug,status,section_id,edit_version,updated_at,owner_profile_id,review_requested_at,review_note,published_by_profile_id,excerpt,content,seo_keyphrase,meta_description,article_categories(category_id),article_tags(tag_id),article_contributors(profile_id,contribution_role,display_order)",
+        "id,title,slug,status,section_id,edit_version,updated_at,owner_profile_id,review_requested_at,review_note,published_by_profile_id,excerpt,content,seo_keyphrase,meta_description,publication_date,article_categories(category_id),article_tags(tag_id),article_contributors(profile_id,contribution_role,display_order)",
       )
       .eq("id", articleId);
     // Authors see only their own articles; editors and administrators rely on
@@ -278,6 +278,9 @@ export async function getDraftEditorData(
       content: data.content,
       seoKeyphrase: data.seo_keyphrase,
       metaDescription: data.meta_description,
+      ...(data.publication_date
+        ? { publicationDate: data.publication_date }
+        : {}),
       categoryIds: data.article_categories.map((row) => row.category_id),
       tagIds: data.article_tags.map((row) => row.tag_id),
       contributors: data.article_contributors.map((row) => ({

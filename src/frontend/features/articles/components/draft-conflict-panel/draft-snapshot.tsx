@@ -38,6 +38,7 @@ export function DraftSnapshot({
           ["Excerpt", input.excerpt],
           ["SEO keyphrase", input.seoKeyphrase],
           ["Meta description", input.metaDescription],
+          ["Publication date", input.publicationDate ?? "Day it is published"],
         ].map(([label, value]) => (
           <div key={label}>
             <dt>{label}</dt>
