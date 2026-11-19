@@ -13,6 +13,10 @@ const actionSchema = z.enum([
   "membership.approved",
   "membership.role_changed",
   "membership.deactivated",
+  "membership.invited",
+  "membership.invitation_changed",
+  "membership.invitation_removed",
+  "membership.claimed",
 ]);
 const inputSchema = z.strictObject({
   cursor: z.string().optional(),

@@ -34,7 +34,7 @@ Success means readers can reliably discover and read articles, approved members 
 ### Editorial dashboard
 
 - Google sign-in restricted to `bc.edu` accounts.
-- Explicit administrator approval before dashboard access.
+- Administrators list BC emails with roles; dashboard access applies at that person's first sign-in.
 - My Articles listing.
 - Create, edit, save draft, publish now, and archive owned articles.
 - Rich content supporting headings, paragraphs, emphasis, links, quotations, lists, images, captions, and approved video providers.

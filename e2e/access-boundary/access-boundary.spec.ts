@@ -29,7 +29,7 @@ for (const [label, user] of [
     await page.goto("/dashboard");
     await expect(page).toHaveURL(/\/access-pending$/);
     await expect(
-      page.getByRole("heading", { name: "Access pending" }),
+      page.getByRole("heading", { name: "Access not approved" }),
     ).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "My articles" }),

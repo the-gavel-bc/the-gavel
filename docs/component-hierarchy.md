@@ -13,7 +13,7 @@ Task 4 adds a body-image control to the private editor. It reuses the checked up
 | `/`               | Accessible foundation homepage; final publication composition remains planned  |
 | `/sign-in`        | Server action initiating Google sign-in; hosted provider setup remains manual  |
 | `/auth/callback`  | PKCE code exchange and safe access routing                                     |
-| `/access-pending` | Denied/pending membership experience and sign-out                              |
+| `/access-pending` | "Access not approved" page and sign-out (person is not on the staff list)      |
 | `/dashboard`      | Protected owned-article listing with pagination, role-aware shell and sign-out |
 
 The header's public section links identify planned Phase 5 destinations. Dashboard profile and administrator routes are implemented. Both dashboard layout and page independently call the server membership guard. Components live in named folders under `src/frontend/components/site`, `src/frontend/components/dashboard`, and `src/frontend/components/ui`, alongside their owned CSS Modules and existing tests. See [file colocation](coding-style.md#file-colocation).
@@ -39,20 +39,20 @@ Newsletter signup is deferred.
 
 ## Full MVP dashboard route design
 
-| Route                            | Purpose                                        | Access         |
-| -------------------------------- | ---------------------------------------------- | -------------- |
-| `/dashboard`                     | Summary and My Articles                        | Active members |
-| `/dashboard/articles/new`        | Create article                                 | Author/admin   |
-| `/dashboard/articles/[id]`       | Edit owned or administrator-accessible article | Owner/admin    |
-| `/dashboard/profile`             | Edit own public profile                        | Author/admin   |
-| `/dashboard/admin/articles`      | Manage all content and archives                | Admin          |
-| `/dashboard/admin/articles/[id]` | Review article status and restore archives     | Admin          |
-| `/dashboard/admin/members`       | Approve/deactivate members and roles           | Admin          |
-| `/dashboard/admin/contributors`  | Manage credited profiles                       | Admin          |
-| `/dashboard/admin/taxonomy`      | Manage sections and categories; view tags      | Admin          |
-| `/dashboard/admin/homepage`      | Curate lead, Featured News, and Read This      | Admin          |
-| `/dashboard/admin/site`          | Edit allowlisted site information              | Admin          |
-| `/dashboard/admin/audit`         | Review audit activity                          | Admin          |
+| Route                            | Purpose                                                                                             | Access         |
+| -------------------------------- | --------------------------------------------------------------------------------------------------- | -------------- |
+| `/dashboard`                     | Summary and My Articles                                                                             | Active members |
+| `/dashboard/articles/new`        | Create article                                                                                      | Author/admin   |
+| `/dashboard/articles/[id]`       | Edit owned or administrator-accessible article                                                      | Owner/admin    |
+| `/dashboard/profile`             | Edit own public profile                                                                             | Author/admin   |
+| `/dashboard/admin/articles`      | Manage all content and archives                                                                     | Admin          |
+| `/dashboard/admin/articles/[id]` | Review article status and restore archives                                                          | Admin          |
+| `/dashboard/admin/members`       | Staff list: counts by role, search and filters, add people by email, change role, deactivate/remove | Admin          |
+| `/dashboard/admin/contributors`  | Manage credited profiles                                                                            | Admin          |
+| `/dashboard/admin/taxonomy`      | Manage sections and categories; view tags                                                           | Admin          |
+| `/dashboard/admin/homepage`      | Curate lead, Featured News, and Read This                                                           | Admin          |
+| `/dashboard/admin/site`          | Edit allowlisted site information                                                                   | Admin          |
+| `/dashboard/admin/audit`         | Review audit activity                                                                               | Admin          |
 
 Task 10 implements the administrator contributor route with bounded state filtering, guest creation, public-field edit/deactivation, generated-slug display, and referenced-profile feedback. It never accepts an Auth link or a caller-chosen slug. Public `/authors/[slug]` rendering remains Phase 5 work.
 

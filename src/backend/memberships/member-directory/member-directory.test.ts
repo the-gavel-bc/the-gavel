@@ -21,13 +21,15 @@ vi.mock("next/server", () => ({ connection: mocks.connection }));
 import { listMembers } from "./member-directory";
 
 let http: ReturnType<typeof queryTestClient>;
-const pending = {
-  user_id: articleId,
+const row = {
+  key: articleId,
+  user_id: null,
+  invitation_id: articleId,
   email: "new@bc.edu",
   display_name: null,
-  role: null,
-  state: "pending",
-  edit_version: null,
+  role: "author",
+  state: "invited",
+  edit_version: 1,
   eligible: true,
 };
 beforeEach(() => {
@@ -37,48 +39,43 @@ beforeEach(() => {
   mocks.guard.mockResolvedValue({ ...access, role: "administrator" });
 });
 
-it("returns bounded pending identities and a state-bound cursor", async () => {
-  http.respond([pending, { ...pending, user_id: profileId }]);
-  const page = await listMembers({ state: "pending", pageSize: 1 });
+it("returns a bounded page of staff and a cursor for the next one", async () => {
+  http.respond([row, { ...row, key: profileId, email: "z@bc.edu" }]);
+  const page = await listMembers({ state: "invited", pageSize: 1, q: " new " });
   expect(page.items).toEqual([
     {
-      userId: articleId,
+      key: articleId,
+      userId: null,
+      invitationId: articleId,
       email: "new@bc.edu",
       displayName: null,
-      role: null,
-      state: "pending",
-      version: null,
+      role: "author",
+      state: "invited",
+      version: 1,
       eligible: true,
     },
   ]);
   expect(page.nextCursor).toEqual(expect.any(String));
   const call = http.network.mock.calls[0];
-  expect(new URL(String(call[0])).pathname).toContain(
-    "/rpc/list_membership_candidates",
-  );
+  expect(new URL(String(call[0])).pathname).toContain("/rpc/list_staff");
   expect(JSON.parse(String(call[1]?.body))).toMatchObject({
     p_limit: 2,
-    p_state: "pending",
+    p_state: "invited",
+    p_search: "new",
   });
   http.respond([]);
-  await listMembers({ state: "pending", cursor: page.nextCursor });
+  await listMembers({ state: "invited", cursor: page.nextCursor });
   expect(JSON.parse(String(http.network.mock.calls[1][1]?.body))).toMatchObject(
-    {
-      p_before_email: "new@bc.edu",
-      p_before_user_id: articleId,
-    },
+    { p_after_email: "new@bc.edu", p_after_key: articleId },
   );
-  await expect(
-    listMembers({ state: "active", cursor: page.nextCursor }),
-  ).rejects.toThrow("Invalid membership list request.");
 });
 
 it("rejects malformed filters and authors before any RPC", async () => {
   for (const input of [
-    { state: "deleted" },
+    { state: "pending" },
     { pageSize: 51 },
     { cursor: "bad" },
-    { role: "administrator" },
+    { role: "owner" },
   ])
     await expect(listMembers(input)).rejects.toThrow(
       "Invalid membership list request.",
@@ -94,6 +91,6 @@ it("rejects malformed filters and authors before any RPC", async () => {
 it("masks database errors and malformed identity rows", async () => {
   http.respond({ message: "private Auth table" }, 500);
   await expect(listMembers({})).rejects.toThrow("Unable to load memberships.");
-  http.respond([{ ...pending, state: "owner" }]);
+  http.respond([{ ...row, state: "owner" }]);
   await expect(listMembers({})).rejects.toThrow("Unable to load memberships.");
 });

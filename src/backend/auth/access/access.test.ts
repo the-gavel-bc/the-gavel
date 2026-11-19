@@ -50,13 +50,55 @@ beforeEach(() => {
     data: { role: "author", active: true },
     error: null,
   });
-  mocks.rpc.mockResolvedValue({
-    data: [{ id: "profile-a", display_name: "Author A" }],
-    error: null,
-  });
+  mocks.rpc.mockImplementation(async (name: string) =>
+    name === "claim_invitation"
+      ? { data: false, error: null }
+      : { data: [{ id: "profile-a", display_name: "Author A" }], error: null },
+  );
 });
 
 describe("membership access", () => {
+  it("claims a listed address at first sign-in", async () => {
+    mocks.membership
+      .mockResolvedValueOnce({ data: null, error: null })
+      .mockResolvedValueOnce({
+        data: { role: "administrator", active: true },
+        error: null,
+      });
+    mocks.rpc.mockImplementation(async (name: string) =>
+      name === "claim_invitation"
+        ? { data: true, error: null }
+        : {
+            data: [{ id: "profile-a", display_name: "Author A" }],
+            error: null,
+          },
+    );
+    expect(await getCurrentAccess()).toMatchObject({
+      status: "active",
+      role: "administrator",
+    });
+    expect(mocks.rpc).toHaveBeenCalledWith("claim_invitation");
+  });
+  it("treats a failed claim as not approved", async () => {
+    mocks.membership.mockResolvedValue({ data: null, error: null });
+    mocks.rpc.mockResolvedValue({ data: null, error: { message: "x" } });
+    expect(await getCurrentAccess()).toEqual({ status: "pending" });
+  });
+  it("never claims for an ineligible identity", async () => {
+    mocks.getUser.mockResolvedValue({
+      data: {
+        user: {
+          id: "user-a",
+          email: "synthetic@example.test",
+          email_confirmed_at: "2026-01-01",
+          app_metadata: { provider: "google" },
+        },
+      },
+      error: null,
+    });
+    expect(await getCurrentAccess()).toEqual({ status: "pending" });
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
   it("denies a missing or invalid session", async () => {
     mocks.getUser.mockResolvedValue({ data: { user: null }, error: null });
     expect(await getCurrentAccess()).toEqual({ status: "signedOut" });

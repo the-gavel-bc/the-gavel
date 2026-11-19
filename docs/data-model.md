@@ -53,6 +53,8 @@ Public contributor identity, independent from login access.
 
 Task 9 stores immutable membership request receipts in `private.membership_write_receipts`, keyed by actor and request UUID. Each binds the exact operation and inputs to its result. Successful changes write one `membership.*` audit event in the same transaction. Approval creates a linked public profile when none exists; the administrator supplies its display name, and the database generates a collision-safe slug. Existing profile public fields are retained on reapproval. Direct authenticated membership writes are closed.
 
+The staff email list (`private.membership_invitations`, migration `20261116010000_staff_email_list.sql`) stores a lowercase `@bc.edu` address, role, optional display name, edit version and who listed it. One live (unclaimed, unremoved) listing per address. `claim_invitation()` creates the membership and profile at the person's first eligible sign-in and marks the listing claimed; removal is soft (`removed_at`). Receipts now also cover `invite`, `change_invitation` and `remove_invitation`, and audit events add `membership.invited`, `invitation_changed`, `invitation_removed` and `claimed`.
+
 The migration `supabase/migrations/20261017000000_foundation_identity.sql` is authoritative for these two tables, their constraints, grants, indexes, helper functions, and RLS policies. `supabase/seed.sql` contains four synthetic, passwordless local identities covering inactive member, two authors, and administrator roles. It contains no production identity or content.
 
 `profile_image_id` remains planned until the media schema exists. Biographies are stored as plain text; rich biography editing is not implemented.

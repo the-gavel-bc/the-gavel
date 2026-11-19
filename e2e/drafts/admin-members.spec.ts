@@ -11,30 +11,46 @@ test.beforeAll(({}, info) => {
 });
 test.afterAll(() => fixture?.cleanup());
 
-test("administrator approves, changes role, deactivates, and reads activity", async ({
+test("administrator lists an email, the person claims it on sign-in, then role change, deactivation and activity", async ({
+  browser,
   context,
   page,
 }) => {
   await setLocalSession(context, fixture.users.admin);
-  await page.goto("/dashboard/admin/members?state=pending");
+  await page.goto("/dashboard/admin/members");
   const email = fixture.pendingMemberEmail;
   await expect(
     page.getByRole("heading", { name: "Memberships" }),
   ).toBeVisible();
-  await page
-    .getByLabel(`Public display name for ${email}`)
-    .fill("New Gavel Writer");
-  await page.getByRole("button", { name: `Approve ${email}` }).click();
-  await expect(page.getByRole("heading", { name: email })).toHaveCount(0);
+  await page.getByText("Add people", { exact: true }).click();
+  await page.getByLabel("BC email addresses").fill(email);
+  await page.getByRole("button", { name: "Add to staff list" }).click();
+  await expect(page.getByRole("status")).toContainText("Added 1");
+
+  await page.goto("/dashboard/admin/members?state=invited");
+  const listed = page.getByRole("listitem").filter({ hasText: email });
+  await expect(listed.getByText("Not signed in yet")).toBeVisible();
+
+  // The listed person's first sign-in turns the listing into a membership.
+  const personContext = await browser.newContext();
+  await setLocalSession(personContext, fixture.pendingMemberUser);
+  const personPage = await personContext.newPage();
+  await personPage.goto("/dashboard");
+  await expect(
+    personPage.getByRole("heading", { name: "My articles" }),
+  ).toBeVisible();
+  await personContext.close();
 
   await page.goto("/dashboard/admin/members?state=active");
   const member = page.getByRole("listitem").filter({ hasText: email });
-  await expect(member.getByText("Public name: New Gavel Writer")).toBeVisible();
+  await expect(member.getByText("Author", { exact: true })).toBeVisible();
   await member.getByLabel(`Role for ${email}`).selectOption("administrator");
   await member
     .getByRole("button", { name: `Change role for ${email}` })
     .click();
-  await expect(member.getByText("Role: administrator")).toBeVisible();
+  await expect(
+    member.getByText("Administrator", { exact: true }),
+  ).toBeVisible();
   page.on("dialog", (dialog) => dialog.accept());
   await member.getByRole("button", { name: `Deactivate ${email}` }).click();
   await expect(member).toHaveCount(0);

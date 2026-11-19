@@ -691,6 +691,15 @@ export type Database = {
         Args: { p_actor_user_id: string; p_asset_id: string };
         Returns: Json;
       };
+      change_invitation_role: {
+        Args: {
+          p_expected_version: number;
+          p_invitation_id: string;
+          p_request_id: string;
+          p_role: Database["public"]["Enums"]["app_role"];
+        };
+        Returns: Json;
+      };
       change_membership_role: {
         Args: {
           p_expected_version: number;
@@ -700,6 +709,7 @@ export type Database = {
         };
         Returns: Json;
       };
+      claim_invitation: { Args: Record<PropertyKey, never>; Returns: boolean };
       claim_media_cleanup: {
         Args: { p_limit: number };
         Returns: {
@@ -864,6 +874,10 @@ export type Database = {
           submission_instructions: string;
         }[];
       };
+      invite_staff: {
+        Args: { p_entries: Json; p_request_id: string };
+        Returns: Json;
+      };
       list_admin_contributors: {
         Args: {
           p_before_id?: string;
@@ -923,23 +937,6 @@ export type Database = {
           target_email: string;
         }[];
       };
-      list_membership_candidates: {
-        Args: {
-          p_before_email?: string;
-          p_before_user_id?: string;
-          p_limit?: number;
-          p_state?: string;
-        };
-        Returns: {
-          display_name: string;
-          edit_version: number;
-          eligible: boolean;
-          email: string;
-          role: Database["public"]["Enums"]["app_role"];
-          state: string;
-          user_id: string;
-        }[];
-      };
       list_public_articles: {
         Args: {
           p_cursor: Json;
@@ -957,6 +954,27 @@ export type Database = {
           p_limit: number;
         };
         Returns: Json;
+      };
+      list_staff: {
+        Args: {
+          p_after_email?: string;
+          p_after_key?: string;
+          p_limit?: number;
+          p_role?: string;
+          p_search?: string;
+          p_state?: string;
+        };
+        Returns: {
+          display_name: string;
+          edit_version: number;
+          eligible: boolean;
+          email: string;
+          invitation_id: string;
+          key: string;
+          role: Database["public"]["Enums"]["app_role"];
+          state: string;
+          user_id: string;
+        }[];
       };
       list_unused_article_uploads: {
         Args: { p_after_id?: string; p_article_id: string; p_limit?: number };
@@ -993,6 +1011,14 @@ export type Database = {
           p_claim_token: string;
         };
         Returns: boolean;
+      };
+      remove_invitation: {
+        Args: {
+          p_expected_version: number;
+          p_invitation_id: string;
+          p_request_id: string;
+        };
+        Returns: Json;
       };
       request_article_image_upload: {
         Args: { p_article_id: string; p_request_id: string };
@@ -1083,6 +1109,15 @@ export type Database = {
           p_request_id: string;
         };
         Returns: Json;
+      };
+      staff_summary: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          administrators: number;
+          authors: number;
+          inactive: number;
+          invited: number;
+        }[];
       };
       start_media_cleanup_run: {
         Args: Record<PropertyKey, never>;
