@@ -35,6 +35,7 @@ export type DraftSaveEvent =
       type: "resolve";
       requestId: string;
       result: DraftWriteResult;
+      keepPublishedDateOnClear?: boolean;
     }
   | { type: "acknowledgeArticle"; article: DraftArticle }
   | { type: "reload"; article: DraftArticle; input: DraftInput }
@@ -148,17 +149,34 @@ export function reduceDraftSave(
           lastResult: { ok: false, code: "unavailable" },
         };
       // Confirm only the submitted snapshot; edits made during the request stay dirty.
-      const acknowledged = pending.command.draft;
+      const submitted = pending.command.draft;
+      // A published clear keeps the previous reader date. The receipt still
+      // acknowledges the original command, so retries send it unchanged.
+      const retainedDate =
+        event.keepPublishedDateOnClear && submitted.publicationDate == null
+          ? state.acknowledged.publicationDate
+          : null;
+      const acknowledged = retainedDate
+        ? { ...submitted, publicationDate: retainedDate }
+        : submitted;
+      const current =
+        retainedDate && state.current.publicationDate == null
+          ? { ...state.current, publicationDate: retainedDate }
+          : state.current;
+      const currentKey =
+        current === state.current
+          ? state.currentKey
+          : draftInputKeyWithContentKey(current, state.currentContentKey);
       const contentKey = draftContentKey(acknowledged.content);
       const acknowledgedKey = draftInputKeyWithContentKey(
         acknowledged,
         contentKey,
       );
-      const newer = state.nativeInvalid || state.currentKey !== acknowledgedKey;
+      const newer = state.nativeInvalid || currentKey !== acknowledgedKey;
       return {
         ...state,
-        current: newer ? state.current : acknowledged,
-        currentKey: newer ? state.currentKey : acknowledgedKey,
+        current: newer ? current : acknowledged,
+        currentKey: newer ? currentKey : acknowledgedKey,
         currentContentKey: newer ? state.currentContentKey : contentKey,
         acknowledged,
         acknowledgedKey,

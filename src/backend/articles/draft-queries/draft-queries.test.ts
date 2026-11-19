@@ -59,6 +59,7 @@ describe("own article page", () => {
           updatedAt,
           inReview: false,
           reviewNote: null,
+          publishedByMe: false,
         },
       ]);
       expect(decodeDraftCursor(result.nextCursor)).toEqual({
@@ -69,7 +70,7 @@ describe("own article page", () => {
       const url = new URL(String(http.network.mock.calls[0][0]));
       expect(url.searchParams.get("owner_profile_id")).toBe(`eq.${profileId}`);
       expect(url.searchParams.get("select")).toBe(
-        "id,title,slug,status,section_id,edit_version,updated_at,review_requested_at,review_note,section:sections!articles_section_id_fkey(name)",
+        "id,title,slug,status,section_id,edit_version,updated_at,review_requested_at,review_note,published_by_profile_id,section:sections!articles_section_id_fkey(name)",
       );
       // No filters unless asked for.
       expect(url.searchParams.get("status")).toBeNull();
@@ -79,6 +80,36 @@ describe("own article page", () => {
       expect(mocks.connection).toHaveBeenCalledOnce();
     },
   );
+  it("identifies the publisher and ignores review metadata on published rows", async () => {
+    http.respond([
+      {
+        ...row,
+        status: "published",
+        published_by_profile_id: profileId,
+        review_requested_at: updatedAt,
+        review_note: "Old note",
+      },
+      {
+        ...row,
+        id: profileId,
+        status: "published",
+        published_by_profile_id: articleId,
+      },
+      { ...row, status: "published", published_by_profile_id: null },
+    ]);
+    const result = await getMyArticlesPage({});
+    expect(
+      result.items.map(({ publishedByMe, inReview, reviewNote }) => ({
+        publishedByMe,
+        inReview,
+        reviewNote,
+      })),
+    ).toEqual([
+      { publishedByMe: true, inReview: false, reviewNote: null },
+      { publishedByMe: false, inReview: false, reviewNote: null },
+      { publishedByMe: false, inReview: false, reviewNote: null },
+    ]);
+  });
   it("filters by status and a safe title search, still owner-scoped", async () => {
     http.respond([]);
     await getMyArticlesPage({ status: "published", search: " O'Neill-1 " });

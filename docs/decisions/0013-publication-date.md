@@ -11,7 +11,7 @@ Editors need to set the date readers see (for example when republishing an older
 
 ## Decision
 
-Add an optional `publication_date date` (Eastern calendar date, never in the future). Keep `published_at` as the single value public code uses and derive it from the date when publishing: now for today, noon Eastern for an earlier date. The field is an additive, optional key of the draft input; null is stripped from the canonical form so older clients' fingerprints still match. The future-date rule is time dependent, so it lives in stable functions, not constraints or the immutable input check. Who may set it follows `private.article_authority` (administrators only after publication).
+Add an optional `publication_date date` (Eastern calendar date, never in the future). Keep `published_at` as the single value public code uses and derive it from the date when publishing: now for today, noon Eastern for an earlier date. The field is an additive, optional key of the draft input; null is stripped from the canonical form so older clients' fingerprints still match. The future-date rule is time dependent, so it lives in stable functions, not constraints or the immutable input check. Whoever may edit the article may set its date. After publication only administrators may edit it. See the [API contract](../api-contracts.md#implemented-draft-form-adapter) for clear and restore behavior.
 
 ## Alternatives considered
 

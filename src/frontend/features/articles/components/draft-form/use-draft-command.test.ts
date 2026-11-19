@@ -275,3 +275,41 @@ it("a captured image callback advances version without discarding current edits"
     }),
   );
 });
+
+it("restores the published date after a confirmed clear and preserves newer edits", async () => {
+  let finish!: (value: typeof success) => void;
+  actions.published.mockReturnValue(
+    new Promise((resolve) => {
+      finish = resolve;
+    }),
+  );
+  const { result } = renderHook(() =>
+    useDraftCommand(
+      { ...baseDraft, publicationDate: "2026-01-15" },
+      { id: success.articleId, version: 2, updatedAt: success.updatedAt },
+      "published",
+    ),
+  );
+  act(() =>
+    result.current.update((draft) => ({ ...draft, publicationDate: null })),
+  );
+  let saving!: Promise<unknown>;
+  act(() => {
+    saving = result.current.submit();
+  });
+  expect(actions.published.mock.lastCall?.[0].draft).not.toHaveProperty(
+    "publicationDate",
+  );
+  act(() =>
+    result.current.update((draft) => ({ ...draft, title: "Newer title" })),
+  );
+  await act(async () => {
+    finish({ ...success, version: 2, changed: false });
+    await saving;
+  });
+  expect(result.current.draft).toMatchObject({
+    publicationDate: "2026-01-15",
+    title: "Newer title",
+  });
+  expect(result.current.dirty).toBe(true);
+});

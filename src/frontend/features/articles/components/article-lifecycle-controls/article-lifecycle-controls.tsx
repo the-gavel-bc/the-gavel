@@ -213,8 +213,10 @@ export function ArticleLifecycleControls({
     setResult({ operation, value: next });
     setPending(null);
     busy.current = false;
-    if (next.ok) router.refresh();
-    else onBusyChange?.(false);
+    if (next.ok) {
+      if (operation === "return") router.push("/dashboard/review");
+      else router.refresh();
+    } else onBusyChange?.(false);
   }
 
   const failed = result && !result.value.ok ? result.value : null;
