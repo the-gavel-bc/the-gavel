@@ -7,6 +7,7 @@ select has_function('public','save_article_draft',array['uuid','integer','uuid',
 create function pg_temp.save_request(v integer,r uuid,patch jsonb default '{}') returns jsonb language sql as $$
 select public.save_article_draft((select (result->>'articleId')::uuid from target),v,r,pg_temp.draft_input(patch));
 $$;
+grant execute on function pg_temp.save_request(integer, uuid, jsonb) to authenticated;
 create temp table results(label text primary key,result jsonb);
 grant select,insert on results to authenticated;
 set local role authenticated;

@@ -31,7 +31,7 @@ select is(public.finish_media_cleanup('synthetic-ledger-key','86000000-0000-4000
 select is(public.finish_media_cleanup('synthetic-ledger-key',current_setting('test.cleanup_token')::uuid,true),true,'claimed cleanup records a successful attempt');
 select set_config('test.prefix_token',(select claim_token::text from public.claim_retired_article_prefixes(100) where article_id='86000000-0000-4000-8000-000000000001'),true);
 select is(public.register_retired_media_keys('86000000-0000-4000-8000-000000000001',array['86000000-0000-4000-8000-000000000004'::uuid],current_setting('test.prefix_token')::uuid),true,'discovered canonical key is registered');
-select is(public.finish_retired_article_scan('86000000-0000-4000-8000-000000000001',current_setting('test.prefix_token')::uuid,1,true),true,'prefix scan releases claim');
+select is(public.finish_retired_article_scan_v2('86000000-0000-4000-8000-000000000001',current_setting('test.prefix_token')::uuid,1,true,true),true,'prefix scan releases claim');
 reset role;
 select is((select count(*)::int from private.media_cleanup_ledger where article_id='86000000-0000-4000-8000-000000000001'),2,'successful attempts remain in ledger for future late uploads');
 select is((select scan_offset from private.retired_article_ids where article_id='86000000-0000-4000-8000-000000000001'),0,'prefix scan wraps after last page');

@@ -26,6 +26,7 @@ create function pg_temp.body_image(p_asset uuid) returns jsonb language sql as $
     'type','doc','content',jsonb_build_array(jsonb_build_object('type','image','attrs',
       jsonb_build_object('assetId',p_asset,'alt','A photo','caption',null)))));
 $$;
+grant execute on function pg_temp.body_image(uuid) to authenticated;
 select is(private.is_valid_draft_document(pg_temp.body_image('60000000-0000-0000-0000-000000000701')),
   true,'canonical version 2 image shape is valid');
 select is(private.is_valid_draft_document('{"format":"gavel-draft","version":1,"document":{"type":"doc","content":[{"type":"paragraph"}]}}'::jsonb),

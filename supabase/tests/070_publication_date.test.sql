@@ -9,6 +9,7 @@ grant execute on function pg_temp.act_as(text) to authenticated;
 create function pg_temp.body() returns jsonb language sql as $$
   select jsonb_build_object('content','{"format":"gavel-draft","version":1,"document":{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Story"}]}]}}'::jsonb);
 $$;
+grant execute on function pg_temp.body() to authenticated;
 create temp table t(label text primary key, id uuid);
 grant all on t to authenticated;
 -- create_as(u, label, n, patch): create a draft with extra input, return the result code.

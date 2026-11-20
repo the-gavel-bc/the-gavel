@@ -1,6 +1,6 @@
 # Current work
 
-- Phase: Batch 2 of the approved review fixes is implemented and verified locally.
-- Branch: `fix/reader-eastern-dates` in `/private/tmp/gavel-review-batch-2`, stacked on Batch 1 [PR #121](https://github.com/dylandrozario/the-gavel/pull/121) at `583e731`.
+- Phase: Batch 3 of the approved review fixes is implemented, reviewed, and verified locally.
+- Branch: `fix/database-privilege-hygiene` in `/private/tmp/gavel-review-batch-3`, stacked on [PR #122](https://github.com/dylandrozario/the-gavel/pull/122) at `8ffecea`.
 - Approved scope and verification: [review fixes plan](docs/superpowers/plans/2026-11-19-review-fixes.md).
-- Batch 1 and Batch 2 target `main`. Batch 2 has no migration.
+- Database: disposable `gavel-review-db` only (API 58721, DB 58722). Batch 1 and Batch 2 target `main`.

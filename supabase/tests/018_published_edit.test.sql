@@ -7,6 +7,7 @@ update public.memberships set role='administrator' where user_id='00000000-0000-
 create function pg_temp.published_input(p_patch jsonb default '{}') returns jsonb language sql as $$
 select pg_temp.draft_input(jsonb_build_object('content','{"format":"gavel-draft","version":1,"document":{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Ready story"}]}]}}'::jsonb) || p_patch);
 $$;
+grant execute on function pg_temp.published_input(jsonb) to authenticated;
 create temp table published_target as select
   (public.create_article_draft('80000000-0000-0000-0000-000000000801',pg_temp.published_input())->>'articleId')::uuid article_id;
 grant select on published_target to authenticated;
@@ -24,6 +25,7 @@ create temp table published_before as select slug,published_at from public.artic
 create function pg_temp.save_published(v integer,r uuid,patch jsonb default '{}') returns jsonb language sql as $$
 select public.save_published_article((select article_id from published_target),v,r,pg_temp.published_input(patch));
 $$;
+grant execute on function pg_temp.save_published(integer, uuid, jsonb) to authenticated;
 
 select has_function('public','save_published_article',array['uuid','integer','uuid','jsonb'],
   'separate published save boundary exists');

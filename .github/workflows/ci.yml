@@ -30,6 +30,11 @@ jobs:
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version-file: .nvmrc
+      - name: Check migration order
+        if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.before != '0000000000000000000000000000000000000000')
+        env:
+          MIGRATION_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: node scripts/ci-supabase/check-migration-order.mjs "$MIGRATION_BASE" HEAD
       - name: Activate pinned pnpm
         run: corepack enable
       - name: Locate pnpm store

@@ -13,9 +13,11 @@ grant select on lifecycle_target to authenticated;
 create function pg_temp.publish(v integer,r uuid) returns jsonb language sql as $$
   select public.publish_article((select article_id from lifecycle_target),v,r);
 $$;
+grant execute on function pg_temp.publish(integer, uuid) to authenticated;
 create function pg_temp.archive(v integer,r uuid) returns jsonb language sql as $$
   select public.archive_article((select article_id from lifecycle_target),v,r);
 $$;
+grant execute on function pg_temp.archive(integer, uuid) to authenticated;
 select has_function('public','publish_article',array['uuid','integer','uuid'],'publish boundary exists');
 select has_function('public','archive_article',array['uuid','integer','uuid'],'archive boundary exists');
 select ok(not has_function_privilege('anon','public.publish_article(uuid,integer,uuid)','EXECUTE'),

@@ -7,6 +7,7 @@ insert into public.article_contributors select id,'10000000-0000-0000-0000-00000
 create function pg_temp.try_save(patch jsonb default '{}') returns jsonb language sql as $$
 select public.save_article_draft((select id from target),1,gen_random_uuid(),pg_temp.draft_input(patch));
 $$;
+grant execute on function pg_temp.try_save(jsonb) to authenticated;
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000003',true);
 set local role authenticated;
 select is(pg_temp.try_save('{"title":"Forged"}')->>'code','not_found','real credited B cannot save A');

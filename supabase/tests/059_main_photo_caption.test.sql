@@ -16,6 +16,7 @@ returns jsonb language sql as $$
  '59000000-0000-0000-0000-000000000002','Caption alt','Caption credit',p_caption)
  from public.articles a where a.id='59000000-0000-0000-0000-000000000001';
 $$;
+grant execute on function pg_temp.caption(text, uuid, integer) to authenticated;
 set local role authenticated;
 select is(pg_temp.caption(repeat('x',401))->>'code','invalid_input','401-character caption rejected');
 select is(pg_temp.caption('  Caption text  ','59000000-0000-0000-0000-000000000004',1)->>'version','2','trimmed caption attaches atomically');
