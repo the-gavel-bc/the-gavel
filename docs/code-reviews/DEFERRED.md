@@ -28,6 +28,7 @@ Everything the fix plan does not cover. Source: [COMBINED-REVIEW-REPORT.md](COMB
 
 | ID | Item | Why deferred | What would settle it |
 | --- | --- | --- | --- |
+| C-04 | Reversing the historical publication-date backfill | The migration already merged. Backfilled and explicitly chosen dates are indistinguishable by value. | Revisit only with reliable provenance and owner approval. |
 | C-08 | Distinct codes and messages for submit conflict, readiness failures and over-long return notes | Needs new error codes in the public contract, which need approval | Decide codes; map them in the lifecycle controls |
 | C-10, C-11 | Restrict the anonymous `tags` read and the `profiles` read policies | Policy changes that affect public tag pages and member lookups; need a design and tests first | Serve the tag page through a definer function requiring a published article; split the profile policy into member and public |
 | C-12 | Separate search and typeahead budgets, try-lock, per-IP edge limits | Database change plus a platform firewall rule; needs a measurement of real traffic | Give suggestions their own budget; add Vercel firewall rules for the search, suggestion, sitemap and media paths |

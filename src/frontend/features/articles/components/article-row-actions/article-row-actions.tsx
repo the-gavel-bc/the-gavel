@@ -45,6 +45,7 @@ export function ArticleRowActions({
     status: Status;
     version: number;
     inReview?: boolean;
+    publishedByMe?: boolean;
   };
   admin: boolean;
   /** The caller's role on their own list; decides which actions to offer. */
@@ -56,7 +57,7 @@ export function ArticleRowActions({
         isOwner: true,
         status: article.status,
         inReview: Boolean(article.inReview),
-        publishedByMe: role === "editor",
+        publishedByMe: article.publishedByMe === true,
       })
     : null;
   const router = useRouter();

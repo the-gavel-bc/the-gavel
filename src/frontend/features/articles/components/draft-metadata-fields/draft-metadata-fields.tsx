@@ -86,8 +86,9 @@ function TextFields({
 // Title, excerpt and section: the details that stay at the top of the editor.
 export function DraftMetadataFields({
   options,
+  published = false,
   ...common
-}: Common & { options: DraftOptions }) {
+}: Common & { options: DraftOptions; published?: boolean }) {
   const { draft, errors, onChange } = common;
   return (
     <TextFields {...common} keys={["title", "excerpt"]}>
@@ -142,8 +143,11 @@ export function DraftMetadataFields({
           }
         />
         <p id="draft-publicationDate-hint" className={styles.hint}>
-          Readers see this date. Leave blank to use the day you publish. It
-          cannot be in the future.
+          Readers see this date.{" "}
+          {published
+            ? "Leave blank to keep the current publication day."
+            : "Leave blank to use the day you publish."}{" "}
+          It cannot be in the future.
         </p>
         {errors.publicationDate && (
           <p id="draft-publicationDate-error">{errors.publicationDate}</p>

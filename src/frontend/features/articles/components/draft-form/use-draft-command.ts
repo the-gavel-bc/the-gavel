@@ -110,6 +110,7 @@ export function useDraftCommand(
       type: "resolve",
       requestId: pending.command.requestId,
       result,
+      keepPublishedDateOnClear: status === "published",
     });
     return result.ok && next.pending === null ? (next.article ?? null) : null;
   }

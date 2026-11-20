@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   submit: vi.fn(),
   returned: vi.fn(),
   refresh: vi.fn(),
+  push: vi.fn(),
 }));
 vi.mock(
   "@/backend/articles/article-lifecycle/article-lifecycle-actions",
@@ -25,7 +26,7 @@ vi.mock(
   }),
 );
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ refresh: mocks.refresh }),
+  useRouter: () => ({ refresh: mocks.refresh, push: mocks.push }),
 }));
 import { ArticleLifecycleControls } from "./article-lifecycle-controls";
 
@@ -268,3 +269,46 @@ it("returns an article to its author with a note", async () => {
   );
   expect(mocks.publish).not.toHaveBeenCalled();
 });
+
+it.each([false, true])(
+  "navigates to the review queue only after a successful return (%s)",
+  async (ok) => {
+    mocks.returned.mockResolvedValue(
+      ok
+        ? {
+            ok: true,
+            articleId,
+            status: "draft",
+            version: 2,
+            updatedAt: "2026-11-19T12:00:00Z",
+            changed: true,
+            replayed: false,
+          }
+        : { ok: false, code: "conflict" },
+    );
+    render(
+      <ArticleLifecycleControls
+        articleId={articleId}
+        status="draft"
+        version={1}
+        disabled={false}
+        capabilities={{
+          submit: false,
+          publish: false,
+          archive: false,
+          restore: false,
+          returnToAuthor: true,
+        }}
+      />,
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: /Return to author/ }),
+    );
+    if (ok) expect(mocks.push).toHaveBeenCalledWith("/dashboard/review");
+    else {
+      expect(screen.getByRole("alert")).toBeVisible();
+      expect(mocks.push).not.toHaveBeenCalled();
+    }
+    expect(mocks.refresh).not.toHaveBeenCalled();
+  },
+);

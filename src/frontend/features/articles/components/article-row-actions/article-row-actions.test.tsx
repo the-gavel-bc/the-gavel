@@ -94,3 +94,19 @@ it("shows only Edit on a draft and nothing destructive to authors on an archive"
   );
   expect(screen.queryByRole("button")).not.toBeInTheDocument();
 });
+
+it.each([false, true])(
+  "offers an editor Archive only when they published it (%s)",
+  (publishedByMe) => {
+    render(
+      <ArticleRowActions
+        article={{ ...base, status: "published", publishedByMe }}
+        admin={false}
+        role="editor"
+      />,
+    );
+    expect(
+      Boolean(screen.queryByRole("button", { name: /Archive article/ })),
+    ).toBe(publishedByMe);
+  },
+);

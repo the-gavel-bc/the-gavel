@@ -8,15 +8,15 @@ Corrections to earlier notes: the `picomatch` dependency advisory is no longer r
 
 | ID | Sev | Finding | Source | Status |
 | --- | --- | --- | --- | --- |
-| C-01 | Medium | Publish never clears `review_requested_at`, so published articles still show "In review" to authors, in the editor banner and in the review queue; no CHECK ties the review columns to draft status. | 3/logic-1, 3/arch-10 | Fix now |
-| C-02 | Medium | The author's "My articles" row actions assume every editor published their own articles (`publishedByMe` hardcoded), so Archive is offered on articles they did not publish and the database answers "no longer available". | 3/logic-2 | Fix now |
-| C-03 | Low | After an editor returns a draft, the refresh lands on a not-found page because the editor lost read access to it. Navigate to the review queue instead. | 3/logic-7 | Fix now |
-| C-04 | Medium | The publication date migration's backfill update fires the `updated_at` trigger on every published and archived article, so older browser tabs see spurious "changed" saves. Null already means "the publish day", so the backfill is unnecessary. Not yet merged anywhere. | 3/arch-1 | Fix now |
+| C-01 | Medium | Publish never clears `review_requested_at`, so published articles still show "In review" to authors, in the editor banner and in the review queue; no CHECK ties the review columns to draft status. | 3/logic-1, 3/arch-10 | Implemented locally (Batch 1) |
+| C-02 | Medium | The author's "My articles" row actions assume every editor published their own articles (`publishedByMe` hardcoded), so Archive is offered on articles they did not publish and the database answers "no longer available". | 3/logic-2 | Implemented locally (Batch 1) |
+| C-03 | Low | After an editor returns a draft, the refresh lands on a not-found page because the editor lost read access to it. Navigate to the review queue instead. | 3/logic-7 | Implemented locally (Batch 1) |
+| C-04 | Medium | The publication date migration's backfill update fired the `updated_at` trigger on published and archived rows. The review attributed stale-save conflicts to that timestamp change. The save checks use `edit_version`, which the backfill did not change. The migration was unmerged at review time. | 3/arch-1 | Historical backfill preserved (merged) |
 | C-05 | Medium | Bylines (article header, homepage hero, preview cards) format dates in UTC while the publication date is an Eastern date, so an evening publish shows the next day. Verified in `article-header.tsx`, `home-hero.tsx`, `preview-meta.tsx`. | 5/test-7 | Fix now |
-| C-06 | Low | Clearing the publication date on a published article leaves the backdated `published_at`, so the form is blank while readers see the old date; a client that omits the key wipes the stored date. | 3/logic-5, 3/logic-6, 3/arch-2 | Cheap (derive the date from `published_at`); absent-means-clear is documented |
-| C-07 | Low | The "who sets the date" wording in ADR 0013 reads as editors only; the owner decision is whoever can edit. | 3/logic decision challenge | Cheap (doc) |
+| C-06 | Low | Clearing the publication date on a published article leaves the backdated `published_at`, so the form is blank while readers see the old date; a client that omits the key wipes the stored date. | 3/logic-5, 3/logic-6, 3/arch-2 | Implemented locally (Batch 1) |
+| C-07 | Low | The "who sets the date" wording in ADR 0013 reads as editors only; the owner decision is whoever can edit. | 3/logic decision challenge | Implemented locally (Batch 1) |
 | C-08 | Low | Submit refused for an unfinished upload, a failed readiness check and a return note over 500 characters all show generic messages ("changed elsewhere, reload" or one invalid-input text). | 3/logic-3, 3/logic-4 | Plan |
-| C-09 | Low | Save replay paths use authority mode `edit` where transitions use `replay`, so a lost response can come back as not found; restore does not re-check the publication date. | 3/arch-4, 3/test handoff | Cheap (mode), decision needed (restore) |
+| C-09 | Low | Save replay paths use authority mode `edit` where transitions use `replay`, so a lost response can come back as not found; restore does not re-check the publication date. | 3/arch-4, 3/test handoff | Implemented locally (Batch 1) |
 
 ## Security and privacy
 

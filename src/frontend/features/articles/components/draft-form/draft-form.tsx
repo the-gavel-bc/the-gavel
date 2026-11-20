@@ -357,6 +357,7 @@ export function DraftForm({
           {status === "published" ? "Article details" : "Draft details"}
         </legend>
         <DraftMetadataFields
+          published={status === "published"}
           draft={command.draft}
           options={currentOptions}
           errors={errors}

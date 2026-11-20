@@ -89,9 +89,66 @@ begin
   reset role; return r;
 end; $$;
 grant execute on function pg_temp.save_pub(text,text,jsonb) to authenticated;
+select is(pg_temp.save_pub('4','null','{}')->>'changed','false','omitting an already blank published date remains a no-op');
+select is((select publication_date::text from public.articles where id=(select id from t where label='null')),
+  null,'a blank published date stays blank after save');
 select is(pg_temp.save_pub('2','past','{"publicationDate":"2026-01-10"}')->>'code','not_found','the author cannot change a published date');
 select is(pg_temp.save_pub('4','past','{"publicationDate":"2026-01-10"}')->>'ok','true','an administrator can');
 select is((select (published_at at time zone 'America/New_York')::text from public.articles where id=(select id from t where label='past')),'2026-01-10 12:00:00','published_at follows the new date');
 select is((select count(*)::int from public.audit_events where action='article.updated' and resource_id=(select id from t where label='past')),1,'the change is audited');
+select is(pg_temp.save_pub('4','past','{"publicationDate":null}')->>'ok','true','an administrator can clear the date');
+select is((select publication_date::text from public.articles where id=(select id from t where label='past')),'2026-01-10','clear stores the existing Eastern publication date');
+select is((select (published_at at time zone 'America/New_York')::text from public.articles where id=(select id from t where label='past')),'2026-01-10 12:00:00','clear keeps the original instant');
+select is(pg_temp.save_pub('4','past','{}')->>'changed','false','omitting the date again is a no-op');
+
+select pg_temp.act_as('4');
+set local role authenticated;
+select is(public.archive_article((select id from t where label='past'),
+  (select edit_version from public.articles where id=(select id from t where label='past')),gen_random_uuid())->>'ok','true','archive before restore');
+reset role;
+update public.articles set publication_date=((now() at time zone 'America/New_York')::date)+2 where id=(select id from t where label='past');
+select pg_temp.act_as('4');
+set local role authenticated;
+select is(public.restore_article((select id from t where label='past'),
+  (select edit_version from public.articles where id=(select id from t where label='past')),gen_random_uuid())->>'code','invalid_input','restore rejects a future date');
+reset role;
+update public.articles set publication_date='2026-01-10' where id=(select id from t where label='past');
+select pg_temp.act_as('4');
+set local role authenticated;
+select is(public.restore_article((select id from t where label='past'),
+  (select edit_version from public.articles where id=(select id from t where label='past')),gen_random_uuid())->>'ok','true','restore accepts a valid past date');
+reset role;
+select ok((select review_requested_at is null and review_note is null and published_at='2026-01-10 17:00Z'
+  from public.articles where id=(select id from t where label='past')),'restore preserves the publication instant and clean review state');
+-- An exact old-client retry may omit the original explicit null. The date
+-- and receipt both survive, even when the caller can no longer edit.
+create temp table clear_receipt as
+select id, edit_version, gen_random_uuid() as request_id, null::jsonb as result,
+  (select count(*) from public.article_revisions r where r.article_id=a.id) as revisions
+from public.articles a where id=(select id from t where label='past');
+grant select, update on clear_receipt to authenticated;
+set local role authenticated;
+update clear_receipt set result=public.save_published_article(id,edit_version,request_id,
+  pg_temp.draft_input(pg_temp.body()||'{"title":"Changed with clear","publicationDate":null}'));
+select is((select result->>'changed' from clear_receipt),'true','clear and title update write a receipt');
+reset role;
+update public.memberships set role='editor' where user_id='00000000-0000-0000-0000-000000000004';
+set local role authenticated;
+select is(
+  (select public.save_published_article(id,edit_version,request_id,
+    pg_temp.draft_input(pg_temp.body()||'{"title":"Changed with clear"}')) from clear_receipt),
+  (select result||'{"replayed":true}'::jsonb from clear_receipt),
+  'omission replays the exact published receipt after losing edit authority');
+select is(
+  (select public.save_published_article(id,edit_version+1,gen_random_uuid(),
+    pg_temp.draft_input(pg_temp.body()||'{"title":"Unauthorized edit"}'))->>'code' from clear_receipt),
+  'not_found','published replay authority does not permit a new edit');
+reset role;
+select is((select a.edit_version from public.articles a join clear_receipt c using (id)),
+  (select edit_version+1 from clear_receipt),'exact replay does not bump the version');
+select is((select count(*) from public.article_revisions r join clear_receipt c on r.article_id=c.id),
+  (select revisions+1 from clear_receipt),'exact replay does not create another revision');
+select is((select count(*) from public.audit_events e join clear_receipt c on e.correlation_id=c.request_id),
+  1::bigint,'exact replay does not create another audit event');
 select * from finish();
 rollback;

@@ -2,6 +2,8 @@
 
 Status: implemented in three slices (database, contract and editor, docs). The browser test is deferred (see docs/code-reviews/DEFERRED.md). Owner decisions (2026-11-19): the field is the **publication date shown to readers**; **whoever can edit the article may set it, locked after publication except for administrators**; **today or earlier only** (no scheduling); **date only, interpreted in Eastern time**.
 
+The lifecycle follow-up preserves the merged backfill and defines clear and restore behavior in the [API contract](../../api-contracts.md#implemented-draft-form-adapter). Historical design notes follow.
+
 ## Behavior
 
 - A date input in the editor's metadata section (create and edit), labeled "Publication date (optional)" with help text: "Readers see this date. Leave blank to use the day you publish. It cannot be in the future."

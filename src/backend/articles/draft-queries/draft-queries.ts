@@ -41,6 +41,7 @@ export type ArticleSummary = {
   inReview: boolean;
   /** The editor's note when the article was last returned. */
   reviewNote: string | null;
+  publishedByMe: boolean;
 };
 export type ArticlePage = {
   items: ArticleSummary[];
@@ -74,6 +75,7 @@ const listRow = summaryRow.extend({
   section: z.object({ name: z.string().max(160) }),
   review_requested_at: reviewColumns.review_requested_at,
   review_note: reviewColumns.review_note,
+  published_by_profile_id: reviewColumns.published_by_profile_id,
 });
 
 async function reader() {
@@ -100,7 +102,7 @@ export async function getMyArticlesPage(input: {
     let query = client
       .from("articles")
       .select(
-        "id,title,slug,status,section_id,edit_version,updated_at,review_requested_at,review_note,section:sections!articles_section_id_fkey(name)",
+        "id,title,slug,status,section_id,edit_version,updated_at,review_requested_at,review_note,published_by_profile_id,section:sections!articles_section_id_fkey(name)",
       )
       // My Articles stays owner-filtered even for administrators; RLS alone allows more.
       .eq("owner_profile_id", access.profileId)
@@ -131,8 +133,9 @@ export async function getMyArticlesPage(input: {
       sectionName: row.section.name,
       version: row.edit_version,
       updatedAt: row.updated_at,
-      inReview: Boolean(row.review_requested_at),
-      reviewNote: row.review_note ?? null,
+      inReview: row.status === "draft" && Boolean(row.review_requested_at),
+      reviewNote: row.status === "draft" ? (row.review_note ?? null) : null,
+      publishedByMe: row.published_by_profile_id === access.profileId,
     }));
     const last = items.at(-1);
     return {
