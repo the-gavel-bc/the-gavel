@@ -78,6 +78,8 @@ Findings are in [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md) (IDs D-01 to D-
 
 ### Batch 1b: urgent bugs found in these areas (one small migration plus interface fixes)
 
+- C-40 (confirmed on a phone): let the save bar's button row wrap and set `min-width: 0` on the bar, so Save stays on screen at 320 and 375 px with four buttons; check with a browser at both widths. Cheap CSS fix; do it first.
+
 - D-01: add `article.submitted`, `article.returned`, `article.image_purged` (and a decision on `article.owner_changed`) to the audit reader's TypeScript enum, labels and filters from one shared constant, and add a parity test between the SQL reader's action list and the TypeScript schema. Acceptance: the Article activity page loads with those events present.
 - D-02: when the contributor combobox text differs from the selected person's label, revert the text on blur (or block Save with a message); "Add contributor" adds an empty row and requires a choice. Tests for both.
 - D-03: admin tag list ordered by name with a search box, merge target chosen by a server-side lookup; create-category form loads all sections up to the navigation limit.

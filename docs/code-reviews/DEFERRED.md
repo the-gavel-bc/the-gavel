@@ -64,6 +64,10 @@ Source: [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md); IDs refer to it. Items
 | D-26 | Browser specs for homepage, taxonomy, public authors and audit | Part of repairing the stale browser suite (C-27) | See C-27 |
 | D-28 | Bounded searched editor catalogs, search ranking, archive and byline alignment, JSON-LD for credit-only writers, navigation limit | Each needs a small design or product answer | Handle after the cheap batches |
 
+## Still unverified at runtime
+
+See [RUNTIME-VERIFICATION.md](RUNTIME-VERIFICATION.md). Not proven: tag merge past 50 tags (D-03), lifecycle controls staying locked after a status-keeping action (C-34), all keyboard, drag-and-drop, focus and screen reader findings, and the unreproduced Save tap on an iPhone viewport. Refuted: the mobile reader menu staying open after a link (12/ux-1); remove it from any list of open items.
+
 ## Decided not to change (so they are not re-raised)
 
 | Area | Item | Decision and reason |

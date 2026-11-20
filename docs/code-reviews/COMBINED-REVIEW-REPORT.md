@@ -24,6 +24,14 @@ Corrections to earlier notes: the `picomatch` dependency advisory is no longer r
 
 Notes: every area in the list has now been reviewed at least once (quick runs, static reading). Areas 6 to 9 and 12 are in [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md). The `tags` and `profiles` read policies (C-10, C-11) are reported once, in this file. Reviews so far were static: no query plans, browser runs or screen reader checks were done.
 
+## Runtime verification (2026-11-20)
+
+Findings checked in a running build are listed in [RUNTIME-VERIFICATION.md](RUNTIME-VERIFICATION.md). Confirmed: C-05 (byline shows the wrong day), C-10 (anonymous tag read and a 200 page for an unused tag), C-11 (a non-member session reads a credit-only profile's name and biography), C-12 (typeahead starves search: "Search is busy"), C-14 and C-24 (cache headers), C-33 (the save bar is 491 px wide on a 375 px or 320 px phone with four buttons, so Save is off-screen: now **Fix now**, see C-40). Refuted: the mobile menu staying open after a link.
+
+| ID | Sev | Finding | Source | Status |
+| --- | --- | --- | --- | --- |
+| C-40 | High | On a phone (375 and 320 px) the editor's sticky save bar is 491 px wide with four buttons (Cancel, Return, Publish, Save), so the page scrolls sideways and Save sits off the right edge. Fix: let the button row wrap and give the bar `min-width: 0`. | 4/ux-7, 11/test-10 (confirmed in a running build) | Fix now |
+
 ## Bugs in code written this week (fix first)
 
 | ID | Sev | Finding | Source | Status |
