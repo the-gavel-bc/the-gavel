@@ -130,6 +130,7 @@ export function DraftConflictPanel({
           <DraftSnapshot
             input={editable.detail.draft}
             options={editable.options}
+            comparison={previous?.input ?? local}
           />
           <Button type="button" disabled={disabled} onClick={() => void load()}>
             Load latest saved version
@@ -149,7 +150,11 @@ export function DraftConflictPanel({
               the last valid body.
             </p>
           )}
-          <DraftSnapshot input={previous.input} options={previous.options} />
+          <DraftSnapshot
+            input={previous.input}
+            options={previous.options}
+            comparison={editable?.detail.draft ?? local}
+          />
         </details>
       )}
       {confirmDialog}

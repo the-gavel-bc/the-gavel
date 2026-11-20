@@ -86,10 +86,7 @@ test("independent owner and admin tabs review conflicts and deliberately adopt a
     await expect(
       admin.getByText("Admin local body.", { exact: true }),
     ).toBeVisible();
-    const missing = admin.getByLabel(
-      `Unavailable category: ${fixture.id(97)}`,
-      { exact: true },
-    );
+    const missing = admin.getByLabel("Unavailable category 1", { exact: true });
     await expect(missing).toBeChecked();
     expect(
       await admin.evaluate(

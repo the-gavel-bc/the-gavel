@@ -20,21 +20,43 @@ function text(
         ) ?? "")
     : "";
 }
+// Assign the same display numbers on either side without revealing database IDs.
+function unavailable(kind: string, id: string, ids: string[]) {
+  const position = [...new Set(ids)].sort().indexOf(id) + 1;
+  return `Unavailable ${kind} ${position}`;
+}
+
 export function DraftSnapshot({
   input,
   options,
+  comparison,
 }: {
   input: DraftInput;
   options: DraftOptions;
+  comparison?: DraftInput;
 }) {
-  const name = (id: string, choices: { id: string; name: string }[]) =>
-    choices.find((c) => c.id === id)?.name ?? `Unavailable selection: ${id}`;
+  const categoryIds = [
+    ...input.categoryIds,
+    ...(comparison?.categoryIds ?? []),
+  ];
+  const tagIds = [...input.tagIds, ...(comparison?.tagIds ?? [])];
+  const creditIds = [
+    ...input.contributors,
+    ...(comparison?.contributors ?? []),
+  ].map((credit) => credit.profileId);
   return (
     <div className={styles.snapshot}>
       <dl>
         {[
           ["Title", input.title],
-          ["Section", name(input.sectionId, options.sections)],
+          [
+            "Section",
+            options.sections.find(({ id }) => id === input.sectionId)?.name ??
+              unavailable("section", input.sectionId, [
+                input.sectionId,
+                comparison?.sectionId ?? input.sectionId,
+              ]),
+          ],
           ["Excerpt", input.excerpt],
           ["SEO keyphrase", input.seoKeyphrase],
           ["Meta description", input.metaDescription],
@@ -49,19 +71,29 @@ export function DraftSnapshot({
       <p>
         Categories:{" "}
         {input.categoryIds
-          .map((id) => name(id, options.categories))
+          .map(
+            (id) =>
+              options.categories.find((category) => category.id === id)?.name ??
+              unavailable("category", id, categoryIds),
+          )
           .join(", ") || "None"}
       </p>
       <p>
         Tags:{" "}
-        {input.tagIds.map((id) => name(id, options.tags)).join(", ") || "None"}
+        {input.tagIds
+          .map(
+            (id) =>
+              options.tags.find((tag) => tag.id === id)?.name ??
+              unavailable("tag", id, tagIds),
+          )
+          .join(", ") || "None"}
       </p>
       <p>
         Contributors:{" "}
         {input.contributors
           .map(
             (c) =>
-              `${options.contributors.find((p) => p.id === c.profileId)?.displayName ?? `Unavailable contributor: ${c.profileId}`} (${c.role}, order ${c.displayOrder})`,
+              `${options.contributors.find((p) => p.id === c.profileId)?.displayName ?? unavailable("contributor", c.profileId, creditIds)} (${c.role}, order ${c.displayOrder})`,
           )
           .join(", ") || "None"}
       </p>

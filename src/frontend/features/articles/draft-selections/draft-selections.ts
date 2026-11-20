@@ -31,7 +31,10 @@ export function draftSelectionErrors(
   const pairs = draft.contributors.map(
     (c) => `${c.profileId.toLowerCase()}:${c.role}`,
   );
-  if (
+  if (draft.contributors.some((credit) => !credit.profileId)) {
+    errors.contributors =
+      "Choose a contributor for each row or remove the empty row.";
+  } else if (
     draft.contributors.length > MAX_CONTRIBUTORS ||
     new Set(pairs).size !== pairs.length ||
     draft.contributors.some(

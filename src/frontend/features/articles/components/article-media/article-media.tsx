@@ -11,6 +11,7 @@ import {
 } from "@/backend/media/media-actions/media-actions";
 import type { MainImage } from "@/backend/media/media-queries/media-queries";
 import { removeUnusedArticleImage } from "@/backend/media/media-removal/media-removal";
+import { uploadReservationMessage } from "./upload-reservation-message";
 import styles from "./article-media.module.css";
 
 type Confirmed = Extract<DraftWriteResult, { ok: true }>;
@@ -114,7 +115,7 @@ export function ArticleMedia({
       );
       if (!reservation.ok) {
         if (reservation.code !== "unavailable") setUploadRequestId(null);
-        setError(`Image upload could not start (${reservation.code}). Retry.`);
+        setError(uploadReservationMessage(reservation.code));
         return;
       }
       const body = new FormData();
@@ -206,7 +207,7 @@ export function ArticleMedia({
         ) {
           setPendingWrite({ ...write, uncertain: true });
           setError(
-            `Original image change is still unconfirmed (${result.code}). Retry the same change.`,
+            "Original image change is still unconfirmed. Retry the same change.",
           );
           return;
         }
@@ -215,7 +216,11 @@ export function ArticleMedia({
           setError(
             "This draft changed elsewhere. Reload to review its current version.",
           );
-        } else setError(`Image change was not saved (${result.code}). Retry.`);
+        } else if (result.code === "forbidden") {
+          setError("You no longer have access to change this image.");
+        } else if (result.code === "not_found") {
+          setError("This image is no longer available.");
+        } else setError("Image change was not saved. Try again.");
         setPendingWrite(null);
         return;
       }
@@ -279,11 +284,11 @@ export function ArticleMedia({
     if (!target || disabled || busy || conflict || pendingWrite) return;
     setBusy(true);
     setError("");
-    setStatus("Deleting image…");
+    setStatus("Discarding upload…");
     try {
       const result = await removeUnusedArticleImage(target);
       if (!result.ok) {
-        setError(`Image could not be deleted (${result.code}). Retry.`);
+        setError("Could not discard the upload. Try again.");
         return;
       }
       setAssetId(null);
@@ -296,9 +301,9 @@ export function ArticleMedia({
         setCredit("");
         setCaption("");
       }
-      setStatus("Image deleted.");
+      setStatus("Upload discarded.");
     } catch {
-      setError("Image could not be deleted. Retry.");
+      setError("Could not discard the upload. Try again.");
     } finally {
       setBusy(false);
     }
@@ -407,6 +412,7 @@ export function ArticleMedia({
         {assetId && (
           <Button
             type="button"
+            variant="danger"
             disabled={mutationLocked}
             onClick={async () => {
               if (
@@ -422,7 +428,7 @@ export function ArticleMedia({
                 void discardUpload();
             }}
           >
-            Delete image
+            Discard upload
           </Button>
         )}
         {cleanupAssetId && (
@@ -464,7 +470,7 @@ export function ArticleMedia({
                   message: published
                     ? "Readers will stop seeing it on this published article."
                     : "The image is removed from this draft.",
-                  confirmLabel: "Remove image",
+                  confirmLabel: "Remove main image",
                   cancelLabel: "Keep",
                   danger: true,
                 }))
@@ -478,7 +484,7 @@ export function ArticleMedia({
               });
             }}
           >
-            Remove image
+            Remove main image
           </Button>
         )}
       </div>

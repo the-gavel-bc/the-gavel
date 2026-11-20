@@ -16,11 +16,13 @@ export function ContributorCombobox({
   onSelect,
 }: {
   index: number;
-  selected: ContributorChoice;
+  selected: ContributorChoice | null;
   onSelect: (choice: ContributorChoice) => void;
 }) {
   const id = useId();
-  const label = `${selected.displayName} (${selected.slug})`;
+  const label = selected?.slug
+    ? `${selected.displayName} (${selected.slug})`
+    : (selected?.displayName ?? "");
   const [text, setText] = useState(label);
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<ContributorChoice[]>([]);
@@ -105,7 +107,7 @@ export function ContributorCombobox({
       requestId: crypto.randomUUID(),
       displayName: name.success ? name.data : "",
     };
-    const originalId = latest.current.selected.id;
+    const originalId = latest.current.selected?.id;
     inFlight.current = true;
     setCommand(next);
     setCreating(true);
@@ -113,7 +115,8 @@ export function ContributorCombobox({
     setError("");
     try {
       const result = await createGuestContributorAction(next);
-      if (!mounted.current || latest.current.selected.id !== originalId) return;
+      if (!mounted.current || latest.current.selected?.id !== originalId)
+        return;
       if (result.ok) {
         setCommand(null);
         select(result);

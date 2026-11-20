@@ -63,7 +63,7 @@ it("disables adding at the cap but leaves removal available", () => {
     />,
   );
   expect(screen.getByLabelText("Campus")).toBeDisabled();
-  expect(screen.getByLabelText(/Unavailable category: id-0$/)).toBeEnabled();
+  expect(screen.getByLabelText("Unavailable category 1")).toBeEnabled();
   expect(
     screen.getByRole("group", { name: "Categories" }),
   ).toHaveAccessibleDescription(/Repair selections/);
@@ -117,7 +117,7 @@ it("retains older selections beyond ten and allows removal", async () => {
   expect(screen.getByLabelText("Add tag")).toBeDisabled();
   expect(screen.getByText(/10 tags/)).toBeVisible();
   await userEvent.click(
-    screen.getByRole("button", { name: "Remove tag Unavailable tag: tag-0" }),
+    screen.getByRole("button", { name: "Remove tag Unavailable tag 1" }),
   );
   expect(onChange.mock.calls[0][0].tagIds).toEqual(tagIds.slice(1));
 });

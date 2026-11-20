@@ -30,6 +30,8 @@ export function useConfirm() {
   const cancelButton = useRef<HTMLButtonElement>(null);
   const titleId = useId();
   const messageId = useId();
+  const noteId = useId();
+  const noteMax = options?.noteMax ?? 500;
 
   const settle = useCallback((ok: boolean, text = "") => {
     resolver.current?.({ ok, note: text.trim() });
@@ -78,7 +80,12 @@ export function useConfirm() {
     <div
       className={styles.backdrop}
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) settle(false);
+        if (event.target !== event.currentTarget) return;
+        if (options.noteLabel && note.length > 0) {
+          event.preventDefault();
+          return;
+        }
+        settle(false);
       }}
     >
       <div
@@ -91,16 +98,21 @@ export function useConfirm() {
         <h2 id={titleId}>{options.title}</h2>
         <p id={messageId}>{options.message}</p>
         {options.noteLabel && (
-          <label className={styles.note}>
-            <span>{options.noteLabel}</span>
+          <div className={styles.note}>
+            <label htmlFor={noteId}>{options.noteLabel}</label>
             <textarea
+              id={noteId}
+              aria-describedby={`${noteId}-count`}
               autoFocus
               rows={3}
-              maxLength={options.noteMax ?? 500}
+              maxLength={noteMax}
               value={note}
               onChange={(event) => setNote(event.target.value)}
             />
-          </label>
+            <small id={`${noteId}-count`}>
+              {note.length} of {noteMax} characters
+            </small>
+          </div>
         )}
         <div className={styles.actions}>
           <button

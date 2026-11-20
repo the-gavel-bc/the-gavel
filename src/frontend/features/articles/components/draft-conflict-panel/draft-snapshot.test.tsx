@@ -35,9 +35,25 @@ it("previews canonical content as safe text and uses generic unavailable labels"
   expect(container.querySelector("pre")).toHaveTextContent(
     "Plain text <script>inert</script>",
   );
-  expect(
-    screen.getAllByText(
-      new RegExp(`Unavailable selection: ${baseDraft.sectionId}`),
-    ).length,
-  ).toBeGreaterThan(0);
+  expect(screen.getByText("Unavailable section 1")).toBeVisible();
+  expect(screen.getByText(/Unavailable category 1/)).toBeVisible();
+  expect(container).not.toHaveTextContent(baseDraft.sectionId);
+});
+
+it("distinguishes unavailable choices across both snapshots without showing IDs", () => {
+  const lower = "00000000-0000-0000-0000-000000000011";
+  const higher = "00000000-0000-0000-0000-000000000012";
+  const local = { ...baseDraft, tagIds: [higher] };
+  const saved = { ...baseDraft, tagIds: [lower] };
+  const options = { sections: [], categories: [], tags: [], contributors: [] };
+  const { container } = render(
+    <>
+      <DraftSnapshot input={local} options={options} comparison={saved} />
+      <DraftSnapshot input={saved} options={options} comparison={local} />
+    </>,
+  );
+  expect(screen.getByText(/Unavailable tag 1/)).toBeVisible();
+  expect(screen.getByText(/Unavailable tag 2/)).toBeVisible();
+  expect(container).not.toHaveTextContent(lower);
+  expect(container).not.toHaveTextContent(higher);
 });

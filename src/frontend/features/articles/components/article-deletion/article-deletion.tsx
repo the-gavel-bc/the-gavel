@@ -50,7 +50,8 @@ export function ArticleDeletion({
       next = { ok: false, code: "unavailable" };
     }
     setRetry(
-      !next.ok && (next.code === "unavailable" || retry !== null)
+      !next.ok &&
+        (next.code === "unavailable" || retry?.requestId === command.requestId)
         ? command
         : null,
     );

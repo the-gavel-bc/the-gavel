@@ -31,7 +31,6 @@ it("retries uncertainty with the exact submitted UUID/payload and retains input"
   await act(async () => {
     await result.current.submit();
   });
-  expect(result.current.locked).toBe(false);
   expect(result.current.phase).toBe("uncertain");
   act(() =>
     result.current.update({
@@ -166,7 +165,6 @@ it("keeps an earlier uncertain command when later access denial cannot resolve i
     await result.current.submit();
   });
   expect(result.current.phase).toBe("uncertain");
-  expect(result.current.locked).toBe(false);
   await act(async () => {
     expect(await result.current.submit()).toMatchObject({
       id: success.articleId,

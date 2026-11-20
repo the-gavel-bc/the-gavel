@@ -142,10 +142,9 @@ export function ArticleLifecycleControls({
     operation: Operation;
     value: ArticleLifecycleResult;
   } | null>(null);
-  const [retry, setRetry] = useState<{
-    operation: Operation;
-    command: ArticleLifecycleCommand;
-  } | null>(null);
+  const [retries, setRetries] = useState<
+    Partial<Record<Operation, ArticleLifecycleCommand>>
+  >({});
   const busy = useRef(false);
   const offered: Offered = capabilities ?? {
     publish: status === "draft",
@@ -161,7 +160,8 @@ export function ArticleLifecycleControls({
     if (busy.current || blocked) return;
     const spec = operations[operation];
     let command: ArticleLifecycleCommand;
-    if (retry?.operation === operation) command = retry.command;
+    const retry = retries[operation];
+    if (retry) command = retry;
     else {
       command = {
         articleId,
@@ -205,11 +205,13 @@ export function ArticleLifecycleControls({
     } catch {
       next = { ok: false, code: "unavailable" };
     }
-    setRetry(
-      !next.ok && (next.code === "unavailable" || retry !== null)
-        ? { operation, command }
-        : null,
-    );
+    setRetries((previous) => ({
+      ...previous,
+      [operation]:
+        !next.ok && (next.code === "unavailable" || retry)
+          ? command
+          : undefined,
+    }));
     setResult({ operation, value: next });
     setPending(null);
     busy.current = false;
@@ -249,7 +251,7 @@ export function ArticleLifecycleControls({
           >
             {pending === operation
               ? `${spec.progress}…`
-              : retry?.operation === operation
+              : retries[operation]
                 ? `Retry original ${spec.label.split(" ")[0].toLowerCase()}`
                 : spec.label}
           </Button>

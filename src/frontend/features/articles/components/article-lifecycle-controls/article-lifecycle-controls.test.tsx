@@ -312,3 +312,50 @@ it.each([false, true])(
     expect(mocks.refresh).not.toHaveBeenCalled();
   },
 );
+
+it.each(["conflict", "unavailable"])(
+  "preserves the submit receipt when publish returns %s",
+  async (code) => {
+    mocks.submit
+      .mockResolvedValueOnce({ ok: false, code: "unavailable" })
+      .mockResolvedValueOnce({ ok: false, code: "forbidden" });
+    mocks.publish.mockResolvedValueOnce({ ok: false, code });
+    render(
+      <ArticleLifecycleControls
+        articleId={articleId}
+        version={1}
+        status="draft"
+        disabled={false}
+        capabilities={{
+          submit: true,
+          publish: true,
+          archive: false,
+          restore: false,
+          returnToAuthor: false,
+        }}
+      />,
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: /Submit for review/ }),
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "Publish article" }),
+    );
+    if (code === "conflict") {
+      expect(
+        screen.getByRole("button", { name: "Publish article" }),
+      ).toBeEnabled();
+    } else {
+      expect(
+        screen.getByRole("button", { name: "Retry original publish" }),
+      ).toBeEnabled();
+    }
+    await userEvent.click(
+      screen.getByRole("button", { name: "Retry original submit" }),
+    );
+    expect(mocks.submit.mock.calls[1][0]).toEqual(
+      mocks.submit.mock.calls[0][0],
+    );
+    expect(window.confirm).toHaveBeenCalledTimes(2);
+  },
+);

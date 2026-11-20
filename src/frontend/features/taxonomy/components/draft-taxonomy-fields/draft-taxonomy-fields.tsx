@@ -109,9 +109,9 @@ export function DraftTaxonomyFields({
         );
         const rows = [
           ...choices,
-          ...unavailable.map((id) => ({
+          ...unavailable.map((id, index) => ({
             id,
-            name: `Unavailable ${singular}: ${id}`,
+            name: `Unavailable ${singular} ${index + 1}`,
           })),
         ];
         return (
@@ -172,10 +172,10 @@ export function DraftTaxonomyFields({
           Up to 10 tags. Press Enter or comma to add.
         </p>
         <ul className={styles.chips}>
-          {draft.tagIds.map((id) => {
+          {draft.tagIds.map((id, index) => {
             const name =
               tags.find((tag) => tag.id === id)?.name ??
-              `Unavailable tag: ${id}`;
+              `Unavailable tag ${index + 1}`;
             return (
               <li key={id}>
                 {name}
