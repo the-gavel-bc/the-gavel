@@ -23,7 +23,8 @@ select ('5c000000-0000-0000-0000-'||lpad(n::text,12,'0'))::uuid,
  'Publicneedle story '||n,'public-search-story-'||n,'Public excerpt',
  '{"format":"gavel-draft","version":1,"document":{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Bodyneedle secrettext"}]}]}}',
  case when n=14 then 'draft'::public.article_status when n=15 then 'archived'::public.article_status else 'published'::public.article_status end,
- case when n!=14 then '2026-11-10T00:00:00.123456Z'::timestamptz else null end,
+ case when n=1 then '2025-12-31T23:59:59Z'::timestamptz
+      when n!=14 then '2026-11-10T00:00:00.123456Z'::timestamptz else null end,
  case when n=15 then now() else null end from generate_series(1,15) n;
 create temp table search_pages(label text primary key,result jsonb);
 grant select,insert on search_pages to anon,authenticated;
@@ -37,6 +38,8 @@ select is((select result#>>'{items,0,id}' from search_pages where label='first')
 select is((select result#>>'{nextCursor,publishedAt}' from search_pages where label='first'),'2026-11-10T00:00:00.123456Z','cursor preserves six microseconds');
 select is((select jsonb_array_length(result->'items') from search_pages where label='second'),1,'continuation excludes repeated and private articles');
 select is((select result#>>'{items,0,id}' from search_pages where label='second'),'5c000000-0000-0000-0000-000000000001','second page contains only oldest tie');
+select is((select result#>>'{items,0,publishedAt}' from search_pages where label='second'),
+ '2025-12-31T23:59:59.000000Z','backdated published article sorts after current search results');
 select is((select result->'nextCursor' from search_pages where label='second'),'null'::jsonb,'exhaustion has no cursor');
 select ok((select bool_and(not exists(select 1 from jsonb_object_keys(card) k where k not in ('id','slug','title','excerpt','publishedAt','section','owner','writers','mainImage'))) from search_pages,jsonb_array_elements(result->'items') card),'cards expose only allowlisted fields');
 select unalike((select result::text from search_pages where label='first'),'%secrettext%','body match text never becomes a snippet');

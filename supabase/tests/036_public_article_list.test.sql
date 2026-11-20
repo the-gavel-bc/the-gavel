@@ -14,6 +14,8 @@ select ('53000000-0000-0000-0000-'||lpad(n::text,12,'0'))::uuid,
  '2026-01-01T00:00:00.123456Z'::timestamptz + (case when n=3 then interval '1 microsecond' else interval '0' end),
  '{"format":"gavel-draft","version":1,"document":{"type":"doc","content":[{"type":"paragraph"}]}}'
 from generate_series(1,3) n;
+update public.articles set published_at='2025-12-31T23:59:59Z'
+where slug='list-story-1';
 insert into public.articles(id,owner_profile_id,section_id,title,slug)
 values('53000000-0000-0000-0000-000000000004','10000000-0000-0000-0000-000000000002',
  '23000000-0000-0000-0000-000000000036','Secret draft','list-secret');
@@ -35,6 +37,8 @@ select is((select value#>>'{items,1,slug}' from list_proof),'list-story-2','uuid
 select is((select value#>>'{nextCursor,publishedAt}' from list_proof),'2026-01-01T00:00:00.123456Z','cursor preserves microseconds');
 select is(public.list_public_articles('section','list-proof',null,2,(select value->'nextCursor' from list_proof))#>>'{items,0,slug}',
  'list-story-1','continuation returns remaining article');
+select is(public.list_public_articles('section','list-proof',null,10,null)#>>'{items,2,slug}',
+ 'list-story-1','backdated published article sorts after newer list rows');
 select is(public.list_public_articles('section','other',null,2,(select value->'nextCursor' from list_proof))->>'kind','invalid','cursor cannot cross filters');
 select is(public.list_public_articles('section','list-proof',null,25,null)->>'kind','invalid','oversized page rejected');
 select is(public.list_public_articles('section','list-proof',null,0,null)->>'kind','invalid','zero page rejected');
