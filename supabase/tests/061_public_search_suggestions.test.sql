@@ -1,5 +1,9 @@
 begin;
 select no_plan();
+create temp table suggestion_budget_before as
+select last_value, is_called from private.public_search_suggestion_budget;
+select setval('private.public_search_suggestion_budget',
+  floor(extract(epoch from clock_timestamp())/60)::bigint * 128,true);
 select has_function('public','suggest_public_articles',array['text'],'typeahead suggestions exist');
 insert into public.sections(id,name,slug) values('2c000000-0000-0000-0000-000000000061','Suggestsection','suggest-section');
 insert into public.profiles(id,display_name,slug) values('1c000000-0000-0000-0000-000000000061','Suggestowner','suggest-owner');
@@ -36,5 +40,7 @@ select is((select jsonb_array_length(result->'items') from suggestions where lab
 select set_config('request.path','/rpc/search_public_articles',true);
 select is(public.suggest_public_articles('zqxsuggest')->>'kind','invalid','only the direct RPC path is accepted');
 select ok(not has_function_privilege('service_role','public.suggest_public_articles(text)','execute'),'service role is not granted');
+select setval('private.public_search_suggestion_budget',last_value,is_called)
+from suggestion_budget_before;
 select * from finish();
 rollback;

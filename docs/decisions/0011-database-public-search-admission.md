@@ -11,7 +11,7 @@ Search is callable directly through Supabase, so a Next.js-only limit would be b
 
 ## Decision
 
-Use a private, cache-1 PostgreSQL sequence encoding the server minute and admitted count in 128-value buckets. Admit at most 120 attempts per minute. A reserved transaction advisory lock serializes admission and search; compute time after acquiring it. Sequence increments survive ordinary transaction rollback. Never rewind a counter ahead of the server clock; fail closed until time catches up. Invalid inputs do not acquire admission.
+Use a private, cache-1 PostgreSQL sequence encoding the server minute and admitted count in 128-value buckets. Reserve 80 full searches and 40 typeahead attempts per minute. Each lane uses its own private sequence and transaction advisory lock. A busy lane returns a one-second retry without waiting. Compute time after acquiring the lock. During migration, carry over tickets already spent in the current window. Sequence increments survive ordinary transaction rollback. Never rewind a counter ahead of the server clock; fail closed until time catches up. Invalid inputs do not acquire admission.
 
 Expose only a direct POST RPC with a two-second function timeout. [PostgREST hoists function settings](https://docs.postgrest.org/en/v12/references/transactions.html#function-settings) before executing the SQL statement. Check its trusted request path/method so nested transports cannot skip that boundary. Cancellation raises a fixed [PGRST error](https://docs.postgrest.org/en/v12/references/errors.html#add-http-headers-with-raise) with HTTP 503 and no-store, aborting the whole transaction. Returning normally after cancellation could allow later bulk calls to continue after the deadline fired. The checked anonymous server adapter also aborts transport after three seconds.
 
@@ -25,9 +25,9 @@ Expose only a direct POST RPC with a two-second function timeout. [PostgREST hoi
 
 ## Consequences
 
-The limit is global: one source can limit everyone. Fixed windows allow bursts across a boundary. Serialization reduces concurrency, and waiting requests can hit the deadline before admission. Sequence crash gaps/state uncertainty are operational concerns; this is rate-control state, not an audit ledger. Pool acquisition and general request floods need hosted capacity monitoring or future edge controls. No per-IP or DDoS protection is claimed.
+Each lane has a database-wide limit. One source can exhaust a lane for all its callers, but typeahead cannot spend full search tickets. Fixed windows allow bursts across a boundary. Each lane admits one transaction at a time. Sequence crash gaps/state uncertainty are operational concerns; this is rate-control state, not an audit ledger. Pool acquisition and general request floods need hosted capacity monitoring or future edge controls. No per-IP or DDoS protection is claimed.
 
-Search results and all failure states are uncached. The response contains existing public cards, never body snippets. Hosted release requires the same timeout, cancellation and transport proof as local verification. Rollback reverts consumers and revokes the new RPC; additive derived state may remain.
+Search results and all failure states are uncached. The response contains existing public cards, never body snippets. Hosted release requires the same timeout, cancellation and transport proof as local verification. A rollback can restore the prior helper and typeahead function definitions in one migration. The additional sequence can remain private. Restore the shared budget in a new minute so recently admitted typeahead work cannot be charged twice or omitted.
 
 ## Validation
 
