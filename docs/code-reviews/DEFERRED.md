@@ -48,7 +48,39 @@ Everything the fix plan does not cover. Source: [COMBINED-REVIEW-REPORT.md](COMB
 | C-33 | Save-bar phone layout, visible reason for disabled Submit and Publish, linked recovery panel, focus after success | Needs a runtime check at 320 and 375 px | Real phone or simulator check, then adjust |
 | C-35 | Refactor the upload pipeline duplicates and the 587-line draft form | Larger refactor with regression risk | After the test batch lands |
 | C-36 (rest) | Toolbar roving focus and headings, typed-but-not-added tag text, field error styling, body-image form collapse | Polish with design choices | Group into a design-system pass (area 12) |
-| Areas 6 to 9, 12 | Homepage curation, taxonomy and tags, profiles and credits, site information and audit, design-system sweep | Not reviewed yet | Run the same quick review |
+
+## Deferred from areas 6 to 9 and 12
+
+Source: [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md); IDs refer to it. Items planned in [COMBINED-FIX-PLAN.md](COMBINED-FIX-PLAN.md) are not repeated here.
+
+| ID | Item | Why deferred | What would settle it |
+| --- | --- | --- | --- |
+| D-05, D-20 | Homepage keyboard moves between rows and to the lead, focus management, live regions, library counts and inline errors, Discard confirmation, phone layout | Interface work with design choices and runtime checks on touch devices | Add "Make lead" and "Move to" buttons that call the arrangement rules; test on iOS and Android |
+| D-06 | Homepage save eligibility and filler seeding | Needs your decision (see fix plan, decision 6) and a runtime check of the pending-image case | Decide; then use `is_homepage_card_eligible` in save and the library |
+| D-07, D-15 | Member profile moderation, consent for credits of real members | New administrator capability and product decisions (decisions 7 and 9) | Decide; add the function and tests |
+| D-08, D-09 | Caps and cleanup for tags and one-off credits; non-Latin slug fallback | Needs decisions (10) and a change to slug rules; slugs freeze at publish | Choose a hash fallback; add caps with orphan cleanup |
+| D-10 | Tag merge revisions, audit detail, redirects, stale-editor message | Public URL change needs approval (decision 8) | Decide; write revisions and an audit detail column |
+| D-18 | Field-level validation errors and focus in the admin forms; homepage live regions | Interface pass across four forms | Per-field errors with `aria-invalid`, describedby and focus on the first invalid field |
+| D-16 (rest), D-21 | One button system, shared status tokens, scoped dashboard selectors, breakpoint constant, shared component tests, `<dialog>` for the confirm | Larger styling refactor with visual regression risk | Do after the visual checks in a design-system pass |
+| D-17 (rest), D-19 (rest) | Dashboard error, not-found and loading boundaries; mobile menu staying open; forced-colours and dark mode decision; control sizes for touch | Needs runtime checks and design decisions | Check at 375 px and Slow 4G; record the dark-mode decision |
+| D-25 (part) | Audit immutability trigger; site information change detail in the audit; audit search index | Needs a decision (11) and measurement | Decide; measure with EXPLAIN at about 100,000 rows |
+| D-26 | Browser specs for homepage, taxonomy, public authors and audit | Part of repairing the stale browser suite (C-27) | See C-27 |
+| D-28 | Bounded searched editor catalogs, search ranking, archive and byline alignment, JSON-LD for credit-only writers, navigation limit | Each needs a small design or product answer | Handle after the cheap batches |
+
+## Deferred from the gap lenses
+
+Source: [GAP-LENSES-REPORT.md](GAP-LENSES-REPORT.md). Items planned in COMBINED-FIX-PLAN.md are not repeated.
+
+| ID | Item | Why deferred | What would settle it |
+| --- | --- | --- | --- |
+| G-01 | Possible crash from long emoji titles (UTF-16 versus code point length in dashboard schemas) | A 130-emoji title was not reproduced at runtime; the claim may rest on a different count | Add an astral-character length test to the dashboard schemas; fix only if it fails |
+| G-07, G-08, G-09, G-18 | Editor load path and save revalidation cost, metering of large drafts, revision quota, draft cap and slug probing, per-row read policy cost, the smaller performance items | Need measurements (request counts, EXPLAIN at 50,000 rows, bundle analyzer) and design choices | Measure first; see the fix plan |
+| G-15 | Stable slug for the Letter to the Editor section | Needs a decision on renaming | Key the page by slug or block the rename |
+| G-19 | Link allowlist for plain http and private addresses; admin pages answering 200 for non-administrators | Informational | Optional hardening |
+
+## Still unverified at runtime
+
+See [RUNTIME-VERIFICATION.md](RUNTIME-VERIFICATION.md). Not proven: tag merge past 50 tags (D-03), lifecycle controls staying locked after a status-keeping action (C-34), all keyboard, drag-and-drop, focus and screen reader findings, and the unreproduced Save tap on an iPhone viewport. Refuted: the mobile reader menu staying open after a link (12/ux-1); remove it from any list of open items.
 
 ## Decided not to change (so they are not re-raised)
 

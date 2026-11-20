@@ -73,3 +73,48 @@ Search budgets (separate suggestion budget, try-lock), tags and profiles read po
 ## Estimate
 
 Batches 1 to 4 are small (about a day). Batch 5 and 6 are a day each. Batch 7 items are each half a day to two days.
+
+## Additions from areas 6 to 9 and 12
+
+Findings are in [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md) (IDs D-01 to D-28). Same rules as above.
+
+### Batch 1b: urgent bugs found in these areas (one small migration plus interface fixes)
+
+- C-40 (confirmed on a phone): let the save bar's button row wrap and set `min-width: 0` on the bar, so Save stays on screen at 320 and 375 px with four buttons; check with a browser at both widths. Cheap CSS fix; do it first.
+
+- D-01: add `article.submitted`, `article.returned`, `article.image_purged` (and a decision on `article.owner_changed`) to the audit reader's TypeScript enum, labels and filters from one shared constant, and add a parity test between the SQL reader's action list and the TypeScript schema. Acceptance: the Article activity page loads with those events present.
+- D-02: when the contributor combobox text differs from the selected person's label, revert the text on blur (or block Save with a message); "Add contributor" adds an empty row and requires a choice. Tests for both.
+- D-03: admin tag list ordered by name with a search box, merge target chosen by a server-side lookup; create-category form loads all sections up to the navigation limit.
+- D-04: refuse the protected "Outside of BC" category in the section delete branch (returns `conflict`); pgTAP for both branches.
+
+### Batch 3b: cheap hygiene
+
+- D-11: one shared rule rejecting `\p{Cf}` (and U+2800, U+3164) in names, biographies, site text and invitation names, in zod and SQL together; also covers S2-08. D-12: lock source and target tags in one ordered statement in `manage_tag`. D-13: check the actor and rate limit before taking the global advisory locks in the profile functions. D-14: also revalidate public author pages after a profile save.
+
+### Batch 5b: cheap interface and documentation fixes
+
+- D-16/17/19: add the article-body link underline rule, delete the dead `admin-list` CSS, add a title template and per-page dashboard titles, add one reduced-motion rule at the reader surface, correct the design-system doc (sticky toolbar, motion, keyboard moves), and correct the stale taxonomy, contributor and homepage API docs (D-27).
+
+### Batch 6b: tests
+
+D-22 to D-26: taxonomy, homepage, credits and profiles, and site information and audit denials per role, published-article merge and delete, public null-slug assertions, audit-event assertions per action, URL and text boundary tables, race tests, page tests for the site and members-audit pages, and rewriting 056, 057, 027 and 058 to use per-run names and relative counts. Prefer editing one file per area.
+
+### Needs your decisions (new)
+
+6. Homepage editor baseline: should automatic filler stories become permanent picks on save? (recommended: no; show filler as read-only automatic and save only chosen picks.)
+7. Member profile moderation: add an administrator-only function that blanks a member's bio, resets the name and hides the page, and hide a profile when its membership is deactivated? (recommended yes.)
+8. Tag merge and delete: add redirects from retired tag URLs (a public URL change) or accept 404? (recommended: redirects, as the docs already describe.)
+9. Authors crediting real members: require the member's confirmation, or limit non-owner credits to account-less rows the author created? (recommended: limit to account-less rows.)
+10. Caps: a per-member limit on new tags and on unattached one-off credits, with cleanup of orphans? (recommended yes; cap 30 per day per member as a starting point.)
+11. Audit immutability trigger on `audit_events` (blocks the owner and service role too)? (recommended yes.)
+
+## Additions from the gap lenses
+
+Findings are in [GAP-LENSES-REPORT.md](GAP-LENSES-REPORT.md) (G-01 to G-19). Same rules as above.
+
+- Batch 1c (cheap, small): G-10 publication date floor in both layers and the date shown in the publish confirmation (my feature); G-02 memoize `getCurrentAccess` per request with React `cache()` (cuts about 12 round trips per editor open to about 3); G-16 reword the unfiltered empty state and keep filters in the retry link; G-13 select `review_requested_at`, show the In review badge and filter, add a first-page link and dates to the admin list.
+- Batch 3c (one migration with D-13): G-03 check the administrator before taking the global advisory lock and before replaying a receipt in the homepage and taxonomy functions; G-04 give the review queue separate limits for drafts and publications (newest first) and show a note at the cap; G-12 control-character rule in `ensure_tag` and a 100-section cap; G-11 explicit character lists in SQL with shared parity cases (with D-11).
+- Batch 5c (interface): G-05 base the cleanup status on the freshness of the last healthy check and fix the retry button with try/finally and distinct messages; G-06 escape instead of reject search text (My articles and admin list), keeping the filter form on error; G-14 one deletion confirmation pattern with the shared danger button and disabled controls after success.
+- Batch 6c (tests): G-17 tests for the review page, `review-queue.ts`, media cleanup page and control, and the letters pages; an astral-character length test to settle G-01.
+- Plan, measure first: G-07, G-08, G-09 (EXPLAIN at 50,000 articles), G-15 stable letters slug.
+- Needs your decision: G-15 whether renaming the Letter to the Editor section should be blocked or the page keyed by a stable slug (recommended: key by slug).
