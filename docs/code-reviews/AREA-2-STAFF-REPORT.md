@@ -1,6 +1,8 @@
 # Area 2 review: staff and roles
 
-Quick run (security, business logic, architecture, testing; Sonnet, read-only) on commit `580036a`. No privilege-escalation path found. Every membership and invitation function checks the active administrator, uses an empty search path, and is granted to `authenticated` only; direct table writes are revoked; the last-administrator guard counts only eligible, active administrators and is serialized by the advisory lock and Auth row locks; receipts are per actor. Owner approved the findings and plan. Batch 7 fixes are implemented locally on `fix/staff-role-hardening`; focused and global validation is in progress. No changes are published. Raw reports were saved in the reviewer's checkout (`docs/code-reviews/raw/area2-*.md`, not committed).
+This report’s own five-batch plan is superseded by batches 3, 7 and 8 of the “Master sequence” in [COMBINED-FIX-PLAN.md](COMBINED-FIX-PLAN.md).
+
+Quick run (security, business logic, architecture, testing; Sonnet, read-only) on commit `580036a`. No privilege-escalation path found. Every membership and invitation function checks the active administrator, uses an empty search path, and is granted to `authenticated` only; direct table writes are revoked; the last-administrator guard counts only eligible, active administrators and is serialized by the advisory lock and Auth row locks; receipts are per actor. Batch 7 fixes are implemented, committed and pushed on `fix/staff-role-hardening`; see [current status](../../STATUS.md). Raw reports were saved in the reviewer’s checkout (`docs/code-reviews/raw/area2-*.md`, not committed).
 
 ## Findings (consolidated)
 

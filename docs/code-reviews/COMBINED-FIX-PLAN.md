@@ -2,6 +2,25 @@
 
 Companion to [COMBINED-REVIEW-REPORT.md](COMBINED-REVIEW-REPORT.md). Scope: urgent bugs and cheap fixes only. Everything else is in [DEFERRED.md](DEFERRED.md) with its reason. Batches 1–7 are implemented on the review-fix stack; Batch 7 is committed and pushed. PR creation to `main` remains pending GitHub CLI authentication. Later deferred items and owner decisions remain out of scope.
 
+## Master sequence (single ordered list)
+
+This table is the one execution order. It maps every finding ID in the reports to a batch (C = [COMBINED-REVIEW-REPORT.md](COMBINED-REVIEW-REPORT.md), D = [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md), G = [GAP-LENSES-REPORT.md](GAP-LENSES-REPORT.md), S2 = [AREA-2-STAFF-REPORT.md](AREA-2-STAFF-REPORT.md)). The detailed sections that follow (batches 1 to 7 and the additions 1b, 1c, 3b, 3c, 5b, 5c, 6b, 6c) are the specifications; the "b" and "c" additions are merged into the batches below. Anything not listed is in [DEFERRED.md](DEFERRED.md) (including the decisions in [ADR 0014](../decisions/0014-review-follow-up-decisions.md) that are not built yet). One branch and one PR per batch; batches 1 and 2 first because they are user-visible bugs.
+
+| Batch | Scope | Finding IDs | Depends on |
+| --- | --- | --- | --- |
+| 1 | Urgent bugs (one migration plus interface fixes) | C-40 (save bar on phones, CSS first), C-01, C-02, C-03, C-04, C-06, C-07, C-09, D-01 (audit page), D-02 (contributor combobox), D-03 (tag merge), D-04 (section delete guard), G-02 (memoize access), G-10 (date floor), G-13, G-16 | none |
+| 2 | Bylines in Eastern time | C-05 | none |
+| 3 | Database hygiene and checks before locks (one or two migrations) | C-13, C-15, D-11, D-12, D-13, G-03, G-04, G-11, G-12 (control characters, 100 section cap), S2-05, S2-08, migration version check in CI | 1 |
+| 4 | Confirmed read-surface leaks (design note first) | C-10 (anonymous tag read, `/tags` page), C-11 (profiles read policy and anon column grant), C-12 (separate search and typeahead budgets, try-lock) | 3 |
+| 5 | CI and dependencies | C-28, C-30, C-27 (partial: audit steps always run, config), then C-27 repair as its own PR | none |
+| 6 | Interface quick fixes and documentation | C-31 (note kept on backdrop), C-32 (pre-select, focus), C-34, C-35 (dead code), C-36, D-14, D-16 (cheap), D-17, D-19 (reduced motion, docs), D-21 (dead CSS), D-27, C-21 (docs), G-05, G-06, G-14, D-18 (field errors) | 1 |
+| 7 | Tests (one PR per area) | C-37, C-38, C-39, C-26 (subset), D-22, D-23, D-24, D-25, D-26, G-01 (astral length test), G-17, S2 test gaps | 1, 3 |
+| 8 | Area 2 fixes | S2-01, S2-02, S2-03, S2-04, S2-06, S2-07, S2-09, S2-10, S2-11 | 3, 7 |
+| 9 | Decided and designed (ADR 0014), one PR each | 9a caps, reserved slugs, non-Latin slugs, section cap (D-08, D-09, G-12 rest); 9b redirects and merge revisions (D-10, C-10 follow-up); 9c profile moderation (D-07); 9d audit immutability trigger and erasure policy (D-25 part, C-19); 9e navigation cache and retryable code (C-23, C-16 part); 9f homepage editor baseline and eligibility (D-06); 9g contributor cap (C-32 cap, D-02 follow-up); 9h design system consolidation (D-16 rest, D-19 rest); 9i letters stable slug (G-15); 9j drop dead functions (C-15 rest) | 4, 7 |
+| 10 | Measure first, then decide | C-08, C-14, C-16, C-17, C-18, C-20, C-22, C-24 (cache header cheap now), C-25, C-29 (runbooks, health, env check), G-07, G-08, G-09, G-18, D-05 and D-20 (homepage interface), D-28 | measurements |
+
+Not built by any batch because they need a hosted or owner action: hosted Supabase and Vercel settings, the Google `hd` check, backup plan (ADR 0014, decision 18).
+
 ## Batch 1: lifecycle bugs (urgent, one migration)
 
 Findings C-01, C-02, C-03, C-04, C-06, C-09 (mode only), C-07.

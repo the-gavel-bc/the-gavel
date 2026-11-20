@@ -1,5 +1,7 @@
 # Gap-closing review lenses
 
+Batch assignment for every `G-nn` item is in the "Master sequence" table in [COMBINED-FIX-PLAN.md](COMBINED-FIX-PLAN.md).
+
 Four read-only Sonnet reviewers on the branch `docs/combined-review-areas-3-4-5-10-11`, run after the first full pass to close the gaps listed in the coverage discussion: a security lens on areas 3 and 4 (editor input handling and rendering) and on areas 6 and 7 (homepage and taxonomy), a performance lens on the dashboard, and a first review of pages nobody had covered (admin article list and detail, deletion and restore, review queue, media cleanup, My articles, public letters and about). 36 raw findings. No Critical findings. Companion files: [COMBINED-REVIEW-REPORT.md](COMBINED-REVIEW-REPORT.md), [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md), [RUNTIME-VERIFICATION.md](RUNTIME-VERIFICATION.md), [COMBINED-FIX-PLAN.md](COMBINED-FIX-PLAN.md), [DEFERRED.md](DEFERRED.md). IDs `G-nn` are new here; source IDs read `lens/number`. Raw reports were saved in the reviewer's checkout (`docs/code-reviews/raw/gap-*.md`, not committed).
 
 Runtime check made for the one High security finding: a title of 130 emoji (260 UTF-16 units, 130 code points) was written to an article and the review queue, the editor page and the admin list all loaded normally, so the claimed crash (G-01) was **not reproduced**; the title was restored afterwards.

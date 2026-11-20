@@ -1,5 +1,7 @@
 # Combined review: areas 3, 5, 11, 10 and 4
 
+The ordered execution plan (every finding ID mapped to a batch) is the "Master sequence" table in [COMBINED-FIX-PLAN.md](COMBINED-FIX-PLAN.md).
+
 Quick runs (13 Sonnet reviewers, read-only) on commit `feat/publication-date` (`4eeec9d` plus its docs commit). 152 raw findings: lifecycle and drafts 33, public reader and search 30, CI and dependencies 26, database layer 17, article editor 46. No Critical findings. No exposure of private data through table grants, function grants, `security definer` search paths or storage policies (verified against a catalog snapshot of the live local schema). Full per-reviewer reports were saved in the reviewer's checkout (`docs/code-reviews/raw/area{3,4,5,10,11}-*.md`, not committed); this file consolidates them. Source IDs are written `area/reviewer-number` (for example `3/logic-1`). Status uses: **Fix now** (urgent), **Cheap** (small, low risk), **Plan** (next, needs design or runtime proof), **Deferred** (see [DEFERRED.md](DEFERRED.md)). The fix plan is in [COMBINED-FIX-PLAN.md](COMBINED-FIX-PLAN.md).
 
 Batch 4 audit update: the production audit on Next.js 16.4.6 found zero advisories. The full audit reported one moderate development-only `minimatch` advisory and no `picomatch` advisory. See the [Batch 4 verification notes](../superpowers/plans/2026-11-19-review-fixes.md#4-ci-and-dependencies).
