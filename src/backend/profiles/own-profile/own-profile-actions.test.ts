@@ -42,6 +42,7 @@ it("sends only public fields to the own-profile RPC", async () => {
     p_display_name: "Writer",
     p_biography: null,
   });
+  expect(mocks.revalidate).toHaveBeenCalledWith("/authors/[slug]", "page");
 });
 it("denies inactive access and rejects forged fields", async () => {
   mocks.access.mockResolvedValue({ status: "pending" });

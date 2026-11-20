@@ -55,6 +55,8 @@ Source: [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md); IDs refer to it. Items
 
 | ID | Item | Why deferred | What would settle it |
 | --- | --- | --- | --- |
+| D-03 | Tag merge targets are limited to the current page, and category creation can omit sections | Deferred from Batch 1 by the owner | Order the admin tag list by name and add search. Look up merge targets across all tags on the server. Load all sections up to the navigation limit in the category form. |
+| D-04 | Deleting a section can also delete its protected “Outside of BC” category | Deferred from Batch 1 by the owner | Add a forward migration that returns `conflict` when section deletion would remove the protected category. Cover direct category deletion and section deletion with pgTAP. |
 | D-05, D-20 | Homepage keyboard moves between rows and to the lead, focus management, live regions, library counts and inline errors, Discard confirmation, phone layout | Interface work with design choices and runtime checks on touch devices | Add "Make lead" and "Move to" buttons that call the arrangement rules; test on iOS and Android |
 | D-06 | Homepage save eligibility and filler seeding | Needs your decision (see fix plan, decision 6) and a runtime check of the pending-image case | Decide; then use `is_homepage_card_eligible` in save and the library |
 | D-07, D-15 | Member profile moderation, consent for credits of real members | New administrator capability and product decisions (decisions 7 and 9) | Decide; add the function and tests |
@@ -96,6 +98,7 @@ Source: [GAP-LENSES-REPORT.md](GAP-LENSES-REPORT.md). Items planned in COMBINED-
 | --- | --- | --- | --- |
 | G-01 | Possible crash from long emoji titles (UTF-16 versus code point length in dashboard schemas) | A 130-emoji title was not reproduced at runtime; the claim may rest on a different count | Add an astral-character length test to the dashboard schemas; fix only if it fails |
 | G-07, G-08, G-09, G-18 | Editor load path and save revalidation cost, metering of large drafts, revision quota, draft cap and slug probing, per-row read policy cost, the smaller performance items | Need measurements (request counts, EXPLAIN at 50,000 rows, bundle analyzer) and design choices | Measure first; see the fix plan |
+| G-13 | The admin article list and detail omit review state. The list also lacks an In review filter, a link to the first page, and publication and archive dates. | Deferred from Batch 1 by the owner | Read `review_requested_at`, display the In review badge on both pages, and add the filter, first-page link, and dates to the list. |
 | G-15 | Stable slug for the Letter to the Editor section | Needs a decision on renaming | Key the page by slug or block the rename |
 | G-19 | Link allowlist for plain http and private addresses; admin pages answering 200 for non-administrators | Informational | Optional hardening |
 

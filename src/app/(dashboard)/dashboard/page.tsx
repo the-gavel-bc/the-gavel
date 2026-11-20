@@ -40,10 +40,9 @@ export default async function DashboardPage({
     });
   } catch (error) {
     unstable_rethrow(error);
-    const retryHref =
-      typeof cursor === "string"
-        ? `/dashboard?${new URLSearchParams({ cursor })}`
-        : "/dashboard";
+    const retry = new URLSearchParams(filters);
+    if (typeof cursor === "string") retry.set("cursor", cursor);
+    const retryHref = `/dashboard${retry.size ? `?${retry}` : ""}`;
     return (
       <>
         <h1>My articles</h1>

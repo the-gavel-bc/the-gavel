@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
 import { requireActiveMembership } from "@/backend/auth/access/access";
-import { getAdminArticlesPage } from "@/backend/articles/admin-article-queries/admin-article-queries";
+import {
+  getAdminArticlesPage,
+  searchSchema,
+  statusSchema,
+} from "@/backend/articles/admin-article-queries/admin-article-queries";
 import { AdminArticleList } from "@/frontend/features/articles/components/admin-articles/admin-article-list";
 
 export default async function AdminArticlesPage({
@@ -18,30 +22,28 @@ export default async function AdminArticlesPage({
         <Link href="/dashboard">My articles</Link>
       </>
     );
-  const { deleted, from, ...input } = await searchParams;
+  const {
+    deleted,
+    from,
+    cursor,
+    status: rawStatus,
+    search: rawSearch,
+  } = await searchParams;
+  const status = statusSchema.safeParse(rawStatus);
+  const search = searchSchema.safeParse(rawSearch);
   let page;
+  let loadFailed = false;
   try {
-    page = await getAdminArticlesPage(input);
+    page = await getAdminArticlesPage({
+      cursor,
+      status: rawStatus,
+      search: rawSearch,
+    });
   } catch (error) {
     unstable_rethrow(error);
-    return (
-      <>
-        <h1>Article management</h1>
-        <p role="alert">
-          Unable to load articles. Check the filters or try again.
-        </p>
-        <Link href="/dashboard/admin/articles" prefetch={false}>
-          Reset filters
-        </Link>
-      </>
-    );
+    loadFailed = true;
+    page = { items: [], nextCursor: null };
   }
-  const status =
-    typeof input.status === "string" &&
-    ["all", "draft", "published", "archived"].includes(input.status)
-      ? (input.status as "all" | "draft" | "published" | "archived")
-      : "all";
-  const search = typeof input.search === "string" ? input.search.trim() : "";
   return (
     <>
       <h1>Article management</h1>
@@ -52,10 +54,11 @@ export default async function AdminArticlesPage({
         </p>
       )}
       <AdminArticleList
-        key={`${status}:${search}`}
+        key={`${rawStatus}:${rawSearch}`}
         page={page}
-        status={status}
-        search={search}
+        status={status.data ?? "all"}
+        search={search.data ?? ""}
+        loadFailed={loadFailed}
         from={from === "draft" || from === "published" ? from : "all"}
       />
     </>

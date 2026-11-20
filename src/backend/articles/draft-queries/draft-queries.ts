@@ -10,6 +10,7 @@ import {
   type DraftOptions,
 } from "../draft-options/draft-options";
 import {
+  literalTitlePattern,
   searchSchema,
   statusSchema,
 } from "../admin-article-queries/admin-article-queries";
@@ -111,9 +112,11 @@ export async function getMyArticlesPage(input: {
       .limit(parsed.data.pageSize + 1);
     if (parsed.data.status !== "all")
       query = query.eq("status", parsed.data.status);
-    // searchSchema allows only letters, digits, spaces, ' and -.
     if (parsed.data.search)
-      query = query.ilike("title", `%${parsed.data.search}%`);
+      query = query.regexIMatch(
+        "title",
+        literalTitlePattern(parsed.data.search),
+      );
     if (cursor)
       query = query.or(
         `updated_at.lt.${cursor.updatedAt},and(updated_at.eq.${cursor.updatedAt},id.lt.${cursor.id})`,

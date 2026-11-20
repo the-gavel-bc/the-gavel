@@ -112,13 +112,22 @@ describe("own article page", () => {
   });
   it("filters by status and a safe title search, still owner-scoped", async () => {
     http.respond([]);
-    await getMyArticlesPage({ status: "published", search: " O'Neill-1 " });
+    await getMyArticlesPage({
+      status: "published",
+      search: " Q&A: U.S. (O’Neill)*_100% ",
+    });
     const url = new URL(String(http.network.mock.calls[0][0]));
     expect(url.searchParams.get("owner_profile_id")).toBe(`eq.${profileId}`);
     expect(url.searchParams.get("status")).toBe("eq.published");
-    expect(url.searchParams.get("title")).toBe("ilike.%O'Neill-1%");
+    expect(url.searchParams.get("title")).toBe(
+      "imatch.Q&A: U\\.S\\. \\(O’Neill\\)\\*_100%",
+    );
   });
-  it.each([{ status: "deleted" }, { search: "100%" }, { search: "a,b)" }])(
+  it.each([
+    { status: "deleted" },
+    { search: "a\u0000b" },
+    { search: "a".repeat(81) },
+  ])(
     "rejects an unknown status or unsafe search before a read: %o",
     async (input) => {
       await expect(getMyArticlesPage(input)).rejects.toThrow(

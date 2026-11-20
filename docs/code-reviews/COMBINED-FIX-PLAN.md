@@ -1,6 +1,13 @@
 # Fix plan for the combined review
 
-Companion to [COMBINED-REVIEW-REPORT.md](COMBINED-REVIEW-REPORT.md). Scope: urgent bugs and cheap fixes only. Everything else is in [DEFERRED.md](DEFERRED.md) with its reason. Batches 1–7 are implemented on the review-fix stack; Batch 7 is committed and pushed. PR creation to `main` remains pending GitHub CLI authentication. Later deferred items and owner decisions remain out of scope.
+Companion to [COMBINED-REVIEW-REPORT.md](COMBINED-REVIEW-REPORT.md). Scope: urgent bugs and cheap fixes only. Everything else is in [DEFERRED.md](DEFERRED.md) with its reason. The original seven review branches are merged into `main` through PR #128. The expanded sequence below tracks the follow-up work. D-03, D-04 and G-13 were moved to the deferred register by the owner.
+
+## Follow-up progress
+
+- Batch 1 follow-up is implemented on `fix/urgent-review-gaps`. The branch adds the save bar fix, audit action parity, contributor selection recovery, request-scoped access caching, publication date validation and My articles recovery.
+- C-05 and the original CI and staff batches are already on `main`. The remaining browser suite repairs are tracked under C-27.
+- Batch 3 follow-up includes D-12, G-03, G-04 and G-12 on the working branch. Profile writes now check eligibility before waiting for the global locks (D-13). Moving the guest credit quota ahead of the locks while preserving exact retries remains open, alongside D-11 and G-11.
+- The working branch also includes D-14, G-05 and G-06 with focused regression coverage. G-01 did not reproduce in the review queue with a 240-code-point title.
 
 ## Master sequence (single ordered list)
 
@@ -8,7 +15,7 @@ This table is the one execution order. It maps every finding ID in the reports t
 
 | Batch | Scope | Finding IDs | Depends on |
 | --- | --- | --- | --- |
-| 1 | Urgent bugs (one migration plus interface fixes) | C-40 (save bar on phones, CSS first), C-01, C-02, C-03, C-04, C-06, C-07, C-09, D-01 (audit page), D-02 (contributor combobox), D-03 (tag merge), D-04 (section delete guard), G-02 (memoize access), G-10 (date floor), G-13, G-16 | none |
+| 1 | Urgent bugs (one migration plus interface fixes) | C-40 (save bar on phones, CSS first), C-01, C-02, C-03, C-04, C-06, C-07, C-09, D-01 (audit page), D-02 (contributor combobox), G-02 (memoize access), G-10 (date floor), G-16 | none |
 | 2 | Bylines in Eastern time | C-05 | none |
 | 3 | Database hygiene and checks before locks (one or two migrations) | C-13, C-15, D-11, D-12, D-13, G-03, G-04, G-11, G-12 (control characters, 100 section cap), S2-05, S2-08, migration version check in CI | 1 |
 | 4 | Confirmed read-surface leaks (design note first) | C-10 (anonymous tag read, `/tags` page), C-11 (profiles read policy and anon column grant), C-12 (separate search and typeahead budgets, try-lock) | 3 |
@@ -47,6 +54,12 @@ Findings C-13, C-15.
 - Add one pgTAP file asserting: RLS on every `public` table, fixed search path on every `security definer` function, no anon execute outside an allowlist, no write grant to anon. (This is the guard the review found missing.)
 - Drop `record_media_cleanup_health`, `register_retired_media_key` v1 and `finish_retired_article_scan` v1 after confirming no caller; regenerate types.
 - Add a CI check that each new migration's version exceeds all existing ones.
+
+### Expanded Batch 4 design for discussion
+
+- **C-10:** Define a public tag by the same publish eligibility predicate used by the article archive. Make the anonymous tag policy and archive lookup use that predicate so a tag with no eligible public story returns 404. Keep the editor catalog available to eligible active members. Add an indexed existence check and verify draft-only, archived-only and published associations separately.
+- **C-11:** Give authenticated non-members the same published profile scope as anonymous readers. Preserve the active member catalog used by the editor and the administrator's access to inactive profiles. Restrict anonymous projection columns to fields used by the public author page and verify that the account identifier and creation date are unavailable. Test pending and ineligible sessions, active editors and administrators, and public author metadata.
+- **C-12:** Give search and typeahead separate sequence budgets and transaction lock keys. Use try-locks so a competing request returns the existing rate-limit response immediately. Keep the current combined allowance until there is evidence to raise it. Verify lane independence, ticket accounting after cancellation, and retry responses. Hosted edge throttling remains a separate decision.
 
 ## Batch 4: CI and dependencies (cheap, no migration)
 
@@ -105,8 +118,7 @@ Findings are in [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md) (IDs D-01 to D-
 
 - D-01: add `article.submitted`, `article.returned`, `article.image_purged` (and a decision on `article.owner_changed`) to the audit reader's TypeScript enum, labels and filters from one shared constant, and add a parity test between the SQL reader's action list and the TypeScript schema. Acceptance: the Article activity page loads with those events present.
 - D-02: when the contributor combobox text differs from the selected person's label, revert the text on blur (or block Save with a message); "Add contributor" adds an empty row and requires a choice. Tests for both.
-- D-03: admin tag list ordered by name with a search box, merge target chosen by a server-side lookup; create-category form loads all sections up to the navigation limit.
-- D-04: refuse the protected "Outside of BC" category in the section delete branch (returns `conflict`); pgTAP for both branches.
+- D-03 and D-04 are deferred. See the [taxonomy entries in the deferred register](DEFERRED.md#deferred-from-areas-6-to-9-and-12).
 
 ### Batch 3b: cheap hygiene
 
@@ -136,7 +148,7 @@ Resolved in ADR 0014: 6 filler is never saved as picks; 7 profile moderation yes
 
 Findings are in [GAP-LENSES-REPORT.md](GAP-LENSES-REPORT.md) (G-01 to G-19). Same rules as above.
 
-- Batch 1c (cheap, small): G-10 publication date floor in both layers and the date shown in the publish confirmation (my feature); G-02 memoize `getCurrentAccess` per request with React `cache()` (cuts about 12 round trips per editor open to about 3); G-16 reword the unfiltered empty state and keep filters in the retry link; G-13 select `review_requested_at`, show the In review badge and filter, add a first-page link and dates to the admin list.
+- Batch 1c (cheap, small): G-10 publication date floor in both layers and the date shown in the publish confirmation (my feature); G-02 memoize `getCurrentAccess` per request with React `cache()` (cuts about 12 round trips per editor open to about 3); G-16 reword the unfiltered empty state and keep filters in the retry link. G-13 is deferred. See the [gap lens entries in the deferred register](DEFERRED.md#deferred-from-the-gap-lenses).
 - Batch 3c (one migration with D-13): G-03 check the administrator before taking the global advisory lock and before replaying a receipt in the homepage and taxonomy functions; G-04 give the review queue separate limits for drafts and publications (newest first) and show a note at the cap; G-12 control-character rule in `ensure_tag` and a 100-section cap; G-11 explicit character lists in SQL with shared parity cases (with D-11).
 - Batch 5c (interface): G-05 base the cleanup status on the freshness of the last healthy check and fix the retry button with try/finally and distinct messages; G-06 escape instead of reject search text (My articles and admin list), keeping the filter form on error; G-14 one deletion confirmation pattern with the shared danger button and disabled controls after success.
 - Batch 6c (tests): G-17 tests for the review page, `review-queue.ts`, media cleanup page and control, and the letters pages; an astral-character length test to settle G-01.

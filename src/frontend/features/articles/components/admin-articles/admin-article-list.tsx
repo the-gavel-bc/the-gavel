@@ -58,10 +58,12 @@ export function AdminArticleList({
   status,
   search,
   from = "all",
+  loadFailed = false,
 }: {
   page: AdminArticlePage;
   status: "all" | "draft" | "published" | "archived";
   search: string;
+  loadFailed?: boolean;
   /** The view the archives were opened from, so the toggle can go back. */
   from?: View;
 }) {
@@ -117,7 +119,11 @@ export function AdminArticleList({
           {status === "archived" ? viewLabel[from] : "View archives"}
         </Link>
       </form>
-      {page.items.length === 0 ? (
+      {loadFailed ? (
+        <p role="alert">
+          Unable to load articles. Check the filters and try again.
+        </p>
+      ) : page.items.length === 0 ? (
         <p className={styles.empty}>No articles match these filters.</p>
       ) : (
         <ul className={styles.rows}>

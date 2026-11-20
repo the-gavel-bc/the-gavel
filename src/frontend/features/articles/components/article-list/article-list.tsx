@@ -83,7 +83,7 @@ export function ArticleList({
         <p className={styles.empty}>
           {filtered
             ? "No articles match these filters."
-            : "No articles on this page."}
+            : "You have not created any articles yet. Create a draft to get started."}
         </p>
       ) : (
         <ul className={styles.rows}>
