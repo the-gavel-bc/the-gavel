@@ -67,6 +67,27 @@ Source: [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md); IDs refer to it. Items
 | D-26 | Browser specs for homepage, taxonomy, public authors and audit | Part of repairing the stale browser suite (C-27) | See C-27 |
 | D-28 | Bounded searched editor catalogs, search ranking, archive and byline alignment, JSON-LD for credit-only writers, navigation limit | Each needs a small design or product answer | Handle after the cheap batches |
 
+## Decided, not built yet (ADR 0014)
+
+The owner delegated the open decisions; they are resolved in [ADR 0014](../decisions/0014-review-follow-up-decisions.md). These are not in the first fix batches, so they stay here until built. Each needs tests and doc updates when built.
+
+| Decision | What to build | Notes |
+| --- | --- | --- |
+| 5 Erasure policy | Migration: nullable actor references with ON DELETE SET NULL for audit and revisions; cascade receipts and limits; a profile anonymization routine | Destructive-looking migration: review before running |
+| 7 Profile moderation | Administrator-only function (blank bio, reset name, hide page); hide profiles of deactivated memberships; pgTAP | Resolves D-07 |
+| 8 Redirects | `slug_redirects` table, redirect on merge, delete and rename; revisions and audit detail on merge | Public URL change approved; resolves D-10 |
+| 10 Caps | Per-member daily tag cap, open one-off credit cap, orphan cleanup job, 100 active section cap | Resolves D-08, G-12 |
+| 11 Audit immutability | Trigger rejecting update, delete and truncate on `audit_events` | Resolves the D-25 part; add grant assertions |
+| 12 Letters slug and reserved slugs | Stable section slug for letters, reserved-slug rule in SQL for sections and tags | Resolves G-15 and the reserved-slug test gap |
+| 13 Non-Latin slugs | Stable hash fallback in the slug generator | Slugs freeze at publish: new names only |
+| 2 Contributor cap | Shared constant, server and SQL enforcement at five with grandfathering | Resolves C-32 cap part |
+| 3 Cache navigation and footer | 60 s cache with on-demand revalidation | Resolves C-23 |
+| 4 Retryable result code | New code in the draft and lifecycle error contract and client retry behavior | Resolves part of C-16 |
+| 6 Homepage editor baseline | Load chosen picks only; filler read-only; shared eligibility rule | Resolves D-06 |
+| 17 Drop dead functions | One migration dropping `list_unused_article_uploads` and the three dead retired-media functions | Also needs types regenerated |
+| 18 Hosted settings | Verify and record email signup disabled, the `hd` claim, backup and recovery plan | Not code; owner or dashboard action |
+| 15 Design system | One button component, shared status tokens, scoped dashboard selectors, forced-colours and 44 px touch targets, no dark mode recorded | Resolves D-16, D-19 parts |
+
 ## Deferred from the gap lenses
 
 Source: [GAP-LENSES-REPORT.md](GAP-LENSES-REPORT.md). Items planned in COMBINED-FIX-PLAN.md are not repeated.

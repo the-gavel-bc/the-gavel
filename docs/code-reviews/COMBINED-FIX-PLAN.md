@@ -62,7 +62,9 @@ S2-01 through S2-11 are implemented and committed as `8aa3678` on `fix/staff-rol
 
 Search budgets (separate suggestion budget, try-lock), tags and profiles read policies (C-10, C-11), public media ETag and 304, layout caching for navigation and footer, slug lock only when the title changes, receipts and revisions retention, env validation and health endpoint, lock-order documentation, dialog focus trap and inert page, save-bar layout at phone widths. Each needs a short design note or a measurement before code.
 
-## Needs your decisions
+## Decisions (resolved)
+
+All open decisions were resolved for the long term and recorded in [ADR 0014](../decisions/0014-review-follow-up-decisions.md). The questions below are kept for traceability; the answer for each is in the ADR (1 restore re-check: yes; 2 contributor cap: server-enforced at five with grandfathering; 3 caching: yes with on-demand revalidation; 4 retryable code: yes; 5 erasure: anonymize).
 
 1. Restore of a backdated article: re-check the date? (recommended yes)
 2. Five-contributor cap: enforce on the server? (recommended yes after a data check)
@@ -99,7 +101,10 @@ Findings are in [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md) (IDs D-01 to D-
 
 D-22 to D-26: taxonomy, homepage, credits and profiles, and site information and audit denials per role, published-article merge and delete, public null-slug assertions, audit-event assertions per action, URL and text boundary tables, race tests, page tests for the site and members-audit pages, and rewriting 056, 057, 027 and 058 to use per-run names and relative counts. Prefer editing one file per area.
 
-### Needs your decisions (new)
+### Decisions (new, resolved)
+
+Resolved in ADR 0014: 6 filler is never saved as picks; 7 profile moderation yes; 8 tag redirects yes; 9 credits keep the review as the control; 10 caps yes; 11 audit immutability trigger yes.
+
 
 6. Homepage editor baseline: should automatic filler stories become permanent picks on save? (recommended: no; show filler as read-only automatic and save only chosen picks.)
 7. Member profile moderation: add an administrator-only function that blanks a member's bio, resets the name and hides the page, and hide a profile when its membership is deactivated? (recommended yes.)
@@ -117,4 +122,4 @@ Findings are in [GAP-LENSES-REPORT.md](GAP-LENSES-REPORT.md) (G-01 to G-19). Sam
 - Batch 5c (interface): G-05 base the cleanup status on the freshness of the last healthy check and fix the retry button with try/finally and distinct messages; G-06 escape instead of reject search text (My articles and admin list), keeping the filter form on error; G-14 one deletion confirmation pattern with the shared danger button and disabled controls after success.
 - Batch 6c (tests): G-17 tests for the review page, `review-queue.ts`, media cleanup page and control, and the letters pages; an astral-character length test to settle G-01.
 - Plan, measure first: G-07, G-08, G-09 (EXPLAIN at 50,000 articles), G-15 stable letters slug.
-- Needs your decision: G-15 whether renaming the Letter to the Editor section should be blocked or the page keyed by a stable slug (recommended: key by slug).
+- G-15 decided: key the page by a stable section slug and block renaming it (ADR 0014, decision 12).
