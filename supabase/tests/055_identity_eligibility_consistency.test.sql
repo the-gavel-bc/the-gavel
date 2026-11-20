@@ -16,7 +16,7 @@ where id='00000000-0000-0000-0000-000000000002';
 set local role authenticated;
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);
 select is(public.change_membership_role('00000000-0000-0000-0000-000000000004',1,
-  '95000000-0000-0000-0000-000000000001','author')->>'code','conflict',
+  '95000000-0000-0000-0000-000000000001','author')->>'code','last_administrator',
   'mixed-provider administrator does not permit the sole eligible admin to demote self');
 reset role;
 select ok((select active and role='administrator' and edit_version=1 from public.memberships
@@ -26,7 +26,7 @@ update public.memberships set active=true,revoked_at=null,role='administrator',e
 where user_id='00000000-0000-0000-0000-000000000004';
 set local role authenticated;
 select is(public.deactivate_membership('00000000-0000-0000-0000-000000000004',1,
-  '95000000-0000-0000-0000-000000000002')->>'code','conflict',
+  '95000000-0000-0000-0000-000000000002')->>'code','last_administrator',
   'mixed-provider administrator does not permit the sole eligible admin to deactivate self');
 reset role;
 select ok((select active and role='administrator' and edit_version=1 from public.memberships

@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
 import { requireActiveMembership } from "@/backend/auth/access/access";
-import { listMemberAudit } from "@/backend/memberships/member-audit/member-audit";
+import {
+  listMemberAudit,
+  normalizeMemberAuditSearchParams,
+} from "@/backend/memberships/member-audit/member-audit";
+import { staffRoleLabels } from "@/shared/memberships/staff-roles/staff-roles";
 
 const labels = {
   "membership.approved": "Approved membership",
@@ -11,6 +15,7 @@ const labels = {
   "membership.invitation_changed": "Changed a listed role",
   "membership.invitation_removed": "Removed from the staff list",
   "membership.claimed": "Signed in for the first time",
+  "membership.reactivated": "Reactivated membership",
 } as const;
 const date = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
@@ -34,10 +39,11 @@ export default async function MemberAuditPage({
       </>
     );
   const input = await searchParams;
-  const user = typeof input.user === "string" ? input.user : undefined;
+  const normalized = normalizeMemberAuditSearchParams(input);
+  const user = normalized.user;
   let page;
   try {
-    page = await listMemberAudit(input);
+    page = await listMemberAudit(normalized);
   } catch (error) {
     unstable_rethrow(error);
     return (
@@ -75,6 +81,16 @@ export default async function MemberAuditPage({
               <time dateTime={event.createdAt}>
                 {date.format(new Date(event.createdAt))} ET
               </time>
+              {event.detail && (
+                <span>
+                  {event.detail.previousRole !== undefined &&
+                  event.detail.newRole
+                    ? ` (${event.detail.previousRole ? staffRoleLabels[event.detail.previousRole] : "none"} → ${staffRoleLabels[event.detail.newRole]})`
+                    : event.detail.role
+                      ? ` (${staffRoleLabels[event.detail.role]})`
+                      : null}
+                </span>
+              )}
             </li>
           ))}
         </ol>

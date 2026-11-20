@@ -22,14 +22,14 @@ const approve = {
   requestId,
   role: "author",
   displayName: "New Member",
-  expectedVersion: null,
+  expectedVersion: 1,
 } as const;
 const success = {
   ok: true,
   targetUserId,
   role: "author",
   active: true,
-  version: 1,
+  version: 2,
   changed: true,
   replayed: false,
 };
@@ -47,7 +47,7 @@ it("sends only allowlisted approval fields through the user-scoped RPC", async (
     p_request_id: requestId,
     p_role: "author",
     p_display_name: "New Member",
-    p_expected_version: undefined,
+    p_expected_version: 1,
   });
   expect(mocks.revalidate).toHaveBeenCalledWith("/dashboard/admin/members");
 });
@@ -92,6 +92,22 @@ it("keeps a safe uncertain result for transport or malformed database responses"
     ok: false,
     code: "unavailable",
   });
+  expect(mocks.revalidate).not.toHaveBeenCalled();
+});
+
+it("returns the explicit last-administrator outcome without invalidating the directory", async () => {
+  mocks.rpc.mockResolvedValueOnce({
+    data: { ok: false, code: "last_administrator" },
+    error: null,
+  });
+  expect(
+    await manageMembershipAction({
+      kind: "deactivate",
+      targetUserId,
+      expectedVersion: 1,
+      requestId,
+    }),
+  ).toEqual({ ok: false, code: "last_administrator" });
   expect(mocks.revalidate).not.toHaveBeenCalled();
 });
 

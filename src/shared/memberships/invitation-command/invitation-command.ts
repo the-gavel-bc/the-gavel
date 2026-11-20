@@ -1,13 +1,14 @@
 import { z } from "zod";
 import { isDraftUuid } from "@/shared/articles/draft-cursor/draft-cursor";
+import { staffRoleSchema } from "@/shared/memberships/staff-roles/staff-roles";
 
 const uuid = z.custom<string>(isDraftUuid);
-const role = z.enum(["author", "editor", "administrator"]);
+const role = staffRoleSchema;
 const displayName = z
   .string()
   .min(1)
   .max(120)
-  .refine((value) => value === value.trim() && !/[\p{Cc}]/u.test(value));
+  .refine((value) => value === value.trim() && !/[\p{Cc}\p{Cf}]/u.test(value));
 const email = z
   .string()
   .max(255)
@@ -110,9 +111,14 @@ export function parseInvitationResult(
           skipped: value.skipped,
         }
       : { ok: false, code: "unavailable" };
-  return command.kind === "invite"
-    ? { ok: false, code: "unavailable" }
-    : { ok: true, changed: true };
+  if (command.kind === "invite") return { ok: false, code: "unavailable" };
+  if (
+    value.invitationId !== command.invitationId ||
+    value.version !== command.expectedVersion + 1 ||
+    (command.kind === "changeRole" && value.role !== command.role)
+  )
+    return { ok: false, code: "unavailable" };
+  return { ok: true, changed: true };
 }
 
 /**
@@ -129,15 +135,27 @@ export function parseInviteText(text: string): {
   for (const line of text.split(/\r?\n|;/u)) {
     const trimmed = line.trim();
     if (!trimmed) continue;
-    // Several addresses on one line, or "email, Name" on its own line.
+    // Accept email, email plus a comma-separated name, and Name <email>.
     const parts = trimmed.split(",").map((part) => part.trim());
-    const addresses = parts.filter((part) => part.includes("@"));
+    const explicit = parts.flatMap((part) => {
+      const angle = /^(.*?)\s*<([^<>]+)>$/u.exec(part);
+      return angle
+        ? [{ address: angle[2].trim(), name: angle[1].trim() || null }]
+        : part.includes("@")
+          ? [{ address: part, name: null }]
+          : [];
+    });
     const names = parts.filter((part) => part && !part.includes("@"));
     const lineEntries =
-      addresses.length === 1 && names.length === 1
-        ? [{ address: addresses[0], name: names[0] }]
-        : addresses.map((address) => ({ address, name: null }));
-    if (!lineEntries.length) invalid.push(trimmed);
+      explicit.length === 1 && explicit[0]?.name === null && names.length === 1
+        ? [{ address: explicit[0].address, name: names[0] }]
+        : explicit;
+    if (
+      !lineEntries.length ||
+      (explicit.length !== 1 && names.length > 0) ||
+      (explicit.length === 1 && explicit[0]?.name && names.length > 0)
+    )
+      invalid.push(trimmed);
     for (const { address, name } of lineEntries) {
       const parsed = email.safeParse(address);
       if (!parsed.success) {
@@ -147,9 +165,13 @@ export function parseInviteText(text: string): {
       if (seen.has(parsed.data)) continue;
       seen.add(parsed.data);
       const checked = name ? displayName.safeParse(name) : null;
+      if (checked && !checked.success) {
+        invalid.push(trimmed);
+        continue;
+      }
       entries.push({
         email: parsed.data,
-        displayName: checked?.success ? checked.data : null,
+        displayName: checked?.data ?? null,
       });
     }
   }

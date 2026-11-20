@@ -18,7 +18,7 @@ vi.mock("@/backend/infrastructure/supabase/server/server", () => ({
   createServerSupabaseClient: mocks.client,
 }));
 vi.mock("next/server", () => ({ connection: mocks.connection }));
-import { listMembers } from "./member-directory";
+import { listMembers, normalizeMemberSearchParams } from "./member-directory";
 
 let http: ReturnType<typeof queryTestClient>;
 const row = {
@@ -86,6 +86,21 @@ it("rejects malformed filters and authors before any RPC", async () => {
     "Administrator access required.",
   );
   expect(http.network).not.toHaveBeenCalled();
+});
+
+it("ignores unknown and repeated query parameters safely", () => {
+  expect(
+    normalizeMemberSearchParams({
+      role: ["author", "administrator"],
+      state: ["invited"],
+      q: "same",
+      extra: "ignored",
+    }),
+  ).toEqual({
+    role: "__invalid__",
+    state: "invited",
+    q: "same",
+  });
 });
 
 it("masks database errors and malformed identity rows", async () => {

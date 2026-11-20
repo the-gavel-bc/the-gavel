@@ -99,7 +99,7 @@ from (values ('article.scheduled'), ('membership.approved'), (''), ('ARTICLE.CRE
 select throws_ok(format('update public.audit_events set resource_type = %L', value), '23514', null, 'audit rejects resource type: ' || value)
 from (values ('profile'), ('Article'), ('')) as bad(value);
 select results_eq($$ select column_name::text collate "default" from information_schema.columns where table_schema = 'public' and table_name = 'audit_events' order by column_name $$,
-  array['action','actor_user_id','correlation_id','created_at','id','resource_id','resource_type']::text[],
+  array['action','actor_user_id','correlation_id','created_at','detail','id','resource_id','resource_type']::text[],
   'audit uses only the accepted metadata columns, with no body, snapshot or free-form payload');
 select throws_ok($$ update public.audit_events set actor_user_id = null $$, '23502', null, 'audit requires actor_user_id');
 select throws_ok($$ update public.audit_events set action = null $$, '23502', null, 'audit requires action');

@@ -56,7 +56,7 @@ it("concurrent eligible administrators cannot both remove their own authority", 
     const pending = b.json(demote(ADMIN, requestId));
     await waitForLock(observer, b);
     await a.execute("commit;");
-    expect(await pending).toEqual({ ok: false, code: "conflict" });
+    expect(await pending).toEqual({ ok: false, code: "last_administrator" });
     await b.execute("commit;");
     expect(
       await observer.json(
@@ -75,7 +75,7 @@ it("administrator count rechecks provider revocation committed during its Auth l
     const pending = b.json(demote(ACTOR));
     await waitForLock(observer, b);
     await a.execute("commit;");
-    expect(await pending).toEqual({ ok: false, code: "conflict" });
+    expect(await pending).toEqual({ ok: false, code: "last_administrator" });
     await b.execute("rollback;");
   });
 });

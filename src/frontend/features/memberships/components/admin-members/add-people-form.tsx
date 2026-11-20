@@ -10,14 +10,19 @@ import {
   type InvitationResult,
 } from "@/shared/memberships/invitation-command/invitation-command";
 import { Button } from "@/frontend/components/ui/button/button";
+import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
+import {
+  STAFF_ROLE_OPTIONS,
+  staffRoleLabels,
+  type StaffRole,
+} from "@/shared/memberships/staff-roles/staff-roles";
 import styles from "./admin-members.module.css";
 
 export function AddPeopleForm() {
   const router = useRouter();
+  const { confirm, confirmDialog } = useConfirm();
   const [text, setText] = useState("");
-  const [role, setRole] = useState<"author" | "editor" | "administrator">(
-    "author",
-  );
+  const [role, setRole] = useState<StaffRole>("author");
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<InvitationResult | null>(null);
   const [problem, setProblem] = useState("");
@@ -46,7 +51,7 @@ export function AddPeopleForm() {
     }
   }
 
-  function submit(event: React.FormEvent) {
+  async function submit(event: React.FormEvent) {
     event.preventDefault();
     if (pending || retry) return;
     const { entries, invalid } = parseInviteText(text);
@@ -60,6 +65,17 @@ export function AddPeopleForm() {
       setProblem(`Enter between 1 and ${MAX_INVITES} email addresses.`);
       return;
     }
+    if (
+      role === "administrator" &&
+      !(await confirm({
+        title: "Grant Administrator access?",
+        message: `Up to ${entries.length} people will receive full staff administration access when they sign in.`,
+        confirmLabel: "Grant access",
+        cancelLabel: "Cancel",
+        danger: true,
+      }))
+    )
+      return;
     setProblem("");
     void run({
       kind: "invite",
@@ -85,30 +101,32 @@ export function AddPeopleForm() {
           Role for everyone listed
           <select
             value={role}
-            onChange={(event) =>
-              setRole(
-                event.target.value as "author" | "editor" | "administrator",
-              )
-            }
+            onChange={(event) => setRole(event.target.value as StaffRole)}
             disabled={pending || Boolean(retry)}
           >
-            <option value="author">Author</option>
-            <option value="editor">Editor</option>
-            <option value="administrator">Administrator</option>
+            {STAFF_ROLE_OPTIONS.map((option) => (
+              <option key={option} value={option}>
+                {staffRoleLabels[option]}
+              </option>
+            ))}
           </select>
         </label>
         <Button type="submit" disabled={pending || Boolean(retry)}>
           Add to staff list
         </Button>
       </div>
+      {confirmDialog}
       {problem && <p role="alert">{problem}</p>}
       {pending && <p role="status">Saving…</p>}
       {result?.ok && "added" in result && (
         <p role="status">
           Added {result.added}
-          {result.updated ? `, updated ${result.updated}` : ""}.
+          {result.updated
+            ? `, updated ${result.updated}, including any role changes to ${staffRoleLabels[role]}`
+            : ""}
+          .
           {result.skipped.length
-            ? ` Already members (edit them in the list): ${result.skipped.join(", ")}.`
+            ? ` Already listed or members (edit members in the list): ${result.skipped.join(", ")}.`
             : ""}
         </p>
       )}

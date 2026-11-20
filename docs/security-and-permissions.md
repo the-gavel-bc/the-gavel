@@ -17,6 +17,8 @@ The project replaces a previously compromised WordPress site. The new system min
 - Identity provider: Google through Supabase Auth.
 - Allowed organization domain: `bc.edu`.
 - Dashboard eligibility additionally requires an active membership. An administrator lists a BC email with a role; the person's first eligible sign-in claims it. People who are not listed see "Access not approved" and nothing is stored about them.
+- Invitation state is checked in the database: claim identity and timestamp are paired, and a claimed listing cannot also be removed. Deactivation retires a matching live listing atomically; reactivation requires an administrator command against the existing membership and current version.
+- Membership audit readers require an active administrator. The versioned reader returns role details and reactivation events, including earlier listing events for the same address; it does not expose the private invitation table.
 - Google identity alone never grants author access.
 - Server code validates the active session; client-decoded claims are not authoritative.
 - Authentication tokens must not appear in URLs, logs, analytics, or user-visible errors.

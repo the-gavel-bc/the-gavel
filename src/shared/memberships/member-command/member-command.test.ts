@@ -9,7 +9,7 @@ const approve = {
   requestId,
   role: "author",
   displayName: "New Member",
-  expectedVersion: null,
+  expectedVersion: 1,
 } as const;
 
 it("accepts exact membership commands and rejects forged or unsafe fields", () => {
@@ -19,7 +19,9 @@ it("accepts exact membership commands and rejects forged or unsafe fields", () =
     { ...approve, role: "owner" },
     { ...approve, displayName: " New Member " },
     { ...approve, displayName: "Name\nInjected" },
+    { ...approve, displayName: "Name\u202eSpoofed" },
     { ...approve, expectedVersion: 0 },
+    { ...approve, expectedVersion: null },
     { ...approve, requestId: "bad" },
     {
       kind: "deactivate",
@@ -50,6 +52,17 @@ it("accepts only a matching safe success or allowlisted failure", () => {
     ok: false,
     code: "conflict",
   });
+  expect(
+    parseMemberResult(
+      { ok: false, code: "last_administrator" },
+      {
+        kind: "deactivate",
+        targetUserId,
+        requestId,
+        expectedVersion: 1,
+      },
+    ),
+  ).toEqual({ ok: false, code: "last_administrator" });
   for (const input of [
     { ...success, targetUserId: requestId },
     { ...success, active: false },

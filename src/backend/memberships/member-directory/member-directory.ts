@@ -5,6 +5,10 @@ import { z } from "zod";
 import { requireActiveMembership } from "@/backend/auth/access/access";
 import { createServerSupabaseClient } from "@/backend/infrastructure/supabase/server/server";
 import { isDraftUuid } from "@/shared/articles/draft-cursor/draft-cursor";
+import {
+  staffRoleSchema,
+  type StaffRole,
+} from "@/shared/memberships/staff-roles/staff-roles";
 
 export const memberStateSchema = z.enum([
   "all",
@@ -13,7 +17,7 @@ export const memberStateSchema = z.enum([
   "invited",
 ]);
 export type MemberState = z.infer<typeof memberStateSchema>;
-export const memberRoleSchema = z.enum(["author", "editor", "administrator"]);
+export const memberRoleSchema = staffRoleSchema;
 export type MemberSummary = {
   /** Stable row key: the member's user id, or the listing id before sign-in. */
   key: string;
@@ -21,7 +25,7 @@ export type MemberSummary = {
   invitationId: string | null;
   email: string;
   displayName: string | null;
-  role: "author" | "editor" | "administrator";
+  role: StaffRole;
   state: "active" | "inactive" | "invited";
   version: number;
   eligible: boolean;
@@ -47,6 +51,18 @@ const pageSchema = z.strictObject({
   cursor: z.string().optional(),
   pageSize: z.number().int().min(1).max(50).default(25),
 });
+export function normalizeMemberSearchParams(
+  input: Record<string, string | string[] | undefined>,
+): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const key of ["state", "role", "q", "cursor"] as const) {
+    const value = input[key];
+    if (typeof value === "string") result[key] = value;
+    else if (Array.isArray(value))
+      result[key] = value.length === 1 && value[0] ? value[0] : "__invalid__";
+  }
+  return result;
+}
 const rowSchema = z.object({
   key: z.string().min(1).max(64),
   user_id: z.custom<string>(isDraftUuid).nullable(),

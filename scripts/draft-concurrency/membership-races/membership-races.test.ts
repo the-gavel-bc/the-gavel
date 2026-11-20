@@ -22,10 +22,11 @@ it("serializes duplicate approval and stale deactivation on one membership", asy
       insert into public.profiles(auth_user_id,display_name,slug)
         values('${actor}','Race Actor','race-actor-${actor}');
       insert into public.memberships(user_id,role,active,approved_by,approved_at)
-        values('${actor}','administrator',true,'${actor}',now());commit;`);
+        values('${actor}','administrator',true,'${actor}',now()),
+          ('${target}','author',false,'${actor}',now());commit;`);
     prepared = true;
     const begin = `begin;set local role authenticated;set local request.jwt.claim.sub='${actor}';`;
-    const approve = `public.approve_membership('${target}'::uuid,'${approval}'::uuid,'author','Race Member')`;
+    const approve = `public.approve_membership('${target}'::uuid,'${approval}'::uuid,'author','Race Member',1)`;
     await a.execute(begin);
     expect(await a.json<{ ok: boolean }>(approve)).toMatchObject({ ok: true });
     await b.execute(begin);
@@ -41,11 +42,11 @@ it("serializes duplicate approval and stale deactivation on one membership", asy
     ).toBe(1);
 
     await a.execute(begin);
-    const first = `public.deactivate_membership('${target}'::uuid,1,'${randomUUID()}'::uuid)`;
+    const first = `public.deactivate_membership('${target}'::uuid,2,'${randomUUID()}'::uuid)`;
     expect(await a.json<{ ok: boolean }>(first)).toMatchObject({ ok: true });
     await b.execute(begin);
     const stale = b.json<{ ok: boolean; code: string }>(
-      `public.deactivate_membership('${target}'::uuid,1,'${randomUUID()}'::uuid)`,
+      `public.deactivate_membership('${target}'::uuid,2,'${randomUUID()}'::uuid)`,
     );
     await waitForLock(observer, b);
     await a.execute("commit;");

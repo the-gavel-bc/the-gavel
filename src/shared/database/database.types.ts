@@ -338,6 +338,7 @@ export type Database = {
           actor_user_id: string;
           correlation_id: string | null;
           created_at: string;
+          detail: Json | null;
           id: string;
           resource_id: string;
           resource_type: string;
@@ -348,6 +349,7 @@ export type Database = {
           actor_user_id: string;
           correlation_id?: string | null;
           created_at?: string;
+          detail?: Json | null;
           id?: string;
           resource_id: string;
           resource_type: string;
@@ -357,6 +359,7 @@ export type Database = {
           actor_user_id?: string;
           correlation_id?: string | null;
           created_at?: string;
+          detail?: Json | null;
           id?: string;
           resource_id?: string;
           resource_type?: string;
@@ -959,6 +962,23 @@ export type Database = {
           action: string;
           actor_label: string;
           created_at: string;
+          event_id: string;
+          resource_id: string;
+          target_email: string;
+        }[];
+      };
+      list_membership_audit_events_v2: {
+        Args: {
+          p_before_at?: string;
+          p_before_id?: string;
+          p_limit?: number;
+          p_subject?: string;
+        };
+        Returns: {
+          action: string;
+          actor_label: string;
+          created_at: string;
+          detail: Json;
           event_id: string;
           resource_id: string;
           target_email: string;

@@ -58,6 +58,19 @@ it("changes a listed person's role and retries one uncertain request unchanged",
   await userEvent.click(
     screen.getByRole("button", { name: "Change role for new@bc.edu" }),
   );
+  expect(
+    await screen.findByRole("alertdialog", {
+      name: "Grant Administrator access?",
+    }),
+  ).toBeVisible();
+  await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+  expect(mocks.invitation).not.toHaveBeenCalled();
+  await userEvent.click(
+    screen.getByRole("button", { name: "Change role for new@bc.edu" }),
+  );
+  await userEvent.click(
+    await screen.findByRole("button", { name: "Grant access" }),
+  );
   const retry = await screen.findByRole("button", {
     name: "Retry original request",
   });
@@ -117,6 +130,28 @@ it("warns before self-deactivation and reloads after a conflict", async () => {
     await screen.findByRole("button", { name: "Reload memberships" }),
   );
   expect(mocks.refresh).toHaveBeenCalledOnce();
+});
+
+it("explains a last-administrator denial without mislabeling it as a stale edit", async () => {
+  mocks.member.mockResolvedValue({ ok: false, code: "last_administrator" });
+  render(<MemberControls member={active} isSelf />);
+  await userEvent.selectOptions(
+    screen.getByLabelText("Role for new@bc.edu"),
+    "author",
+  );
+  await userEvent.click(
+    screen.getByRole("button", { name: "Change role for new@bc.edu" }),
+  );
+  await userEvent.click(
+    await screen.findByRole("button", { name: "Demote me" }),
+  );
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    /at least one eligible administrator must remain/i,
+  );
+  expect(
+    screen.queryByRole("button", { name: "Reload memberships" }),
+  ).toBeNull();
+  expect(mocks.refresh).not.toHaveBeenCalled();
 });
 
 it("reactivates an inactive member with their existing name", async () => {

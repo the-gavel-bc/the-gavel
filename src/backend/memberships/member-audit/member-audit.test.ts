@@ -18,7 +18,10 @@ vi.mock("@/backend/infrastructure/supabase/server/server", () => ({
   createServerSupabaseClient: mocks.client,
 }));
 vi.mock("next/server", () => ({ connection: mocks.connection }));
-import { listMemberAudit } from "./member-audit";
+import {
+  listMemberAudit,
+  normalizeMemberAuditSearchParams,
+} from "./member-audit";
 
 let http: ReturnType<typeof queryTestClient>;
 const row = {
@@ -28,6 +31,7 @@ const row = {
   created_at: "2026-11-06T12:00:00Z",
   actor_label: "Administrator",
   target_email: "new@bc.edu",
+  detail: { role: "author" },
 };
 beforeEach(() => {
   vi.clearAllMocks();
@@ -47,11 +51,12 @@ it("returns safe membership events with a bounded cursor", async () => {
       targetEmail: "new@bc.edu",
       createdAt: row.created_at,
       actorLabel: "Administrator",
+      detail: { role: "author" },
     },
   ]);
   expect(page.nextCursor).toEqual(expect.any(String));
   expect(new URL(String(http.network.mock.calls[0][0])).pathname).toContain(
-    "/rpc/list_membership_audit_events",
+    "/rpc/list_membership_audit_events_v2",
   );
   http.respond([]);
   await listMemberAudit({ cursor: page.nextCursor });
@@ -61,6 +66,52 @@ it("returns safe membership events with a bounded cursor", async () => {
       p_before_at: row.created_at,
     },
   );
+});
+
+it("ignores unknown and repeated activity query parameters safely", () => {
+  expect(
+    normalizeMemberAuditSearchParams({
+      user: [profileId, profileId],
+      cursor: ["cursor"],
+      extra: "ignored",
+    }),
+  ).toEqual({ user: "__invalid__", cursor: "cursor" });
+});
+
+it("returns validated prior and new roles, including the reactivation action", async () => {
+  http.respond([
+    {
+      ...row,
+      action: "membership.role_changed",
+      detail: { previousRole: "author", newRole: "editor" },
+    },
+    {
+      ...row,
+      event_id: profileId,
+      action: "membership.reactivated",
+      detail: { previousRole: "editor", newRole: "administrator" },
+    },
+  ]);
+  expect((await listMemberAudit({})).items).toEqual([
+    {
+      id: articleId,
+      action: "membership.role_changed",
+      targetUserId: profileId,
+      targetEmail: "new@bc.edu",
+      createdAt: row.created_at,
+      actorLabel: "Administrator",
+      detail: { previousRole: "author", newRole: "editor" },
+    },
+    {
+      id: profileId,
+      action: "membership.reactivated",
+      targetUserId: profileId,
+      targetEmail: "new@bc.edu",
+      createdAt: row.created_at,
+      actorLabel: "Administrator",
+      detail: { previousRole: "editor", newRole: "administrator" },
+    },
+  ]);
 });
 
 it("rejects malformed requests and authors before querying", async () => {
@@ -82,6 +133,10 @@ it("masks database errors and unexpected actions", async () => {
     "Unable to load membership activity.",
   );
   http.respond([{ ...row, action: "article.published" }]);
+  await expect(listMemberAudit({})).rejects.toThrow(
+    "Unable to load membership activity.",
+  );
+  http.respond([{ ...row, detail: { role: "owner" } }]);
   await expect(listMemberAudit({})).rejects.toThrow(
     "Unable to load membership activity.",
   );

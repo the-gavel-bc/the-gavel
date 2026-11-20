@@ -6,15 +6,21 @@ import type { MemberSummary } from "@/backend/memberships/member-directory/membe
 import { manageMembershipAction } from "@/backend/memberships/member-command/member-actions";
 import { manageInvitationAction } from "@/backend/memberships/invitation-command/invitation-actions";
 import { Button } from "@/frontend/components/ui/button/button";
+import {
+  STAFF_ROLE_OPTIONS,
+  staffRoleLabels,
+  type StaffRole,
+} from "@/shared/memberships/staff-roles/staff-roles";
 import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import styles from "./admin-members.module.css";
 
-type Role = "author" | "editor" | "administrator";
+type Role = StaffRole;
 type Failure =
   | "invalid_input"
   | "forbidden"
   | "not_found"
   | "conflict"
+  | "last_administrator"
   | "request_conflict"
   | "unavailable";
 const messages: Record<Failure, string> = {
@@ -22,6 +28,7 @@ const messages: Record<Failure, string> = {
   forbidden: "Your administrator access no longer permits this change.",
   not_found: "This person is no longer available.",
   conflict: "This changed elsewhere. Reload to see its current state.",
+  last_administrator: "At least one eligible administrator must remain active.",
   request_conflict: "This request cannot be reused. Reload the directory.",
   unavailable:
     "The result is uncertain. Retry the original request to confirm it.",
@@ -72,6 +79,17 @@ export function MemberControls({
 
   async function save() {
     if (blocked || role === member.role) return;
+    if (
+      role === "administrator" &&
+      !(await confirm({
+        title: "Grant Administrator access?",
+        message: `${member.email} will be able to manage staff access.`,
+        confirmLabel: "Grant access",
+        cancelLabel: "Cancel",
+        danger: true,
+      }))
+    )
+      return;
     if (
       isSelf &&
       role !== "administrator" &&
@@ -156,8 +174,19 @@ export function MemberControls({
     }
   }
 
-  function reactivate() {
+  async function reactivate() {
     if (blocked || !member.userId || !member.eligible) return;
+    if (
+      role === "administrator" &&
+      !(await confirm({
+        title: "Reactivate as Administrator?",
+        message: `${member.email} will regain full staff administration access.`,
+        confirmLabel: "Reactivate",
+        cancelLabel: "Cancel",
+        danger: true,
+      }))
+    )
+      return;
     void run(() =>
       manageMembershipAction({
         kind: "approve",
@@ -183,9 +212,11 @@ export function MemberControls({
         onChange={(event) => setRole(event.target.value as Role)}
         disabled={blocked}
       >
-        <option value="author">Author</option>
-        <option value="editor">Editor</option>
-        <option value="administrator">Administrator</option>
+        {STAFF_ROLE_OPTIONS.map((option) => (
+          <option key={option} value={option}>
+            {staffRoleLabels[option]}
+          </option>
+        ))}
       </select>
       {inactive ? (
         <Button
