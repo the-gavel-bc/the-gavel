@@ -1,3 +1,4 @@
+import { dbContainer } from "../support/db-container/db-container";
 import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
 import {
@@ -20,7 +21,7 @@ function sql(statement: string) {
     [
       "exec",
       "-i",
-      "supabase_db_the-gavel",
+      dbContainer(),
       "psql",
       "-U",
       "postgres",

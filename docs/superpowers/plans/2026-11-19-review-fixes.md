@@ -1,6 +1,6 @@
 # Review fixes implementation plan
 
-**Status:** Batches 1 and 2 are open as [PR #121](https://github.com/dylandrozario/the-gavel/pull/121) and [PR #122](https://github.com/dylandrozario/the-gavel/pull/122). Batch 3 is implemented locally on `fix/database-privilege-hygiene`, stacked on PR #122.
+**Status:** Batches 1 and 2 are open as [PR #121](https://github.com/dylandrozario/the-gavel/pull/121) and [PR #122](https://github.com/dylandrozario/the-gavel/pull/122). Batch 3 is open as [PR #123](https://github.com/dylandrozario/the-gavel/pull/123). Batch 4 is implemented locally on `fix/ci-and-dependencies`, stacked on PR #123.
 
 **Goal:** Fix the approved review findings in seven reviewable batches and document the evidence for each.
 
@@ -77,9 +77,19 @@ GitHub Actions did not start [Batch 1's hosted job](https://github.com/dylandroz
 
 **Findings:** C-27 (audit and config only), C-28, C-30. No migration, function or policy change.
 
-- [ ] Update `.github/workflows/ci.yml`, `package.json`, `pnpm-lock.yaml`, `playwright.config.ts` and `docs/testing.md`. Run both dependency audits independently of the browser result and of each other, with visible failure if installation is unavailable. Keep the browser failure visible, upload Playwright traces and results when present on failure, set the web server timeout to 180 seconds, pin `ubuntu-24.04`, remove the old foundation-branch trigger, and set `engines.node` to at least 22.13. Cache Next build cache and the browser cache using lockfile/platform keys and keep system browser dependency install valid on cache hits.
-- [ ] Add `e2e/support/db-container/db-container.ts` and update `e2e/global-setup/global-setup.ts`, `e2e/support/draft-list-fixture/draft-list-fixture.ts`, and the direct container consumers in `e2e/public-{archives,article,authors,information,metadata,search,tags}/`. Keep isolated-project defaults and support `GAVEL_DB_CONTAINER`. Verify default and override selection with a focused test. Search scripts with separate database purposes are handled only under their own approved work.
-- [ ] Resolve the latest patched 16.4.x for both Next packages against the configured package registry and advisories at implementation time. The review reports 16.4.6. Run the global gates, `pnpm audit --prod`, `pnpm audit`, and inspect the hosted run for both audit steps and retained artifacts after a browser failure. Update the stale picomatch note based on actual audit output. Stale browser spec repair remains deferred.
+- [x] Update `.github/workflows/ci.yml`, `package.json`, `pnpm-lock.yaml`, `playwright.config.ts` and `docs/testing.md`. Run both dependency audits independently of the browser result and of each other, with visible failure if installation is unavailable. Keep the browser failure visible, upload Playwright traces and results when present on failure, set the web server timeout to 180 seconds, pin `ubuntu-24.04`, remove the old foundation-branch trigger, and set `engines.node` to at least 22.13. Cache Next build cache and the browser cache using lockfile/platform keys and keep system browser dependency install valid on cache hits.
+- [x] Add `e2e/support/db-container/db-container.ts` and update `e2e/global-setup/global-setup.ts`, `e2e/support/draft-list-fixture/draft-list-fixture.ts`, and the direct container consumers in `e2e/public-{archives,article,authors,information,metadata,search,tags}/`. Keep isolated-project defaults and support `GAVEL_DB_CONTAINER`. Verify default and override selection with a focused test. Search scripts with separate database purposes are handled only under their own approved work.
+- [x] Resolve the latest patched 16.4.x for both Next packages against the configured package registry and advisories at implementation time. The review reports 16.4.6. Run the global gates, `pnpm audit --prod`, `pnpm audit`, and verify local failure artifacts. Update the stale picomatch note based on actual audit output. Stale browser spec repair remains deferred.
+
+- [ ] Verify audit scheduling, retained artifacts and cache writes in hosted CI after the account issue is resolved.
+
+### Batch 4 implementation and verification
+
+- The configured registry resolved both Next.js packages at 16.4.6. The lockfile update is limited to the Next.js package family, and `pnpm install --frozen-lockfile` passed.
+- The unfiltered `pnpm audit --prod` passed with zero findings. The unfiltered `pnpm audit` exited 1 for one moderate development-only `minimatch` advisory ([GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249)). No `picomatch` advisory appeared. Both CI audit commands passed at the existing high-severity threshold.
+- A read-only review identified two issues that were fixed locally. The regular Playwright suite verifies the selected Docker container's database port against the CLI project before running fixtures. CI saves the Chromium cache after installation and the Next cache after a completed production build even if browser tests subsequently fail.
+- All eight helper tests passed. Playwright discovery listed 198 tests with a matching local override and rejected a mismatched container before fixture setup. An intentional synthetic Chromium failure produced a nonempty HTML report and trace ZIP. Workflow YAML parsed locally. Format, lint, typecheck, the production build, and all 1,210 unit tests passed.
+- The latest hosted foundation job on [PR #123](https://github.com/dylandrozario/the-gavel/actions/runs/44591274342/job/135797614672) did not start. GitHub reported an account payment or spending-limit issue. Hosted audit scheduling, artifact upload, and cache writes remain unverified. The full browser suite and stale spec repair remain deferred.
 
 ## 5. Editor fixes
 

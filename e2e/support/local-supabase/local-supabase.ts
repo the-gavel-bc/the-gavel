@@ -1,6 +1,10 @@
 import { execFileSync } from "node:child_process";
 import { createHmac } from "node:crypto";
 import type { BrowserContext } from "@playwright/test";
+import {
+  assertMatchingDbPort,
+  dbContainer,
+} from "../db-container/db-container";
 
 let verifiedLocal: Readonly<Record<string, string>> | undefined;
 
@@ -21,6 +25,17 @@ export function localSupabase() {
     throw new Error(
       "Browser tests require the isolated local Supabase project.",
     );
+  if (process.env.GAVEL_DB_CONTAINER !== undefined) {
+    const publishedPorts = execFileSync(
+      "docker",
+      ["port", dbContainer(), "5432/tcp"],
+      {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+      },
+    );
+    assertMatchingDbPort(status.DB_URL, publishedPorts);
+  }
   verifiedLocal = Object.freeze(status);
   return verifiedLocal;
 }

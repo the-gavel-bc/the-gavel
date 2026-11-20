@@ -1,3 +1,4 @@
+import { dbContainer } from "../support/db-container/db-container";
 import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
 import { expectVisibleFocus } from "../support/focus/focus";
@@ -51,7 +52,7 @@ if (workdir)
         [
           "exec",
           "-i",
-          "supabase_db_gavel-task19-browser",
+          dbContainer("supabase_db_gavel-task19-browser"),
           "psql",
           "-U",
           "postgres",

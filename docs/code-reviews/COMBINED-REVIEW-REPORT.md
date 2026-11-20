@@ -2,7 +2,7 @@
 
 Quick runs (13 Sonnet reviewers, read-only) on commit `feat/publication-date` (`4eeec9d` plus its docs commit). 152 raw findings: lifecycle and drafts 33, public reader and search 30, CI and dependencies 26, database layer 17, article editor 46. No Critical findings. No exposure of private data through table grants, function grants, `security definer` search paths or storage policies (verified against a catalog snapshot of the live local schema). Full per-reviewer reports were saved in the reviewer's checkout (`docs/code-reviews/raw/area{3,4,5,10,11}-*.md`, not committed); this file consolidates them. Source IDs are written `area/reviewer-number` (for example `3/logic-1`). Status uses: **Fix now** (urgent), **Cheap** (small, low risk), **Plan** (next, needs design or runtime proof), **Deferred** (see [DEFERRED.md](DEFERRED.md)). The fix plan is in [COMBINED-FIX-PLAN.md](COMBINED-FIX-PLAN.md).
 
-Corrections to earlier notes: the `picomatch` dependency advisory is no longer returned by the registry, so `pnpm audit` passes; the DEFERRED row that called it a blocker was stale. The remaining advisories are two moderate ones in production `next` (patched in 16.4.5, latest 16.4.6) and one dev-only `minimatch`.
+Batch 4 audit update: the production audit on Next.js 16.4.6 found zero advisories. The full audit reported one moderate development-only `minimatch` advisory and no `picomatch` advisory. See the [Batch 4 verification notes](../superpowers/plans/2026-11-19-review-fixes.md#4-ci-and-dependencies).
 
 ## Bugs in code written this week (fix first)
 
@@ -54,10 +54,10 @@ Corrections to earlier notes: the `picomatch` dependency advisory is no longer r
 
 | ID | Sev | Finding | Source | Status |
 | --- | --- | --- | --- | --- |
-| C-27 | High | 13 stale browser specs keep CI red, normalise failures, and skip the audit steps that follow. The browser suite also has no editor user, so the review workflow has never had browser coverage. Per-spec causes are known (in-page dialogs, roles, credits); about 2 days including shared helpers. | 11/ops-3, 11/test-1..5, 11/ops-2 | Cheap (audit steps run regardless, config tweaks); repair Deferred |
-| C-28 | Medium | Production `next` has two moderate advisories (patched in 16.4.5; latest 16.4.6). | 11/ops-1 | Cheap |
+| C-27 | High | 13 stale browser specs keep CI red, normalise failures, and skip the audit steps that follow. The browser suite also has no editor user, so the review workflow has never had browser coverage. Per-spec causes are known (in-page dialogs, roles, credits); about 2 days including shared helpers. | 11/ops-3, 11/test-1..5, 11/ops-2 | Audit and configuration implemented locally (Batch 4); stale specs deferred |
+| C-28 | Medium | Production `next` has two moderate advisories (patched in 16.4.5; latest 16.4.6). | 11/ops-1 | Patched locally (Batch 4) |
 | C-29 | Medium | Startup validates only three environment variables; a missing `CRON_SECRET` or service-role key in production fails silently (crons return 401 forever). No health endpoint, error reporter or cron alerting; no backup, restore, rollback or rotation runbooks; no release procedure for migrate-then-deploy. | 11/ops-4,5,7,8 | Plan (env check, health endpoint); Deferred (runbooks, hosted settings) |
-| C-30 | Low | CI hygiene: stale `feat/project-foundation` push trigger; `ubuntu-latest` drift; no failure artifacts; no `.next` or browser cache; Playwright `webServer` has no timeout; container name hard-coded in four places; no `engines.node`. | 11/ops-9..14, 11/test-6,11,12 | Cheap |
+| C-30 | Low | CI hygiene: stale `feat/project-foundation` push trigger; `ubuntu-latest` drift; no failure artifacts; no `.next` or browser cache; Playwright `webServer` has no timeout; container name hard-coded in four places; no `engines.node`. | 11/ops-9..14, 11/test-6,11,12 | Implemented locally (Batch 4) |
 
 ## Article editor (interface, code quality, tests)
 
