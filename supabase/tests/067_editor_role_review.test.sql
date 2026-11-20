@@ -32,7 +32,7 @@ end;
 $$;
 create temp table t(label text primary key, id uuid, res jsonb);
 grant all on t to authenticated;
-insert into t(label,id) values ('a1',pg_temp.ready(1,'2')),('a2',pg_temp.ready(2,'2')),('a3',pg_temp.ready(3,'2')),('e1',pg_temp.ready(4,'3'));
+insert into t(label,id) values ('a1',pg_temp.ready(1,'2')),('a2',pg_temp.ready(2,'2')),('a3',pg_temp.ready(3,'2')),('e1',pg_temp.ready(4,'3')),('a4',pg_temp.ready(5,'2'));
 create function pg_temp.call(who text, fn text, lbl text, p_v integer default null, note text default null)
 returns jsonb language plpgsql as $$
 declare r jsonb; aid uuid := (select id from t where label=lbl); v integer := p_v;
@@ -42,6 +42,8 @@ begin
   if fn='submit' then r:=public.submit_article(aid,v,gen_random_uuid());
   elsif fn='publish' then r:=public.publish_article(aid,v,gen_random_uuid());
   elsif fn='archive' then r:=public.archive_article(aid,v,gen_random_uuid());
+  elsif fn='restore' then r:=public.restore_article(aid,v,gen_random_uuid());
+  elsif fn='delete' then r:=public.delete_archived_article(aid,v,gen_random_uuid(),true);
   elsif fn='return' then r:=public.return_article(aid,v,gen_random_uuid(),note);
   elsif fn='save' then r:=public.save_article_draft(aid,v,gen_random_uuid(),pg_temp.draft_input(pg_temp.body()||'{"title":"Copy edited"}'));
   elsif fn='save_pub' then r:=public.save_published_article(aid,v,gen_random_uuid(),pg_temp.draft_input(pg_temp.body()||'{"title":"Copy edited"}'));
@@ -60,13 +62,51 @@ select ok((select review_requested_at is not null from public.articles where id=
 select is(pg_temp.call('2','submit','a1')->>'code','conflict','cannot submit twice');
 select is(pg_temp.call('2','save','a1')->>'code','not_found','author cannot edit while in review');
 select is(pg_temp.call('2','publish','a1')->>'code','not_found','author cannot publish after submitting');
+create temp table submit_receipt as
+  select id,edit_version,gen_random_uuid() as request_id,null::jsonb as result
+  from public.articles where id=(select id from t where label='a4');
+grant select,update on submit_receipt to authenticated;
+select pg_temp.act_as('2'); set local role authenticated;
+update submit_receipt set result=public.submit_article(id,edit_version,request_id);
+select is((select result->>'ok' from submit_receipt),'true','author submits second article');
+select is((select public.submit_article(id,edit_version,request_id) from submit_receipt),
+  (select result||'{"replayed":true}'::jsonb from submit_receipt),
+  'exact submit retry returns its original receipt');
+select is((select public.submit_article(id,edit_version+1,request_id) from submit_receipt)->>'code',
+  'request_conflict','changed submit request cannot reuse receipt');
+reset role;
+update private.draft_write_limits set attempt_count=30,window_start=clock_timestamp()
+where actor_user_id='00000000-0000-0000-0000-000000000002';
+set local role authenticated;
+select is((select public.submit_article(id,edit_version,request_id) from submit_receipt)->>'replayed',
+  'true','exact transition replay remains available at the write limit');
+reset role;
+select is((select attempt_count from private.draft_write_limits where actor_user_id=auth.uid()),
+  30,'transition replay consumes no additional write attempt');
+update private.draft_write_limits set attempt_count=0
+where actor_user_id='00000000-0000-0000-0000-000000000002';
+select is(pg_temp.call('3','publish','a4')->>'ok','true','editor publishes receipt fixture');
+select is(pg_temp.call('3','archive','a4')->>'ok','true','editor clears receipt fixture from review queue');
 -- Editor review.
 select is(pg_temp.call('3','save','a1')->>'ok','true','editor copy-edits an article in review');
 select is((select title from public.articles where id=(select id from t where label='a1')),'Copy edited','edit applied');
 select is(pg_temp.call('3','save','a2')->>'code','not_found','editor cannot edit an unsubmitted draft');
 select is(pg_temp.call('3','publish','a2')->>'code','not_found','editor cannot publish an unsubmitted draft');
 select is(pg_temp.call('3','return','a1',null,null)->>'code','invalid_input','return needs a note');
-select is(pg_temp.call('3','return','a1',null,'Fix the lede')->>'ok','true','editor returns with a note');
+select is(pg_temp.call('3','return','a1',null,repeat('x',501))->>'code','invalid_input','return note has a 500 character maximum');
+create temp table return_receipt as
+  select id,edit_version,gen_random_uuid() as request_id,null::jsonb as result
+  from public.articles where id=(select id from t where label='a1');
+grant select,update on return_receipt to authenticated;
+select pg_temp.act_as('3'); set local role authenticated;
+update return_receipt set result=public.return_article(id,edit_version,request_id,'Fix the lede');
+select is((select result->>'ok' from return_receipt),'true','editor returns with a note');
+select is((select public.return_article(id,edit_version,request_id,'Fix the lede') from return_receipt),
+  (select result||'{"replayed":true}'::jsonb from return_receipt),
+  'exact return retry returns its original receipt');
+select is((select public.return_article(id,edit_version,request_id,'Different note') from return_receipt)->>'code',
+  'request_conflict','changed return note cannot reuse receipt');
+reset role;
 select is((select review_note from public.articles where id=(select id from t where label='a1')),'Fix the lede','note stored');
 select is(pg_temp.call('2','save','a1')->>'ok','true','author edits again after return');
 -- Save while the owner may edit; replay the same receipt after submission.
@@ -98,6 +138,10 @@ reset role;
 select is((select review_note from public.articles where id=(select id from t where label='a1')),null,'note cleared on resubmit');
 select is(pg_temp.call('3','publish','a1')->>'ok','true','editor publishes a submitted article');
 select ok((select review_requested_at is null and review_note is null from public.articles where id=(select id from t where label='a1')),'publish clears review metadata');
+select ok(exists(
+  select 1 from jsonb_array_elements(public.list_public_sitemap_articles(null,null,100)->'items') item
+  where item->>'id'=(select id::text from t where label='a1')),
+  'checked publish transition makes article visible in sitemap');
 select throws_ok(
   $$update public.articles set review_requested_at=now() where id=(select id from t where label='a1')$$,
   '23514', null, 'non-drafts cannot carry review metadata'
@@ -113,6 +157,8 @@ select is(pg_temp.call('3','publish','e1')->>'ok','true','editor publishes own a
 select is(pg_temp.call('4','publish','a2')->>'ok','true','administrator publishes any draft');
 select is(pg_temp.call('3','archive','a2')->>'code','not_found','editor cannot archive another publisher''s article');
 select is(pg_temp.call('4','archive','a2')->>'ok','true','administrator archives anything');
+select is(pg_temp.call('2','restore','a2')->>'code','not_found','author cannot restore an archived article');
+select is(pg_temp.call('2','delete','a2')->>'code','forbidden','author cannot delete an archived article');
 -- Reads.
 select pg_temp.act_as('3'); set local role authenticated;
 select is((select count(*)::integer from public.articles where id=(select id from t where label='a3')),0,'editor cannot read unsubmitted drafts');
@@ -137,6 +183,11 @@ reset role;
 -- not readable by editors through the private table (they read only what is in review or what they published).
 select is(pg_temp.call('4','publish','a3')->>'ok','true','administrator publishes the submitted article');
 select is(pg_temp.call('4','archive','a3')->>'ok','true','administrator archives it');
+select ok(not exists(
+  select 1 from jsonb_array_elements(public.list_public_sitemap_articles(null,null,100)->'items') item
+  where item->>'id'=(select id::text from t where label='a3')),
+  'checked archive transition removes article from sitemap');
+select is(pg_temp.call('3','restore','a3')->>'code','not_found','editor cannot restore another publisher''s archived article');
 select pg_temp.act_as('3'); set local role authenticated;
 select is((select count(*)::integer from public.articles where id=(select id from t where label='a3')),0,
   'an editor cannot read an archived article they did not publish');

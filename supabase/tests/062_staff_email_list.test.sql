@@ -10,6 +10,11 @@ where id='00000000-0000-0000-0000-000000000004';
 update auth.users set email='list-author@bc.edu',email_confirmed_at=now(),
   raw_app_meta_data='{"provider":"google","providers":["google"]}'::jsonb
 where id='00000000-0000-0000-0000-000000000002';
+update auth.users set email='list-editor@bc.edu',email_confirmed_at=now(),
+  raw_app_meta_data='{"provider":"google","providers":["google"]}'::jsonb
+where id='00000000-0000-0000-0000-000000000003';
+update public.memberships set role='editor'
+where user_id='00000000-0000-0000-0000-000000000003';
 -- Signed in with Google but never approved, and one listed person.
 insert into auth.users(id,email,email_confirmed_at,raw_app_meta_data,raw_user_meta_data)
 values('90000000-0000-0000-0000-000000000031','Listed.Person@bc.edu',now(),
@@ -63,6 +68,42 @@ select is((public.invite_staff('a0000000-0000-0000-0000-000000000006',
 select is(public.invite_staff('a0000000-0000-0000-0000-000000000006',
   '[{"email":"other@bc.edu","role":"author"}]'::jsonb)->>'code','request_conflict',
   'a reused request id with different content conflicts');
+
+create temp table staff_pages(page integer primary key,email text,key text);
+grant select,insert on staff_pages to authenticated;
+insert into staff_pages
+select 1,email,key from public.list_staff(1,null,null,'invited')
+order by email collate "C",key collate "C" limit 1;
+insert into staff_pages
+select 2,next_page.email,next_page.key
+from staff_pages first_page
+cross join lateral public.list_staff(1,null,null,'invited',first_page.email,first_page.key) next_page
+where first_page.page=1;
+select is((select count(*)::integer from staff_pages),2,
+  'directory cursor returns the next invited person');
+select ok((select email collate "C" < (select email collate "C" from staff_pages where page=2)
+  from staff_pages where page=1),'directory pagination preserves email ordering');
+create temp table later_invitation as
+select invitation_id from public.list_staff(51,'later');
+grant select on later_invitation to authenticated;
+
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000003',true);
+select is(public.invite_staff('a0000000-0000-0000-0000-000000000009',
+  '[{"email":"editor-add@bc.edu","role":"author"}]'::jsonb)->>'code','forbidden',
+  'editor cannot add an invitation');
+select throws_ok($$select * from public.list_staff()$$,'42501',null,
+  'editor cannot list staff');
+select throws_ok($$select * from public.staff_summary()$$,'42501',null,
+  'editor cannot read staff counts');
+select is(public.change_invitation_role(
+  (select invitation_id from later_invitation),1,
+  'a0000000-0000-0000-0000-000000000010','administrator')->>'code','forbidden',
+  'editor cannot change an invitation target');
+select is(public.remove_invitation(
+  (select invitation_id from later_invitation),1,
+  'a0000000-0000-0000-0000-000000000011')->>'code','forbidden',
+  'editor cannot remove an invitation target');
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);
 
 select is((select pg_catalog.count(*)::int from public.list_staff(51,null,null,'invited')),
   2,'two people are listed');

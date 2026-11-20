@@ -57,6 +57,10 @@ select is(pg_temp.create_as('2','x',4,jsonb_build_object('publicationDate',(((no
 select is(pg_temp.create_as('2','x',5,'{"publicationDate":"2026-02-30"}'),'invalid_input','an impossible calendar date is refused');
 select is(pg_temp.create_as('2','x',6,'{"publicationDate":"01/15/2026"}'),'invalid_input','a wrong format is refused');
 select is(pg_temp.create_as('2','x',7,'{"publicationDate":20260115}'),'invalid_input','a non-string is refused');
+select is(('2026-03-08 04:59:59.999999Z'::timestamptz at time zone 'America/New_York')::date::text,
+  '2026-03-07','Eastern date remains previous day before spring midnight');
+select is(('2026-03-08 05:00:00Z'::timestamptz at time zone 'America/New_York')::date::text,
+  '2026-03-08','Eastern date advances at spring midnight');
 select is((select publication_date::text from public.articles where id=(select id from t where label='past')),'2026-01-15','the date is stored');
 select is((select count(*)::int from public.articles where id=(select id from t where label='none') and publication_date is null),1,'no date is stored as null');
 
@@ -71,13 +75,24 @@ select is((pg_temp.save_as('2','none','{"publicationDate":"2999-01-01"}'))->>'co
 select pg_temp.ready('past',1); select pg_temp.ready('null',2);
 select is(pg_temp.pub_as('4','null')->>'ok','true','publish with no date');
 select ok((select abs(extract(epoch from now()-published_at))<60 from public.articles where id=(select id from t where label='null')),'no date publishes as now');
+
+-- Date-only publication remains noon Eastern on both 2026 DST transition dates.
+select is(pg_temp.create_as('2','spring',8,'{"publicationDate":"2026-03-08"}'),'ok','spring DST date is accepted');
+select is(pg_temp.create_as('2','autumn',9,'{"publicationDate":"2026-11-01"}'),'ok','autumn DST date is accepted');
+select pg_temp.ready('spring',8); select pg_temp.ready('autumn',9);
+select is(pg_temp.pub_as('4','spring')->>'ok','true','spring DST date publishes');
+select is(pg_temp.pub_as('4','autumn')->>'ok','true','autumn DST date publishes');
+select is((select (published_at at time zone 'UTC')::text from public.articles where id=(select id from t where label='spring')),
+  '2026-03-08 16:00:00','spring date publishes at noon EDT');
+select is((select (published_at at time zone 'UTC')::text from public.articles where id=(select id from t where label='autumn')),
+  '2026-11-01 17:00:00','autumn date publishes at noon EST');
 select is(pg_temp.pub_as('4','past')->>'ok','true','publish with a past date');
 select is((select (published_at at time zone 'America/New_York')::text from public.articles where id=(select id from t where label='past')),'2026-01-15 12:00:00','a past date publishes at noon Eastern');
 select is((select publication_date::text from public.articles where id=(select id from t where label='null')),null,'a blank date stays blank after publishing');
 
 -- A date set after the fact into the future (direct data) cannot be published.
-select is(pg_temp.create_as('2','late',8,'{}'),'ok','draft for the future-publish check');
-select pg_temp.ready('late',3);
+select is(pg_temp.create_as('2','late',10,'{}'),'ok','draft for the future-publish check');
+select pg_temp.ready('late',10);
 update public.articles set publication_date=((now() at time zone 'America/New_York')::date)+2 where id=(select id from t where label='late');
 select is(pg_temp.pub_as('4','late')->>'code','invalid_input','a future date cannot be published');
 

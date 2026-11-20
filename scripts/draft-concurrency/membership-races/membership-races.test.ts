@@ -128,3 +128,64 @@ it("prevents two administrators from demoting each other into lockout", async ()
     await observer.close();
   }
 });
+
+it("allows only the first of two administrators trying to deactivate each other", async () => {
+  const observer = new DatabaseSession();
+  const a = new DatabaseSession();
+  const b = new DatabaseSession();
+  const second = randomUUID();
+  const actor = randomUUID();
+  let prepared = false;
+  try {
+    await Promise.all([observer.ready(), a.ready(), b.ready()]);
+    await observer.execute(`begin;
+      insert into auth.users(id,email,email_confirmed_at,raw_app_meta_data) values
+        ('${actor}','deactivate-actor-${actor}@bc.edu',now(),'{"provider":"google"}'::jsonb),
+        ('${second}','deactivate-admin-${second}@bc.edu',now(),'{"provider":"google"}'::jsonb);
+      insert into public.profiles(auth_user_id,display_name,slug)
+        values('${actor}','Deactivate Actor','deactivate-actor-${actor}'),
+          ('${second}','Deactivate Administrator','deactivate-admin-${second}');
+      insert into public.memberships(user_id,role,active,approved_by,approved_at)
+        values('${actor}','administrator',true,'${actor}',now()),
+          ('${second}','administrator',true,'${actor}',now());commit;`);
+    prepared = true;
+    await a.execute(
+      `begin;set local role authenticated;set local request.jwt.claim.sub='${actor}';`,
+    );
+    expect(
+      await a.json<{ ok: boolean }>(
+        `public.deactivate_membership('${second}'::uuid,1,'${randomUUID()}'::uuid)`,
+      ),
+    ).toMatchObject({ ok: true });
+    await b.execute(
+      `begin;set local role authenticated;set local request.jwt.claim.sub='${second}';`,
+    );
+    const competing = b.json<{ ok: boolean; code: string }>(
+      `public.deactivate_membership('${actor}'::uuid,1,'${randomUUID()}'::uuid)`,
+    );
+    await waitForLock(observer, b);
+    await a.execute("commit;");
+    expect(await competing).toEqual({ ok: false, code: "forbidden" });
+    await b.execute("commit;");
+    expect(
+      await observer.json<number>(
+        `(select count(*) from public.memberships where role='administrator' and active and user_id in ('${actor}','${second}'))`,
+      ),
+    ).toBe(1);
+    expect(
+      await observer.json<number>(
+        `(select count(*) from public.audit_events where action='membership.deactivated' and resource_id in ('${actor}','${second}'))`,
+      ),
+    ).toBe(1);
+  } finally {
+    await Promise.all([a.close(), b.close()]);
+    if (prepared)
+      await observer.execute(`begin;
+        delete from private.membership_write_receipts where actor_user_id in ('${actor}','${second}') or target_user_id in ('${actor}','${second}');
+        delete from public.audit_events where actor_user_id in ('${actor}','${second}') or (resource_type='membership' and resource_id in ('${actor}','${second}'));
+        delete from public.memberships where user_id in ('${actor}','${second}');
+        delete from public.profiles where auth_user_id in ('${actor}','${second}');
+        delete from auth.users where id in ('${actor}','${second}');commit;`);
+    await observer.close();
+  }
+});

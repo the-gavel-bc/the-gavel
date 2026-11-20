@@ -30,7 +30,7 @@ insert into public.profiles(id,display_name,slug) values
  ('14000000-0000-0000-0000-000000000004','Sitemap inactive','sm-inactive');
 -- Future timestamps keep fixture rows ahead of any seeded publications.
 insert into public.articles(id,owner_profile_id,section_id,title,slug,status,published_at,archived_at) values
- ('54000000-0000-0000-0000-000000000001','14000000-0000-0000-0000-000000000001','24000000-0000-0000-0000-000000000001','One','sm-one','published','2099-01-01T00:00:00.123456Z',null),
+ ('54000000-0000-0000-0000-000000000001','14000000-0000-0000-0000-000000000001','24000000-0000-0000-0000-000000000001','One','sm-one','published','2025-12-31T23:59:59Z',null),
  ('54000000-0000-0000-0000-000000000002','14000000-0000-0000-0000-000000000001','24000000-0000-0000-0000-000000000001','Two','sm-two','published','2099-01-01T00:00:00.123456Z',null),
  ('54000000-0000-0000-0000-000000000003','14000000-0000-0000-0000-000000000001','24000000-0000-0000-0000-000000000001','Three','sm-three','published','2099-01-01T00:00:00.123457Z',null),
  ('54000000-0000-0000-0000-000000000004','14000000-0000-0000-0000-000000000001','24000000-0000-0000-0000-000000000001','Draft','sm-draft','draft',null,null),
@@ -79,6 +79,8 @@ select is((select value#>>'{items,1,slug}' from sitemap_proof where label='page1
 select is((select value#>>'{items,0,publishedAt}' from sitemap_proof where label='page1'),'2099-01-01T00:00:00.123457Z','lastmod keeps microseconds');
 select ok((select (value->>'hasMore')::boolean from sitemap_proof where label='page1'),'full page reports more rows');
 select is((select value#>>'{items,0,slug}' from sitemap_proof where label='page2'),'sm-one','continuation neither skips nor repeats ties');
+select is((select value#>>'{items,0,publishedAt}' from sitemap_proof where label='page2'),
+ '2025-12-31T23:59:59.000000Z','backdated published article sorts after current sitemap rows');
 select is((select array_agg(i->>'slug' order by i->>'slug') from sitemap_proof,jsonb_array_elements(value->'items') i
    where label='all' and i->>'slug' like 'sm-%'),array['sm-one','sm-three','sm-two'],
  'draft, archived, inactive-section, inactive-owner and NULL-body articles are absent');

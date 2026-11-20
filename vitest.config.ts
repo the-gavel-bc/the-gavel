@@ -20,6 +20,7 @@ export default defineConfig({
       "scripts/draft-contract-check/**",
       "scripts/draft-concurrency/**",
       "scripts/draft-editor-check/**",
+      "scripts/public-search-check/**",
     ],
     setupFiles: ["./vitest.setup.ts"],
   },

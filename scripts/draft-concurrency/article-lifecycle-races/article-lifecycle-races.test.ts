@@ -77,3 +77,120 @@ it("publish and archive serialize against saves and leave one transition history
     ).toBe(3);
   });
 });
+
+it("serializes a publication-date edit before a competing publish", async () => {
+  await withSaveFixtures(async ({ observer, a, b, articleId }) => {
+    const assetId = randomUUID();
+    await observer.execute(`begin;
+      update public.articles set content=${fixtureJson(content)} where id='${articleId}';
+      insert into public.media_assets(id,article_id,uploader_user_id,request_id,object_key,status,byte_size,width,height,sha256,finalized_at)
+      values('${assetId}','${articleId}','${ACTOR}','${randomUUID()}','lifecycle-date/${assetId}.webp','finalized',1234,120,90,repeat('b',64),now());
+      insert into public.article_main_images(article_id,asset_id,alt_text,credit)
+      values('${articleId}','${assetId}','Race image','The Gavel');
+      commit;`);
+    await beginAsActor(a);
+    const dateEdit = a.json<DraftWriteResult>(
+      saveCommand(articleId, 1, randomUUID(), {
+        ...DRAFT,
+        content,
+        publicationDate: "2026-03-08",
+      }),
+    );
+    await beginAsActor(b);
+    const publish = b.json<{ ok: boolean; code?: string }>(
+      transition("publish", articleId, 1),
+    );
+    await waitForLock(observer, b);
+    await a.execute("commit;");
+    expect(await dateEdit).toMatchObject({ ok: true, version: 2 });
+    expect(await publish).toEqual({ ok: false, code: "conflict" });
+    await b.execute("commit;");
+    expect(
+      await observer.json(
+        `(select jsonb_build_object('status',status,'version',edit_version,'date',publication_date) from public.articles where id='${articleId}')`,
+      ),
+    ).toEqual({ status: "draft", version: 2, date: "2026-03-08" });
+  });
+});
+
+it("serializes submission before a competing owner save", async () => {
+  await withSaveFixtures(async ({ observer, a, b, articleId }) => {
+    const assetId = randomUUID();
+    await observer.execute(`begin;
+      update public.articles set content=${fixtureJson(content)} where id='${articleId}';
+      insert into public.media_assets(id,article_id,uploader_user_id,request_id,object_key,status,byte_size,width,height,sha256,finalized_at)
+      values('${assetId}','${articleId}','${ACTOR}','${randomUUID()}','lifecycle-submit/${assetId}.webp','finalized',1234,120,90,repeat('d',64),now());
+      insert into public.article_main_images(article_id,asset_id,alt_text,credit)
+      values('${articleId}','${assetId}','Race image','The Gavel');
+      commit;`);
+    await beginAsActor(a);
+    expect(
+      await a.json<{ ok: boolean }>(
+        `public.submit_article('${articleId}'::uuid,1,'${randomUUID()}'::uuid)`,
+      ),
+    ).toMatchObject({ ok: true });
+    await beginAsActor(b);
+    const save = b.json<DraftWriteResult>(
+      saveCommand(articleId, 1, randomUUID(), {
+        ...DRAFT,
+        title: "Concurrent save",
+      }),
+    );
+    await waitForLock(observer, b);
+    await a.execute("commit;");
+    expect(await save).toEqual({ ok: false, code: "conflict" });
+    await b.execute("commit;");
+    expect(
+      await observer.json(
+        `(select jsonb_build_object('status',status,'version',edit_version,'requested',review_requested_at is not null) from public.articles where id='${articleId}')`,
+      ),
+    ).toEqual({ status: "draft", version: 2, requested: true });
+  });
+});
+
+it("serializes a return before a competing save and preserves the return note", async () => {
+  await withSaveFixtures(async ({ observer, a, b, articleId }) => {
+    const assetId = randomUUID();
+    await observer.execute(`begin;
+      update public.articles set content=${fixtureJson(content)} where id='${articleId}';
+      insert into public.media_assets(id,article_id,uploader_user_id,request_id,object_key,status,byte_size,width,height,sha256,finalized_at)
+      values('${assetId}','${articleId}','${ACTOR}','${randomUUID()}','lifecycle-return/${assetId}.webp','finalized',1234,120,90,repeat('e',64),now());
+      insert into public.article_main_images(article_id,asset_id,alt_text,credit)
+      values('${articleId}','${assetId}','Race image','The Gavel');
+      commit;`);
+    await beginAsActor(a);
+    expect(
+      await a.json<{ ok: boolean }>(
+        `public.submit_article('${articleId}'::uuid,1,'${randomUUID()}'::uuid)`,
+      ),
+    ).toMatchObject({ ok: true });
+    await a.execute("commit;");
+
+    await beginAsActor(a);
+    const returned = a.json<{ ok: boolean }>(
+      `public.return_article('${articleId}'::uuid,2,'${randomUUID()}'::uuid,'Please revise the summary')`,
+    );
+    await beginAsActor(b);
+    const save = b.json<DraftWriteResult>(
+      saveCommand(articleId, 2, randomUUID(), {
+        ...DRAFT,
+        title: "Competing edit",
+      }),
+    );
+    await waitForLock(observer, b);
+    await a.execute("commit;");
+    expect(await returned).toMatchObject({ ok: true, version: 3 });
+    expect(await save).toEqual({ ok: false, code: "conflict" });
+    await b.execute("commit;");
+    expect(
+      await observer.json(
+        `(select jsonb_build_object('status',status,'version',edit_version,'requested',review_requested_at is not null,'note',review_note) from public.articles where id='${articleId}')`,
+      ),
+    ).toEqual({
+      status: "draft",
+      version: 3,
+      requested: false,
+      note: "Please revise the summary",
+    });
+  });
+});

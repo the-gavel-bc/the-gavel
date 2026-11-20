@@ -5,7 +5,10 @@ update auth.users set email='membership-' || right(id::text,1) || '@bc.edu',
   email_confirmed_at=now(),raw_app_meta_data='{"provider":"google","providers":["google"]}'::jsonb
 where id in ('00000000-0000-0000-0000-000000000001',
   '00000000-0000-0000-0000-000000000002',
+  '00000000-0000-0000-0000-000000000003',
   '00000000-0000-0000-0000-000000000004');
+update public.memberships set role='editor'
+where user_id='00000000-0000-0000-0000-000000000003';
 insert into auth.users(id,email,email_confirmed_at,raw_app_meta_data,raw_user_meta_data)
 values
   ('90000000-0000-0000-0000-000000000005','new5@bc.edu',now(),
@@ -34,6 +37,20 @@ select is((public.approve_membership('90000000-0000-0000-0000-000000000005',
 reset role;
 select is((select count(*)::integer from public.memberships where user_id=
   '90000000-0000-0000-0000-000000000005'),0,'denied approval creates no membership');
+
+-- Editors may review articles but have no staff administration authority.
+set local role authenticated;
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000003',true);
+select is((public.approve_membership('90000000-0000-0000-0000-000000000005',
+  '80000000-0000-0000-0000-000000000924','author','Editor Target')->>'code'),
+  'forbidden','editor cannot approve a membership');
+select is((public.change_membership_role('00000000-0000-0000-0000-000000000004',1,
+  '80000000-0000-0000-0000-000000000925','author')->>'code'),
+  'forbidden','editor cannot change an administrator role');
+select is((public.deactivate_membership('00000000-0000-0000-0000-000000000004',1,
+  '80000000-0000-0000-0000-000000000926')->>'code'),
+  'forbidden','editor cannot deactivate an administrator');
+reset role;
 
 update auth.users set raw_app_meta_data='{"provider":"email"}'::jsonb
 where id='00000000-0000-0000-0000-000000000004';

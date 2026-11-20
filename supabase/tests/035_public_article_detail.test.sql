@@ -50,6 +50,18 @@ values ('53000000-0000-0000-0000-000000000035','63000000-0000-0000-0000-00000000
 set local role anon;
 select is(public.get_public_article('projection-public')#>>'{article,bodyImages,0,width}','2','current finalized body image descriptor returned');
 reset role;
+update public.profiles set active=false where id='10000000-0000-0000-0000-000000000002';
+set local role anon;
+select is(public.get_public_article('projection-public')->>'kind','unavailable','inactive owner fails closed for current article detail');
+select is(public.get_public_article('projection-public') ? 'article',false,'inactive owner data is not projected');
+reset role;
+update public.profiles set active=true where id='10000000-0000-0000-0000-000000000002';
+update public.sections set active=false where id='23000000-0000-0000-0000-000000000035';
+set local role anon;
+select is(public.get_public_article('projection-public')->>'kind','unavailable','inactive section fails closed for current article detail');
+select is(public.get_public_article('projection-public') ? 'article',false,'inactive section data is not projected');
+reset role;
+update public.sections set active=true where id='23000000-0000-0000-0000-000000000035';
 update public.articles set status='archived',archived_at=now() where slug='projection-public';
 set local role anon;
 select is(public.get_public_article('projection-public')->>'kind','notFound','archived article disappears');
