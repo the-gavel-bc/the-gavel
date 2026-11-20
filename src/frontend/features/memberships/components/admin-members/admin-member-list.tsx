@@ -5,6 +5,7 @@ import type {
   MemberSummary,
   StaffSummary,
 } from "@/backend/memberships/member-directory/member-directory";
+import { staffRoleLabels } from "@/shared/memberships/staff-roles/staff-roles";
 import { MemberControls } from "./member-controls";
 import { AddPeopleForm } from "./add-people-form";
 import styles from "./admin-members.module.css";
@@ -13,11 +14,6 @@ const stateLabels = {
   active: "Active",
   inactive: "Inactive",
   invited: "Not signed in yet",
-} as const;
-const roleLabels = {
-  author: "Author",
-  administrator: "Administrator",
-  editor: "Editor",
 } as const;
 
 function initials(person: MemberSummary) {
@@ -170,7 +166,9 @@ export function AdminMemberList({
                 )}
               </div>
               <p className={styles.tags}>
-                <span data-role={member.role}>{roleLabels[member.role]}</span>
+                <span data-role={member.role}>
+                  {staffRoleLabels[member.role]}
+                </span>
                 <span data-state={member.state}>
                   {stateLabels[member.state]}
                 </span>

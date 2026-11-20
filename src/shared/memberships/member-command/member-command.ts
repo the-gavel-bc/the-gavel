@@ -1,14 +1,15 @@
 import { z } from "zod";
 import { isDraftUuid } from "@/shared/articles/draft-cursor/draft-cursor";
+import { staffRoleSchema } from "@/shared/memberships/staff-roles/staff-roles";
 
 const uuid = z.custom<string>(isDraftUuid);
 const version = z.number().int().positive().max(2147483647);
-const role = z.enum(["author", "editor", "administrator"]);
+const role = staffRoleSchema;
 const displayName = z
   .string()
   .min(1)
   .max(120)
-  .refine((value) => value === value.trim() && !/[\p{Cc}]/u.test(value));
+  .refine((value) => value === value.trim() && !/[\p{Cc}\p{Cf}]/u.test(value));
 
 export const memberCommandSchema = z.discriminatedUnion("kind", [
   z.strictObject({
@@ -17,7 +18,7 @@ export const memberCommandSchema = z.discriminatedUnion("kind", [
     requestId: uuid,
     role,
     displayName,
-    expectedVersion: version.nullable(),
+    expectedVersion: version,
   }),
   z.strictObject({
     kind: z.literal("changeRole"),
@@ -39,6 +40,7 @@ const failureCode = z.enum([
   "forbidden",
   "not_found",
   "conflict",
+  "last_administrator",
   "request_conflict",
   "unavailable",
 ]);
@@ -46,7 +48,7 @@ export type MemberResult =
   | {
       ok: true;
       targetUserId: string;
-      role: "author" | "editor" | "administrator";
+      role: z.infer<typeof role>;
       active: boolean;
       version: number;
       changed: boolean;

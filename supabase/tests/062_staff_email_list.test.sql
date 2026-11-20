@@ -48,6 +48,16 @@ select is(public.invite_staff('a0000000-0000-0000-0000-000000000002',
 select is(public.invite_staff('a0000000-0000-0000-0000-000000000003',
   '[{"email":"a@bc.edu","role":"owner"}]'::jsonb)->>'code','invalid_input',
   'unknown roles are rejected');
+select is(public.invite_staff('a0000000-0000-0000-0000-000000000015',
+  '[{"email":"missing-role@bc.edu"}]'::jsonb)->>'code','invalid_input',
+  'a missing role is a checked input error');
+select is(public.invite_staff('a0000000-0000-0000-0000-000000000016',
+  '[{"email":"null-role@bc.edu","role":null}]'::jsonb)->>'code','invalid_input',
+  'a null role is a checked input error');
+select is(public.invite_staff('a0000000-0000-0000-0000-000000000017',
+  pg_catalog.jsonb_build_array(pg_catalog.jsonb_build_object('email','format-name@bc.edu',
+    'role','author','displayName',U&'Name\202ESpoof')))
+  ->>'code','invalid_input','format characters are rejected in SQL invitation names');
 select is(public.invite_staff('a0000000-0000-0000-0000-000000000004',
   '[{"email":"a@bc.edu","role":"author"},{"email":"A@bc.edu","role":"author"}]'::jsonb)
   ->>'code','invalid_input','duplicate addresses in one request are rejected');
@@ -60,6 +70,9 @@ select is((public.invite_staff('a0000000-0000-0000-0000-000000000006',
     {"email":"list-author@bc.edu","role":"administrator"}]'::jsonb))
   - 'replayed','{"ok":true,"added":2,"updated":0,"skipped":["list-author@bc.edu"]}'::jsonb,
   'adds new addresses, skips people who are already members');
+select is((select detail from public.audit_events where action='membership.invited'
+  and resource_id=(select invitation_id from public.list_staff(51,'later'))),
+  '{"role":"author"}'::jsonb,'new listing audit records its offered role');
 select is((public.invite_staff('a0000000-0000-0000-0000-000000000006',
   '[{"email":"Listed.Person@bc.edu","role":"administrator"},
     {"email":"later@bc.edu","role":"author","displayName":"Later Person"},
@@ -111,6 +124,8 @@ select is((select state from public.list_staff(51,'later') limit 1),'invited',
   'search finds a listed person');
 select is((select pg_catalog.count(*)::int from public.list_staff(51,null,'administrator')),
   2,'role filter shows the administrator members and listings');
+select throws_ok($$select * from public.list_staff(20,null,'owner')$$,
+  '22023',null,'role filtering rejects values outside the database enum');
 select is((select pg_catalog.count(*)::int from public.list_staff(51,'100%')),0,
   'search treats wildcard characters literally');
 select throws_ok($$select * from public.list_staff(52)$$,'22023',null,'page size is bounded');
@@ -125,6 +140,13 @@ select is((public.change_invitation_role(
   (select invitation_id from public.list_staff(51,'later')),1,
   'a0000000-0000-0000-0000-000000000007','administrator'))->>'version','2',
   'listed role can change');
+select is((public.invite_staff('a0000000-0000-0000-0000-000000000020',
+  '[{"email":"later@bc.edu","role":"administrator"}]'::jsonb)->'skipped'),
+  '["later@bc.edu"]'::jsonb,'an unchanged listed address is reported as skipped');
+select is((select detail from public.audit_events where action='membership.invitation_changed'
+  and resource_id=(select invitation_id from public.list_staff(51,'later'))),
+  '{"previousRole":"author","newRole":"administrator"}'::jsonb,
+  'listed role change records previous and new roles');
 select is(public.change_invitation_role(
   (select invitation_id from public.list_staff(51,'later')),1,
   'a0000000-0000-0000-0000-000000000008','author')->>'code','conflict',
@@ -137,6 +159,9 @@ select set_config('request.jwt.claim.sub','90000000-0000-0000-0000-000000000033'
 select is(public.claim_invitation(),false,'a mixed-provider identity claims nothing');
 select set_config('request.jwt.claim.sub','90000000-0000-0000-0000-000000000031',true);
 select is(public.claim_invitation(),true,'the listed person claims their role');
+select is((select detail from public.audit_events where action='membership.claimed'
+  and resource_id='90000000-0000-0000-0000-000000000031'),
+  '{"role":"administrator"}'::jsonb,'claim audit records the role actually applied');
 select is(public.claim_invitation(),false,'a second claim does nothing');
 reset role;
 select is((select role::text from public.memberships
@@ -157,9 +182,70 @@ select is((select pg_catalog.count(*)::int from public.list_staff(51,null,null,'
   0,'removed listing is gone');
 reset role;
 
+-- A live listing cannot reactivate a membership retired by staff.
+set local role authenticated;
+select is((public.invite_staff('a0000000-0000-0000-0000-000000000018',
+  '[{"email":"stale-listing@bc.edu","role":"author"}]'::jsonb)->>'added'),
+  '1','invitation can predate an account');
+reset role;
+insert into auth.users(id,email,email_confirmed_at,raw_app_meta_data,raw_user_meta_data)
+values('90000000-0000-0000-0000-000000000034','stale-listing@bc.edu',now(),
+  '{"provider":"google","providers":["google"]}'::jsonb,'{}');
+insert into public.profiles(auth_user_id,display_name,slug)
+values('90000000-0000-0000-0000-000000000034','Stale Listing','stale-listing-person');
+insert into public.memberships(user_id,role,active,approved_by,approved_at)
+values('90000000-0000-0000-0000-000000000034','author',true,
+  '00000000-0000-0000-0000-000000000004',now());
+select throws_ok($$insert into private.membership_invitations(
+  id,email,role,invited_by,claimed_user_id) values(
+  '90000000-0000-0000-0000-000000000035','mismatch@bc.edu','author',
+  '00000000-0000-0000-0000-000000000004','90000000-0000-0000-0000-000000000034')$$,
+  '23514',null,'invitation claim identity and timestamp must move together');
+select throws_ok($$insert into private.membership_invitations(
+  id,email,role,invited_by,claimed_user_id,claimed_at,removed_at) values(
+  '90000000-0000-0000-0000-000000000036','removed-claimed@bc.edu','author',
+  '00000000-0000-0000-0000-000000000004','90000000-0000-0000-0000-000000000034',
+  now(),now())$$,'23514',null,'a listing cannot be both claimed and removed');
+set local role authenticated;
+select is((public.deactivate_membership('90000000-0000-0000-0000-000000000034',1,
+  'a0000000-0000-0000-0000-000000000019')->>'ok'),'true',
+  'deactivating a listed member succeeds');
+select set_config('request.jwt.claim.sub','90000000-0000-0000-0000-000000000034',true);
+select is(public.claim_invitation(),false,
+  'the deactivated member cannot claim a stale live listing');
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);
+reset role;
+select ok((select not active from public.memberships
+  where user_id='90000000-0000-0000-0000-000000000034'),
+  'claim race leaves the deactivated membership inactive');
+select ok((select removed_at is not null and claimed_user_id is null
+  from private.membership_invitations where email='stale-listing@bc.edu'),
+  'deactivation retires its live listing');
+select is((select detail from public.audit_events where action='membership.invitation_removed'
+  and correlation_id='a0000000-0000-0000-0000-000000000019'),
+  '{"role":"author"}'::jsonb,'retired listing audit records its role');
+select is((select pg_catalog.count(*)::int from public.audit_events
+  where action='membership.invitation_removed'
+    and correlation_id='a0000000-0000-0000-0000-000000000019'),1,
+  'listing retirement is audited with the membership request');
+set local role authenticated;
+select is((public.deactivate_membership('90000000-0000-0000-0000-000000000034',1,
+  'a0000000-0000-0000-0000-000000000019')->>'replayed'),'true',
+  'deactivation retry replays without another listing event');
+reset role;
+select is((select pg_catalog.count(*)::int from public.audit_events
+  where action='membership.invitation_removed'
+    and correlation_id='a0000000-0000-0000-0000-000000000019'),1,
+  'exact retry does not duplicate listing retirement audit');
+select is((select pg_catalog.count(*)::int from public.audit_events
+  where correlation_id='a0000000-0000-0000-0000-000000000019'
+    and action in ('membership.deactivated','membership.invitation_removed')),2,
+  'exact retry preserves exactly the two initial mutation audit effects');
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);
+
 select is((select pg_catalog.count(*)::int from public.audit_events
   where action in ('membership.invited','membership.invitation_changed',
-    'membership.invitation_removed','membership.claimed')) - (select n from audit_before),5,
+    'membership.invitation_removed','membership.claimed')) - (select n from audit_before),7,
   'listing changes and claims are audited');
 -- Activity for one person includes events from before they signed in.
 select is((select pg_catalog.count(*)::int from public.list_membership_audit_events(

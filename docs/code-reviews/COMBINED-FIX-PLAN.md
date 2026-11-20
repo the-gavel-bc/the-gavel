@@ -56,7 +56,9 @@ Findings C-37, C-38, C-39 (subset), C-26 (subset).
 - Vitest: draft form tests for the date field (dirty, payload, error, conflict row), review and returned banners, the read-only page, lifecycle failure and retry, save status messages; real confirm and note dialog (focus, empty note, Escape); `getReviewQueue`; lifecycle actions table for all five operations; the byline Eastern tests from Batch 2.
 - Acceptance: new tests fail without the corresponding fix where a fix exists.
 
-## Batch 7: next, needs design or runtime proof (planned, not scheduled)
+## Batch 7: staff and roles (owner approved; implementation complete locally)
+
+S2-01 through S2-11 are implemented locally. S2-12 remains measurement only; a rolled-back synthetic 5,000-member run has been recorded in the focused plan. All verification gates passed; final independent diff review remains. Nothing is published.
 
 Search budgets (separate suggestion budget, try-lock), tags and profiles read policies (C-10, C-11), public media ETag and 304, layout caching for navigation and footer, slug lock only when the title changes, receipts and revisions retention, env validation and health endpoint, lock-order documentation, dialog focus trap and inert page, save-bar layout at phone widths. Each needs a short design note or a measurement before code.
 

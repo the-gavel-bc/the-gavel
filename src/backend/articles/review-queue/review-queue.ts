@@ -19,15 +19,24 @@ export type ReviewItem = {
   /** When it was submitted (drafts) or published (an editor's own publications). */
   at: string;
 };
-const row = z.object({
+const rowBase = z.object({
   article_id: z.custom<string>(isDraftUuid),
   title: z.string().max(240),
-  status: z.enum(["draft", "published"]),
   owner_name: z.string().max(200),
   section_name: z.string().max(160),
   submitted_at: z.custom<string>(isDatabaseTimestamp).nullable(),
   published_at: z.custom<string>(isDatabaseTimestamp).nullable(),
 });
+const row = z.discriminatedUnion("status", [
+  rowBase.extend({
+    status: z.literal("draft"),
+    submitted_at: z.custom<string>(isDatabaseTimestamp),
+  }),
+  rowBase.extend({
+    status: z.literal("published"),
+    published_at: z.custom<string>(isDatabaseTimestamp),
+  }),
+]);
 
 // Submitted drafts waiting for an editor, then the caller's own publications
 // (which only they, or an administrator, may archive). The database function
@@ -49,6 +58,6 @@ export async function getReviewQueue(): Promise<ReviewItem[]> {
       status: item.status,
       ownerName: item.owner_name,
       sectionName: item.section_name,
-      at: (item.submitted_at ?? item.published_at) as string,
+      at: item.status === "draft" ? item.submitted_at : item.published_at,
     }));
 }

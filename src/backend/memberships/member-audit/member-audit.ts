@@ -8,6 +8,7 @@ import {
   isDatabaseTimestamp,
   isDraftUuid,
 } from "@/shared/articles/draft-cursor/draft-cursor";
+import { staffRoleSchema } from "@/shared/memberships/staff-roles/staff-roles";
 
 const actionSchema = z.enum([
   "membership.approved",
@@ -17,12 +18,34 @@ const actionSchema = z.enum([
   "membership.invitation_changed",
   "membership.invitation_removed",
   "membership.claimed",
+  "membership.reactivated",
 ]);
+const roleSchema = staffRoleSchema;
+const detailSchema = z
+  .object({
+    role: roleSchema.optional(),
+    previousRole: roleSchema.nullable().optional(),
+    newRole: roleSchema.optional(),
+  })
+  .strict()
+  .nullable();
 const inputSchema = z.strictObject({
   user: z.custom<string>(isDraftUuid).optional(),
   cursor: z.string().optional(),
   pageSize: z.number().int().min(1).max(50).default(20),
 });
+export function normalizeMemberAuditSearchParams(
+  input: Record<string, string | string[] | undefined>,
+): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const key of ["user", "cursor"] as const) {
+    const value = input[key];
+    if (typeof value === "string") result[key] = value;
+    else if (Array.isArray(value))
+      result[key] = value.length === 1 && value[0] ? value[0] : "__invalid__";
+  }
+  return result;
+}
 const rowSchema = z.object({
   event_id: z.custom<string>(isDraftUuid),
   action: actionSchema,
@@ -30,6 +53,7 @@ const rowSchema = z.object({
   created_at: z.custom<string>(isDatabaseTimestamp),
   actor_label: z.string().min(1).max(120),
   target_email: z.string().max(255),
+  detail: detailSchema,
 });
 export type MemberAuditEvent = {
   id: string;
@@ -38,6 +62,7 @@ export type MemberAuditEvent = {
   targetEmail: string;
   createdAt: string;
   actorLabel: string;
+  detail: z.infer<typeof detailSchema>;
 };
 export type MemberAuditPage = {
   items: MemberAuditEvent[];
@@ -83,12 +108,15 @@ export async function listMemberAudit(
     throw new Error("Administrator access required.");
   const client = await createServerSupabaseClient();
   try {
-    const { data, error } = await client.rpc("list_membership_audit_events", {
-      p_limit: pageSize + 1,
-      p_before_at: cursor?.createdAt,
-      p_before_id: cursor?.id,
-      p_subject: parsed.data.user,
-    });
+    const { data, error } = await client.rpc(
+      "list_membership_audit_events_v2",
+      {
+        p_limit: pageSize + 1,
+        p_before_at: cursor?.createdAt,
+        p_before_id: cursor?.id,
+        p_subject: parsed.data.user,
+      },
+    );
     if (error) throw error;
     const rows = z
       .array(rowSchema)
@@ -101,6 +129,7 @@ export async function listMemberAudit(
       targetEmail: row.target_email,
       createdAt: row.created_at,
       actorLabel: row.actor_label,
+      detail: row.detail,
     }));
     const last = items.at(-1);
     return {

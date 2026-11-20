@@ -28,7 +28,7 @@ export async function manageMembershipAction(
             p_request_id: value.requestId,
             p_role: value.role,
             p_display_name: value.displayName,
-            p_expected_version: value.expectedVersion ?? undefined,
+            p_expected_version: value.expectedVersion,
           })
         : value.kind === "changeRole"
           ? client.rpc("change_membership_role", {
