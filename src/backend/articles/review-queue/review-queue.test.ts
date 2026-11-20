@@ -89,3 +89,12 @@ it("redirects authors before reading and masks failed or malformed results", asy
   });
   await expect(getReviewQueue()).rejects.toThrow();
 });
+
+it.each([
+  { ...item, submitted_at: null },
+  { ...item, status: "published", submitted_at: null, published_at: null },
+])("rejects a queue row without its status timestamp", async (row) => {
+  mocks.guard.mockResolvedValue({ status: "active", role: "editor" });
+  mocks.rpc.mockResolvedValueOnce({ data: [row], error: null });
+  await expect(getReviewQueue()).rejects.toThrow();
+});
