@@ -534,6 +534,7 @@ export function DraftForm({
               articleId={command.article.id}
               version={command.article.version}
               status={status}
+              publicationDate={command.draft.publicationDate}
               capabilities={capabilities}
               onBusyChange={setLifecycleBusy}
               disabled={

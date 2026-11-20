@@ -10,6 +10,16 @@ let verifiedLocal: Readonly<Record<string, string>> | undefined;
 
 export function localSupabase() {
   if (verifiedLocal) return verifiedLocal;
+  const apiPort = process.env.GAVEL_SUPABASE_API_PORT ?? "54321";
+  if (
+    !/^\d{1,5}$/.test(apiPort) ||
+    Number(apiPort) < 1 ||
+    Number(apiPort) > 65535 ||
+    (apiPort !== "54321" && !process.env.GAVEL_DB_CONTAINER)
+  )
+    throw new Error(
+      "An alternate local API port requires a matching database container.",
+    );
   const status = JSON.parse(
     execFileSync("pnpm", ["exec", "supabase", "status", "-o", "json"], {
       encoding: "utf8",
@@ -17,7 +27,7 @@ export function localSupabase() {
     }),
   ) as Record<string, string>;
   if (
-    status.API_URL !== "http://127.0.0.1:54321" ||
+    status.API_URL !== `http://127.0.0.1:${apiPort}` ||
     !status.JWT_SECRET ||
     !status.PUBLISHABLE_KEY ||
     !status.SERVICE_ROLE_KEY

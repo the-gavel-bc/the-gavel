@@ -50,6 +50,8 @@ end; $$;
 grant execute on function pg_temp.pub_as(text,text) to authenticated;
 
 -- Validation on create.
+select is(pg_temp.create_as('2','floor',11,'{"publicationDate":"2000-01-01"}'),'ok','the earliest supported date is accepted');
+select is(pg_temp.create_as('2','x',12,'{"publicationDate":"1999-12-31"}'),'invalid_input','a date below the floor is refused');
 select is(pg_temp.create_as('2','past',1,'{"publicationDate":"2026-01-15"}'),'ok','a past date is accepted');
 select is(pg_temp.create_as('2','none',2,'{}'),'ok','an older client without the key is accepted');
 select is(pg_temp.create_as('2','null',3,'{"publicationDate":null}'),'ok','null means the publish day');

@@ -94,6 +94,17 @@ it("repairs an unavailable credit, orders by position and renumbers on every cha
   );
   expect(screen.getByRole("button", { name: "Add contributor" })).toHaveFocus();
 });
+it("restores the selected contributor label when uncommitted text loses focus", async () => {
+  render(<Form />);
+  const field = screen.getByLabelText("Contributor 1");
+  await userEvent.clear(field);
+  await userEvent.type(field, "Different person");
+  await userEvent.tab();
+  expect(field).toHaveValue("Unavailable contributor");
+  expect(screen.getByLabelText("Selected credits")).toHaveTextContent(
+    '"profileId":"missing"',
+  );
+});
 it("shows credits in stored display order and caps the list at 5", async () => {
   const many = Array.from({ length: 5 }, (_, i) => ({
     profileId: "guest",

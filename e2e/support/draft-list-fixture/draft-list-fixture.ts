@@ -179,6 +179,12 @@ export function draftListFixture(
           values('${id(number)}','${id(91)}','Synthetic newsroom','The Gavel');
       `);
     },
+    makeInReview(articleNumber: number) {
+      if (!installed || suite !== "lifecycle")
+        throw new Error("Not a lifecycle fixture.");
+      sql(`update public.articles set review_requested_at=now(),review_note=null
+        where id='${id(articleNumber)}' and status='draft';`);
+    },
     makeArchivedReady() {
       if (!installed || suite !== "admin")
         throw new Error("Not an admin fixture.");

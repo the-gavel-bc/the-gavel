@@ -29,6 +29,7 @@ The reviews of every area left open product and architecture questions. The owne
 16. JSON-LD omits credit-only writers on purpose (privacy); the media cleanup and unused-upload cron routes stay production-only.
 17. `list_unused_article_uploads` and the three dead retired-media functions are dropped (no caller).
 18. Hosted settings to verify and record (not code): email signup disabled so only Google sign-in exists; whether Google's `hd` claim is present for bc.edu accounts (require it if so); backup and point-in-time recovery plan.
+19. Publication dates must be on or after 2000-01-01 in both TypeScript and SQL; publish confirmation shows the selected date, or today when blank.
 
 ## Consequences
 

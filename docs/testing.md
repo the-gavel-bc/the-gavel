@@ -25,7 +25,7 @@ Install the Playwright Chromium runtime once with `pnpm exec playwright install 
 - Unit/component tests cover configuration validation/startup, shell semantics, active membership checks, private profile resolution, safe OAuth redirects, and independent dashboard layout/page guards.
 - pgTAP covers grants, RLS, profile ownership, inactive-member edit denial, membership read/write/delete denials, administrator approval, scoped profile lookup, and direct-operation denials for non-Google, unconfirmed, and out-of-domain identities.
 - Playwright covers desktop/mobile homepage landmarks, keyboard focus/contrast and overflow; signed-out, inactive, unapproved Google, non-`bc.edu`, author, administrator, and forged-cookie access paths. Access tests run with JavaScript disabled.
-- Browser fixtures are isolated to the fixed local Docker project. They set synthetic Auth metadata only; passwords and hosted Google credentials are not used. `db reset` restores the original passwordless fixtures.
+- Browser fixtures use the default local Docker project. For a separate migrated stack, set `SUPABASE_WORKDIR` to its project directory, `GAVEL_SUPABASE_API_PORT` to its loopback API port, and `GAVEL_DB_CONTAINER` to the matching database container. They set synthetic Auth metadata only; passwords and hosted Google credentials are not used. `db reset` restores the original passwordless fixtures.
 
 ## Implemented taxonomy coverage
 

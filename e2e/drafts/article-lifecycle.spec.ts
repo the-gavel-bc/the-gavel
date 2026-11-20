@@ -11,6 +11,30 @@ test.beforeAll(({}, info) => {
 });
 test.afterAll(() => fixture?.cleanup());
 
+test("review save bar keeps all actions on screen at phone widths", async ({
+  context,
+  page,
+}) => {
+  fixture.makeInReview(18);
+  await setLocalSession(context, fixture.users.admin);
+  await page.goto(`/dashboard/articles/${fixture.id(18)}`);
+  const bar = page.locator("[data-draft-save-bar]");
+  await expect(bar).toBeVisible();
+  for (const width of [320, 375]) {
+    await page.setViewportSize({ width, height: 900 });
+    const save = page.getByRole("button", { name: "Save draft" });
+    await expect(save).toBeVisible();
+    const box = await save.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.x + box!.width).toBeLessThanOrEqual(width);
+    expect(
+      await bar.evaluate(
+        (element) => element.scrollWidth <= element.clientWidth,
+      ),
+    ).toBe(true);
+  }
+});
+
 test("owner publishes and archives with confirmation and current version", async ({
   context,
   page,

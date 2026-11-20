@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/backend/infrastructure/supabase/server/server";
 
@@ -13,7 +14,7 @@ export type ActiveMembership = {
 export type AccessState =
   { status: "signedOut" } | { status: "pending" } | ActiveMembership;
 
-export async function getCurrentAccess(): Promise<AccessState> {
+export const getCurrentAccess = cache(async (): Promise<AccessState> => {
   const client = await createServerSupabaseClient();
   const {
     data: { user },
@@ -66,7 +67,7 @@ export async function getCurrentAccess(): Promise<AccessState> {
     displayName: profile.display_name,
     role: membership.role,
   };
-}
+});
 
 export async function requireActiveMembership(): Promise<ActiveMembership> {
   const access = await getCurrentAccess();
