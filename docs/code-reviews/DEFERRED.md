@@ -64,6 +64,17 @@ Source: [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md); IDs refer to it. Items
 | D-26 | Browser specs for homepage, taxonomy, public authors and audit | Part of repairing the stale browser suite (C-27) | See C-27 |
 | D-28 | Bounded searched editor catalogs, search ranking, archive and byline alignment, JSON-LD for credit-only writers, navigation limit | Each needs a small design or product answer | Handle after the cheap batches |
 
+## Deferred from the gap lenses
+
+Source: [GAP-LENSES-REPORT.md](GAP-LENSES-REPORT.md). Items planned in COMBINED-FIX-PLAN.md are not repeated.
+
+| ID | Item | Why deferred | What would settle it |
+| --- | --- | --- | --- |
+| G-01 | Possible crash from long emoji titles (UTF-16 versus code point length in dashboard schemas) | A 130-emoji title was not reproduced at runtime; the claim may rest on a different count | Add an astral-character length test to the dashboard schemas; fix only if it fails |
+| G-07, G-08, G-09, G-18 | Editor load path and save revalidation cost, metering of large drafts, revision quota, draft cap and slug probing, per-row read policy cost, the smaller performance items | Need measurements (request counts, EXPLAIN at 50,000 rows, bundle analyzer) and design choices | Measure first; see the fix plan |
+| G-15 | Stable slug for the Letter to the Editor section | Needs a decision on renaming | Key the page by slug or block the rename |
+| G-19 | Link allowlist for plain http and private addresses; admin pages answering 200 for non-administrators | Informational | Optional hardening |
+
 ## Still unverified at runtime
 
 See [RUNTIME-VERIFICATION.md](RUNTIME-VERIFICATION.md). Not proven: tag merge past 50 tags (D-03), lifecycle controls staying locked after a status-keeping action (C-34), all keyboard, drag-and-drop, focus and screen reader findings, and the unreproduced Save tap on an iPhone viewport. Refuted: the mobile reader menu staying open after a link (12/ux-1); remove it from any list of open items.

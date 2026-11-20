@@ -22,7 +22,7 @@ Corrections to earlier notes: the `picomatch` dependency advisory is no longer r
 | 9 | Site information and the admin audit log | Reviewed | [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md) |
 | 12 | Design system and accessibility sweep | Reviewed | [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md) |
 
-Notes: every area in the list has now been reviewed at least once (quick runs, static reading). Areas 6 to 9 and 12 are in [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md). The `tags` and `profiles` read policies (C-10, C-11) are reported once, in this file. Reviews so far were static: no query plans, browser runs or screen reader checks were done.
+Gap lenses (security on areas 3, 4, 6 and 7; performance on the dashboard; first review of the admin article pages, deletion and restore, review queue, media cleanup, My articles and the public letters and about pages) are in [GAP-LENSES-REPORT.md](GAP-LENSES-REPORT.md), and findings were checked in a running build in [RUNTIME-VERIFICATION.md](RUNTIME-VERIFICATION.md). Notes: every area in the list has now been reviewed at least once (quick runs, static reading). Areas 6 to 9 and 12 are in [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md). The `tags` and `profiles` read policies (C-10, C-11) are reported once, in this file. Reviews so far were static: no query plans, browser runs or screen reader checks were done.
 
 ## Runtime verification (2026-11-20)
 

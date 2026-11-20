@@ -105,3 +105,14 @@ D-22 to D-26: taxonomy, homepage, credits and profiles, and site information and
 9. Authors crediting real members: require the member's confirmation, or limit non-owner credits to account-less rows the author created? (recommended: limit to account-less rows.)
 10. Caps: a per-member limit on new tags and on unattached one-off credits, with cleanup of orphans? (recommended yes; cap 30 per day per member as a starting point.)
 11. Audit immutability trigger on `audit_events` (blocks the owner and service role too)? (recommended yes.)
+
+## Additions from the gap lenses
+
+Findings are in [GAP-LENSES-REPORT.md](GAP-LENSES-REPORT.md) (G-01 to G-19). Same rules as above.
+
+- Batch 1c (cheap, small): G-10 publication date floor in both layers and the date shown in the publish confirmation (my feature); G-02 memoize `getCurrentAccess` per request with React `cache()` (cuts about 12 round trips per editor open to about 3); G-16 reword the unfiltered empty state and keep filters in the retry link; G-13 select `review_requested_at`, show the In review badge and filter, add a first-page link and dates to the admin list.
+- Batch 3c (one migration with D-13): G-03 check the administrator before taking the global advisory lock and before replaying a receipt in the homepage and taxonomy functions; G-04 give the review queue separate limits for drafts and publications (newest first) and show a note at the cap; G-12 control-character rule in `ensure_tag` and a 100-section cap; G-11 explicit character lists in SQL with shared parity cases (with D-11).
+- Batch 5c (interface): G-05 base the cleanup status on the freshness of the last healthy check and fix the retry button with try/finally and distinct messages; G-06 escape instead of reject search text (My articles and admin list), keeping the filter form on error; G-14 one deletion confirmation pattern with the shared danger button and disabled controls after success.
+- Batch 6c (tests): G-17 tests for the review page, `review-queue.ts`, media cleanup page and control, and the letters pages; an astral-character length test to settle G-01.
+- Plan, measure first: G-07, G-08, G-09 (EXPLAIN at 50,000 articles), G-15 stable letters slug.
+- Needs your decision: G-15 whether renaming the Letter to the Editor section should be blocked or the page keyed by a stable slug (recommended: key by slug).
