@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReviewItem } from "@/backend/articles/review-queue/review-queue";
+import { REVIEW_QUEUE_GROUP_LIMIT } from "@/shared/articles/review-queue/review-queue-limits";
 import { StatusBadge } from "../status-badge/status-badge";
 import styles from "../article-list/article-list.module.css";
 
@@ -48,6 +49,11 @@ export function ReviewQueue({ items }: { items: ReviewItem[] }) {
     <>
       <section aria-labelledby="waiting" className={styles.listing}>
         <h2 id="waiting">Waiting for review</h2>
+        {waiting.length >= REVIEW_QUEUE_GROUP_LIMIT && (
+          <p>
+            Showing the oldest submissions, up to {REVIEW_QUEUE_GROUP_LIMIT}.
+          </p>
+        )}
         {waiting.length === 0 ? (
           <p className={styles.empty}>Nothing is waiting for review.</p>
         ) : (
@@ -56,6 +62,11 @@ export function ReviewQueue({ items }: { items: ReviewItem[] }) {
       </section>
       <section aria-labelledby="published-by-you" className={styles.listing}>
         <h2 id="published-by-you">Published by you</h2>
+        {published.length >= REVIEW_QUEUE_GROUP_LIMIT && (
+          <p>
+            Showing the latest publications, up to {REVIEW_QUEUE_GROUP_LIMIT}.
+          </p>
+        )}
         {published.length === 0 ? (
           <p className={styles.empty}>You have not published anything yet.</p>
         ) : (

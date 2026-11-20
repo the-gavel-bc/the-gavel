@@ -9,12 +9,14 @@ create temp table before_tag_creation as select
   (select count(*) from public.articles) articles,
   (select count(*) from public.profiles) profiles,
   (select count(*) from public.memberships) memberships,
-  (select count(*) from public.audit_events) audits;
+  (select count(*) from public.audit_events) audits,
+  (select count(*) from public.tags where name in ('Denied','Rate denied')) denied_tags;
 select set_config('request.jwt.claim.sub','',true);
 select is(public.ensure_tag('Denied')->>'code','forbidden','missing identity denied');
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',true);
 select is(public.ensure_tag('Denied')->>'code','forbidden','inactive member denied');
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',true);
+update auth.users set raw_app_meta_data='{"provider":"email"}' where id=auth.uid();
 select is(public.ensure_tag('Denied')->>'code','forbidden','ineligible identity denied');
 update auth.users set email='typed-tags@bc.edu',email_confirmed_at=now(),raw_app_meta_data='{"provider":"google"}' where id=auth.uid();
 update public.profiles set active=false where auth_user_id=auth.uid();
@@ -22,6 +24,9 @@ select is(public.ensure_tag('Denied')->>'code','forbidden','inactive profile den
 update public.profiles set active=true where auth_user_id=auth.uid();
 set local role authenticated;
 select is(public.ensure_tag(null)->>'code','invalid_input','null input rejected');
+select is(public.ensure_tag(U&'campus\001Bnews')->>'code','invalid_input','escape in a name is refused');
+select is(public.ensure_tag(U&'campus\0085news')->>'code','invalid_input','C1 control in a name is refused');
+
 select is(public.ensure_tag(E' \n\t ')->>'code','invalid_input','empty normalized name rejected');
 select is(public.ensure_tag(repeat('x',121))->>'code','invalid_input','overlong name rejected');
 select is(public.ensure_tag(E'  Typed\t tag\n name  ')->>'name','Typed tag name','name whitespace normalized');
@@ -40,6 +45,7 @@ update private.draft_write_limits set attempt_count=30,window_start=clock_timest
 set local role authenticated;
 select is(public.ensure_tag('Rate denied')->>'code','rate_limited','rate limit enforced');
 reset role;
-select is_empty($$select 1 from public.tags where name in ('Denied','Rate denied')$$,'denials create no tags');
+select is((select count(*) from public.tags where name in ('Denied','Rate denied')),
+  (select denied_tags from before_tag_creation),'denials create no tags');
 select * from finish();
 rollback;

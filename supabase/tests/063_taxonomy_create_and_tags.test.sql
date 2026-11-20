@@ -106,5 +106,27 @@ select is((select count(*)::int from public.audit_events where action in
   ('section.created','category.created','tag.renamed','tag.merged','tag.deleted',
     'section.deleted','category.deleted')) - (select n from audit_before),8,
   'every change is audited once');
+insert into public.sections(name,slug)
+select 'Cap section '||n,'cap-section-'||n
+from generate_series(1,100-(select count(*)::int from public.sections where active)) n;
+set local role authenticated;
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);
+select is(public.create_taxonomy('section',gen_random_uuid(),'Over the cap',5,null)->>'code',
+  'conflict','administrator cannot create a 101st active section');
+select is(public.update_section_taxonomy('a1000000-0000-0000-0000-000000000002',1,
+  gen_random_uuid(),'Tax off',2,true)->>'code','conflict','reactivation observes the active section cap');
+select is(public.create_taxonomy('section','b0000000-0000-0000-0000-000000000013',
+  'New Section!',5,null)->>'replayed','true','the cap does not invalidate an authorized receipt');
+reset role;
+update public.memberships set role='author'
+where user_id='00000000-0000-0000-0000-000000000004';
+set local role authenticated;
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);
+select is(public.create_taxonomy('section','b0000000-0000-0000-0000-000000000013',
+  'New Section!',5,null)->>'code','forbidden','demoted administrator cannot replay a section creation');
+select is(public.merge_tags('a2000000-0000-0000-0000-000000000001',
+  'a2000000-0000-0000-0000-000000000002','b0000000-0000-0000-0000-000000000024')->>'code',
+  'forbidden','demoted administrator cannot replay a tag merge');
+reset role;
 select * from finish();
 rollback;
