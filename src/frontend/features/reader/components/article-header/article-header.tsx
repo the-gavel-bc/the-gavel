@@ -43,7 +43,7 @@ export function ArticleHeader({ article }: { article: PublicArticle }) {
         <time dateTime={article.publishedAt}>
           {new Intl.DateTimeFormat("en-US", {
             dateStyle: "long",
-            timeZone: "UTC",
+            timeZone: "America/New_York",
           }).format(new Date(article.publishedAt))}
         </time>
       </p>

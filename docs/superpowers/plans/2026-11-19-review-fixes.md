@@ -1,6 +1,6 @@
 # Review fixes implementation plan
 
-**Status:** Plan and defaults approved. Batch 1 is implemented locally on `fix/review-lifecycle`.
+**Status:** Batch 1 is open as [PR #121](https://github.com/dylandrozario/the-gavel/pull/121). Batch 2 is implemented locally on `fix/reader-eastern-dates`, stacked on that PR.
 
 **Goal:** Fix the approved review findings in seven reviewable batches and document the evidence for each.
 
@@ -50,8 +50,12 @@ GitHub showed zero open PRs. PRs #106–#120 and #78–#80 are merged. Use `orig
 
 **Finding:** C-05. No migration, function or policy change.
 
-- [ ] In `src/frontend/features/reader/components/`, update `article-header/article-header.tsx`, `home-hero/home-hero.tsx`, `home-latest/home-latest.tsx` and `preview-meta/preview-meta.tsx` to format reader-facing dates in `America/New_York`, preserving existing label styles and machine-readable timestamps. These are the four UTC formatters found on main. Extend the adjacent tests and add `article-header/article-header.test.tsx` and `home-latest/home-latest.test.tsx` if no existing route test exercises the rendered dates.
-- [ ] Verify `2026-11-10T02:30Z` displays November 9 and `2026-01-15T17:00Z` displays January 15. Assert the original timestamp survives in machine-readable output, including the sitemap `lastmod` in `src/app/sitemap.xml/route.test.ts`. Run these Vitest files and the global gates. No query ordering or rollout coupling.
+- [x] In `src/frontend/features/reader/components/`, update `article-header/article-header.tsx`, `home-hero/home-hero.tsx`, `home-latest/home-latest.tsx` and `preview-meta/preview-meta.tsx` to format reader-facing dates in `America/New_York`, preserving existing label styles and machine-readable timestamps. These are the four UTC formatters found on main. Extend the adjacent tests and add `article-header/article-header.test.tsx` and `home-latest/home-latest.test.tsx` if no existing route test exercises the rendered dates.
+- [x] Verify `2026-11-10T02:30Z` displays November 9 and `2026-01-15T17:00Z` displays January 15. Assert the original timestamp survives in machine-readable output, including the sitemap `lastmod` in `src/app/sitemap.xml/route.test.ts`. Run these Vitest files and the global gates. No query ordering or rollout coupling.
+
+Batch 2 retested all four reader surfaces and the sitemap. Four late-UTC assertions failed before the change, and the 26 focused checks passed after updating the article-card expectation from UTC to Eastern. The HTML `datetime` and sitemap `lastmod` values keep the original timestamp. `pnpm test --maxWorkers 4` passed all 1,197 tests after updating the stale expectation. Formatting, lint, types and the production build also passed.
+
+GitHub Actions did not start [Batch 1's hosted job](https://github.com/dylandrozario/the-gavel/actions/runs/44567217377). GitHub reported an account payment or spending-limit issue.
 
 ## 3. Database hygiene
 

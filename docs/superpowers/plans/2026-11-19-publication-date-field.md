@@ -36,7 +36,7 @@ The draft input is a strict, versioned contract with canonical JSON, fingerprint
 - `DraftMetadataFields`: native `<input type="date">` with a visible label, help text via `aria-describedby`, error text associated with the input, `max` set to today's Eastern date (computed with `Intl`, not the browser's local date).
 - Draft form state, dirty tracking, reload and conflict-recovery comparison, selections helper and the editor detail query all carry the new field.
 - Read-only view for people who cannot edit shows the date as text. Admin article detail shows it.
-- Public pages need no change; they already format `published_at` in Eastern time.
+- Reader publication dates use Eastern time after the [reader date follow-up](2026-11-19-review-fixes.md#2-eastern-reader-dates).
 
 ## Risks and how they are handled
 

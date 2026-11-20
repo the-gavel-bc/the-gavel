@@ -5,7 +5,7 @@ import styles from "./home-latest.module.css";
 
 const longDate = new Intl.DateTimeFormat("en-US", {
   dateStyle: "long",
-  timeZone: "UTC",
+  timeZone: "America/New_York",
 });
 
 // Stories beside the lead: square thumbnail, headline and date.

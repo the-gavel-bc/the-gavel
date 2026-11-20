@@ -21,7 +21,7 @@ Preserve the existing Gavel logo, blue/black/white palette, publication structur
 - Header: logo, primary sections, category dropdowns, search, and accessible mobile menu.
 - Cards: image, title, date, excerpt, and clear linked target.
 - Archives: heading, optional description, result count when useful, cards, and pagination.
-- Article: image/credit, title, byline, date, content, contributors, taxonomy, author profile, related articles, and latest/search sidebar where layout allows.
+- Article: image/credit, title, byline, date, content, contributors, taxonomy, author profile, related articles, and latest/search sidebar where layout allows. Reader publication dates use the Eastern calendar day. Machine-readable timestamps retain the original publication instant.
 - Forms: persistent labels, instructions, inline errors, summary for submission errors, and clear required/optional status.
 - Dialogs: reserve for short confirmations; permanent deletion requires explicit article identification.
 - Feedback: distinct loading, empty, error, success, disabled, and unsaved states.
