@@ -1,6 +1,6 @@
 # Fix plan for the combined review
 
-Companion to [COMBINED-REVIEW-REPORT.md](COMBINED-REVIEW-REPORT.md). Scope: urgent bugs and cheap fixes only. Everything else is in [DEFERRED.md](DEFERRED.md) with its reason. Status of every item: approval Pending, implementation Not started. Order follows risk: user-visible bugs in this week's code first, then security hygiene, then CI, then tests. Each batch is one small branch and PR, and one migration at most. Rules from `AGENTS.md` apply: authorization, public URL, content lifecycle and destructive migration changes need discussion first, so those are marked "needs your decision".
+Companion to [COMBINED-REVIEW-REPORT.md](COMBINED-REVIEW-REPORT.md). Scope: urgent bugs and cheap fixes only. Everything else is in [DEFERRED.md](DEFERRED.md) with its reason. Batches 1–7 are implemented on the review-fix stack; Batch 7 is committed and pushed. PR creation to `main` remains pending GitHub CLI authentication. Later deferred items and owner decisions remain out of scope.
 
 ## Batch 1: lifecycle bugs (urgent, one migration)
 
@@ -56,9 +56,9 @@ Findings C-37, C-38, C-39 (subset), C-26 (subset).
 - Vitest: draft form tests for the date field (dirty, payload, error, conflict row), review and returned banners, the read-only page, lifecycle failure and retry, save status messages; real confirm and note dialog (focus, empty note, Escape); `getReviewQueue`; lifecycle actions table for all five operations; the byline Eastern tests from Batch 2.
 - Acceptance: new tests fail without the corresponding fix where a fix exists.
 
-## Batch 7: staff and roles (owner approved; implementation complete locally)
+## Batch 7: staff and roles (owner approved; implemented, reviewed, and pushed)
 
-S2-01 through S2-11 are implemented locally. S2-12 remains measurement only; a rolled-back synthetic 5,000-member run has been recorded in the focused plan. All verification gates passed; final independent diff review remains. Nothing is published.
+S2-01 through S2-11 are implemented and committed as `8aa3678` on `fix/staff-role-hardening`; the branch is pushed. S2-12 remains measurement only; a rolled-back synthetic 5,000-member run is recorded in the focused plan. Reported verification gates passed. Independent review found no issues but did not rerun gates. PR creation to `main` remains pending GitHub CLI authentication.
 
 Search budgets (separate suggestion budget, try-lock), tags and profiles read policies (C-10, C-11), public media ETag and 304, layout caching for navigation and footer, slug lock only when the title changes, receipts and revisions retention, env validation and health endpoint, lock-order documentation, dialog focus trap and inert page, save-bar layout at phone widths. Each needs a short design note or a measurement before code.
 

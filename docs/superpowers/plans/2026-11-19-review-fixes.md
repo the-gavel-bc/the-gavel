@@ -2,7 +2,7 @@
 
 **Status:** Batches 1 and 2 are open as [PR #121](https://github.com/dylandrozario/the-gavel/pull/121) and [PR #122](https://github.com/dylandrozario/the-gavel/pull/122). Batch 3 is open as [PR #123](https://github.com/dylandrozario/the-gavel/pull/123). Batch 4 is open as [PR #124](https://github.com/dylandrozario/the-gavel/pull/124). Batch 5 is implemented locally on `fix/editor-review-polish`, stacked on PR #124.
 
-**Batch 7 status:** Implementation complete locally on `fix/staff-role-hardening`, stacked on Batch 6 and the separately approved review-queue timestamp fix. Final independent diff review remains; nothing has been published.
+**Batch 7 status:** Implemented, independently reviewed with no findings, and pushed as commit `8aa3678` on `fix/staff-role-hardening`, stacked on Batch 6 and the separately approved review-queue timestamp fix. GitHub CLI authentication blocked PR creation; no production change has been made.
 
 **Goal:** Fix the approved review findings in seven reviewable batches and document the evidence for each.
 
@@ -161,7 +161,7 @@ GitHub Actions did not start [Batch 1's hosted job](https://github.com/dylandroz
 
 - **Implementation:** database role validation uses the `public.app_role` enum; frontend options, labels and Zod validation share the generated enum type. Existing live listings that are unchanged are returned in the existing `skipped` list. Administrator grants prompt for confirmation. Name/email parsing accepts both `Name <email>` and `email, Name`; query normalization ignores unknown keys and rejects repeated known keys without broadening the audit subject. Invitation action results must match invitation ID, role and next version. Null-version approval is rejected for new writes while exact historical null-version receipts still replay. The invitation state check pairs claim identity/timestamp and forbids simultaneous claim/removal.
 - **Data proof:** local pre-constraint inventory found zero invitation rows with inconsistent claim timestamps or claimed-and-removed state. Migration validates the check after the inventory guard and does not rewrite valid rows.
-- **Verification:** focused staff Vitest passed 29/29; full Vitest passed 1,228/1,228 with two workers. Focused staff pgTAP passed 130 assertions; full pgTAP passed 2,540 assertions across 83 files. Full isolated concurrency passed 81/81 across 23 files; final staff race rerun passed 6/6. Typecheck, lint, formatting, production build, DB lint, and isolated generated-type parity passed. The rolled-back 5,000-member benchmark recorded `list_staff` 43.17 ms / 16,211 shared hits, `staff_summary` 1.43 ms / 256 hits, and 200-entry `invite_staff` 105.15 ms / 16,723 hits. No optimization was made. Final independent diff review remains.
+- **Verification:** focused staff Vitest passed 29/29; full Vitest passed 1,228/1,228 with two workers. Focused staff pgTAP passed 130 assertions; full pgTAP passed 2,540 assertions across 83 files. Full isolated concurrency passed 81/81 across 23 files; final staff race rerun passed 6/6. Typecheck, lint, formatting, production build, DB lint, and isolated generated-type parity passed. The rolled-back 5,000-member benchmark recorded `list_staff` 43.17 ms / 16,211 shared hits, `staff_summary` 1.43 ms / 256 hits, and 200-entry `invite_staff` 105.15 ms / 16,723 hits. No optimization was made. Independent review found no issues; reviewer did not rerun the reported verification gates.
 
 ## Runtime evidence and limits
 
