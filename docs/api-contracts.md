@@ -14,7 +14,7 @@ Added by the [reader refresh plan](superpowers/plans/2026-11-13-reader-refresh.m
 
 - **`GET /api/public/search/suggestions?q=`:** typeahead for the navigation search.
   - It calls `suggest_public_articles(p_query)`: published titles that contain the typed text, case-insensitive, newest first, at most 6. Partial words match, and typed `%` and `_` are literal.
-  - The query is normalized like search and must be at least 2 characters. Each call spends one ticket from the shared public search budget (120 per server minute).
+  - The query is normalized like search and must be at least 2 characters. Each admitted call spends a typeahead ticket. Typeahead has 40 tickets per server minute and its own database lock.
   - Cards go through the same allowlisted `homepage_card_map` projection as search; the route returns only `{title, slug, section}`.
   - `ok` returns `{kind: "ok", items: [{title, slug, section}]}` with `Cache-Control: public, max-age=30, s-maxage=30`.
   - `invalid` returns 400, `rate_limited` returns 429 with `Retry-After`, and `unavailable` returns 503; all three are `private, no-store`.
@@ -262,7 +262,7 @@ Phase 5 Task 17 implements POST RPC `search_public_articles(p_query text, p_limi
 
 The canonical query normalizes an explicit Unicode whitespace set and preserves case for cursor identity. Bounds are 512 raw code points/2,048 UTF-8 bytes, 160 normalized code points, 1–8 distinct native simple-parser words and 120 code points per word. Every word must match across current public article text, owner/writer names, section/category names or tags. Quotes and wildcard-looking input are data, never search operators. Limit is 1–24. Ordering is publication timestamp then UUID descending. The strict cursor has exactly `{version:1,query,publishedAt,id}`, including six UTC fractional digits, and is bound to the canonical query.
 
-`searchPublicArticles({query,limit?,cursor?})` in `backend/public-articles/public-search/` validates unknown input and public output, using an opaque Base64URL cursor and the cookie-free anonymous reader. Request-local caching deduplicates identical normalized reads; it adds no persistent cache. The database admits at most 120 attempts per server minute across all callers; invalid requests consume none, admitted failures retain their ticket. Direct GET/HEAD cannot produce search results. Task 18 owns the GET page/UI. See [ADR 0011](decisions/0011-database-public-search-admission.md) for timeout and quota tradeoffs and [Task 17](superpowers/plans/2026-11-10-bounded-public-search.md) for verification.
+`searchPublicArticles({query,limit?,cursor?})` in `backend/public-articles/public-search/` validates unknown input and public output, using an opaque Base64URL cursor and the cookie-free anonymous reader. Request-local caching deduplicates identical normalized reads; it adds no persistent cache. The database admits at most 80 full searches per server minute across all callers. Full search and typeahead have separate budgets. A busy lane returns a rate-limit response immediately with a one-second retry. Invalid requests consume no tickets, and admitted failures retain their ticket. Direct GET/HEAD cannot produce search results. Task 18 owns the GET page/UI. See [ADR 0011](decisions/0011-database-public-search-admission.md) for timeout and quota tradeoffs and [Task 17](superpowers/plans/2026-11-10-bounded-public-search.md) for verification.
 
 ### Public search page
 

@@ -74,11 +74,11 @@ create temp table quota_base as select last_value from private.public_search_bud
 select is(public.search_public_articles('!!!')->>'kind','invalid','invalid query still rejected with fresh budget');
 select is(public.search_public_articles('word',0)->>'kind','invalid','invalid limit spends no quota');
 select is((select last_value from private.public_search_budget),(select last_value from quota_base),'invalid requests spend no tickets');
-select is((select count(*)::int from generate_series(1,120) n where public.search_public_articles('zzabsentneedle')->>'kind'='ok'),120,'exactly 120 attempts admitted in window');
-select is(public.search_public_articles('word')->>'kind','rate_limited','attempt 121 is denied');
+select is((select count(*)::int from generate_series(1,80) n where public.search_public_articles('zzabsentneedle')->>'kind'='ok'),80,'exactly 80 attempts admitted in window');
+select is(public.search_public_articles('word')->>'kind','rate_limited','attempt 81 is denied');
 select ok((public.search_public_articles('word')->>'retryAfter')::int between 1 and 60,'retry duration is bounded server time');
-select is((select last_value from private.public_search_budget),(select last_value+120 from quota_base),'rejected attempts do not increment saturated sequence');
-select setval('private.public_search_budget',(select last_value-128+120 from quota_base),true);
+select is((select last_value from private.public_search_budget),(select last_value+80 from quota_base),'rejected attempts do not increment saturated sequence');
+select setval('private.public_search_budget',(select last_value-128+80 from quota_base),true);
 select is(public.search_public_articles('word')->>'kind','ok','expired full window rolls over');
 select is((select last_value from private.public_search_budget),(select last_value+1 from quota_base),'new window counts one ticket');
 savepoint lost_response;
