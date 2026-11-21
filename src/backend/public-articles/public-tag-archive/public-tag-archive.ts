@@ -27,8 +27,7 @@ export async function getPublicTagArchive(
 ): Promise<PublicArchiveResult> {
   if (!slugSchema.safeParse(tagSlug).success) return { kind: "notFound" };
   try {
-    // Tags already have an anonymous read policy. Read one unique public label,
-    // not the catalog or any article associations/private workflow fields.
+    // The anonymous policy exposes labels only for tags with public articles.
     const { data, error } = await createPublicReaderClient()
       .from("tags")
       .select("name,slug")
@@ -60,6 +59,9 @@ export async function getPublicTagArchive(
       return result.kind === "invalid"
         ? { kind: "invalid", archive }
         : { kind: "unavailable" };
+    // The last public association can disappear between the label and list reads.
+    if (cursor === undefined && result.items.length === 0)
+      return { kind: "notFound" };
     return {
       kind: "ok",
       archive,

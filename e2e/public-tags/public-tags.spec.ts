@@ -127,7 +127,7 @@ test("article topic links lead to multi-section archives with native isolated pa
     ),
   ).toBe(true);
 });
-test("tags hide private and stale references, distinguish empty404, and work without JavaScript", async ({
+test("tags hide private and stale references, return 404 for unused tags, and work without JavaScript", async ({
   page,
   context,
   browser,
@@ -145,8 +145,10 @@ test("tags hide private and stale references, distinguish empty404, and work wit
   await expect(main.getByRole("heading", { level: 1 })).toHaveText(
     "Archive not found",
   );
-  await page.goto(`/tags/${prefix}-empty`);
-  await expect(main.getByText("No articles yet")).toBeVisible();
+  expect((await page.goto(`/tags/${prefix}-empty`))?.status()).toBe(404);
+  await expect(main.getByRole("heading", { level: 1 })).toHaveText(
+    "Archive not found",
+  );
   await page.goto(`/tags/${prefix}-main?cursor=one&cursor=two`);
   await expect(
     main.getByText("This article page is invalid or expired."),
