@@ -98,3 +98,9 @@ it.each([
   mocks.rpc.mockResolvedValueOnce({ data: [row], error: null });
   await expect(getReviewQueue()).rejects.toThrow();
 });
+
+it("reads a title with 240 Unicode code points", async () => {
+  const title = "😀".repeat(240);
+  mocks.rpc.mockResolvedValueOnce({ data: [{ ...item, title }], error: null });
+  expect(await getReviewQueue()).toEqual([expect.objectContaining({ title })]);
+});

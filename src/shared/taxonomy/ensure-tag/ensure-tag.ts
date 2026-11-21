@@ -4,7 +4,13 @@ import { isDraftUuid } from "@/shared/articles/draft-cursor/draft-cursor";
 export const tagNameSchema = z
   .string()
   .transform((name) => name.replace(/\s+/gu, " ").trim())
-  .pipe(z.string().min(1).max(120));
+  .pipe(
+    z
+      .string()
+      .min(1)
+      .max(120)
+      .refine((name) => !/\p{Cc}/u.test(name)),
+  );
 export const ensureTagResultSchema = z.discriminatedUnion("ok", [
   z.object({
     ok: z.literal(true),

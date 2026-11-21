@@ -55,6 +55,7 @@ it("requires confirmation and blocks unsaved work", async () => {
       articleId={articleId}
       version={1}
       status="draft"
+      publicationDate="2026-11-04"
       disabled={false}
     />,
   );
@@ -81,6 +82,7 @@ it("retries one uncertain publication with the exact command", async () => {
       articleId={articleId}
       version={1}
       status="draft"
+      publicationDate="2026-11-04"
       disabled={false}
     />,
   );
@@ -97,6 +99,12 @@ it("retries one uncertain publication with the exact command", async () => {
     mocks.publish.mock.calls[0][0],
   );
   expect(window.confirm).toHaveBeenCalledOnce();
+  expect(window.confirm).toHaveBeenCalledWith(
+    expect.stringContaining("Publication date: 2026-11-04"),
+  );
+  expect(window.confirm).toHaveBeenCalledWith(
+    expect.stringContaining("Publication date: 2026-11-04"),
+  );
   expect(screen.getByRole("status")).toHaveTextContent(/published/i);
 });
 it("offers reload after a stale archive and preserves the expected version", async () => {

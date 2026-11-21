@@ -18,7 +18,10 @@ describe("manual cleanup", () => {
     "denies %ss before any privileged worker runs",
     async (role) => {
       m.access.mockResolvedValue({ status: "active", role });
-      expect(await retryMediaCleanupAction()).toEqual({ ok: false });
+      expect(await retryMediaCleanupAction()).toEqual({
+        ok: false,
+        code: "forbidden",
+      });
       expect(m.run).not.toHaveBeenCalled();
     },
   );
@@ -26,17 +29,41 @@ describe("manual cleanup", () => {
     process.env.VERCEL_ENV = "production";
     delete process.env.CRON_SECRET;
     m.access.mockResolvedValue({ status: "active", role: "administrator" });
-    expect(await retryMediaCleanupAction()).toEqual({ ok: false });
+    expect(await retryMediaCleanupAction()).toEqual({
+      ok: false,
+      code: "environment",
+    });
     expect(m.run).not.toHaveBeenCalled();
   });
   it("rejects previews and nonlocal development before creating a privileged client", async () => {
     m.access.mockResolvedValue({ status: "active", role: "administrator" });
     process.env.VERCEL_ENV = "preview";
-    expect(await retryMediaCleanupAction()).toEqual({ ok: false });
+    expect(await retryMediaCleanupAction()).toEqual({
+      ok: false,
+      code: "environment",
+    });
     delete process.env.VERCEL_ENV;
     process.env.NEXT_PUBLIC_SUPABASE_URL = "https://hosted.example";
-    expect(await retryMediaCleanupAction()).toEqual({ ok: false });
+    expect(await retryMediaCleanupAction()).toEqual({
+      ok: false,
+      code: "environment",
+    });
     expect(m.run).not.toHaveBeenCalled();
+  });
+  it("allows an explicitly configured loopback port for isolated tests", async () => {
+    delete process.env.VERCEL_ENV;
+    process.env.GAVEL_SUPABASE_API_PORT = "59721";
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "http://127.0.0.1:59721";
+    m.access.mockResolvedValue({ status: "active", role: "administrator" });
+    m.run.mockResolvedValue({ ok: true });
+    expect(await retryMediaCleanupAction()).toEqual({ ok: true });
+    expect(m.run).toHaveBeenCalledOnce();
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "http://127.0.0.1:58721";
+    expect(await retryMediaCleanupAction()).toEqual({
+      ok: false,
+      code: "environment",
+    });
+    expect(m.run).toHaveBeenCalledOnce();
   });
   it("lets administrators retry a bounded sweep", async () => {
     delete process.env.VERCEL_ENV;

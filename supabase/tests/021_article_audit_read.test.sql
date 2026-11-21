@@ -45,11 +45,24 @@ select results_eq($$select event_id::text from public.list_article_audit_events(
   'archived-resource audit remains visible');
 select throws_ok($$select * from public.list_article_audit_events(52)$$,'22023',null,
   'direct RPC cannot request an oversized page');
-select throws_ok($$select * from public.list_article_audit_events(20,'article.owner_changed')$$,
+select throws_ok($$select * from public.list_article_audit_events(20,'article.unknown')$$,
   '22023',null,'unimplemented action cannot be requested');
 select throws_ok($$select * from public.list_article_audit_events(
   20,null,'2026-01-03T00:00:00Z',null)$$,'22023',null,
   'partial cursor is rejected');
+
+reset role;
+insert into public.audit_events(actor_user_id,action,resource_type,resource_id)
+select '00000000-0000-0000-0000-000000000004', a, 'article',
+  '50000000-0000-0000-0000-000000000082'
+from unnest(array['article.owner_changed','article.submitted','article.returned','article.image_purged']) a;
+set local role authenticated;
+select is((select count(*) from public.list_article_audit_events(51)
+  where resource_id='50000000-0000-0000-0000-000000000082'),4::bigint,
+  'all four additional actions are visible in unfiltered activity');
+select is((select count(*) from public.list_article_audit_events(51,'article.owner_changed')
+  where resource_id='50000000-0000-0000-0000-000000000082'),1::bigint,
+  'owner changes are available through the action filter');
 
 select * from finish();
 rollback;

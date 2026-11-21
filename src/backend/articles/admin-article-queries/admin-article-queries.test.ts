@@ -60,7 +60,7 @@ it("reads only safe admin summaries with filter-bound keyset pagination", async 
   expect(result.nextCursor).toEqual(expect.any(String));
   const url = new URL(String(http.network.mock.calls[0][0]));
   expect(url.searchParams.get("status")).toBe("eq.archived");
-  expect(url.searchParams.get("title")).toBe("ilike.%News%");
+  expect(url.searchParams.get("title")).toBe("imatch.News");
   expect(url.searchParams.get("select")).not.toMatch(
     /content|excerpt|auth_user_id/,
   );
@@ -86,7 +86,7 @@ it("rejects forged inputs and non-admin access before any article read", async (
   for (const input of [
     { pageSize: 51 },
     { status: "other" },
-    { search: "%" },
+    { search: "a\u0000b" },
     { cursor: "invalid" },
     { owner: profileId },
   ])

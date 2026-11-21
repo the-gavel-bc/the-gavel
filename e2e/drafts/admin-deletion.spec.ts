@@ -45,6 +45,10 @@ test("administrator confirms deletion of an archived article", async ({
   await expect(button).toBeDisabled();
   await page.getByLabel("Type DELETE to confirm").fill("DELETE");
   await button.click();
+  await page
+    .getByRole("alertdialog")
+    .getByRole("button", { name: "Delete permanently" })
+    .click();
   await expect(page).toHaveURL(/\/dashboard\/admin\/articles\?deleted=1$/);
   await expect(page.getByRole("status")).toContainText(
     "Image cleanup continues",
@@ -76,7 +80,11 @@ test("administrator confirms deletion of an archived article", async ({
   expect((await bucket.download(unknownKey)).error).not.toBeNull();
   await page.goto("/dashboard/admin/audit?action=article.deleted");
   await expect(
-    page.getByText(`Deleted article ${fixture.id(19)}`),
+    page
+      .getByRole("listitem")
+      .filter({ hasText: "Deleted article" })
+      .filter({ hasText: "Synthetic list member" })
+      .first(),
   ).toBeVisible();
 });
 test("author cannot open the administrator deletion controls", async ({

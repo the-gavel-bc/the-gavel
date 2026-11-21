@@ -26,7 +26,10 @@ export async function saveOwnProfileAction(
     });
     if (error) return { ok: false, code: "unavailable" };
     const result = parseOwnProfileResult(data, access.profileId);
-    if (result.ok) revalidatePath("/dashboard/profile");
+    if (result.ok) {
+      revalidatePath("/dashboard/profile");
+      revalidatePath("/authors/[slug]", "page");
+    }
     return result;
   } catch {
     return { ok: false, code: "unavailable" };

@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { beforeEach, expect, it, vi } from "vitest";
 import {
   access,
@@ -19,7 +20,7 @@ vi.mock("@/backend/infrastructure/supabase/server/server", () => ({
   createServerSupabaseClient: mocks.client,
 }));
 vi.mock("next/server", () => ({ connection: mocks.connection }));
-import { listAuditEvents } from "./admin-audit";
+import { auditActionSchema, listAuditEvents } from "./admin-audit";
 
 let http: ReturnType<typeof queryTestClient>;
 const row = {
@@ -87,7 +88,7 @@ it("returns safe summaries and a filter-bound keyset cursor", async () => {
 it("rejects malformed or unbounded requests before access or database reads", async () => {
   for (const input of [
     { pageSize: 51 },
-    { action: "article.owner_changed" },
+    { action: "article.unknown" },
     { cursor: "bad" },
     { actorId: articleId },
     { pageSize: "50" },
@@ -113,10 +114,16 @@ it("blocks authors before the RPC and masks database failures", async () => {
 });
 
 it("rejects raw or unexpected database fields in displayed events", async () => {
-  http.respond([{ ...row, action: "article.owner_changed" }]);
-  await expect(listAuditEvents({})).rejects.toThrow(
-    "Unable to load article activity.",
-  );
+  for (const action of [
+    "article.owner_changed",
+    "article.submitted",
+    "article.returned",
+    "article.image_purged",
+  ]) {
+    http.respond([{ ...row, action, article_exists: false }]);
+    const page = await listAuditEvents({ action });
+    expect(page.items[0]?.action).toBe(action);
+  }
   http.respond([{ ...row, actor_label: "" }]);
   await expect(listAuditEvents({})).rejects.toThrow(
     "Unable to load article activity.",
@@ -146,5 +153,18 @@ it("passes a trimmed search through and binds paging to it", async () => {
   ).rejects.toThrow("Invalid audit request.");
   await expect(listAuditEvents({ search: "a<b" })).rejects.toThrow(
     "Invalid audit request.",
+  );
+});
+
+it("keeps the audit action schema in sync with the SQL reader", () => {
+  const sql = readFileSync(
+    "supabase/migrations/20261121090000_urgent_review_gaps.sql",
+    "utf8",
+  );
+  const array = sql.match(
+    /allowed_actions constant text\[\] := array\[([^\]]+)\]/,
+  )?.[1];
+  expect(array?.match(/article\.[a-z_]+/g)?.sort()).toEqual(
+    [...auditActionSchema.options].sort(),
   );
 });

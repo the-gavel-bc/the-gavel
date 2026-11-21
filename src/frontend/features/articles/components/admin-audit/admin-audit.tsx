@@ -12,6 +12,10 @@ const labels: Record<AuditAction, string> = {
   "article.archived": "Archived",
   "article.restored": "Restored",
   "article.deleted": "Deleted",
+  "article.owner_changed": "Owner changed",
+  "article.submitted": "Submitted for review",
+  "article.returned": "Returned to author",
+  "article.image_purged": "Unused images purged",
 };
 const date = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",

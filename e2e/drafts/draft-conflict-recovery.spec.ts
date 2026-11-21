@@ -65,17 +65,18 @@ test("independent owner and admin tabs review conflicts and deliberately adopt a
     await expect(admin.getByLabel("Title (required)")).toHaveValue(
       "Admin local changes",
     );
-    admin.once("dialog", (dialog) => dialog.dismiss());
+    const dialog = admin.getByRole("alertdialog");
     await admin
       .getByRole("button", { name: "Load latest saved version" })
       .click();
+    await dialog.getByRole("button", { name: "Keep my changes" }).click();
     await expect(admin.getByLabel("Title (required)")).toHaveValue(
       "Admin local changes",
     );
-    admin.once("dialog", (dialog) => dialog.accept());
     await admin
       .getByRole("button", { name: "Load latest saved version" })
       .click();
+    await dialog.getByRole("button", { name: "Load saved version" }).click();
     await expect(admin.getByLabel("Title (required)")).toHaveValue(
       "Owner saved version",
     );
@@ -95,7 +96,7 @@ test("independent owner and admin tabs review conflicts and deliberately adopt a
     ).toBe(true);
     await admin.evaluate(() => window.scrollTo(0, 0));
     await admin.screenshot({
-      path: `docs/reviews/assets/phase-3-task10-${info.project.name}.png`,
+      path: info.outputPath("phase-3-task10.png"),
       fullPage: true,
     });
     await missing.click();
@@ -237,7 +238,7 @@ test("status-changing recovery retains local edits until a deliberate reload", a
   page,
   browser,
 }) => {
-  await setLocalSession(context, fixture.users.author);
+  await setLocalSession(context, fixture.users.admin);
   fixture.prepareRecoveryPublication();
   const path = `/dashboard/articles/${fixture.id(17)}`;
   await page.goto(path);
@@ -257,8 +258,11 @@ test("status-changing recovery retains local edits until a deliberate reload", a
     await expect(
       admin.getByRole("status").filter({ hasText: "Draft saved" }),
     ).toBeVisible();
-    admin.once("dialog", (dialog) => dialog.accept());
     await admin.getByRole("button", { name: "Publish article" }).click();
+    await admin
+      .getByRole("alertdialog")
+      .getByRole("button", { name: "Publish", exact: true })
+      .click();
     await expect(
       admin.getByRole("heading", { name: "Edit published article" }),
     ).toBeVisible();
@@ -266,9 +270,12 @@ test("status-changing recovery retains local edits until a deliberate reload", a
     await page
       .getByRole("button", { name: "Review latest saved version" })
       .click();
-    page.once("dialog", (dialog) => dialog.accept());
     await page
       .getByRole("button", { name: "Load latest saved version" })
+      .click();
+    await page
+      .getByRole("alertdialog")
+      .getByRole("button", { name: "Load saved version" })
       .click();
     await expect(
       page.getByRole("region", { name: "Article status changed" }),

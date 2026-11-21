@@ -14,7 +14,14 @@ export const searchSchema = z
   .string()
   .trim()
   .max(80)
-  .refine((value) => !value || /^[\p{L}\p{N} '\-]+$/u.test(value));
+  .refine((value) => !/[\p{Cc}]/u.test(value));
+
+// PostgREST ILIKE treats asterisks as wildcards. A quoted regex literal
+// keeps asterisks, percent signs and underscores searchable as typed.
+export function literalTitlePattern(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 const pageSchema = z.strictObject({
   cursor: z.string().optional(),
   status: statusSchema.default("all"),
@@ -159,7 +166,7 @@ export async function getAdminArticlesPage(
       .order("id", { ascending: false })
       .limit(pageSize + 1);
     if (status !== "all") query = query.eq("status", status);
-    if (search) query = query.ilike("title", `%${search}%`);
+    if (search) query = query.regexIMatch("title", literalTitlePattern(search));
     if (cursor)
       query = query.or(
         `updated_at.lt.${cursor.updatedAt},and(updated_at.eq.${cursor.updatedAt},id.lt.${cursor.id})`,

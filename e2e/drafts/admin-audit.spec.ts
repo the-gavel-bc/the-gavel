@@ -25,13 +25,15 @@ test("administrator filters and pages article activity with keyboard controls", 
     .getByRole("navigation", { name: "Filter activity" })
     .getByRole("link", { name: "Archived" })
     .click();
+  const archived = page.getByRole("link", { name: "Archived", exact: true });
+  await expect(archived).toHaveAttribute("aria-current", "page");
   await expect(page.locator("ol").getByText("Archived").first()).toBeVisible();
   await expect(page.getByText(/Synthetic list member ·/).first()).toBeVisible();
   const next = page.getByRole("link", { name: "Next page" });
   await next.focus();
   await expect(next).toBeFocused();
   await next.press("Enter");
-  await expect(page).toHaveURL(/cursor=/);
+  await expect(page).toHaveURL(/cursor=.*&action=article\.archived/);
   await expect(
     page.getByRole("link", { name: "Archived", exact: true }),
   ).toHaveAttribute("aria-current", "page");

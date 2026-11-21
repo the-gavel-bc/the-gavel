@@ -1,0 +1,1 @@
+export const REVIEW_QUEUE_GROUP_LIMIT = 50;

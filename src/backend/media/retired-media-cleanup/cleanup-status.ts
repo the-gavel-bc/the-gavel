@@ -15,6 +15,15 @@ const schema = z.object({
   oldestPrefixCheck: z.string().nullable(),
 });
 export type CleanupStatus = z.infer<typeof schema>;
+export function isMediaCleanupHealthy(status: CleanupStatus, now = Date.now()) {
+  // Same freshness window as the database's article deletion check.
+  return (
+    status.lastHealthyAt !== null &&
+    Date.parse(status.lastHealthyAt) > now - 48 * 60 * 60 * 1000 &&
+    status.failedKeys === 0 &&
+    status.failedPrefixes === 0
+  );
+}
 export async function getMediaCleanupStatus(): Promise<CleanupStatus> {
   await connection();
   const access = await requireActiveMembership();

@@ -55,6 +55,8 @@ Source: [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md); IDs refer to it. Items
 
 | ID | Item | Why deferred | What would settle it |
 | --- | --- | --- | --- |
+| D-03 | Tag merge targets are limited to the current page, and category creation can omit sections | Deferred from Batch 1 by the owner | Order the admin tag list by name and add search. Look up merge targets across all tags on the server. Load all sections up to the navigation limit in the category form. |
+| D-04 | Deleting a section can also delete its protected “Outside of BC” category | Deferred from Batch 1 by the owner | Add a forward migration that returns `conflict` when section deletion would remove the protected category. Cover direct category deletion and section deletion with pgTAP. |
 | D-05, D-20 | Homepage keyboard moves between rows and to the lead, focus management, live regions, library counts and inline errors, Discard confirmation, phone layout | Interface work with design choices and runtime checks on touch devices | Add "Make lead" and "Move to" buttons that call the arrangement rules; test on iOS and Android |
 | D-06 | Homepage save eligibility and filler seeding | Needs your decision (see fix plan, decision 6) and a runtime check of the pending-image case | Decide; then use `is_homepage_card_eligible` in save and the library |
 | D-07, D-15 | Member profile moderation, consent for credits of real members | New administrator capability and product decisions (decisions 7 and 9) | Decide; add the function and tests |
@@ -67,6 +69,27 @@ Source: [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md); IDs refer to it. Items
 | D-26 | Browser specs for homepage, taxonomy, public authors and audit | Part of repairing the stale browser suite (C-27) | See C-27 |
 | D-28 | Bounded searched editor catalogs, search ranking, archive and byline alignment, JSON-LD for credit-only writers, navigation limit | Each needs a small design or product answer | Handle after the cheap batches |
 
+## Decided, not built yet (ADR 0014)
+
+The owner delegated the open decisions; they are resolved in [ADR 0014](../decisions/0014-review-follow-up-decisions.md). These are not in the first fix batches, so they stay here until built. Each needs tests and doc updates when built.
+
+| Decision | What to build | Notes |
+| --- | --- | --- |
+| 5 Erasure policy | Migration: nullable actor references with ON DELETE SET NULL for audit and revisions; cascade receipts and limits; a profile anonymization routine | Destructive-looking migration: review before running |
+| 7 Profile moderation | Administrator-only function (blank bio, reset name, hide page); hide profiles of deactivated memberships; pgTAP | Resolves D-07 |
+| 8 Redirects | `slug_redirects` table, redirect on merge, delete and rename; revisions and audit detail on merge | Public URL change approved; resolves D-10 |
+| 10 Caps | Per-member daily tag cap, open one-off credit cap, orphan cleanup job, 100 active section cap | Resolves D-08, G-12 |
+| 11 Audit immutability | Trigger rejecting update, delete and truncate on `audit_events` | Resolves the D-25 part; add grant assertions |
+| 12 Letters slug and reserved slugs | Stable section slug for letters, reserved-slug rule in SQL for sections and tags | Resolves G-15 and the reserved-slug test gap |
+| 13 Non-Latin slugs | Stable hash fallback in the slug generator | Slugs freeze at publish: new names only |
+| 2 Contributor cap | Shared constant, server and SQL enforcement at five with grandfathering | Resolves C-32 cap part |
+| 3 Cache navigation and footer | 60 s cache with on-demand revalidation | Resolves C-23 |
+| 4 Retryable result code | New code in the draft and lifecycle error contract and client retry behavior | Resolves part of C-16 |
+| 6 Homepage editor baseline | Load chosen picks only; filler read-only; shared eligibility rule | Resolves D-06 |
+| 17 Drop dead functions | One migration dropping `list_unused_article_uploads` and the three dead retired-media functions | Also needs types regenerated |
+| 18 Hosted settings | Verify and record email signup disabled, the `hd` claim, backup and recovery plan | Not code; owner or dashboard action |
+| 15 Design system | One button component, shared status tokens, scoped dashboard selectors, forced-colours and 44 px touch targets, no dark mode recorded | Resolves D-16, D-19 parts |
+
 ## Deferred from the gap lenses
 
 Source: [GAP-LENSES-REPORT.md](GAP-LENSES-REPORT.md). Items planned in COMBINED-FIX-PLAN.md are not repeated.
@@ -75,6 +98,7 @@ Source: [GAP-LENSES-REPORT.md](GAP-LENSES-REPORT.md). Items planned in COMBINED-
 | --- | --- | --- | --- |
 | G-01 | Possible crash from long emoji titles (UTF-16 versus code point length in dashboard schemas) | A 130-emoji title was not reproduced at runtime; the claim may rest on a different count | Add an astral-character length test to the dashboard schemas; fix only if it fails |
 | G-07, G-08, G-09, G-18 | Editor load path and save revalidation cost, metering of large drafts, revision quota, draft cap and slug probing, per-row read policy cost, the smaller performance items | Need measurements (request counts, EXPLAIN at 50,000 rows, bundle analyzer) and design choices | Measure first; see the fix plan |
+| G-13 | The admin article list and detail omit review state. The list also lacks an In review filter, a link to the first page, and publication and archive dates. | Deferred from Batch 1 by the owner | Read `review_requested_at`, display the In review badge on both pages, and add the filter, first-page link, and dates to the list. |
 | G-15 | Stable slug for the Letter to the Editor section | Needs a decision on renaming | Key the page by slug or block the rename |
 | G-19 | Link allowlist for plain http and private addresses; admin pages answering 200 for non-administrators | Informational | Optional hardening |
 
@@ -99,4 +123,4 @@ See [RUNTIME-VERIFICATION.md](RUNTIME-VERIFICATION.md). Not proven: tag merge pa
 - Media (quick run, 4 reviewers): every finding that was verified real was implemented, except the items in the first table. Nothing was skipped for being low impact; the deferred items were deferred for dependencies (e2e stack, real data sizes) or because they need an owner decision.
 - Area 1 (authentication and access): the real defects were fixed (editor read scope, callback errors, lost claim race, wording). The remaining Low and test-only findings were deferred and are listed above; none of them is a security gap.
 - Area 2 (staff and roles): Batch 7 S2-01 through S2-11 are implemented locally on `fix/staff-role-hardening`; S2-12 is measurement only. Full Vitest, pgTAP, concurrency, DB lint, build, type, lint, format and generated-type checks passed. Final independent diff review remains; nothing is published. See AREA-2-STAFF-REPORT.md and the [Batch 7 plan](../superpowers/plans/2026-11-19-review-fixes.md#7-staff-and-roles).
-| CI | Browser (Playwright) suite is red on the stack tip (#117 run, both desktop and mobile): `admin-audit`, `admin-deletion`, `admin-homepage`, `admin-members`, `article-lifecycle`, `article-media`, `create-drafts`, `draft-conflict-recovery`, `draft-selections`, `edit-drafts` (published editable), `published-edit`, `public-authors` (guest credits), and `public-search` (resource 404 without JavaScript) | The specs predate the desk redesign (in-page confirmations replacing `window.confirm`, new buttons and layout, one-off credits replacing guest contributors, the editor role so authors no longer publish or edit published articles, staff email list). Updating them needs the isolated local Supabase on port 54321 and iterating on selectors; it was not attempted. The body-images mobile failure (sticky toolbar covering the button) was a real bug and is fixed. | Reset a local stack (`supabase start`), run `pnpm test:e2e`, update each spec to the current UI and roles (authors submit, editors or administrators publish), and add an editor user to the fixtures |
+| CI | Hosted verification of the repaired browser suite (C-27) | A full isolated local run passed with 197 tests and three intentional skips for shared settings. GitHub Actions did not start its jobs because of the account billing or spending limit. | Rerun the hosted foundation job when GitHub Actions can start. |

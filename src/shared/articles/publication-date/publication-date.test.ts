@@ -29,6 +29,8 @@ describe("publication date", () => {
     expect(publicationDateError("", today)).toBeNull();
     expect(publicationDateError("2026-06-10", today)).toBeNull();
     expect(publicationDateError("2026-01-01", today)).toBeNull();
+    expect(publicationDateError("2000-01-01", today)).toBeNull();
+    expect(publicationDateError("1999-12-31", today)).toMatch(/2000-01-01/);
     expect(publicationDateError("2026-06-11", today)).toMatch(/future/);
     expect(publicationDateError("2026-02-30", today)).toMatch(/valid/);
   });

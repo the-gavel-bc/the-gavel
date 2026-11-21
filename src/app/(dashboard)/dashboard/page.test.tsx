@@ -97,6 +97,27 @@ it("server-renders safe recovery for repeated cursors and read failures", async 
     "/dashboard",
   );
 });
+it("keeps status and search filters on the retry link", async () => {
+  access.mockResolvedValue({ status: "active" });
+  query.mockRejectedValue(new Error("private SQL error"));
+  render(
+    await DashboardPage({
+      searchParams: Promise.resolve({
+        cursor: "page-two",
+        status: "published",
+        search: "campus news",
+      }),
+    }),
+  );
+  expect(screen.getByRole("link", { name: "Try again" })).toHaveAttribute(
+    "href",
+    "/dashboard?status=published&search=campus+news&cursor=page-two",
+  );
+  expect(screen.getByRole("link", { name: "Newest articles" })).toHaveAttribute(
+    "href",
+    "/dashboard?status=published&search=campus+news",
+  );
+});
 it("does not mask a query guard's redirect during recovery", async () => {
   access.mockResolvedValue({ status: "active" });
   const { redirect } = await import("next/navigation");

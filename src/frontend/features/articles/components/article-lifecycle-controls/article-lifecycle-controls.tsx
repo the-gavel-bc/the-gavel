@@ -120,6 +120,7 @@ export function ArticleLifecycleControls({
   articleId,
   version,
   status,
+  publicationDate,
   capabilities,
   disabled,
   onBusyChange,
@@ -128,6 +129,7 @@ export function ArticleLifecycleControls({
   articleId: string;
   version: number;
   status: "draft" | "published" | "archived";
+  publicationDate?: string | null;
   /** Which changes this member may make; defaults to the classic one per status. */
   capabilities?: Offered;
   disabled: boolean;
@@ -180,6 +182,13 @@ export function ArticleLifecycleControls({
       } else if (
         !(await confirm({
           ...spec.confirm,
+          ...(operation === "publish"
+            ? {
+                message: publicationDate
+                  ? `Readers will be able to see it. Publication date: ${publicationDate}.`
+                  : "Readers will be able to see it. Publication date: today.",
+              }
+            : {}),
           confirmLabel: spec.label.replace(" article", ""),
           cancelLabel: "Cancel",
           danger: spec.danger,

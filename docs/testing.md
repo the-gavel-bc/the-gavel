@@ -18,14 +18,16 @@ Run commands with Node.js 22 and the pnpm version recorded in `package.json`.
 
 The anonymous public-search parser parity test uses the disposable review DB project: start it, then run `SEARCH_CHECK_WORKDIR=/private/tmp/gavel-review-db-b6 pnpm exec vitest run --config scripts/public-search-check/vitest.config.ts`. It sends a real anonymous RPC response through the production response parser. Never point this check at a hosted or shared project.
 
-Install the Playwright Chromium runtime once with `pnpm exec playwright install chromium`. Start local Supabase with `pnpm supabase start` using a Docker-compatible runtime. Run `pnpm supabase db reset`, `pnpm test:db`, `pnpm supabase db lint`, and `pnpm db:types:check`. Regenerate formatted types with `pnpm --silent db:types > src/shared/database/database.types.ts`. The drift check compares without overwriting the committed file.
+Install the Playwright Chromium runtime once with `pnpm exec playwright install chromium`. Start local Supabase with `pnpm supabase start` using a Docker-compatible runtime. CI uses `pnpm supabase start -x logflare,vector,studio` because its checks do not need local analytics, log collection or Studio. Run `pnpm supabase db reset`, `pnpm test:db`, `pnpm supabase db lint`, and `pnpm db:types:check`. Regenerate formatted types with `pnpm --silent db:types > src/shared/database/database.types.ts`. The drift check compares without overwriting the committed file.
+
+Use a freshly started stack from the pinned Supabase CLI for CI reproduction. An older running Storage service may be incompatible with the current database schema even if the application migrations match. Run the full pgTAP suite on a clean database before starting browser or concurrency fixtures. Those suites share the database and some SQL assertions depend on the seed state.
 
 ## Implemented foundation coverage
 
 - Unit/component tests cover configuration validation/startup, shell semantics, active membership checks, private profile resolution, safe OAuth redirects, and independent dashboard layout/page guards.
 - pgTAP covers grants, RLS, profile ownership, inactive-member edit denial, membership read/write/delete denials, administrator approval, scoped profile lookup, and direct-operation denials for non-Google, unconfirmed, and out-of-domain identities.
 - Playwright covers desktop/mobile homepage landmarks, keyboard focus/contrast and overflow; signed-out, inactive, unapproved Google, non-`bc.edu`, author, administrator, and forged-cookie access paths. Access tests run with JavaScript disabled.
-- Browser fixtures are isolated to the fixed local Docker project. They set synthetic Auth metadata only; passwords and hosted Google credentials are not used. `db reset` restores the original passwordless fixtures.
+- Browser fixtures use the default local Docker project. For a separate migrated stack, set `SUPABASE_WORKDIR` to its project directory, `GAVEL_SUPABASE_API_PORT` to its loopback API port, and `GAVEL_DB_CONTAINER` to the matching database container. They set synthetic Auth metadata only; passwords and hosted Google credentials are not used. `db reset` restores the original passwordless fixtures.
 
 ## Implemented taxonomy coverage
 

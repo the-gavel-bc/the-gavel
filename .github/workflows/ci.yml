@@ -59,7 +59,8 @@ jobs:
         run: node scripts/ci-supabase/prepare-database-port.mjs
       - name: Start isolated local Supabase
         run: |
-          if pnpm supabase start > "$RUNNER_TEMP/supabase-start.log" 2>&1; then
+          # CI uses the database, API, Auth and Storage, without the local dashboards.
+          if pnpm supabase start -x logflare,vector,studio > "$RUNNER_TEMP/supabase-start.log" 2>&1; then
             exit 0
           else
             startup_status=$?

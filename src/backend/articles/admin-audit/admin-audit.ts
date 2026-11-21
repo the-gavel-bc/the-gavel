@@ -16,6 +16,10 @@ export const auditActionSchema = z.enum([
   "article.archived",
   "article.restored",
   "article.deleted",
+  "article.owner_changed",
+  "article.submitted",
+  "article.returned",
+  "article.image_purged",
 ]);
 export type AuditAction = z.infer<typeof auditActionSchema>;
 export type AuditEvent = {

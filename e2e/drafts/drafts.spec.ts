@@ -127,13 +127,17 @@ test("empty state and invalid-cursor recovery are safe", async ({
 }) => {
   await setLocalSession(context, fixture.users.empty);
   await page.goto("/dashboard");
-  await expect(page.getByText("No articles on this page.")).toBeVisible();
+  await expect(
+    page.getByText(/You have not created any articles yet/),
+  ).toBeVisible();
   await page.goto("/dashboard?cursor=invalid");
   await expect(page.getByRole("alert")).toContainText(
     "Unable to load your articles",
   );
   await page.getByRole("link", { name: "Newest articles" }).click();
-  await expect(page.getByText("No articles on this page.")).toBeVisible();
+  await expect(
+    page.getByText(/You have not created any articles yet/),
+  ).toBeVisible();
 });
 
 test("server read failure offers a working retry without JavaScript", async ({

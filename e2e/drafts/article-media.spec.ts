@@ -64,7 +64,13 @@ test("owner uploads, describes, attaches and unlinks a private main image", asyn
   await expect(page.getByText("Image attached.")).toBeVisible();
   await page.reload();
   await expect(page.getByLabel("Caption", { exact: true })).toHaveValue("");
-  await page.getByRole("button", { name: "Remove image" }).click();
+  await page.getByRole("button", { name: "Remove main image" }).click();
+  await page
+    .getByRole("alertdialog")
+    .getByRole("button", {
+      name: "Remove main image",
+    })
+    .click();
   await expect(page.getByText("Image removed.")).toBeVisible();
   await page.reload();
   await expect(

@@ -2,6 +2,7 @@
 // The database is the authority; this mirrors its rules for early feedback.
 
 const EASTERN = "America/New_York";
+export const MIN_PUBLICATION_DATE = "2000-01-01";
 
 /** Today's date in Eastern time as YYYY-MM-DD. */
 export function easternToday(now: Date = new Date()): string {
@@ -31,6 +32,8 @@ export function publicationDateError(
 ): string | null {
   if (value === undefined || value === null || value === "") return null;
   if (!isCalendarDate(value)) return "Enter a valid date.";
+  if (value < MIN_PUBLICATION_DATE)
+    return `The date must be ${MIN_PUBLICATION_DATE} or later.`;
   if (value > today) return "The date cannot be in the future.";
   return null;
 }

@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
 import { requireActiveMembership } from "@/backend/auth/access/access";
-import { getMediaCleanupStatus } from "@/backend/media/retired-media-cleanup/cleanup-status";
+import {
+  getMediaCleanupStatus,
+  isMediaCleanupHealthy,
+} from "@/backend/media/retired-media-cleanup/cleanup-status";
 import styles from "@/frontend/features/media/components/media-cleanup/media-cleanup.module.css";
 import { MediaCleanupControl } from "@/frontend/features/media/components/media-cleanup/media-cleanup-control";
 // The retry action runs the time-boxed sweep (about 40 s) in this function.
@@ -33,7 +36,7 @@ export default async function MediaCleanupPage() {
       </>
     );
   }
-  const healthy = status.failedKeys === 0 && status.failedPrefixes === 0;
+  const healthy = isMediaCleanupHealthy(status);
   const when = (value: string | null, none: string) =>
     value ? `${date.format(new Date(value))} ET` : none;
   const tiles = [

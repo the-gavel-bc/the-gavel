@@ -1,6 +1,12 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-export function ArticleListError({ children }: { children: ReactNode }) {
+export function ArticleListError({
+  children,
+  newestHref = "/dashboard",
+}: {
+  children: ReactNode;
+  newestHref?: string;
+}) {
   return (
     <section aria-label="Article loading error">
       <p role="alert">
@@ -9,7 +15,7 @@ export function ArticleListError({ children }: { children: ReactNode }) {
       </p>
       {children}
       <p>
-        <Link href="/dashboard" prefetch={false}>
+        <Link href={newestHref} prefetch={false}>
           Newest articles
         </Link>
       </p>

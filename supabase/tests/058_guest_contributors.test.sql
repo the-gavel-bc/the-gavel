@@ -6,10 +6,14 @@ select ok(not has_table_privilege('authenticated','public.profiles','insert'),'d
 select set_config('request.jwt.claim.sub','',true);
 select is(public.search_contributors('Author')->>'code','forbidden','search missing identity denied');
 select is(public.create_guest_contributor(gen_random_uuid(),'Guest')->>'code','forbidden','guest missing identity denied');
+select is((select count(*) from pg_catalog.pg_locks
+  where pid=pg_catalog.pg_backend_pid() and locktype='advisory'),0::bigint,
+  'guest creation denial does not acquire an advisory lock');
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',true);
 select is(public.search_contributors('Author')->>'code','forbidden','inactive search denied');
 select is(public.create_guest_contributor(gen_random_uuid(),'Guest')->>'code','forbidden','inactive creation denied');
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',true);
+update auth.users set raw_app_meta_data='{"provider":"email"}' where id=auth.uid();
 select is(public.search_contributors('Author')->>'code','forbidden','ineligible search denied');
 select is(public.create_guest_contributor(gen_random_uuid(),'Guest')->>'code','forbidden','ineligible creation denied');
 update auth.users set email='guest-author@bc.edu',email_confirmed_at=now(),raw_app_meta_data='{"provider":"google"}' where id=auth.uid();

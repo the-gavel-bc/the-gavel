@@ -3,6 +3,7 @@ import "server-only";
 import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { REVIEW_QUEUE_GROUP_LIMIT } from "@/shared/articles/review-queue/review-queue-limits";
 import { requireActiveMembership } from "@/backend/auth/access/access";
 import { createServerSupabaseClient } from "@/backend/infrastructure/supabase/server/server";
 import {
@@ -50,7 +51,7 @@ export async function getReviewQueue(): Promise<ReviewItem[]> {
   if (error) throw new Error("Unable to load the review queue.");
   return z
     .array(row)
-    .max(100)
+    .max(REVIEW_QUEUE_GROUP_LIMIT * 2)
     .parse(data)
     .map((item) => ({
       id: item.article_id,

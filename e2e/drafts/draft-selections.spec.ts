@@ -34,20 +34,30 @@ test("creates and reopens categories tags and multiple guest credits", async ({
     .fill(`Synthetic ${info.project.name} guest`);
   await page
     .getByRole("option", {
-      name: `Synthetic ${info.project.name} guest (task9-${info.project.name}-guest)`,
+      name: `Add 'Synthetic ${info.project.name} guest' as a one-off credit`,
       exact: true,
     })
     .click();
+  await expect(
+    page.getByRole("status").filter({
+      hasText: "One-off credit added",
+    }),
+  ).toHaveCount(1);
   await page.getByRole("button", { name: "Add contributor" }).click();
   await page
     .getByLabel("Contributor 2", { exact: true })
     .fill(`Synthetic ${info.project.name} guest`);
   await page
     .getByRole("option", {
-      name: `Synthetic ${info.project.name} guest (task9-${info.project.name}-guest)`,
+      name: `Add 'Synthetic ${info.project.name} guest' as a one-off credit`,
       exact: true,
     })
     .click();
+  await expect(
+    page.getByRole("status").filter({
+      hasText: "One-off credit added",
+    }),
+  ).toHaveCount(2);
   await page.getByLabel("Role 2", { exact: true }).selectOption("editor");
   await page.getByRole("button", { name: "Create draft" }).click();
   await expect(page).toHaveURL(/\/dashboard\/articles\/[0-9a-f-]+$/);
@@ -77,7 +87,7 @@ test("creates and reopens categories tags and multiple guest credits", async ({
     ),
   ).toBe(true);
   await page.screenshot({
-    path: `docs/reviews/assets/phase-3-task9-${info.project.name}.png`,
+    path: info.outputPath("phase-3-task9.png"),
     fullPage: true,
   });
 });

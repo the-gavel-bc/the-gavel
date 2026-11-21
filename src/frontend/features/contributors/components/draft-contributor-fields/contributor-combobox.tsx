@@ -175,6 +175,16 @@ export function ContributorCombobox({
           setNotice("");
           setError("");
         }}
+        onBlur={() => {
+          if (!latest.current.selected) return;
+          setText(
+            latest.current.selected.slug
+              ? `${latest.current.selected.displayName} (${latest.current.selected.slug})`
+              : latest.current.selected.displayName,
+          );
+          setQuery("");
+          setOpen(false);
+        }}
         onKeyDown={(e) => {
           if (e.key === "Escape") {
             e.preventDefault();

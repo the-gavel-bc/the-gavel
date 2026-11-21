@@ -172,6 +172,24 @@ select pg_temp.act_as('3'); set local role authenticated;
 select is((select count(*)::integer from public.articles where id=(select id from t where label='a3')),1,'editor reads submitted drafts');
 select is((select count(*)::integer from public.list_review_articles()),2,'review queue: one submission plus own publication');
 reset role;
+insert into public.articles(owner_profile_id,section_id,title,slug,status,
+  review_requested_at,published_at,published_by_profile_id)
+select a.owner_profile_id,a.section_id,'Queue fixture '||n,'queue-fixture-'||n,
+  case when n <= 51 then 'draft'::public.article_status else 'published'::public.article_status end,
+  case when n <= 51 then now() + n * interval '1 day' end,
+  case when n > 51 then now() + n * interval '1 day' end,
+  case when n > 51 then (select id from public.profiles
+    where auth_user_id='00000000-0000-0000-0000-000000000003') end
+from public.articles a cross join generate_series(1,102) n
+where a.id=(select id from t where label='a3');
+set local role authenticated;
+select is((select count(*) from public.list_review_articles() where status='draft'),
+  50::bigint,'pending drafts have their own cap');
+select is((select count(*) from public.list_review_articles() where status='published'),
+  50::bigint,'a full draft queue leaves room for publications');
+select is((select title from public.list_review_articles() where status='published' limit 1),
+  'Queue fixture 102','the newest own publication appears first');
+reset role;
 select pg_temp.act_as('2'); set local role authenticated;
 select throws_ok('select * from public.list_review_articles()','42501',null,'authors cannot open the review queue');
 reset role;
