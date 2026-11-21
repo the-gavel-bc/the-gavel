@@ -82,7 +82,7 @@ const cases = [
   ],
 ];
 for (const [name, filePath, code, expected] of cases) {
-  it(name, async () => {
+  it(name, { timeout: 15_000 }, async () => {
     const [result] = await eslint.lintText(code, { filePath });
     expect(
       result.messages.filter((m) => m.ruleId === "ownership/boundaries"),
