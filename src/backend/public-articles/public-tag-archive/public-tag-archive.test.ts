@@ -23,9 +23,13 @@ beforeEach(() => {
     data: { name: "Campus life", slug: "campus-life" },
     error: null,
   });
-  mocks.list.mockResolvedValue({ kind: "ok", items: [], nextCursor: null });
+  mocks.list.mockResolvedValue({
+    kind: "ok",
+    items: [{ id: "story" }],
+    nextCursor: null,
+  });
 });
-it("resolves an allowlisted public tag and distinguishes its empty archive", async () => {
+it("resolves an allowlisted tag with public stories", async () => {
   expect(await getPublicTagArchive("campus-life")).toMatchObject({
     kind: "ok",
     archive: {
@@ -35,7 +39,7 @@ it("resolves an allowlisted public tag and distinguishes its empty archive", asy
       isLetters: false,
       href: "/tags/campus-life",
     },
-    items: [],
+    items: [{ id: "story" }],
     continuation: false,
   });
   expect(mocks.from).toHaveBeenCalledExactlyOnceWith("tags");
@@ -115,4 +119,11 @@ it("rejects repeated, empty and oversized cursors before listing", async () => {
       kind: "invalid",
     });
   expect(mocks.list).not.toHaveBeenCalled();
+});
+
+it("hides the tag when the last public article disappears after label lookup", async () => {
+  mocks.list.mockResolvedValue({ kind: "ok", items: [], nextCursor: null });
+  expect(await getPublicTagArchive("campus-life")).toEqual({
+    kind: "notFound",
+  });
 });

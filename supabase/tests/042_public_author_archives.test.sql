@@ -41,8 +41,8 @@ select throws_ok($$ select auth_user_id from public.profiles $$,'42501',null,'Au
 select is(jsonb_array_length(public.list_public_articles('author','author-proof-guest',null,24,null)->'items'),2,'guest credits expose only published active stories once across roles');
 select is(jsonb_array_length(public.list_public_articles('author','author-proof-empty',null,24,null)->'items'),0,'active empty guest remains a valid empty archive');
 select is(jsonb_array_length(public.list_public_articles('author','author-proof-inactive',null,24,null)->'items'),0,'inactive legacy credited profile is not a public filter');
-select is(jsonb_array_length(public.list_public_articles('author',(select slug from public.profiles where id='10000000-0000-0000-0000-000000000002'),null,24,null)->'items'),2,'inactive membership retains published owner stories without duplicate self-credits');
-select is((select count(*)::int from public.profiles where id='10000000-0000-0000-0000-000000000002'),1,'inactive membership alone does not retract public biography');
+select is(jsonb_array_length(public.list_public_articles('author','author-a',null,24,null)->'items'),2,'inactive membership retains published owner stories without duplicate self-credits');
+select is((select count(*)::int from public.profiles where slug='author-a'),1,'inactive membership alone does not retract public biography');
 insert into author_proof select public.list_public_articles('author','author-proof-guest',null,1,null);
 select is(public.list_public_articles('author','author-proof-empty',null,1,(select value->'nextCursor' from author_proof))->>'kind','invalid','cursor cannot cross author identity');
 select is(public.list_public_articles('tag','author-proof-guest',null,1,(select value->'nextCursor' from author_proof))->>'kind','invalid','author cursor cannot cross filter kind');
