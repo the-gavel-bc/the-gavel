@@ -24,6 +24,7 @@ export default async function DashboardPage({
   if (status !== "all") filters.set("status", status);
   if (search) filters.set("search", search);
   const filtered = filters.size > 0;
+  const firstPageHref = filtered ? `/dashboard?${filters}` : "/dashboard";
   let page;
   try {
     if (
@@ -46,7 +47,7 @@ export default async function DashboardPage({
     return (
       <>
         <h1>My articles</h1>
-        <ArticleListError>
+        <ArticleListError newestHref={firstPageHref}>
           <LinkButton href={retryHref} prefetch={false}>
             Try again
           </LinkButton>
@@ -59,10 +60,7 @@ export default async function DashboardPage({
       <h1>My articles</h1>
       {cursor !== undefined && (
         <p>
-          <Link
-            href={filtered ? `/dashboard?${filters}` : "/dashboard"}
-            prefetch={false}
-          >
+          <Link href={firstPageHref} prefetch={false}>
             Newest articles
           </Link>
         </p>

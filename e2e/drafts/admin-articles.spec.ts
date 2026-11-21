@@ -98,7 +98,8 @@ test("bad cursor has a safe recovery; inactive administrator loses access", asyn
   await expect(
     page.getByText(/Unable to load articles\. Check the filters/),
   ).toBeVisible();
-  await page.getByRole("link", { name: "Reset filters" }).click();
+  await page.getByRole("button", { name: "Apply filters" }).click();
+  await expect(page).not.toHaveURL(/cursor=/);
   await expect(
     page.getByRole("heading", { name: "Article management" }),
   ).toBeVisible();

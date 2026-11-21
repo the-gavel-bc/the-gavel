@@ -50,6 +50,21 @@ describe("manual cleanup", () => {
     });
     expect(m.run).not.toHaveBeenCalled();
   });
+  it("allows an explicitly configured loopback port for isolated tests", async () => {
+    delete process.env.VERCEL_ENV;
+    process.env.GAVEL_SUPABASE_API_PORT = "59721";
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "http://127.0.0.1:59721";
+    m.access.mockResolvedValue({ status: "active", role: "administrator" });
+    m.run.mockResolvedValue({ ok: true });
+    expect(await retryMediaCleanupAction()).toEqual({ ok: true });
+    expect(m.run).toHaveBeenCalledOnce();
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "http://127.0.0.1:58721";
+    expect(await retryMediaCleanupAction()).toEqual({
+      ok: false,
+      code: "environment",
+    });
+    expect(m.run).toHaveBeenCalledOnce();
+  });
   it("lets administrators retry a bounded sweep", async () => {
     delete process.env.VERCEL_ENV;
     process.env.NEXT_PUBLIC_SUPABASE_URL = "http://127.0.0.1:54321";

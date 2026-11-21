@@ -23,6 +23,10 @@ test("administrator saves ordered published homepage selections", async ({
   await page.goto("/dashboard/admin/homepage");
   const lead = `${fixture.label} own 20`;
   const featured = `${fixture.label} own 21`;
+  const remove = page.getByRole("button", {
+    name: /^Remove (lead|.+ from (Featured News|Read This))$/,
+  });
+  while (await remove.count()) await remove.first().click();
   await page.getByRole("button", { name: `Set ${lead} as lead` }).click();
   await page.getByLabel("Search titles").fill("own 21");
   await page.getByRole("button", { name: "Search", exact: true }).click();
@@ -61,6 +65,10 @@ test("administrator sees published candidates; author cannot open curation", asy
       .getByText(`${fixture.label} own 20`, { exact: true }),
   ).toBeVisible();
   if (info.project.name === "mobile") {
+    const remove = page.getByRole("button", {
+      name: /^Remove (lead|.+ from (Featured News|Read This))$/,
+    });
+    while (await remove.count()) await remove.first().click();
     await page
       .getByRole("button", { name: `Set ${fixture.label} own 20 as lead` })
       .click();

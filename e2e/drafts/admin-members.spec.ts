@@ -32,37 +32,49 @@ test("administrator lists an email, the person claims it on sign-in, then role c
   await expect(listed.getByText("Not signed in yet")).toBeVisible();
 
   // The listed person's first sign-in turns the listing into a membership.
-  const personContext = await browser.newContext();
-  await setLocalSession(personContext, fixture.pendingMemberUser);
-  const personPage = await personContext.newPage();
-  await personPage.goto("/dashboard");
-  await expect(
-    personPage.getByRole("heading", { name: "My articles" }),
-  ).toBeVisible();
-  await personContext.close();
+  const personContext = await browser.newContext({
+    baseURL: "http://127.0.0.1:3100",
+  });
+  try {
+    await setLocalSession(personContext, fixture.pendingMemberUser);
+    const personPage = await personContext.newPage();
+    await personPage.goto("/dashboard");
+    await expect(
+      personPage.getByRole("heading", { name: "My articles" }),
+    ).toBeVisible();
+  } finally {
+    await personContext.close();
+  }
 
   await page.goto("/dashboard/admin/members?state=active");
   const member = page.getByRole("listitem").filter({ hasText: email });
-  await expect(member.getByText("Author", { exact: true })).toBeVisible();
+  await expect(member.locator('[data-role="author"]')).toBeVisible();
   await member.getByLabel(`Role for ${email}`).selectOption("administrator");
   await member
     .getByRole("button", { name: `Change role for ${email}` })
     .click();
-  await expect(
-    member.getByText("Administrator", { exact: true }),
-  ).toBeVisible();
-  page.on("dialog", (dialog) => dialog.accept());
+  const dialog = page.getByRole("alertdialog");
+  await dialog.getByRole("button", { name: "Grant access" }).click();
+  await expect(member.locator('[data-role="administrator"]')).toBeVisible();
   await member.getByRole("button", { name: `Deactivate ${email}` }).click();
+  await dialog.getByRole("button", { name: "Deactivate", exact: true }).click();
   await expect(member).toHaveCount(0);
 
   // A person's name opens only that person's activity.
   await page.goto("/dashboard/admin/members?state=inactive");
-  await page.getByRole("link", { name: email }).click();
+  await page
+    .getByRole("listitem")
+    .filter({ hasText: email })
+    .getByRole("link")
+    .click();
   await expect(
     page.getByRole("heading", { name: `Activity for ${email}` }),
   ).toBeVisible();
   await expect(
-    page.getByText(`Deactivated membership for ${email}`),
+    page
+      .getByRole("listitem")
+      .filter({ hasText: "Deactivated membership" })
+      .filter({ hasText: email }),
   ).toBeVisible();
 });
 

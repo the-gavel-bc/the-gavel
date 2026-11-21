@@ -211,9 +211,14 @@ export function draftListFixture(
     seedPendingMember() {
       if (!installed || suite !== "members")
         throw new Error("Not a membership fixture.");
-      sql(`insert into auth.users(id,email,email_confirmed_at,raw_app_meta_data,raw_user_meta_data)
-        values('${uuid(base + 5)}','aaaa-task9-${project}@bc.edu',now(),
-          '{"provider":"google","providers":["google"]}'::jsonb,'{}'::jsonb);`);
+      sql(`insert into auth.users (
+          id,instance_id,aud,role,email,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,
+          created_at,updated_at,encrypted_password,confirmation_token,recovery_token,email_change_token_new,email_change_token_current,
+          email_change,phone_change,phone_change_token,reauthentication_token)
+        values('${uuid(base + 5)}','00000000-0000-0000-0000-000000000000',
+          'authenticated','authenticated','aaaa-task9-${project}@bc.edu',now(),
+          '{"provider":"google","providers":["google"]}'::jsonb,'{}'::jsonb,
+          now(),now(),'','','','','','','','','');`);
     },
     prepareHomepage() {
       if (!installed || suite !== "homepage" || project !== "desktop")
@@ -399,20 +404,26 @@ export function draftListFixture(
         end $$;
         delete from private.site_information_receipts where actor_user_id in (${quoted(userIds)});`);
       if (suite === "members")
-        sql(`delete from private.membership_write_receipts where target_user_id='${uuid(base + 5)}';
+        sql(`delete from private.membership_write_receipts
+          where actor_user_id in (${quoted(userIds)}) or target_user_id='${uuid(base + 5)}';
+          delete from private.membership_invitations
+          where email='aaaa-task9-${project}@bc.edu' and invited_by='${uuid(users.admin)}';
           delete from public.audit_events where resource_type='membership' and resource_id='${uuid(base + 5)}';
           delete from public.memberships where user_id='${uuid(base + 5)}';
           delete from public.profiles where auth_user_id='${uuid(base + 5)}';
           delete from auth.users where id='${uuid(base + 5)}';`);
-      sql(`${
-        suite === "media" ||
-        suite === "recover" ||
-        suite === "bodyMedia" ||
-        suite === "published" ||
-        suite === "lifecycle" ||
-        suite === "admin" ||
-        suite === "deletion"
-          ? `
+      sql(`create temp table fixture_credit_profiles on commit drop as
+        select profile_id from private.profile_write_receipts
+        where actor_user_id in (${quoted(userIds)}) and operation='create_guest_author';
+        ${
+          suite === "media" ||
+          suite === "recover" ||
+          suite === "bodyMedia" ||
+          suite === "published" ||
+          suite === "lifecycle" ||
+          suite === "admin" ||
+          suite === "deletion"
+            ? `
         -- Test-only synthetic cleanup; production removes objects via Storage API.
         select set_config('storage.allow_delete_query','true',true);
         delete from storage.objects where bucket_id='article-media' and name in
@@ -426,8 +437,8 @@ export function draftListFixture(
           (select id from public.articles where owner_profile_id in (${quoted(userIds)}));
         delete from public.media_assets where uploader_user_id in (${quoted(userIds)});
       `
-          : ""
-      }
+            : ""
+        }
         ${suite === "deletion" ? `delete from private.media_cleanup_ledger where article_id='${id(19)}'; delete from private.media_key_registry where article_id='${id(19)}'; delete from private.retired_article_ids where article_id='${id(19)}'; delete from private.article_id_registry where article_id='${id(19)}'; delete from private.article_deletion_receipts where actor_user_id in (${quoted(userIds)}); delete from private.retired_article_slugs where slug='${prefix}-own-19';` : ""}
         delete from private.draft_write_receipts where actor_user_id in (${quoted(userIds)});
         delete from private.profile_write_receipts where actor_user_id in (${quoted(userIds)});
@@ -466,6 +477,8 @@ export function draftListFixture(
         }
         delete from public.sections where id='${id(99)}';
         ${suite === "contributors" ? `delete from public.profiles where auth_user_id is null and slug in ('task-ten-guest-${project}','task-ten-edited-${project}');` : ""}
+        delete from public.profiles where auth_user_id is null
+          and id in (select profile_id from fixture_credit_profiles);
         delete from public.memberships where user_id in (${quoted(userIds)});
         delete from public.profiles where id in (${quoted(userIds)});
         delete from auth.users where id in (${quoted(userIds)});`);

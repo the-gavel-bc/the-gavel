@@ -113,6 +113,10 @@ it("keeps status and search filters on the retry link", async () => {
     "href",
     "/dashboard?status=published&search=campus+news&cursor=page-two",
   );
+  expect(screen.getByRole("link", { name: "Newest articles" })).toHaveAttribute(
+    "href",
+    "/dashboard?status=published&search=campus+news",
+  );
 });
 it("does not mask a query guard's redirect during recovery", async () => {
   access.mockResolvedValue({ status: "active" });

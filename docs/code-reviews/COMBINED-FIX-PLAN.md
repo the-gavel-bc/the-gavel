@@ -5,7 +5,7 @@ Companion to [COMBINED-REVIEW-REPORT.md](COMBINED-REVIEW-REPORT.md). Scope: urge
 ## Follow-up progress
 
 - Batch 1 follow-up is implemented on `fix/urgent-review-gaps`. The branch adds the save bar fix, audit action parity, contributor selection recovery, request-scoped access caching, publication date validation and My articles recovery.
-- C-05 and the original CI and staff batches are already on `main`. The remaining browser suite repairs are tracked under C-27.
+- C-05 and the original CI and staff batches are already on `main`. The C-27 browser repairs pass locally, including both Playwright projects. Hosted verification is tracked in the deferred register.
 - Batch 3 follow-up includes D-12, G-03, G-04 and G-12 on the working branch. Profile writes now check eligibility before waiting for the global locks (D-13). Moving the guest credit quota ahead of the locks while preserving exact retries remains open, alongside D-11 and G-11.
 - The working branch also includes D-14, G-05 and G-06 with focused regression coverage. G-01 did not reproduce in the review queue with a 240-code-point title.
 

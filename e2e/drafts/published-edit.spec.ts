@@ -12,7 +12,7 @@ test.beforeAll(({}, info) => {
 });
 test.afterAll(() => fixture?.cleanup());
 
-test("owner and administrator save published changes without changing publication identity", async ({
+test("administrator tabs resolve conflicting published edits without changing publication identity", async ({
   browser,
   context,
   page,
@@ -20,13 +20,12 @@ test("owner and administrator save published changes without changing publicatio
   await setLocalSession(context, fixture.users.author);
   const path = `/dashboard/articles/${fixture.id(20)}`;
   const before = fixture.article(20).article;
-  await page.goto("/dashboard");
-  const editLink = page.getByRole("link", {
-    name: `Edit article: ${fixture.label} own 20`,
-  });
-  await editLink.focus();
-  await expect(editLink).toBeFocused();
-  await editLink.press("Enter");
+  await page.goto(path);
+  await expect(page.getByRole("button", { name: "Save article" })).toHaveCount(
+    0,
+  );
+  await setLocalSession(context, fixture.users.admin);
+  await page.goto(path);
   await expect(
     page.getByRole("heading", { name: "Edit published article" }),
   ).toBeVisible();
@@ -35,27 +34,27 @@ test("owner and administrator save published changes without changing publicatio
   ).toBeVisible();
   await expect(page.getByLabel("Image file", { exact: true })).toBeVisible();
   await expect(page.getByLabel("Body image file")).toHaveCount(0);
-  await page.getByLabel("Title (required)").fill("Owner published edit");
+  await page.getByLabel("Title (required)").fill("First published edit");
   await page
     .getByRole("textbox", { name: "Article body" })
-    .fill("Owner revised body.");
+    .fill("First revised body.");
   await page.getByRole("button", { name: "Save article" }).click();
   await expect(
     page.getByRole("status").filter({ hasText: "Article saved" }),
   ).toBeVisible();
   await page.reload();
   await expect(page.getByLabel("Title (required)")).toHaveValue(
-    "Owner published edit",
+    "First published edit",
   );
-  const afterOwner = fixture.article(20);
-  expect(afterOwner.article).toMatchObject({
+  const afterFirstSave = fixture.article(20);
+  expect(afterFirstSave.article).toMatchObject({
     status: "published",
     edit_version: 2,
   });
-  expect(afterOwner.article.slug).toBe(before.slug);
-  expect(afterOwner.article.published_at).toBe(before.published_at);
-  expect(afterOwner.revisions).toBe(1);
-  expect(afterOwner.audits).toBe(1);
+  expect(afterFirstSave.article.slug).toBe(before.slug);
+  expect(afterFirstSave.article.published_at).toBe(before.published_at);
+  expect(afterFirstSave.revisions).toBe(1);
+  expect(afterFirstSave.audits).toBe(1);
 
   const adminContext = await browser.newContext({
     baseURL: "http://127.0.0.1:3100",
@@ -84,13 +83,13 @@ test("owner and administrator save published changes without changing publicatio
   } finally {
     await adminContext.close();
   }
-  await page.getByLabel("Title (required)").fill("Owner stale local edit");
+  await page.getByLabel("Title (required)").fill("Stale published edit");
   await page.getByRole("button", { name: "Save article" }).click();
   await expect(
     page.getByRole("alert").filter({ hasText: "changed elsewhere" }),
   ).toBeVisible();
   await expect(page.getByLabel("Title (required)")).toHaveValue(
-    "Owner stale local edit",
+    "Stale published edit",
   );
   await page
     .getByRole("button", { name: "Review latest saved version" })
@@ -98,18 +97,21 @@ test("owner and administrator save published changes without changing publicatio
   await expect(
     page.getByRole("heading", { name: "Latest saved version (3)" }),
   ).toBeVisible();
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "Load latest saved version" }).click();
+  await page
+    .getByRole("alertdialog")
+    .getByRole("button", { name: "Load saved version" })
+    .click();
   await expect(page.getByLabel("Title (required)")).toHaveValue(
     "Administrator published edit",
   );
-  await page.getByLabel("Title (required)").fill("Owner recovered edit");
+  await page.getByLabel("Title (required)").fill("Recovered published edit");
   await page.getByRole("button", { name: "Save article" }).click();
   await expect(
     page.getByRole("status").filter({ hasText: "Article saved" }),
   ).toBeVisible();
   expect(fixture.article(20).article).toMatchObject({
-    title: "Owner recovered edit",
+    title: "Recovered published edit",
     status: "published",
     edit_version: 4,
     slug: before.slug,
@@ -131,7 +133,7 @@ test("published photo stays private until attached and replacement updates publi
   page,
   browser,
 }) => {
-  await setLocalSession(context, fixture.users.author);
+  await setLocalSession(context, fixture.users.admin);
   const articleId = fixture.id(20);
   await page.goto(`/dashboard/articles/${articleId}`);
   const publicContext = await browser.newContext({

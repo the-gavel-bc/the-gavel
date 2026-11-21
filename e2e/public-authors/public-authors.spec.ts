@@ -46,7 +46,7 @@ test.beforeAll(({}, info) => {
     insert into auth.users(id,instance_id,aud,role,email,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,encrypted_password,confirmation_token,recovery_token,email_change_token_new,email_change_token_current,email_change,phone_change,phone_change_token,reauthentication_token)
     select value::uuid,'00000000-0000-0000-0000-000000000000','authenticated','authenticated','${prefix}-'||right(value,4)||'@bc.edu',now(),'{"provider":"google","providers":["google"]}'::jsonb,'{}'::jsonb,now(),now(),'','','','','','','','','' from unnest(array['${userId(userNumber)}','${userId(userNumber + 1)}']) value;
     insert into public.profiles(id,auth_user_id,display_name,slug,biography,active) values
-      ('${id(301)}','${userId(userNumber)}','Member Writer ${project}','${prefix}-member','Member biography remains public.',true),
+      ('${id(301)}','${userId(userNumber)}','Member Writer ${project}','${prefix}-member',E'Literal <script>window.authorBioExecuted=true</script>\n\nSecond paragraph.',true),
       ('${id(302)}',null,'Guest Writer ${project}','${prefix}-guest',E'Literal <script>window.authorBioExecuted=true</script>\n\nSecond paragraph.',true),
       ('${id(303)}',null,'Empty Writer ${project}','${prefix}-empty',null,true),
       ('${id(304)}','${userId(userNumber + 1)}','Inactive Writer ${project}','${prefix}-inactive','Hidden author biography.',false);
@@ -73,26 +73,35 @@ test.afterAll(() => {
     delete from public.memberships where user_id in ('${userId(userNumber)}','${userId(userNumber + 1)}');delete from public.profiles where slug like '${prefix}-%';delete from auth.users where id in ('${userId(userNumber)}','${userId(userNumber + 1)}');`);
 });
 
-test("credit links open escaped guest biographies and deduplicated scoped author pages", async ({
+test("member links open escaped biographies and one-off credits stay unlinked", async ({
   page,
 }) => {
   if (project === "mobile")
     await page.setViewportSize({ width: 320, height: 900 });
   const main = page.getByRole("main");
   await page.goto(`/articles/${prefix}-story-1`);
-  await main
-    .getByRole("article", { name: `${prefix} story 1`, exact: true })
-    .getByRole("link", { name: `Guest Writer ${project}`, exact: true })
+  const story = main.getByRole("article", {
+    name: `${prefix} story 1`,
+    exact: true,
+  });
+  await expect(
+    story.getByText(`Guest Writer ${project}`).first(),
+  ).toBeVisible();
+  await expect(
+    story.getByRole("link", { name: `Guest Writer ${project}` }),
+  ).toHaveCount(0);
+  await story
+    .getByRole("link", { name: `Member Writer ${project}`, exact: true })
     .first()
     .click();
   await expect(main.getByRole("heading", { level: 1 })).toHaveText(
-    `Guest Writer ${project}`,
+    `Member Writer ${project}`,
   );
   const bio = main.getByRole("region", {
-    name: `About Guest Writer ${project}`,
+    name: `About Member Writer ${project}`,
   });
   await expect(bio).toHaveText(
-    "BiographyLiteral <script>window.authorBioExecuted=true</script> Second paragraph.",
+    /Literal <script>window.authorBioExecuted=true<\/script>\s+Second paragraph\./,
   );
   expect(
     await bio.locator("p").evaluate((p) => getComputedStyle(p).whiteSpace),
@@ -115,7 +124,7 @@ test("credit links open escaped guest biographies and deduplicated scoped author
     0,
   );
   await page.goto(
-    `/authors/${prefix}-member?cursor=${encodeURIComponent(cursor)}`,
+    `/authors/${prefix}-member?cursor=${encodeURIComponent(cursor + "!")}`,
   );
   await expect(
     main.getByText("This article page is invalid or expired."),
@@ -163,13 +172,10 @@ test("public author pages survive membership deactivation but hide inactive prof
     );
     await expect(main.getByText("Hidden author biography.")).toHaveCount(0);
   }
-  await page.goto(`/authors/${prefix}-empty`);
-  await expect(main.getByRole("heading", { level: 1 })).toHaveText(
-    `Empty Writer ${project}`,
-  );
-  await expect(main.getByText("No articles yet")).toBeVisible();
-  await expect(main.getByRole("region", { name: /About/ })).toHaveCount(0);
-  await page.goto(`/authors/${prefix}-guest?cursor=one&cursor=two`);
+  for (const slug of ["empty", "guest"]) {
+    expect((await page.goto(`/authors/${prefix}-${slug}`))?.status()).toBe(404);
+  }
+  await page.goto(`/authors/${prefix}-member?cursor=one&cursor=two`);
   await expect(
     main.getByText("This article page is invalid or expired."),
   ).toBeVisible();
@@ -183,12 +189,12 @@ test("public author pages survive membership deactivation but hide inactive prof
     await reader.goto(new URL(`/articles/${prefix}-story-1`, page.url()).href);
     await content
       .getByRole("article", { name: `${prefix} story 1`, exact: true })
-      .getByRole("link", { name: `Guest Writer ${project}`, exact: true })
+      .getByRole("link", { name: `Member Writer ${project}`, exact: true })
       .first()
       .click();
     await expect(content.getByRole("article")).toHaveCount(12);
     await expect(
-      content.getByRole("region", { name: `About Guest Writer ${project}` }),
+      content.getByRole("region", { name: `About Member Writer ${project}` }),
     ).toBeVisible();
     expect(
       await reader.evaluate(
