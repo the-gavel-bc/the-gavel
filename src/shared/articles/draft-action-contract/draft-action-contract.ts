@@ -1,6 +1,6 @@
 import { z } from "zod";
 import {
-  checkDraftInput,
+  checkDraftStructure,
   DRAFT_ERROR_CODES,
   isDraftUuid,
   type CreateDraftCommand,
@@ -17,7 +17,8 @@ type Parsed<T> = DraftFailure | { ok: true; value: T };
 export function parseCreateCommand(value: unknown): Parsed<CreateDraftCommand> {
   const parsed = create.safeParse(value);
   if (!parsed.success) return { ok: false, code: "invalid_input" };
-  const draft = checkDraftInput(parsed.data.draft);
+  // PostgreSQL checks new text after resolving existing request receipts.
+  const draft = checkDraftStructure(parsed.data.draft);
   return draft.ok
     ? {
         ok: true,
@@ -31,7 +32,7 @@ export function parseCreateCommand(value: unknown): Parsed<CreateDraftCommand> {
 export function parseSaveCommand(value: unknown): Parsed<SaveDraftCommand> {
   const parsed = save.safeParse(value);
   if (!parsed.success) return { ok: false, code: "invalid_input" };
-  const draft = checkDraftInput(parsed.data.draft);
+  const draft = checkDraftStructure(parsed.data.draft);
   return draft.ok
     ? {
         ok: true,

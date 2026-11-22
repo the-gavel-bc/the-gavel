@@ -4,6 +4,7 @@ import {
   draftJsonbByteLength,
   isValidDraftDocument,
   isValidDraftLink,
+  checkDraftStructure,
 } from "./draft-contract";
 import {
   baseDraft,
@@ -192,3 +193,36 @@ describe("publication date in the draft input", () => {
     expect(checkDraftInput({ ...baseDraft, extra: true }).ok).toBe(false);
   });
 });
+
+it.each(["\u202E", "\u001C"])(
+  "rejects unsafe draft text on writes and preserves stored text on reads",
+  (character) => {
+    const title = `News${character}room`;
+    const content = {
+      format: "gavel-draft",
+      version: 2,
+      document: {
+        type: "doc",
+        content: [
+          {
+            type: "image",
+            attrs: {
+              assetId: "20000000-0000-0000-0000-000000000001",
+              alt: `A${character} photo`,
+              caption: `Campus${character} news`,
+            },
+          },
+        ],
+      },
+    };
+    expect(checkDraftInput({ ...baseDraft, title }).ok).toBe(false);
+    expect(checkDraftInput({ ...baseDraft, content }).ok).toBe(false);
+    expect(isValidDraftDocument(content)).toBe(true);
+    expect(checkDraftStructure({ ...baseDraft, title, content })).toMatchObject(
+      {
+        ok: true,
+        value: { title, content },
+      },
+    );
+  },
+);
