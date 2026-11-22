@@ -9,6 +9,11 @@ update auth.users set email='tax-admin@bc.edu',email_confirmed_at=now(),
 update auth.users set email='tax-author@bc.edu',email_confirmed_at=now(),
   raw_app_meta_data='{"provider":"google","providers":["google"]}'::jsonb
   where id='00000000-0000-0000-0000-000000000002';
+update auth.users set email='tax-editor@bc.edu',email_confirmed_at=now(),
+  raw_app_meta_data='{"provider":"google","providers":["google"]}'::jsonb
+  where id='00000000-0000-0000-0000-000000000003';
+update public.memberships set role='editor', active=true
+  where user_id='00000000-0000-0000-0000-000000000003';
 insert into public.sections(id,name,slug,navigation_order,active) values
   ('a1000000-0000-0000-0000-000000000001','Tax one','tax-one',1,true),
   ('a1000000-0000-0000-0000-000000000002','Tax off','tax-off',2,false);
@@ -22,6 +27,8 @@ insert into public.articles(id,owner_profile_id,section_id,title,slug,status)
     'a1000000-0000-0000-0000-000000000001','Tax story','tax-story','draft'),
   ('a3000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000002',
     'a1000000-0000-0000-0000-000000000001','Tax story two','tax-story-two','draft');
+update public.articles set status='published', published_at=now()
+where id='a3000000-0000-0000-0000-000000000002';
 insert into public.article_tags(article_id,tag_id) values
   ('a3000000-0000-0000-0000-000000000001','a2000000-0000-0000-0000-000000000001'),
   ('a3000000-0000-0000-0000-000000000001','a2000000-0000-0000-0000-000000000002'),
@@ -37,6 +44,13 @@ select is(public.rename_tag('a2000000-0000-0000-0000-000000000004','b0000000-000
   'forbidden','author cannot rename a tag');
 select is(public.delete_unused_tag('a2000000-0000-0000-0000-000000000004','b0000000-0000-0000-0000-000000000003')->>'code',
   'forbidden','author cannot delete a tag');
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000003',true);
+select is(public.create_taxonomy('section',gen_random_uuid(),'Denied section',9,null)->>'code',
+  'forbidden','editor cannot create a section');
+select is(public.rename_tag('a2000000-0000-0000-0000-000000000004',gen_random_uuid(),'Denied tag')->>'code',
+  'forbidden','editor cannot rename a tag');
+select is(public.delete_taxonomy('section','a1000000-0000-0000-0000-000000000002',gen_random_uuid())->>'code',
+  'forbidden','editor cannot delete an unused section');
 
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);
 select is(public.create_taxonomy('section','b0000000-0000-0000-0000-000000000010',' Bad',1,null)->>'code',
@@ -78,6 +92,9 @@ select is(public.merge_tags('a2000000-0000-0000-0000-000000000001','a2000000-000
   'true','an exact merge retry replays');
 select is((select count(*)::int from public.article_tags where tag_id='a2000000-0000-0000-0000-000000000002'),2,
   'every story keeps the surviving tag exactly once');
+select is((select count(*)::int from public.article_tags where
+  article_id='a3000000-0000-0000-0000-000000000002' and tag_id='a2000000-0000-0000-0000-000000000002'),1,
+  'a published story keeps the surviving tag once');
 select is((select count(*)::int from public.tags where id='a2000000-0000-0000-0000-000000000001'),0,'merged tag is gone');
 select is(public.delete_unused_tag('a2000000-0000-0000-0000-000000000002','b0000000-0000-0000-0000-000000000025')->>'code',
   'conflict','a used tag cannot be deleted');
@@ -106,6 +123,23 @@ select is((select count(*)::int from public.audit_events where action in
   ('section.created','category.created','tag.renamed','tag.merged','tag.deleted',
     'section.deleted','category.deleted')) - (select n from audit_before),8,
   'every change is audited once');
+select results_eq(
+  $$select correlation_id, action from public.audit_events
+    where correlation_id in (
+      'b0000000-0000-0000-0000-000000000013', 'b0000000-0000-0000-0000-000000000015',
+      'b0000000-0000-0000-0000-000000000016', 'b0000000-0000-0000-0000-000000000022',
+      'b0000000-0000-0000-0000-000000000024', 'b0000000-0000-0000-0000-000000000026',
+      'b0000000-0000-0000-0000-000000000031', 'b0000000-0000-0000-0000-000000000032')
+    order by correlation_id$$,
+  $$values ('b0000000-0000-0000-0000-000000000013'::uuid,'section.created'),
+    ('b0000000-0000-0000-0000-000000000015'::uuid,'section.created'),
+    ('b0000000-0000-0000-0000-000000000016'::uuid,'category.created'),
+    ('b0000000-0000-0000-0000-000000000022'::uuid,'tag.renamed'),
+    ('b0000000-0000-0000-0000-000000000024'::uuid,'tag.merged'),
+    ('b0000000-0000-0000-0000-000000000026'::uuid,'tag.deleted'),
+    ('b0000000-0000-0000-0000-000000000031'::uuid,'category.deleted'),
+    ('b0000000-0000-0000-0000-000000000032'::uuid,'section.deleted')$$,
+  'taxonomy writes record one expected action per committed request');
 insert into public.sections(name,slug)
 select 'Cap section '||n,'cap-section-'||n
 from generate_series(1,100-(select count(*)::int from public.sections where active)) n;

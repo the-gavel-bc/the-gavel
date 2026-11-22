@@ -100,3 +100,35 @@ it("returns safe non-indexed metadata for unavailable and invalid pages", async 
   });
   expect(await sectionMetadata(sectionProps)).toMatchObject({ title: "News" });
 });
+
+it("forwards the letters cursor and excludes continuation pages from indexing", async () => {
+  mocks.read.mockResolvedValue({
+    kind: "ok",
+    archive: {
+      ...archive,
+      title: "Letter to the Editor",
+      href: "/letters",
+      isLetters: true,
+    },
+    items: [],
+    nextCursor: null,
+    continuation: true,
+  });
+  const props = {
+    ...lettersProps,
+    searchParams: Promise.resolve({ cursor: "letters-next" }),
+  };
+  render(await Letters(props));
+  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+    "Letter to the Editor",
+  );
+  expect(mocks.read).toHaveBeenLastCalledWith(
+    "letters",
+    "",
+    "",
+    "letters-next",
+  );
+  expect(await lettersMetadata(props)).toMatchObject({
+    robots: { index: false, follow: true },
+  });
+});
