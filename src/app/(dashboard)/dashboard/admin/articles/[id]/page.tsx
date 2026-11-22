@@ -8,6 +8,8 @@ import { GuardedDashboardLink } from "@/frontend/components/dashboard/guarded-da
 import { ArticleDeletion } from "@/frontend/features/articles/components/article-deletion/article-deletion";
 import { ArticleLifecycleControls } from "@/frontend/features/articles/components/article-lifecycle-controls/article-lifecycle-controls";
 
+export const metadata = { title: "Manage article" };
+
 export default async function AdminArticleDetailPage({
   params,
 }: {
@@ -53,7 +55,11 @@ export default async function AdminArticleDetailPage({
             status="archived"
             disabled={false}
           />
-          <ArticleDeletion articleId={article.id} version={article.version} />
+          <ArticleDeletion
+            articleId={article.id}
+            title={article.title}
+            version={article.version}
+          />
         </>
       ) : (
         <p>

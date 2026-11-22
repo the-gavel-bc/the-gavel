@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/frontend/components/ui/button/button";
 import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -25,14 +26,15 @@ const messages = {
 };
 export function ArticleDeletion({
   articleId,
+  title,
   version,
 }: {
   articleId: string;
+  title: string;
   version: number;
 }) {
   const router = useRouter();
   const { confirm, confirmDialog } = useConfirm();
-  const [confirmation, setConfirmation] = useState("");
   const [pending, setPending] = useState(false);
   const [retry, setRetry] = useState<DeletionCommand | null>(null);
   const [result, setResult] = useState<DeletionResult | null>(null);
@@ -57,7 +59,7 @@ export function ArticleDeletion({
     );
     setResult(next);
     setPending(false);
-    busy.current = false;
+    busy.current = next.ok;
     if (next.ok) {
       router.push("/dashboard/admin/articles?deleted=1");
       router.refresh();
@@ -70,24 +72,15 @@ export function ArticleDeletion({
         This permanently removes the article and its revision history. Audit
         records remain. Image removal may continue after the article is deleted.
       </p>
-      <label>
-        Type DELETE to confirm
-        <input
-          value={confirmation}
-          disabled={pending || Boolean(retry)}
-          onChange={(event) => setConfirmation(event.target.value)}
-          autoComplete="off"
-        />
-      </label>
-      <button
+      <Button
         type="button"
-        disabled={confirmation !== "DELETE" || pending || Boolean(retry)}
+        variant="danger"
+        disabled={pending || Boolean(retry) || result?.ok === true}
         onClick={async () => {
           if (
             !(await confirm({
               title: "Permanently delete this article?",
-              message:
-                "The article and its revision history are removed. This cannot be undone.",
+              message: `“${title}” and its revision history will be permanently removed.`,
               confirmLabel: "Delete permanently",
               cancelLabel: "Cancel",
               danger: true,
@@ -103,7 +96,7 @@ export function ArticleDeletion({
         }}
       >
         Permanently delete article
-      </button>
+      </Button>
       {pending && <p role="status">Deleting article…</p>}
       {result && !result.ok && (
         <div role="alert">

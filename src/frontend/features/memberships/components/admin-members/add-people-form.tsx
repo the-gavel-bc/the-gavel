@@ -1,4 +1,5 @@
 "use client";
+import { useFieldErrors } from "@/frontend/components/ui/field-errors/use-field-errors";
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -20,12 +21,12 @@ import styles from "./admin-members.module.css";
 
 export function AddPeopleForm() {
   const router = useRouter();
+  const fields = useFieldErrors();
   const { confirm, confirmDialog } = useConfirm();
   const [text, setText] = useState("");
   const [role, setRole] = useState<StaffRole>("author");
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<InvitationResult | null>(null);
-  const [problem, setProblem] = useState("");
   // The same request id is reused while the original request is uncertain.
   const [retry, setRetry] = useState<InvitationCommand | null>(null);
   const busy = useRef(false);
@@ -51,18 +52,20 @@ export function AddPeopleForm() {
     }
   }
 
-  async function submit(event: React.FormEvent) {
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (pending || retry) return;
     const { entries, invalid } = parseInviteText(text);
     if (invalid.length) {
-      setProblem(
-        `Only Boston College addresses (name@bc.edu) can be added. Check: ${invalid.slice(0, 3).join(", ")}${invalid.length > 3 ? "…" : ""}`,
-      );
+      fields.show(event.currentTarget, {
+        text: `Only Boston College addresses (name@bc.edu) can be added. Check ${invalid.slice(0, 3).join(", ")}${invalid.length > 3 ? "…" : ""}.`,
+      });
       return;
     }
     if (!entries.length || entries.length > MAX_INVITES) {
-      setProblem(`Enter between 1 and ${MAX_INVITES} email addresses.`);
+      fields.show(event.currentTarget, {
+        text: `Enter between 1 and ${MAX_INVITES} email addresses.`,
+      });
       return;
     }
     if (
@@ -76,7 +79,6 @@ export function AddPeopleForm() {
       }))
     )
       return;
-    setProblem("");
     void run({
       kind: "invite",
       requestId: crypto.randomUUID(),
@@ -89,8 +91,12 @@ export function AddPeopleForm() {
       <label>
         BC email addresses
         <textarea
+          {...fields.input("text")}
           value={text}
-          onChange={(event) => setText(event.target.value)}
+          onChange={(event) => {
+            setText(event.target.value);
+            fields.clear("text");
+          }}
           rows={4}
           placeholder={"name@bc.edu\nname@bc.edu, Optional Name"}
           disabled={pending || Boolean(retry)}
@@ -116,7 +122,7 @@ export function AddPeopleForm() {
         </Button>
       </div>
       {confirmDialog}
-      {problem && <p role="alert">{problem}</p>}
+      {fields.messages}
       {pending && <p role="status">Saving…</p>}
       {result?.ok && "added" in result && (
         <p role="status">

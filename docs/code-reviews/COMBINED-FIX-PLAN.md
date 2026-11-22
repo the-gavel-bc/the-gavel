@@ -8,6 +8,7 @@ Companion to [COMBINED-REVIEW-REPORT.md](COMBINED-REVIEW-REPORT.md). Scope: urge
 - C-05 and the original CI and staff batches are already on `main`. The C-27 browser repairs pass locally, including both Playwright projects. Hosted verification is tracked in the deferred register.
 - Batch 3 follow-up includes D-12, G-03, G-04 and G-12 on the working branch. Profile writes now check eligibility before waiting for the global locks (D-13). Moving the guest credit quota ahead of the locks while preserving exact retries remains open, alongside D-11 and G-11.
 - The working branch also includes D-14, G-05 and G-06 with focused regression coverage. G-01 did not reproduce in the review queue with a 240-code-point title.
+- The Batch 6 dashboard follow-up adds page titles, a single named deletion confirmation, reader motion and link styles, and focused field errors. The contributor contract correction is in the separate guest quota PR.
 
 ## Master sequence (single ordered list)
 

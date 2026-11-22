@@ -110,3 +110,20 @@ it.each([false, true])(
     ).toBe(publishedByMe);
   },
 );
+
+it("keeps archive actions disabled after a successful permanent deletion", async () => {
+  mocks.remove.mockResolvedValue({ ok: true });
+  render(<ArticleRowActions article={{ ...base, status: "archived" }} admin />);
+  const remove = screen.getByRole("button", {
+    name: "Delete article: Budget vote",
+  });
+  await userEvent.click(remove);
+  await userEvent.click(
+    screen.getByRole("button", { name: "Delete permanently" }),
+  );
+  expect(remove).toBeDisabled();
+  expect(
+    screen.getByRole("button", { name: "Restore article: Budget vote" }),
+  ).toBeDisabled();
+  expect(mocks.remove).toHaveBeenCalledTimes(1);
+});

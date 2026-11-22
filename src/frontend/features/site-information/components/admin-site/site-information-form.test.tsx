@@ -1,4 +1,5 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock(
   "@/frontend/components/ui/confirm-dialog/use-confirm",
@@ -54,6 +55,40 @@ describe("site information form", () => {
         facebookUrl: null,
       }),
     );
+  });
+  it("focuses the first invalid field and describes the correction", () => {
+    render(<SiteInformationForm information={information} />);
+    const email = screen.getByLabelText("Contact email");
+    const spotify = screen.getByLabelText("Spotify URL");
+    fireEvent.change(email, { target: { value: "broken@" } });
+    fireEvent.change(spotify, {
+      target: { value: "https://example.com/show" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Save site information" }),
+    );
+    expect(email).toHaveFocus();
+    expect(email).toHaveAttribute("aria-invalid", "true");
+    expect(email).toHaveAccessibleDescription(
+      "Enter a valid contact email address.",
+    );
+    expect(spotify).toHaveAccessibleDescription("Enter an HTTPS Spotify URL.");
+    expect(mocks.save).not.toHaveBeenCalled();
+    fireEvent.change(email, { target: { value: "news@example.com" } });
+    expect(email).not.toHaveAttribute("aria-invalid");
+    expect(spotify).toHaveAttribute("aria-invalid", "true");
+  });
+  it("announces errors when Enter leaves focus on the invalid field", async () => {
+    const { container } = render(
+      <SiteInformationForm information={information} />,
+    );
+    const email = screen.getByLabelText("Contact email");
+    const live = container.querySelector('[aria-live="assertive"]');
+    expect(live).toBeEmptyDOMElement();
+    await userEvent.type(email, "broken@{Enter}");
+    expect(email).toHaveFocus();
+    expect(live).toHaveTextContent("Enter a valid contact email address.");
+    expect(mocks.save).not.toHaveBeenCalled();
   });
   it("protects unsaved input and offers conflict recovery", async () => {
     mocks.save.mockResolvedValue({ ok: false, code: "conflict" });

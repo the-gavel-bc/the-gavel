@@ -6,6 +6,8 @@ import { listHomepageStoriesAction } from "@/backend/homepage/homepage-curation/
 import { getAdminHomepageCuration } from "@/backend/homepage/homepage-curation/homepage-curation";
 import { HomepageEditor } from "@/frontend/features/homepage/components/admin-homepage/homepage-editor";
 
+export const metadata = { title: "Homepage curation" };
+
 export default async function AdminHomepagePage() {
   const access = await requireActiveMembership();
   if (access.role !== "administrator")

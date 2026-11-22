@@ -75,7 +75,6 @@ export function HomepageEditor({
   function apply(outcome: { choices: Choices; error?: string }, said: string) {
     if (outcome.error) {
       setNotice(outcome.error);
-      setAnnouncement(outcome.error);
       return;
     }
     setNotice("");
@@ -192,6 +191,12 @@ export function HomepageEditor({
   const full: Group[] = (["featured", "readThis"] as const).filter(
     (group) => choices[group].length >= ROW_LIMIT,
   );
+  const saveMessage = pending
+    ? "Saving selections…"
+    : result?.ok && !dirty
+      ? "Homepage selections saved."
+      : "";
+  const saveError = result && !result.ok ? messages[result.code] : "";
   return (
     <div className={styles.page}>
       <SlotBoard
@@ -214,17 +219,20 @@ export function HomepageEditor({
       <p role="status" aria-live="polite" className={styles.srOnly}>
         {announcement}
       </p>
+      <p aria-live="polite" className={styles.srOnly}>
+        {saveMessage}
+      </p>
+      <p role="alert" className={styles.srOnly}>
+        {[notice, saveError].filter(Boolean).join(" ")}
+      </p>
       {(dirty || pending || result || notice) && (
         <div className={styles.saveBar} data-dirty={dirty || undefined}>
           <div className={styles.saveText}>
-            {notice && <p role="alert">{notice}</p>}
-            {pending && <p role="status">Saving selections…</p>}
-            {result?.ok && !dirty && (
-              <p role="status">Homepage selections saved.</p>
-            )}
+            {notice && <p aria-hidden="true">{notice}</p>}
+            {saveMessage && <p aria-hidden="true">{saveMessage}</p>}
             {result && !result.ok && (
-              <div role="alert">
-                <p>{messages[result.code]}</p>
+              <div>
+                <p aria-hidden="true">{saveError}</p>
                 {retry && (
                   <Button
                     type="button"

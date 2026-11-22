@@ -63,11 +63,13 @@ export function ArticleRowActions({
   const router = useRouter();
   const { confirm, confirmDialog } = useConfirm();
   const [pending, setPending] = useState(false);
+  const [deleted, setDeleted] = useState(false);
   const [problem, setProblem] = useState("");
   const busy = useRef(false);
 
   async function run(
     call: () => Promise<{ ok: boolean; code?: string }>,
+    deleting = false,
   ): Promise<void> {
     if (busy.current) return;
     busy.current = true;
@@ -79,7 +81,9 @@ export function ArticleRowActions({
     } catch {
       result = { ok: false, code: "unavailable" };
     }
-    busy.current = false;
+    const didDelete = result.ok && deleting;
+    busy.current = didDelete;
+    setDeleted(didDelete);
     setPending(false);
     if (result.ok) router.refresh();
     else setProblem(message(result.code ?? "unavailable"));
@@ -119,14 +123,14 @@ export function ArticleRowActions({
     if (
       !(await confirm({
         title: "Permanently delete this article?",
-        message: `“${article.title}” and its revision history are removed. This cannot be undone.`,
+        message: `“${article.title}” and its revision history will be permanently removed.`,
         confirmLabel: "Delete permanently",
         cancelLabel: "Cancel",
         danger: true,
       }))
     )
       return;
-    await run(() => deleteArticleAction({ ...command(), confirm: true }));
+    await run(() => deleteArticleAction({ ...command(), confirm: true }), true);
   }
 
   return (
@@ -155,7 +159,7 @@ export function ArticleRowActions({
         <Button
           type="button"
           variant="danger"
-          disabled={pending}
+          disabled={pending || deleted}
           onClick={() => void archive()}
           aria-label={`Archive article: ${article.title}`}
         >
@@ -167,7 +171,7 @@ export function ArticleRowActions({
           <Button
             type="button"
             variant="secondary"
-            disabled={pending}
+            disabled={pending || deleted}
             onClick={() => void restore()}
             aria-label={`Restore article: ${article.title}`}
           >
@@ -176,7 +180,7 @@ export function ArticleRowActions({
           <Button
             type="button"
             variant="danger"
-            disabled={pending}
+            disabled={pending || deleted}
             onClick={() => void remove()}
             aria-label={`Delete article: ${article.title}`}
           >
@@ -185,7 +189,7 @@ export function ArticleRowActions({
         </>
       )}
       {pending && <span role="status">Working…</span>}
-      {problem && <p role="alert">{problem}</p>}
+      <p role="alert">{problem}</p>
       {confirmDialog}
     </div>
   );

@@ -24,6 +24,8 @@ const date = new Intl.DateTimeFormat("en-US", {
   timeZone: "America/New_York",
 });
 
+export const metadata = { title: "Membership activity" };
+
 export default async function MemberAuditPage({
   searchParams,
 }: {

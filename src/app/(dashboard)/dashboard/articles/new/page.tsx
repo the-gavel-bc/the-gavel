@@ -4,6 +4,8 @@ import { requireActiveMembership } from "@/backend/auth/access/access";
 import { getDraftOptions } from "@/backend/articles/draft-queries/draft-queries";
 import { DraftForm } from "@/frontend/features/articles/components/draft-form/draft-form";
 import type { DraftInput } from "@/shared/articles/draft-contract/draft-contract";
+export const metadata = { title: "New draft" };
+
 export default async function NewDraftPage() {
   await requireActiveMembership();
   let options;

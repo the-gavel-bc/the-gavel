@@ -111,7 +111,7 @@ Slice 2:
 - **Editor:**
   - It groups details in a card.
   - A sticky save bar holds the save status, the visibility note and the save button.
-  - Formatting buttons are chips, filled when pressed.
+  - Formatting buttons appear above the editor and show their pressed state.
 
 ## Reader refresh (2026-11-13)
 
@@ -121,8 +121,8 @@ From the [reader refresh plan](superpowers/plans/2026-11-13-reader-refresh.md), 
   - `--reader-ease` is `cubic-bezier(0.2, 0.7, 0.2, 1)`.
   - Durations: `--reader-fast` 180ms for hover and press, `--reader-medium` 260ms for entrances and panels, `--reader-slow` 500ms for image zoom.
   - `--reader-shadow` is the shared shadow.
-  - All motion is off under `prefers-reduced-motion: reduce`.
-- **Cards:** rounded image frames zoom 3–6% on hover, titles turn blue, and grids and lists rise into view with scroll-driven CSS where supported.
+  - Reduced-motion settings zero the reader duration tokens. Components with standalone animations disable those animations in their own styles.
+- **Cards:** rounded image frames zoom 3–6% on hover, and titles turn blue.
 - **Skeletons:** story image frames shimmer until the photo paints. A navigation that takes longer than 1.5 seconds shows a skeleton shaped like the destination: home, article, archive, author, search or information page. Reader routes keep no `loading.tsx`, so 404 responses stay 404.
 - **Navigation:**
   - On desktop the band is sticky, with pill hover states and a filled, underlined current pill. Dropdowns animate open.
@@ -145,4 +145,4 @@ Desk fixes (2026-11-14): destructive actions use an outlined red style (`Button 
 
 Desk directories (2026-11-16): Memberships and Taxonomy share `admin-list` styles (toolbar card, card rows, state badges), matching the article lists. Desk timestamps are shown in Eastern time with an "ET" label.
 
-Homepage curation (2026-11-17): the desk page mirrors the public homepage with a lead slot and two rows of four cards (image, title, left and right arrows, remove), dashed tiles for empty slots, a sticky save bar, and a horizontal library of published stories with search and arrow paging. Dragging is a convenience; every action also works with buttons, and moves are announced in a polite live region.
+Homepage curation (2026-11-17): the desk page mirrors the public homepage with a lead slot and two rows of four cards (image, title, left and right arrows, remove), dashed tiles for empty slots, a sticky save bar, and a horizontal library of published stories with search and arrow paging. Buttons add stories, remove picks, and reorder picks within a row. Dragging also moves picks across groups. Button moves are announced in a polite live region.

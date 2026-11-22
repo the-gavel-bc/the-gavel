@@ -8,6 +8,10 @@ import {
   ArticleFilters,
   ArticleList,
 } from "@/frontend/features/articles/components/article-list/article-list";
+export const metadata = {
+  title: { absolute: "My articles | The Gavel Dashboard" },
+};
+
 export default async function DashboardPage({
   searchParams,
 }: {

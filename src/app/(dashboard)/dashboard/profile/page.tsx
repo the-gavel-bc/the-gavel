@@ -3,6 +3,8 @@ import { unstable_rethrow } from "next/navigation";
 import { getOwnProfile } from "@/backend/profiles/own-profile/own-profile";
 import { OwnProfileForm } from "@/frontend/features/profiles/components/profile/own-profile-form";
 
+export const metadata = { title: "My public profile" };
+
 export default async function OwnProfilePage() {
   let profile;
   try {
