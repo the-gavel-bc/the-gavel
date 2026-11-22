@@ -2,6 +2,8 @@ import { unstable_rethrow } from "next/navigation";
 import { getReviewQueue } from "@/backend/articles/review-queue/review-queue";
 import { ReviewQueue } from "@/frontend/features/articles/components/review-queue/review-queue";
 
+export const metadata = { title: "Review queue" };
+
 export default async function ReviewPage() {
   let items;
   try {

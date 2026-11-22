@@ -1,4 +1,5 @@
 "use client";
+import { useFieldErrors } from "@/frontend/components/ui/field-errors/use-field-errors";
 import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -10,6 +11,16 @@ import {
   type SiteInformationResult,
 } from "@/shared/site-information/site-information/site-information-command";
 import type { SiteInformation } from "@/backend/site-information/site-information/site-information";
+const fieldMessages: Record<string, string> = {
+  mission: "Enter plain text for the mission, up to 5,000 characters.",
+  contactEmail: "Enter a valid contact email address.",
+  instagramUrl: "Enter an HTTPS Instagram profile URL.",
+  spotifyUrl: "Enter an HTTPS Spotify URL.",
+  linkedinUrl: "Enter an HTTPS LinkedIn profile or organization URL.",
+  facebookUrl: "Enter an HTTPS Facebook page URL.",
+  submissionInstructions:
+    "Enter plain text for submission instructions, up to 5,000 characters.",
+};
 const messages = {
   invalid_input:
     "Check the field lengths, email and social links. Plain text only.",
@@ -26,6 +37,7 @@ export function SiteInformationForm({
   information: SiteInformation;
 }) {
   const router = useRouter();
+  const fields = useFieldErrors();
   const { confirm, confirmDialog } = useConfirm();
   const [mission, setMission] = useState(information.mission ?? "");
   const [contactEmail, setContactEmail] = useState(
@@ -108,13 +120,24 @@ export function SiteInformationForm({
     };
     const parsed = siteInformationCommandSchema.safeParse(command);
     if (!parsed.success) {
-      setResult({ ok: false, code: "invalid_input" });
+      const errors: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        const field = String(issue.path[0]);
+        if (Object.hasOwn(fieldMessages, field))
+          errors[field] = fieldMessages[field];
+      }
+      fields.show(event.currentTarget, errors);
+      setResult(
+        Object.keys(errors).length
+          ? null
+          : { ok: false, code: "invalid_input" },
+      );
       return;
     }
     void run(parsed.data);
   }
   return (
-    <form onSubmit={save}>
+    <form onSubmit={save} noValidate>
       <p>
         Leave a field empty if it is not yet known. Text is plain and may
         include paragraphs.
@@ -122,77 +145,106 @@ export function SiteInformationForm({
       <label>
         Mission
         <textarea
+          {...fields.input("mission")}
           value={mission}
           maxLength={5000}
           rows={5}
           disabled={blocked}
-          onChange={(e) => setMission(e.target.value)}
+          onChange={(e) => {
+            setMission(e.target.value);
+            fields.clear("mission");
+          }}
         />
       </label>
       <label>
         Contact email
         <input
           type="email"
+          {...fields.input("contactEmail")}
           value={contactEmail}
           maxLength={254}
           disabled={blocked}
-          onChange={(e) => setContactEmail(e.target.value)}
+          onChange={(e) => {
+            setContactEmail(e.target.value);
+            fields.clear("contactEmail");
+          }}
         />
       </label>
       <label>
         Instagram URL
         <input
           type="url"
+          {...fields.input("instagramUrl")}
           value={instagramUrl}
           maxLength={255}
           placeholder="https://www.instagram.com/your-account/"
           disabled={blocked}
-          onChange={(e) => setInstagramUrl(e.target.value)}
+          onChange={(e) => {
+            setInstagramUrl(e.target.value);
+            fields.clear("instagramUrl");
+          }}
         />
       </label>
       <label>
         Spotify URL
         <input
           type="url"
+          {...fields.input("spotifyUrl")}
           value={spotifyUrl}
           maxLength={255}
           placeholder="https://open.spotify.com/show/your-show"
           disabled={blocked}
-          onChange={(e) => setSpotifyUrl(e.target.value)}
+          onChange={(e) => {
+            setSpotifyUrl(e.target.value);
+            fields.clear("spotifyUrl");
+          }}
         />
       </label>
       <label>
         LinkedIn URL
         <input
           type="url"
+          {...fields.input("linkedinUrl")}
           value={linkedinUrl}
           maxLength={255}
           placeholder="https://www.linkedin.com/company/your-page/"
           disabled={blocked}
-          onChange={(e) => setLinkedinUrl(e.target.value)}
+          onChange={(e) => {
+            setLinkedinUrl(e.target.value);
+            fields.clear("linkedinUrl");
+          }}
         />
       </label>
       <label>
         Facebook URL
         <input
           type="url"
+          {...fields.input("facebookUrl")}
           value={facebookUrl}
           maxLength={255}
           placeholder="https://www.facebook.com/your-page"
           disabled={blocked}
-          onChange={(e) => setFacebookUrl(e.target.value)}
+          onChange={(e) => {
+            setFacebookUrl(e.target.value);
+            fields.clear("facebookUrl");
+          }}
         />
       </label>
       <label>
         Submission instructions
         <textarea
+          {...fields.input("submissionInstructions")}
           value={submissionInstructions}
           maxLength={5000}
           rows={5}
           disabled={blocked}
-          onChange={(e) => setSubmissionInstructions(e.target.value)}
+          onChange={(e) => {
+            setSubmissionInstructions(e.target.value);
+            fields.clear("submissionInstructions");
+          }}
         />
       </label>
+      {fields.messages}
       <button type="submit" disabled={blocked}>
         Save site information
       </button>

@@ -41,8 +41,26 @@ test("administrator can open settings and authors cannot", async ({
 }) => {
   await setLocalSession(context, fixture.users.admin);
   await page.goto("/dashboard/admin/site");
-  await expect(page.getByLabel("Instagram URL")).toBeVisible();
+  await expect(page).toHaveTitle("Site information | The Gavel Dashboard");
+  const instagram = page.getByLabel("Instagram URL");
+  await expect(instagram).toBeVisible();
+  await instagram.fill("https://example.com/gavel");
+  await page.getByRole("button", { name: "Save site information" }).click();
+  await expect(instagram).toBeFocused();
+  await expect(instagram).toHaveAccessibleDescription(
+    "Enter an HTTPS Instagram profile URL.",
+  );
   await setLocalSession(context, fixture.users.author);
   await page.goto("/dashboard/admin/site");
   await expect(page.getByText("Administrator access required.")).toBeVisible();
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+    "content",
+    /noindex/,
+  );
+  await page.goto("/dashboard");
+  await expect(page).toHaveTitle("My articles | The Gavel Dashboard");
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+    "content",
+    /noindex/,
+  );
 });

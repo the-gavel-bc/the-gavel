@@ -53,3 +53,11 @@
 .surface :is(h1, h2, h3) {
   font-family: var(--reader-display);
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .surface {
+    --reader-fast: 0ms;
+    --reader-medium: 0ms;
+    --reader-slow: 0ms;
+  }
+}

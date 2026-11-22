@@ -8,6 +8,8 @@ import {
 } from "@/backend/articles/admin-article-queries/admin-article-queries";
 import { AdminArticleList } from "@/frontend/features/articles/components/admin-articles/admin-article-list";
 
+export const metadata = { title: "Article management" };
+
 export default async function AdminArticlesPage({
   searchParams,
 }: {

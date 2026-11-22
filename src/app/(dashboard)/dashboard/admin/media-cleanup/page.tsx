@@ -14,6 +14,8 @@ const date = new Intl.DateTimeFormat("en-US", {
   timeStyle: "short",
   timeZone: "America/New_York",
 });
+export const metadata = { title: "Media cleanup" };
+
 export default async function MediaCleanupPage() {
   const access = await requireActiveMembership();
   if (access.role !== "administrator")

@@ -7,6 +7,8 @@ import {
 } from "@/backend/articles/admin-audit/admin-audit";
 import { AdminAudit } from "@/frontend/features/articles/components/admin-audit/admin-audit";
 
+export const metadata = { title: "Article activity" };
+
 export default async function AdminAuditPage({
   searchParams,
 }: {

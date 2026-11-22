@@ -98,7 +98,9 @@ it("creates a category under the chosen section", async () => {
 it("refuses an empty name", async () => {
   render(<CreateTaxonomyForm kind="section" sections={[]} nextOrder={0} />);
   await userEvent.click(screen.getByRole("button", { name: "Create section" }));
-  expect(screen.getByRole("alert")).toBeVisible();
+  const name = screen.getByRole("textbox", { name: "New section name" });
+  expect(name).toHaveFocus();
+  expect(name).toHaveAccessibleDescription(/Enter a name/);
   expect(mocks.action).not.toHaveBeenCalled();
 });
 

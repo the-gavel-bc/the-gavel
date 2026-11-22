@@ -6,6 +6,8 @@ import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
 import { DraftForm } from "@/frontend/features/articles/components/draft-form/draft-form";
 import { getArticleMainImage } from "@/backend/media/media-queries/media-queries";
 import { ArticleLifecycleControls } from "@/frontend/features/articles/components/article-lifecycle-controls/article-lifecycle-controls";
+export const metadata = { title: "Article details" };
+
 export default async function EditDraftPage({
   params,
 }: {

@@ -10,6 +10,8 @@ import { TaxonomyControls } from "@/frontend/features/taxonomy/components/admin-
 import { TagControls } from "@/frontend/features/taxonomy/components/admin-taxonomy/tag-controls";
 import { CreateTaxonomyForm } from "@/frontend/features/taxonomy/components/admin-taxonomy/create-taxonomy-form";
 
+export const metadata = { title: "Taxonomy" };
+
 export default async function AdminTaxonomyPage({
   searchParams,
 }: {

@@ -10,6 +10,8 @@ import {
 } from "@/backend/memberships/member-directory/member-directory";
 import { AdminMemberList } from "@/frontend/features/memberships/components/admin-members/admin-member-list";
 
+export const metadata = { title: "Memberships" };
+
 export default async function AdminMembersPage({
   searchParams,
 }: {

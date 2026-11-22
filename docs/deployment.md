@@ -110,3 +110,8 @@ The owner approved deferring the matched-resource no-JavaScript recovery defect 
 Apply migrations `20261111060000` through `20261111060300` before deploying the optimization consumers. They add a narrow public footer RPC, private processing quota/checked admission, an article pagination index and checked explicit unused-upload listing/removal. Existing full-homepage and media signatures remain compatible. No row rewrite or automatic media deletion runs. Rollback the application first; additive objects can remain while the previous application runs.
 
 The ordinary pagination `CREATE INDEX` blocks writes during its build. Schedule an acceptable write pause; production build time and write overhead have not been measured. For a larger catalog, plan an operational concurrent build before migration rollout. The two-job image gate is per process and does not impose a deployment-wide cap. See the [optimization plan](superpowers/plans/2026-11-11-low-priority-optimizations.md) for scoped verification and measurements.
+
+
+## Editorial review migrations
+
+Apply the pending migrations in version order before deploying the app that uses the revised RPCs. The November 19–21 release includes editor review authority, publication dates, audit updates, and guarded writes. Smoke-test submit, return, publish, archive, restore, and exact retries with author, editor, and administrator accounts. Verify that anonymous article, tag, and author reads still follow publication eligibility. Fix migration defects with a reviewed forward migration so existing receipts and article history remain available.

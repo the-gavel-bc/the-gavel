@@ -135,9 +135,11 @@ it("pages the library with arrows, searches, and keeps staged choices", async ()
 
 it("rejects unsafe search text before any request", async () => {
   renderEditor();
+  const notice = screen.getByRole("alert");
+  expect(notice).toBeEmptyDOMElement();
   await userEvent.type(screen.getByLabelText("Search titles"), "a<b");
   await userEvent.click(screen.getByRole("button", { name: "Search" }));
-  expect(screen.getByRole("alert")).toHaveTextContent(/letters, numbers/);
+  expect(notice).toHaveTextContent(/letters, numbers/);
   expect(mocks.list).not.toHaveBeenCalled();
 });
 

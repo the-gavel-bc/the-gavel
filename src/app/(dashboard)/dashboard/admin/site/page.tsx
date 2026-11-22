@@ -3,6 +3,8 @@ import { unstable_rethrow } from "next/navigation";
 import { requireActiveMembership } from "@/backend/auth/access/access";
 import { getSiteInformation } from "@/backend/site-information/site-information/site-information";
 import { SiteInformationForm } from "@/frontend/features/site-information/components/admin-site/site-information-form";
+export const metadata = { title: "Site information" };
+
 export default async function AdminSitePage() {
   const access = await requireActiveMembership();
   if (access.role !== "administrator")

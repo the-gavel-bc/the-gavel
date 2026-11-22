@@ -1,4 +1,5 @@
 "use client";
+import { useFieldErrors } from "@/frontend/components/ui/field-errors/use-field-errors";
 import { useState } from "react";
 import { CurationFeedback } from "./curation-feedback";
 import { useCuration } from "./use-curation";
@@ -14,9 +15,9 @@ export function CreateTaxonomyForm({
   nextOrder: number;
 }) {
   const [name, setName] = useState("");
+  const fields = useFieldErrors();
   const [sectionId, setSectionId] = useState(sections[0]?.id ?? "");
   const [order, setOrder] = useState(String(nextOrder));
-  const [problem, setProblem] = useState("");
   const [withCategory, setWithCategory] = useState(false);
   const [firstCategory, setFirstCategory] = useState("");
   const [note, setNote] = useState("");
@@ -26,23 +27,25 @@ export function CreateTaxonomyForm({
     setWithCategory(false);
   });
   const noun = kind === "section" ? "section" : "category";
-  async function submit(event: React.FormEvent) {
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (state.blocked) return;
     const value = Number(order);
     const category = withCategory ? firstCategory : "";
-    if (
-      !name.trim() ||
-      name !== name.trim() ||
-      !/^\d+$/u.test(order) ||
-      value > 2147483647 ||
-      (kind === "category" && !sectionId) ||
-      (withCategory && (!category.trim() || category !== category.trim()))
-    ) {
-      setProblem("Enter a name without leading or trailing spaces.");
+    const errors: Record<string, string> = {};
+    if (!name.trim() || name !== name.trim())
+      errors.name = "Enter a name without leading or trailing spaces.";
+    if (kind === "category" && !sectionId)
+      errors.sectionId = "Select a section for this category.";
+    if (!/^\d+$/u.test(order) || value > 2147483647)
+      errors.order = "Enter a whole navigation order from 0 to 2,147,483,647.";
+    if (withCategory && (!category.trim() || category !== category.trim()))
+      errors.firstCategory =
+        "Enter a first category name without leading or trailing spaces.";
+    if (Object.keys(errors).length) {
+      fields.show(event.currentTarget, errors);
       return;
     }
-    setProblem("");
     setNote("");
     const base = {
       requestId: crypto.randomUUID(),
@@ -76,15 +79,22 @@ export function CreateTaxonomyForm({
     }
   }
   return (
-    <form onSubmit={submit} className={list.toolbar} aria-label={`New ${noun}`}>
+    <form
+      onSubmit={submit}
+      noValidate
+      className={list.toolbar}
+      aria-label={`New ${noun}`}
+    >
       <label>
         {`New ${noun} name`}
         <input
+          {...fields.input("name")}
           value={name}
           maxLength={120}
           disabled={state.blocked}
           onChange={(event) => {
             setName(event.target.value);
+            fields.clear("name");
             setNote("");
           }}
         />
@@ -93,9 +103,13 @@ export function CreateTaxonomyForm({
         <label>
           Section
           <select
+            {...fields.input("sectionId")}
             value={sectionId}
             disabled={state.blocked}
-            onChange={(event) => setSectionId(event.target.value)}
+            onChange={(event) => {
+              setSectionId(event.target.value);
+              fields.clear("sectionId");
+            }}
           >
             {sections.map((section) => (
               <option key={section.id} value={section.id}>
@@ -111,9 +125,13 @@ export function CreateTaxonomyForm({
           type="number"
           min="0"
           step="1"
+          {...fields.input("order")}
           value={order}
           disabled={state.blocked}
-          onChange={(event) => setOrder(event.target.value)}
+          onChange={(event) => {
+            setOrder(event.target.value);
+            fields.clear("order");
+          }}
         />
       </label>
       {kind === "section" && (
@@ -123,7 +141,10 @@ export function CreateTaxonomyForm({
               type="checkbox"
               checked={withCategory}
               disabled={state.blocked}
-              onChange={(event) => setWithCategory(event.target.checked)}
+              onChange={(event) => {
+                setWithCategory(event.target.checked);
+                fields.clear("firstCategory");
+              }}
             />
             Also create a first category
           </label>
@@ -131,10 +152,14 @@ export function CreateTaxonomyForm({
             <label>
               First category name
               <input
+                {...fields.input("firstCategory")}
                 value={firstCategory}
                 maxLength={120}
                 disabled={state.blocked}
-                onChange={(event) => setFirstCategory(event.target.value)}
+                onChange={(event) => {
+                  setFirstCategory(event.target.value);
+                  fields.clear("firstCategory");
+                }}
               />
             </label>
           )}
@@ -143,7 +168,7 @@ export function CreateTaxonomyForm({
       <button type="submit" disabled={state.blocked}>
         {`Create ${noun}`}
       </button>
-      {problem && <p role="alert">{problem}</p>}
+      {fields.messages}
       {note && <p role="status">{note}</p>}
       <CurationFeedback state={state} showSaved={false} />
     </form>

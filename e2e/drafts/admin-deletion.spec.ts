@@ -42,13 +42,12 @@ test("administrator confirms deletion of an archived article", async ({
   const button = page.getByRole("button", {
     name: "Permanently delete article",
   });
-  await expect(button).toBeDisabled();
-  await page.getByLabel("Type DELETE to confirm").fill("DELETE");
+  await expect(button).toBeEnabled();
+  const title = await page.getByRole("heading", { level: 1 }).innerText();
   await button.click();
-  await page
-    .getByRole("alertdialog")
-    .getByRole("button", { name: "Delete permanently" })
-    .click();
+  const dialog = page.getByRole("alertdialog");
+  await expect(dialog).toContainText(title);
+  await dialog.getByRole("button", { name: "Delete permanently" }).click();
   await expect(page).toHaveURL(/\/dashboard\/admin\/articles\?deleted=1$/);
   await expect(page.getByRole("status")).toContainText(
     "Image cleanup continues",

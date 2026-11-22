@@ -5,7 +5,10 @@ import { requireActiveMembership } from "@/backend/auth/access/access";
 import { signOut } from "@/backend/auth/actions/actions";
 import { DashboardSignOutForm } from "@/frontend/features/auth/components/dashboard-sign-out-form/dashboard-sign-out-form";
 import { DraftNavigationProvider } from "@/frontend/components/dashboard/draft-navigation-guard/draft-navigation-guard";
-export const metadata = excludedMetadata("Dashboard");
+export const metadata = {
+  ...excludedMetadata("Dashboard"),
+  title: { default: "Dashboard", template: "%s | The Gavel Dashboard" },
+};
 export default async function DashboardLayout({
   children,
 }: {
