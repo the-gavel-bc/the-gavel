@@ -304,6 +304,10 @@ Explicit unused-image removal accepts unreferenced uploading claims. `private.ar
 
 `ensure_tag(p_name text)` is authenticated-only and requires an eligible active member and active profile. It trims and collapses whitespace, accepts 1–120 characters, rejects remaining control characters, reuses case-insensitive names and allocates canonical collision-safe slugs. Success returns `{ok,id,name,slug,created}`; safe failures are `forbidden`, `invalid_input`, `rate_limited`, or `unavailable`. It consumes the existing 30-attempt/60-second draft quota. The editor adds at most ten tags while existing server draft validation still accepts up to 64. See the [editor plan](superpowers/plans/2026-11-12-editor-tags-contributors-photo.md).
 
+### Generated taxonomy slugs
+
+New section and tag slugs skip the reserved public route names in [ADR 0014](decisions/0014-review-follow-up-decisions.md). A section, category, or tag name that produces no Latin slug uses `n-` followed by eight hex characters of the name’s SHA-256 digest. Numeric collision suffixes still apply. Existing taxonomy slugs keep their URLs.
+
 ## Contributor discovery and guest creation
 
 One-off credits (2026-11-16, migration `20261116020000_one_off_credits.sql`): a name typed in the editor creates a credit-only profile row used by that credit, never matched by name to another person or article. `search_contributors` returns only people with accounts. Credit-only people have no author page (anonymous profile reads require an account link, so `/authors/<slug>` returns 404), no sitemap entry and no author archive; public article and card projections return their `slug` as `null` and the UI shows the name as plain text.
