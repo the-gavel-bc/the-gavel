@@ -83,7 +83,7 @@ export function useDraftCommand(
               fieldErrors: {
                 ...draftMetadataErrors(before.current),
                 content:
-                  "Check the body image alt text and captions for whitespace or control characters.",
+                  "Check links, image alt text, and captions for invalid whitespace or control characters.",
               },
             },
           });

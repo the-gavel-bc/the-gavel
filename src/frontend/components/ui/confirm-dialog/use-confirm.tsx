@@ -12,6 +12,7 @@ export type ConfirmOptions = {
   /** Asks for a required written note (used with `ask`). */
   noteLabel?: string;
   noteMax?: number;
+  validateNote?: (note: string) => string | undefined;
 };
 
 // An in-page replacement for window.confirm. Native dialogs are dismissed
@@ -32,6 +33,7 @@ export function useConfirm() {
   const messageId = useId();
   const noteId = useId();
   const noteMax = options?.noteMax ?? 500;
+  const noteError = options?.validateNote?.(note);
 
   const settle = useCallback((ok: boolean, text = "") => {
     resolver.current?.({ ok, note: text.trim() });
@@ -102,7 +104,8 @@ export function useConfirm() {
             <label htmlFor={noteId}>{options.noteLabel}</label>
             <textarea
               id={noteId}
-              aria-describedby={`${noteId}-count`}
+              aria-describedby={`${noteId}-count${noteError ? ` ${noteId}-error` : ""}`}
+              aria-invalid={Boolean(noteError) || undefined}
               autoFocus
               rows={3}
               maxLength={noteMax}
@@ -112,6 +115,11 @@ export function useConfirm() {
             <small id={`${noteId}-count`}>
               {note.length} of {noteMax} characters
             </small>
+            {options.validateNote && (
+              <small id={`${noteId}-error`} aria-live="polite">
+                {noteError}
+              </small>
+            )}
           </div>
         )}
         <div className={styles.actions}>
@@ -127,7 +135,10 @@ export function useConfirm() {
             type="button"
             className={styles.confirm}
             data-danger={options.danger || undefined}
-            disabled={Boolean(options.noteLabel) && note.trim() === ""}
+            disabled={
+              Boolean(options.noteLabel) &&
+              (note.trim() === "" || Boolean(noteError))
+            }
             onClick={() => settle(true, note)}
           >
             {options.confirmLabel ?? "Confirm"}

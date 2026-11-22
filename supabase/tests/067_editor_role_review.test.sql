@@ -94,6 +94,8 @@ select is(pg_temp.call('3','save','a2')->>'code','not_found','editor cannot edit
 select is(pg_temp.call('3','publish','a2')->>'code','not_found','editor cannot publish an unsubmitted draft');
 select is(pg_temp.call('3','return','a1',null,null)->>'code','invalid_input','return needs a note');
 select is(pg_temp.call('3','return','a1',null,repeat('x',501))->>'code','invalid_input','return note has a 500 character maximum');
+select is(pg_temp.call('3','return','a1',null,U&'Fix\202Ethe lede')->>'code',
+  'invalid_input','new return notes reject bidi override characters');
 create temp table return_receipt as
   select id,edit_version,gen_random_uuid() as request_id,null::jsonb as result
   from public.articles where id=(select id from t where label='a1');
@@ -108,6 +110,15 @@ select is((select public.return_article(id,edit_version,request_id,'Different no
   'request_conflict','changed return note cannot reuse receipt');
 reset role;
 select is((select review_note from public.articles where id=(select id from t where label='a1')),'Fix the lede','note stored');
+-- Change the synthetic receipt to a fingerprint that could predate this rule.
+update private.draft_write_receipts set payload_hash=private.draft_request_hash(
+  U&'return:Fix\202Ethe lede',article_id,expected_version,'{}')
+where request_id=(select request_id from return_receipt);
+set local role authenticated;
+select is((select public.return_article(id,edit_version,request_id,U&'Fix\202Ethe lede') from return_receipt),
+  (select result||'{"replayed":true}'::jsonb from return_receipt),
+  'old return notes still replay an exact committed request');
+reset role;
 select is(pg_temp.call('2','save','a1')->>'ok','true','author edits again after return');
 -- Save while the owner may edit; replay the same receipt after submission.
 select pg_temp.act_as('2');

@@ -139,6 +139,42 @@ export function boundaryCases(): ContractCase[] {
       },
       want,
     );
+  for (const [name, text, want] of [
+    ["body link with bidi override", "Campus\u202enews", "invalid_input"],
+    ["body link with interior Unicode spacing", " Campus\u00a0news ", "ok"],
+  ])
+    add(
+      name,
+      "draft",
+      {
+        ...baseDraft,
+        content: {
+          format: "gavel-draft",
+          version: 1,
+          document: {
+            type: "doc",
+            content: [
+              {
+                type: "paragraph",
+                content: [
+                  {
+                    type: "text",
+                    text,
+                    marks: [
+                      {
+                        type: "link",
+                        attrs: { href: "https://example.test/" },
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      },
+      want,
+    );
   // Hand-counted JSONB text overhead of body("") is 147 UTF-8 bytes.
   for (const unit of ["a", "é", "😀", '"', "\n"])
     for (const extra of [0, 1]) {
