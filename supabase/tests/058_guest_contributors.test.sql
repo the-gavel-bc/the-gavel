@@ -20,6 +20,18 @@ update auth.users set email='guest-author@bc.edu',email_confirmed_at=now(),raw_a
 update public.profiles set active=false where auth_user_id=auth.uid();
 select is(public.create_guest_contributor(gen_random_uuid(),'Guest')->>'code','forbidden','inactive profile denied');
 update public.profiles set active=true where auth_user_id=auth.uid();
+insert into private.draft_write_limits(actor_user_id,window_start,attempt_count)
+  values(auth.uid(),clock_timestamp(),30)
+  on conflict(actor_user_id) do update set window_start=excluded.window_start,attempt_count=30;
+set local role authenticated;
+select is(public.create_guest_contributor(gen_random_uuid(),'Rate Guest')->>'code',
+  'rate_limited','a saturated fresh request is denied before allocating a guest');
+reset role;
+select is((select count(*) from pg_catalog.pg_locks
+  where pid=pg_catalog.pg_backend_pid() and locktype='advisory'),0::bigint,
+  'saturated fresh request does not acquire an advisory lock');
+update private.draft_write_limits set window_start=clock_timestamp()-interval '61 seconds'
+  where actor_user_id=auth.uid();
 create temp table guest_before as select (select count(*) from auth.users) users,
   (select count(*) from public.memberships) members,(select count(*) from public.article_contributors) credits;
 set local role authenticated;
@@ -29,7 +41,7 @@ select is(public.create_guest_contributor(gen_random_uuid(),repeat('x',121))->>'
 select is(public.create_guest_contributor(gen_random_uuid(),E'Bad\nName')->>'code','invalid_input','controls rejected');
 select is(public.search_contributors('')->>'code','invalid_input','empty search rejected');
 select is(public.search_contributors(repeat('x',121))->>'code','invalid_input','long search rejected');
-select is(public.create_guest_contributor('d8000000-0000-0000-0000-000000000001','New Guest')->>'created','true','author creates guest');
+select is(public.create_guest_contributor('d8000000-0000-0000-0000-000000000001','New Guest')->>'created','true','author creates guest after the quota window expires');
 select is(public.create_guest_contributor('d8000000-0000-0000-0000-000000000001','New Guest')->>'replayed','true','same request replays');
 select is(public.create_guest_contributor('d8000000-0000-0000-0000-000000000001','Changed Guest')->>'code','request_conflict','changed request conflicts');
 select is(public.create_guest_contributor('d8000000-0000-0000-0000-000000000002','NEW GUEST')->>'created','true','a repeated name is a separate one-off credit');
@@ -54,6 +66,10 @@ update private.draft_write_limits set attempt_count=30,window_start=clock_timest
 set local role authenticated;
 select is(public.create_guest_contributor(gen_random_uuid(),'Rate Guest')->>'code','rate_limited','creation rate limited');
 select is(public.create_guest_contributor('d8000000-0000-0000-0000-000000000001','New Guest')->>'replayed','true','receipt replay does not consume quota');
+select is(public.create_guest_contributor('d8000000-0000-0000-0000-000000000001','Changed Guest')->>'code',
+  'request_conflict','a conflicting retry remains a conflict at quota');
 reset role;
+select is((select attempt_count from private.draft_write_limits where actor_user_id=auth.uid()),
+  30,'limited requests and retries do not debit the full window');
 select * from finish();
 rollback;

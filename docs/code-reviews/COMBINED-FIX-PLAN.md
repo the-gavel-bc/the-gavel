@@ -122,7 +122,7 @@ Findings are in [AREAS-6-9-12-REPORT.md](AREAS-6-9-12-REPORT.md) (IDs D-01 to D-
 
 ### Batch 3b: cheap hygiene
 
-- D-11: one shared rule rejecting `\p{Cf}` (and U+2800, U+3164) in names, biographies, site text and invitation names, in zod and SQL together; also covers S2-08. D-12: lock source and target tags in one ordered statement in `manage_tag`. D-13: check the actor and rate limit before taking the global advisory locks in the profile functions. D-14: also revalidate public author pages after a profile save.
+- D-11: one shared rule rejecting `\p{Cf}` (and U+2800, U+3164) in names, biographies, site text and invitation names, in zod and SQL together; also covers S2-08. D-12: lock source and target tags in one ordered statement in `manage_tag`. D-13: check the actor and rate limit before taking the global advisory locks in the profile functions. Guest credit creation now rejects a full quota window before the global locks and keeps the locked debit and receipt checks for admitted requests. D-14: also revalidate public author pages after a profile save.
 
 ### Batch 5b: cheap interface and documentation fixes
 
