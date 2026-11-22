@@ -4,7 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import type { Editor } from "@tiptap/core";
 import { NodeSelection } from "@tiptap/pm/state";
 import { Button } from "@/frontend/components/ui/button/button";
-import type { DraftFailure } from "@/shared/articles/draft-contract/draft-contract";
+import {
+  hasValidDraftImageText,
+  type DraftFailure,
+} from "@/shared/articles/draft-contract/draft-contract";
 import { requestArticleImageUpload } from "@/backend/media/media-actions/media-actions";
 import { removeUnusedArticleImage } from "@/backend/media/media-removal/media-removal";
 import { uploadReservationMessage } from "../article-media/upload-reservation-message";
@@ -148,13 +151,9 @@ export function DraftBodyImageControl({
     if (!editor || !assetId || locked) return;
     const text = alt.trim();
     const note = caption.trim();
-    if (
-      !text ||
-      Array.from(text).length > 240 ||
-      Array.from(note).length > 500
-    ) {
+    if (!hasValidDraftImageText(text, note || null)) {
       setError(
-        "Alt text is required (up to 240 characters); captions are limited to 500 characters.",
+        "Enter alt text up to 240 characters and a caption up to 500 characters. Remove control characters from both.",
       );
       onError({
         ok: false,
@@ -187,13 +186,9 @@ export function DraftBodyImageControl({
     if (!editor || !selected || locked) return;
     const text = alt.trim();
     const note = caption.trim();
-    if (
-      !text ||
-      Array.from(text).length > 240 ||
-      Array.from(note).length > 500
-    ) {
+    if (!hasValidDraftImageText(text, note || null)) {
       setError(
-        "Alt text is required (up to 240 characters); captions are limited to 500 characters.",
+        "Enter alt text up to 240 characters and a caption up to 500 characters. Remove control characters from both.",
       );
       onError({
         ok: false,

@@ -8,6 +8,7 @@ import {
 import {
   checkDraftInput,
   draftMetadataErrors,
+  isValidDraftDocumentForWrite,
   type DraftInput,
   type DraftWriteResult,
 } from "@/shared/articles/draft-contract/draft-contract";
@@ -63,16 +64,32 @@ export function useDraftCommand(
     if (!before.pending) {
       const checked = checkDraftInput(before.current);
       if (!checked.ok || before.nativeInvalid) {
-        dispatch({
-          type: "reject",
-          failure: !checked.ok
-            ? checked
-            : {
-                ok: false,
-                code: "invalid_input",
-                fieldErrors: { content: "Correct the body before saving." },
+        const failure = checked.ok
+          ? {
+              ok: false as const,
+              code: "invalid_input" as const,
+              fieldErrors: { content: "Correct the body before saving." },
+            }
+          : checked;
+        if (
+          failure.code === "invalid_input" &&
+          !before.nativeInvalid &&
+          !isValidDraftDocumentForWrite(before.current.content)
+        ) {
+          dispatch({
+            type: "reject",
+            failure: {
+              ...failure,
+              fieldErrors: {
+                ...draftMetadataErrors(before.current),
+                content:
+                  "Check the body image alt text and captions for whitespace or control characters.",
               },
-        });
+            },
+          });
+        } else {
+          dispatch({ type: "reject", failure });
+        }
         return null;
       }
       const requestId = crypto.randomUUID();

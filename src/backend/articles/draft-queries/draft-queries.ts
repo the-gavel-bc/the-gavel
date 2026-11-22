@@ -1,8 +1,8 @@
 import "server-only";
 
 import {
-  checkDraftInput,
   isValidDraftDocument,
+  checkDraftStructure,
   type DraftInput,
 } from "../../../shared/articles/draft-contract/draft-contract";
 import {
@@ -276,7 +276,7 @@ export async function getDraftEditorData(
         },
         options: null,
       };
-    const checked = checkDraftInput({
+    const checked = checkDraftStructure({
       schemaVersion: 1,
       title: data.title,
       sectionId: data.section_id,

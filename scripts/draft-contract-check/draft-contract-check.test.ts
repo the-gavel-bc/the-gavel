@@ -43,7 +43,7 @@ const result = spawnSync(
     "ON_ERROR_STOP=1",
   ],
   {
-    input: `begin; select jsonb_build_object('index',i,'link',case when jsonb_typeof(v)='string' then private.is_valid_draft_link(v#>>'{}') else false end,'document',private.is_valid_draft_document(nullif(v,'null'::jsonb)),'result',private.check_draft_input(d),'bytes',octet_length(v::text)) from (values ${rows}) as fixtures(i,v,d) order by i; rollback;`,
+    input: `begin; select jsonb_build_object('index',i,'link',case when jsonb_typeof(v)='string' then private.is_valid_draft_link(v#>>'{}') else false end,'document',private.is_valid_draft_document(nullif(v,'null'::jsonb)),'result',private.check_draft_input_for_write(d),'bytes',octet_length(v::text)) from (values ${rows}) as fixtures(i,v,d) order by i; rollback;`,
     encoding: "utf8",
     timeout: 30000,
     maxBuffer: 20 * 1024 * 1024,

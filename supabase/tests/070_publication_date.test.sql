@@ -130,11 +130,13 @@ set local role authenticated;
 select is(public.restore_article((select id from t where label='past'),
   (select edit_version from public.articles where id=(select id from t where label='past')),gen_random_uuid())->>'code','invalid_input','restore rejects a future date');
 reset role;
-update public.articles set publication_date='2026-01-10' where id=(select id from t where label='past');
+-- Simulate title text accepted before the stricter save rules.
+update public.articles set publication_date='2026-01-10', title=U&'Old\202Estory'
+  where id=(select id from t where label='past');
 select pg_temp.act_as('4');
 set local role authenticated;
 select is(public.restore_article((select id from t where label='past'),
-  (select edit_version from public.articles where id=(select id from t where label='past')),gen_random_uuid())->>'ok','true','restore accepts a valid past date');
+  (select edit_version from public.articles where id=(select id from t where label='past')),gen_random_uuid())->>'ok','true','restore accepts a valid past date with legacy title text');
 reset role;
 select ok((select review_requested_at is null and review_note is null and published_at='2026-01-10 17:00Z'
   from public.articles where id=(select id from t where label='past')),'restore preserves the publication instant and clean review state');

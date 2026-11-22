@@ -100,6 +100,45 @@ export function boundaryCases(): ContractCase[] {
         { ...baseDraft, [field]: "a".repeat(count) },
         count === cap ? "ok" : "invalid_input",
       );
+  for (const [name, title, want] of [
+    ["leading non-breaking space", "\u00a0News", "invalid_input"],
+    ["interior non-breaking space", "Campus\u00a0news", "ok"],
+    ["interior bidi override", "Campus\u202enews", "invalid_input"],
+  ])
+    add(name, "draft", { ...baseDraft, title }, want);
+  for (const [name, alt, caption, want] of [
+    [
+      "trailing narrow non-breaking space",
+      "Photo",
+      "Campus\u202f",
+      "invalid_input",
+    ],
+    [
+      "interior control in image alt",
+      "Campus\u001cphoto",
+      "News",
+      "invalid_input",
+    ],
+    ["multiline image caption", "Photo", "Campus\nnews", "ok"],
+  ])
+    add(
+      name,
+      "draft",
+      {
+        ...baseDraft,
+        content: {
+          format: "gavel-draft",
+          version: 2,
+          document: {
+            type: "doc",
+            content: [
+              { type: "image", attrs: { assetId: id(1), alt, caption } },
+            ],
+          },
+        },
+      },
+      want,
+    );
   // Hand-counted JSONB text overhead of body("") is 147 UTF-8 bytes.
   for (const unit of ["a", "é", "😀", '"', "\n"])
     for (const extra of [0, 1]) {

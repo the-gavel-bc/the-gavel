@@ -106,35 +106,55 @@ const integer = (value: unknown, min: number): value is number =>
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
 export const isDraftUuid = (value: unknown): value is string =>
   typeof value === "string" && UUID.test(value);
-// Match the existing PostgreSQL scalar trim constraint, not JS trim's different BOM/NEL rules.
+// Match private.is_safe_draft_scalar. Keep interior tabs and line breaks.
 const EDGE_SPACE =
   /^[\u0009-\u000d\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]|[\u0009-\u000d\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]$/u;
-function scalar(value: unknown, max: number, nullable = false): boolean {
+const UNSAFE_SCALAR =
+  /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/u;
+function scalar(
+  value: unknown,
+  max: number,
+  nullable: boolean,
+  rejectUnsafeText: boolean,
+): boolean {
   return (
     (nullable && value === null) ||
     (typeof value === "string" &&
       Array.from(value).length >= 1 &&
       Array.from(value).length <= max &&
-      !EDGE_SPACE.test(value))
+      !EDGE_SPACE.test(value) &&
+      (!rejectUnsafeText || !UNSAFE_SCALAR.test(value)))
+  );
+}
+
+export function hasValidDraftImageText(
+  alt: unknown,
+  caption: unknown,
+  rejectUnsafeText = true,
+): boolean {
+  return (
+    scalar(alt, 240, false, rejectUnsafeText) &&
+    scalar(caption, 500, true, rejectUnsafeText)
   );
 }
 
 export function draftMetadataErrors(
   value: Record<string, unknown>,
+  rejectUnsafeText = true,
 ): Record<string, string> {
   const errors: Record<string, string> = {};
-  if (!scalar(value.title, 240))
+  if (!scalar(value.title, 240, false, rejectUnsafeText))
     errors.title =
-      "Enter a title of 1–240 characters without leading or trailing whitespace.";
+      "Enter 1–240 characters. Remove edge whitespace and control characters.";
   if (!isDraftUuid(value.sectionId)) errors.sectionId = "Select a section.";
   for (const [field, max] of [
     ["excerpt", 600],
     ["seoKeyphrase", 160],
     ["metaDescription", 320],
   ] as const)
-    if (!scalar(value[field], max, true))
+    if (!scalar(value[field], max, true, rejectUnsafeText))
       errors[field] =
-        `Use up to ${max} characters without leading or trailing whitespace, or leave this field empty.`;
+        `Use up to ${max} characters. Remove edge whitespace and control characters, or leave this field empty.`;
   const dateError = publicationDateError(value.publicationDate);
   if (dateError) errors.publicationDate = dateError;
   return errors;
@@ -142,16 +162,28 @@ export function draftMetadataErrors(
 
 function hasValidDraftMetadata(
   value: JsonObject,
+  rejectUnsafeText: boolean,
 ): value is JsonObject &
   Pick<
     DraftInput,
     "title" | "sectionId" | "excerpt" | "seoKeyphrase" | "metaDescription"
   > {
-  return Object.keys(draftMetadataErrors(value)).length === 0;
+  return Object.keys(draftMetadataErrors(value, rejectUnsafeText)).length === 0;
 }
 
 export function isValidDraftDocument(
   value: unknown,
+): value is DraftDocument | null {
+  return validateDraftDocument(value, false);
+}
+
+export function isValidDraftDocumentForWrite(value: unknown): boolean {
+  return validateDraftDocument(value, true);
+}
+
+function validateDraftDocument(
+  value: unknown,
+  rejectUnsafeText: boolean,
 ): value is DraftDocument | null {
   if (value === null) return true;
   const bytes = draftJsonbByteLength(value);
@@ -201,8 +233,11 @@ export function isValidDraftDocument(
         !isObject(node.attrs) ||
         !keys(node.attrs, ["assetId", "alt", "caption"]) ||
         !isDraftUuid(node.attrs.assetId) ||
-        !scalar(node.attrs.alt, 240) ||
-        !(node.attrs.caption === null || scalar(node.attrs.caption, 500)) ||
+        !hasValidDraftImageText(
+          node.attrs.alt,
+          node.attrs.caption,
+          rejectUnsafeText,
+        ) ||
         imageIds.has(node.attrs.assetId.toLowerCase())
       )
         return false;
@@ -295,6 +330,18 @@ export function isValidDraftDocument(
 }
 
 export function checkDraftInput(value: unknown): DraftCheckResult {
+  return parseDraftInput(value, true);
+}
+
+// Accept legacy text in stored drafts and commands that may replay a receipt.
+export function checkDraftStructure(value: unknown): DraftCheckResult {
+  return parseDraftInput(value, false);
+}
+
+function parseDraftInput(
+  value: unknown,
+  rejectUnsafeText: boolean,
+): DraftCheckResult {
   const invalid: DraftFailure = { ok: false, code: "invalid_input" };
   const bytes = draftJsonbByteLength(value);
   if (
@@ -320,7 +367,7 @@ export function checkDraftInput(value: unknown): DraftCheckResult {
     value.schemaVersion !== 1
   )
     return invalid;
-  if (!hasValidDraftMetadata(value)) return invalid;
+  if (!hasValidDraftMetadata(value, rejectUnsafeText)) return invalid;
   const sortedIds: string[][] = [];
   for (const [field, cap] of [
     ["categoryIds", 32],
@@ -370,7 +417,7 @@ export function checkDraftInput(value: unknown): DraftCheckResult {
     !isCalendarDate(value.publicationDate)
   )
     return invalid;
-  if (!isValidDraftDocument(value.content)) return invalid;
+  if (!validateDraftDocument(value.content, rejectUnsafeText)) return invalid;
   contributors.sort((a, b) =>
     a.profileId < b.profileId
       ? -1
