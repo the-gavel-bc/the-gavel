@@ -4,7 +4,7 @@ import { createServerSupabaseClient } from "@/backend/infrastructure/supabase/se
 import {
   contributorNameSchema,
   contributorSearchResultSchema,
-  guestContributorCommandSchema,
+  guestContributorTransportSchema,
   guestContributorResultSchema,
   type ContributorSearchResult,
   type GuestContributorResult,
@@ -31,7 +31,7 @@ export async function searchContributorsAction(
 export async function createGuestContributorAction(
   command: unknown,
 ): Promise<GuestContributorResult> {
-  const parsed = guestContributorCommandSchema.safeParse(command);
+  const parsed = guestContributorTransportSchema.safeParse(command);
   if (!parsed.success) return { ok: false, code: "invalid_input" };
   try {
     if ((await getCurrentAccess()).status !== "active")

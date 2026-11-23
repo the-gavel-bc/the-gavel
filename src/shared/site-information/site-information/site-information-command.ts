@@ -1,3 +1,4 @@
+import { hasUnsupportedDisplayCharacter } from "@/shared/validation/display-text/display-text";
 import { z } from "zod";
 import { isDraftUuid } from "@/shared/articles/draft-cursor/draft-cursor";
 
@@ -51,7 +52,7 @@ export const socialUrlPattern = {
 } as const;
 const social = (kind: keyof typeof socialUrlPattern) =>
   z.string().max(255).regex(socialUrlPattern[kind]).nullable();
-export const siteInformationCommandSchema = z.strictObject({
+export const siteInformationTransportSchema = z.strictObject({
   requestId: uuid,
   expectedVersion: version,
   mission: text,
@@ -62,6 +63,18 @@ export const siteInformationCommandSchema = z.strictObject({
   facebookUrl: social("facebook"),
   submissionInstructions: text,
 });
+export const siteInformationCommandSchema =
+  siteInformationTransportSchema.superRefine((value, context) => {
+    for (const field of ["mission", "submissionInstructions"] as const) {
+      if (hasUnsupportedDisplayCharacter(value[field])) {
+        context.addIssue({
+          code: "custom",
+          path: [field],
+          message: "Remove invisible format characters.",
+        });
+      }
+    }
+  });
 export type SiteInformationCommand = z.infer<
   typeof siteInformationCommandSchema
 >;

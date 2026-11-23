@@ -1,8 +1,9 @@
+import { hasUnsupportedDisplayCharacter } from "@/shared/validation/display-text/display-text";
 import { z } from "zod";
 import { isDraftUuid } from "@/shared/articles/draft-cursor/draft-cursor";
 const uuid = z.custom<string>(isDraftUuid);
 const version = z.number().int().min(1).max(2147483647);
-export const ownProfileCommandSchema = z.strictObject({
+export const ownProfileTransportSchema = z.strictObject({
   requestId: uuid,
   expectedVersion: version,
   displayName: z
@@ -16,6 +17,19 @@ export const ownProfileCommandSchema = z.strictObject({
     .nullable()
     .refine((v) => v === null || !/[\p{Cc}]/u.test(v.replace(/[\n\t]/gu, ""))),
 });
+export const ownProfileCommandSchema = ownProfileTransportSchema.superRefine(
+  (value, context) => {
+    for (const field of ["displayName", "biography"] as const) {
+      if (hasUnsupportedDisplayCharacter(value[field])) {
+        context.addIssue({
+          code: "custom",
+          path: [field],
+          message: "Remove invisible format characters.",
+        });
+      }
+    }
+  },
+);
 export type OwnProfileCommand = z.infer<typeof ownProfileCommandSchema>;
 const resultSchema = z.discriminatedUnion("ok", [
   z.strictObject({
