@@ -25,6 +25,7 @@ const failureSchema = z.strictObject({
   ok: z.literal(false),
   code: z.enum([
     "invalid_input",
+    "conflict",
     "forbidden",
     "rate_limited",
     "request_conflict",
