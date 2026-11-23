@@ -31,6 +31,7 @@ $$, $$
     'public.get_public_site_navigation()',
     'public.list_public_articles(text,text,text,integer,jsonb)',
     'public.list_public_sitemap_articles(timestamp with time zone,uuid,integer)',
+    'public.resolve_taxonomy_redirect(text)',
     'public.search_public_articles(text,integer,jsonb)',
     'public.suggest_public_articles(text)'
   ]) signature
