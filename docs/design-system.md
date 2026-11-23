@@ -141,7 +141,7 @@ Accessibility fixes (2026-11-14): the reader's default link focus ring is low-sp
 
 Layout polish (2026-11-14): articles use one 46rem reading column with a plain-text "By … · date" line under the summary. Section archives lead with a full-width split story (photo beside the text from 56rem) instead of an overlay hero. Below 45rem, homepage section rows and Featured News show the first story full size and the rest as compact rows. The How to Submit illustration is capped at 22rem tall with 46rem text. Search titles mark matched words with the soft-blue token.
 
-Desk fixes (2026-11-14): destructive actions use an outlined red style (`Button variant="danger"`, or `data-variant="danger"` on plain dashboard buttons), never the primary fill. The editor's save bar is a single compact row on small screens, and the formatting toolbar sits above the scrollable article body.
+Desk fixes (2026-11-14): destructive actions use an outlined red style (`Button variant="danger"`), never the primary fill. Dashboard actions use the shared button styles. Status pills share semantic color tokens and keep visible text labels. On coarse pointers, controls use a minimum 44 px target. Forced-colors mode uses system focus colors and native select arrows. Dark mode is deferred. The editor save bar can wrap on small screens, and the formatting toolbar sits above the scrollable article body.
 
 Desk directories (2026-11-16): Memberships and Taxonomy share `admin-list` styles (toolbar card, card rows, state badges), matching the article lists. Desk timestamps are shown in Eastern time with an "ET" label.
 

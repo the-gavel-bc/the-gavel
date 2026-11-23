@@ -29,6 +29,11 @@ This table is the one execution order. It maps every finding ID in the reports t
 
 Not built by any batch because they need a hosted or owner action: hosted Supabase and Vercel settings, the Google `hd` check, backup plan (ADR 0014, decision 18).
 
+
+### Consolidated Batch 9 follow-ups
+
+The remaining slices are bundled in one PR. They implement retired taxonomy redirects, published tag-merge revisions, profile moderation, account erasure and audit immutability, public shell caching, editorial retries, dashboard style consolidation, the stable Letters identity, and the remaining orphan-credit sweep. Batch 10 and the owner-assigned deferrals stay in the [deferred register](DEFERRED.md).
+
 ## Batch 1: lifecycle bugs (urgent, one migration)
 
 Findings C-01, C-02, C-03, C-04, C-06, C-09 (mode only), C-07.

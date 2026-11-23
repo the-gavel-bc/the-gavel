@@ -115,3 +115,10 @@ The ordinary pagination `CREATE INDEX` blocks writes during its build. Schedule 
 ## Editorial review migrations
 
 Apply the pending migrations in version order before deploying the app that uses the revised RPCs. The November 19–21 release includes editor review authority, publication dates, audit updates, and guarded writes. Smoke-test submit, return, publish, archive, restore, and exact retries with author, editor, and administrator accounts. Verify that anonymous article, tag, and author reads still follow publication eligibility. Fix migration defects with a reviewed forward migration so existing receipts and article history remain available.
+
+
+The daily orphan-credit sweep runs at 05:00 UTC in production and uses the existing `CRON_SECRET` and Supabase service key. Monitor missed runs (HTTP 503) and sustained batches at the 100-credit limit. Disable the cron to pause future deletion. Point-in-time recovery is required to restore deleted data.
+
+Before applying the Letters migration, check that a section named Letter to the Editor and the reserved slug identify the same row when both exist. The migration stops on a conflict so a maintainer can reconcile the rows and preserve their published links. It upgrades a matching legacy section in place and records its old paths.
+
+The migration builds indexes over retained article revisions for tag URL history and orphan-credit safety. Allow for the index build time when scheduling a release against an established catalog. Previously cached profile photo responses can remain available for the old five-minute lifetime after the new route deploys.
