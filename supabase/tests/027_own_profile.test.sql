@@ -1,5 +1,6 @@
 begin;
 select no_plan();
+\ir support/review-fixtures/review-fixtures.inc
 select has_function('public','get_own_public_profile',array[]::text[],
   'own profile reader exists');
 select has_function('public','save_own_public_profile',
@@ -17,7 +18,7 @@ values ('82000000-0000-0000-0000-000000000010','own-profile-fixture@bc.edu',now(
   '{"provider":"google"}'::jsonb);
 insert into public.profiles(id,auth_user_id,display_name,slug)
 values ('82000000-0000-0000-0000-000000000011','82000000-0000-0000-0000-000000000010',
-  'Own Profile Fixture','own-profile-fixture');
+  'Own Profile Fixture '||pg_temp.review_fixture_token(),'own-profile-fixture-'||pg_temp.review_fixture_token());
 insert into public.memberships(user_id,role,active,approved_by,approved_at)
 values ('82000000-0000-0000-0000-000000000010','author',true,
   '00000000-0000-0000-0000-000000000004',now());
@@ -25,6 +26,9 @@ update auth.users set email='own-'||right(id::text,1)||'@bc.edu',email_confirmed
   raw_app_meta_data='{"provider":"google"}'::jsonb
   where id in ('00000000-0000-0000-0000-000000000001','82000000-0000-0000-0000-000000000010',
     '00000000-0000-0000-0000-000000000003','00000000-0000-0000-0000-000000000004');
+create temp table other_profile_before as
+  select display_name,slug,biography,edit_version from public.profiles
+  where id='10000000-0000-0000-0000-000000000003';
 set local role authenticated;
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',true);
 select is((select count(*)::integer from public.get_own_public_profile()),0,'inactive membership cannot read');
@@ -32,31 +36,34 @@ select is((public.save_own_public_profile(1,'82000000-0000-0000-0000-00000000000
   'forbidden','inactive membership cannot save');
 select set_config('request.jwt.claim.sub','82000000-0000-0000-0000-000000000010',true);
 select is((select count(*)::integer from public.get_own_public_profile()),1,'active author reads only own profile');
-select is((public.save_own_public_profile(1,'82000000-0000-0000-0000-000000000002','Own Profile Fixture Writer','Public bio')->>'version'),
+select is((public.save_own_public_profile(1,'82000000-0000-0000-0000-000000000002','Own Profile Fixture Writer '||pg_temp.review_fixture_token(),'Public bio')->>'version'),
   '2','own edit increments version');
-select is((select slug from public.get_own_public_profile()),'own-profile-fixture-writer','unpublished slug follows name');
-select is((public.save_own_public_profile(1,'82000000-0000-0000-0000-000000000002','Own Profile Fixture Writer','Public bio')->>'replayed'),
+select is((select slug from public.get_own_public_profile()),'own-profile-fixture-writer-'||pg_temp.review_fixture_token(),'unpublished slug follows name');
+select is((public.save_own_public_profile(1,'82000000-0000-0000-0000-000000000002','Own Profile Fixture Writer '||pg_temp.review_fixture_token(),'Public bio')->>'replayed'),
   'true','exact save retries');
 select is((public.save_own_public_profile(1,'82000000-0000-0000-0000-000000000002','Different',null)->>'code'),
   'request_conflict','request ID cannot be reused with changed payload');
 select is((public.save_own_public_profile(1,'82000000-0000-0000-0000-000000000003','Stale',null)->>'code'),
   'conflict','stale version cannot overwrite');
-select is((public.save_own_public_profile(2,'82000000-0000-0000-0000-000000000004','Own Profile Fixture Writer','Public bio')->>'changed'),
+select is((public.save_own_public_profile(2,'82000000-0000-0000-0000-000000000004','Own Profile Fixture Writer '||pg_temp.review_fixture_token(),'Public bio')->>'changed'),
   'false','unchanged save is a no-op');
 select is((public.save_own_public_profile(2,'82000000-0000-0000-0000-000000000005',' Bad ',null)->>'code'),
   'invalid_input','untrimmed name rejected');
 reset role;
-select isnt((select display_name from public.profiles where id='10000000-0000-0000-0000-000000000003'),
-  'Own Profile Fixture Writer','another profile is unchanged');
+select results_eq(
+  $$select display_name,slug,biography,edit_version from public.profiles
+    where id='10000000-0000-0000-0000-000000000003'$$,
+  $$select display_name,slug,biography,edit_version from other_profile_before$$,
+  'another profile is unchanged');
 select is((select count(*)::integer from public.audit_events where resource_type='profile'
   and resource_id='82000000-0000-0000-0000-000000000011'),1,'only changed save writes an audit');
-insert into public.sections(id,name,slug) values('82000000-0000-0000-0000-000000000006','Own test section','own-test-section');
+insert into public.sections(id,name,slug) values('82000000-0000-0000-0000-000000000006','Own test section '||pg_temp.review_fixture_token(),'own-test-section-'||pg_temp.review_fixture_token());
 insert into public.articles(id,owner_profile_id,section_id,title,slug,status,published_at)
   values('82000000-0000-0000-0000-000000000007','82000000-0000-0000-0000-000000000011',
-    '82000000-0000-0000-0000-000000000006','Own story','own-test-story','published',now());
+    '82000000-0000-0000-0000-000000000006','Own story','own-test-story-'||pg_temp.review_fixture_token(),'published',now());
 set local role authenticated;
 select is((public.save_own_public_profile(2,'82000000-0000-0000-0000-000000000008','Published Name',null)->>'slug'),
-  'own-profile-fixture-writer','own published slug remains frozen');
+  'own-profile-fixture-writer-'||pg_temp.review_fixture_token(),'own published slug remains frozen');
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);
 select is((select count(*)::integer from public.get_own_public_profile()),1,'administrator reads their own profile only');
 reset role;
