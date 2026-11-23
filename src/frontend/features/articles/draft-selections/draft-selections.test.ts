@@ -99,6 +99,9 @@ it("enforces credit pair uniqueness, order range and 5-credit cap", () => {
       catalog,
     ),
   ).toEqual({});
+  expect(
+    draftSelectionErrors({ ...baseDraft, contributors: credits }, catalog, 6),
+  ).toEqual({});
   for (const contributors of [
     credits,
     [credits[0], credits[0]],

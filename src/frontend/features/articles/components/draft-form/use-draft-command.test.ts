@@ -311,3 +311,52 @@ it("restores the published date after a confirmed clear and preserves newer edit
   });
   expect(result.current.dirty).toBe(true);
 });
+
+function credits(count: number) {
+  return Array.from({ length: count }, (_, index) => ({
+    profileId: `75000000-0000-0000-0000-${String(index + 1).padStart(12, "0")}`,
+    role: "writer" as const,
+    displayOrder: index,
+  }));
+}
+
+it("blocks a sixth credit on a new draft before dispatching a write", async () => {
+  const { result } = renderHook(() =>
+    useDraftCommand({ ...baseDraft, contributors: credits(6) }),
+  );
+  await act(async () => {
+    await result.current.submit();
+  });
+  expect(result.current.fieldErrors.contributors).toBe(
+    "Choose up to 5 contributors.",
+  );
+  expect(actions.create).not.toHaveBeenCalled();
+});
+
+it("updates the legacy credit ceiling after a reduction is acknowledged", async () => {
+  actions.save.mockResolvedValueOnce({ ...success, version: 2 });
+  const { result } = renderHook(() =>
+    useDraftCommand(
+      { ...baseDraft, contributors: credits(6) },
+      {
+        id: success.articleId,
+        version: 1,
+        updatedAt: success.updatedAt,
+      },
+    ),
+  );
+  expect(result.current.contributorLimit).toBe(6);
+  act(() => result.current.update({ ...baseDraft, contributors: credits(5) }));
+  await act(async () => {
+    await result.current.submit();
+  });
+  expect(result.current.contributorLimit).toBe(5);
+  act(() => result.current.update({ ...baseDraft, contributors: credits(6) }));
+  await act(async () => {
+    await result.current.submit();
+  });
+  expect(actions.save).toHaveBeenCalledTimes(1);
+  expect(result.current.fieldErrors.contributors).toBe(
+    "Choose up to 5 contributors.",
+  );
+});

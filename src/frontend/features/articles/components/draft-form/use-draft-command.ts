@@ -8,6 +8,7 @@ import {
 import {
   checkDraftInput,
   draftMetadataErrors,
+  draftContributorLimit,
   isValidDraftDocumentForWrite,
   type DraftInput,
   type DraftWriteResult,
@@ -92,6 +93,22 @@ export function useDraftCommand(
         }
         return null;
       }
+      const contributorLimit = draftContributorLimit(
+        before.article ? before.acknowledged.contributors.length : 0,
+      );
+      if (checked.value.contributors.length > contributorLimit) {
+        dispatch({
+          type: "reject",
+          failure: {
+            ok: false,
+            code: "invalid_input",
+            fieldErrors: {
+              contributors: `Choose up to ${contributorLimit} contributors.`,
+            },
+          },
+        });
+        return null;
+      }
       const requestId = crypto.randomUUID();
       const resource = before.article;
       dispatch({
@@ -147,6 +164,9 @@ export function useDraftCommand(
   }
   return {
     draft: state.current,
+    contributorLimit: draftContributorLimit(
+      state.article ? state.acknowledged.contributors.length : 0,
+    ),
     update,
     submit,
     phase: state.phase,
