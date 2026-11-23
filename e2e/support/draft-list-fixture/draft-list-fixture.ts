@@ -1,4 +1,7 @@
-import { clearAuditFixtureRows } from "../../../scripts/test-support/audit-fixture-cleanup";
+import {
+  clearAuditFixtureRows,
+  lockAccountFixtureCleanup,
+} from "../../../scripts/test-support/audit-fixture-cleanup";
 import { dbContainer } from "../db-container/db-container";
 import { execFileSync } from "node:child_process";
 import { localSupabase } from "../local-supabase/local-supabase";
@@ -405,7 +408,8 @@ export function draftListFixture(
         end $$;
         delete from private.site_information_receipts where actor_user_id in (${quoted(userIds)});`);
       if (suite === "members")
-        sql(`delete from private.membership_write_receipts
+        sql(`${lockAccountFixtureCleanup}
+          delete from private.membership_write_receipts
           where actor_user_id in (${quoted(userIds)}) or target_user_id='${uuid(base + 5)}';
           delete from private.membership_invitations
           where email='aaaa-task9-${project}@bc.edu' and invited_by='${uuid(users.admin)}';
@@ -413,7 +417,8 @@ export function draftListFixture(
           delete from public.memberships where user_id='${uuid(base + 5)}';
           delete from public.profiles where auth_user_id='${uuid(base + 5)}';
           delete from auth.users where id='${uuid(base + 5)}';`);
-      sql(`create temp table fixture_credit_profiles on commit drop as
+      sql(`${lockAccountFixtureCleanup}
+        create temp table fixture_credit_profiles on commit drop as
         select profile_id from private.profile_write_receipts
         where actor_user_id in (${quoted(userIds)}) and operation='create_guest_author';
         ${

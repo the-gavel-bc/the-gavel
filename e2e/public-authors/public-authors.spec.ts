@@ -1,3 +1,4 @@
+import { lockAccountFixtureCleanup } from "../../scripts/test-support/audit-fixture-cleanup";
 import { dbContainer } from "../support/db-container/db-container";
 import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
@@ -67,7 +68,7 @@ test.beforeAll(({}, info) => {
 });
 test.afterAll(() => {
   if (!installed) return;
-  sql(`delete from public.article_contributors where article_id in (select id from public.articles where slug like '${prefix}-story-%');
+  sql(`${lockAccountFixtureCleanup}delete from public.article_contributors where article_id in (select id from public.articles where slug like '${prefix}-story-%');
     delete from private.article_id_registry where article_id in (select id from public.articles where slug like '${prefix}-story-%');
     delete from public.articles where slug like '${prefix}-story-%';delete from public.sections where slug like '${prefix}-%';
     delete from public.memberships where user_id in ('${userId(userNumber)}','${userId(userNumber + 1)}');delete from public.profiles where slug like '${prefix}-%';delete from auth.users where id in ('${userId(userNumber)}','${userId(userNumber + 1)}');`);

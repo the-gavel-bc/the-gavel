@@ -8,3 +8,10 @@ export function clearAuditFixtureRows(predicate: string) {
     end;
   $fixture_audit_cleanup$;`;
 }
+
+// Fixture cleanup can wait because it takes these locks before touching Auth rows.
+export const lockAccountFixtureCleanup = `
+  set local lock_timeout='10s';
+  select pg_catalog.pg_advisory_xact_lock(72300320261107::bigint);
+  select pg_catalog.pg_advisory_xact_lock(72300320261106::bigint);
+`;
