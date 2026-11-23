@@ -21,7 +21,13 @@ export const ensureTagResultSchema = z.discriminatedUnion("ok", [
   }),
   z.object({
     ok: z.literal(false),
-    code: z.enum(["forbidden", "invalid_input", "rate_limited", "unavailable"]),
+    code: z.enum([
+      "forbidden",
+      "invalid_input",
+      "conflict",
+      "rate_limited",
+      "unavailable",
+    ]),
   }),
 ]);
 export type EnsureTagResult = z.infer<typeof ensureTagResultSchema>;

@@ -179,3 +179,19 @@ it("reports locally cached server tags again after a catalog replacement", async
   );
   expect(mocks.ensure).toHaveBeenCalledOnce();
 });
+
+it("explains the daily tag cap while allowing an existing choice", async () => {
+  mocks.ensure.mockResolvedValueOnce({ ok: false, code: "conflict" });
+  render(<Form />);
+  const tag = screen.getByLabelText("Add tag");
+  await userEvent.type(tag, "New tag{Enter}");
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    /30 new tags per day/,
+  );
+  await userEvent.clear(tag);
+  await userEvent.type(tag, "Topic{Enter}");
+  expect(
+    screen.getByRole("button", { name: "Remove tag Topic" }),
+  ).toBeEnabled();
+  expect(mocks.ensure).toHaveBeenCalledTimes(1);
+});

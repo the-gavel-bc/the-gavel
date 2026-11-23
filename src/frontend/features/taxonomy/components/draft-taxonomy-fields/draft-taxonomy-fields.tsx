@@ -61,7 +61,9 @@ export function DraftTaxonomyFields({
           setError(
             result.code === "rate_limited"
               ? "Too many requests. Try adding the tag again in a minute."
-              : "Unable to add tag. Try again.",
+              : result.code === "conflict"
+                ? "You can create up to 30 new tags per day. Choose an existing tag or try tomorrow."
+                : "Unable to add tag. Try again.",
           );
           return;
         }

@@ -78,7 +78,7 @@ The owner delegated the open decisions; they are resolved in [ADR 0014](../decis
 | 5 Erasure policy | Migration: nullable actor references with ON DELETE SET NULL for audit and revisions; cascade receipts and limits; a profile anonymization routine | Destructive-looking migration: review before running |
 | 7 Profile moderation | Administrator-only function (blank bio, reset name, hide page); hide profiles of deactivated memberships; pgTAP | Resolves D-07 |
 | 8 Redirects | `slug_redirects` table, redirect on merge, delete and rename; revisions and audit detail on merge | Public URL change approved; resolves D-10 |
-| 10 Caps | Per-member daily tag cap, open one-off credit cap, orphan cleanup job, 100 active section cap | Resolves D-08, G-12 |
+| 10 Caps | Open one-off credit cap and orphan cleanup job. The daily tag cap and 100-active-section cap are implemented. | Resolves D-08, G-12 |
 | 11 Audit immutability | Trigger rejecting update, delete and truncate on `audit_events` | Resolves the D-25 part; add grant assertions |
 | 12 Letters slug and reserved slugs | Stable section slug for letters, reserved-slug rule in SQL for sections and tags | Resolves G-15 and the reserved-slug test gap |
 | 13 Non-Latin slugs | Stable hash fallback in the slug generator | Slugs freeze at publish: new names only |

@@ -304,7 +304,7 @@ Explicit unused-image removal accepts unreferenced uploading claims. `private.ar
 
 ## Typed tag creation
 
-`ensure_tag(p_name text)` is authenticated-only and requires an eligible active member and active profile. It trims and collapses whitespace, accepts 1–120 characters, rejects remaining control characters, reuses case-insensitive names and allocates canonical collision-safe slugs. Success returns `{ok,id,name,slug,created}`; safe failures are `forbidden`, `invalid_input`, `rate_limited`, or `unavailable`. It consumes the existing 30-attempt/60-second draft quota. The editor adds at most ten tags while existing server draft validation still accepts up to 64. See the [editor plan](superpowers/plans/2026-11-12-editor-tags-contributors-photo.md).
+`ensure_tag(p_name text)` is authenticated-only and requires an eligible active member and active profile. It trims and collapses whitespace, accepts 1–120 characters, rejects remaining control characters, reuses case-insensitive names and allocates canonical collision-safe slugs. Success returns `{ok,id,name,slug,created}`; safe failures are `forbidden`, `invalid_input`, `conflict`, `rate_limited`, or `unavailable`. It consumes the existing 30-attempt/60-second draft quota. Each active member can create 30 new tags per Eastern calendar day. Reusing a tag does not debit the daily budget. A fresh creation above the limit returns `conflict`. The counter starts when the migration is applied. The editor adds at most ten tags while existing server draft validation still accepts up to 64. See the [editor plan](superpowers/plans/2026-11-12-editor-tags-contributors-photo.md).
 
 ### Generated taxonomy slugs
 
