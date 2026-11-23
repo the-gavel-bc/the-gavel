@@ -111,6 +111,10 @@ const EDGE_SPACE =
   /^[\u0009-\u000d\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]|[\u0009-\u000d\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]$/u;
 const UNSAFE_SCALAR =
   /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/u;
+export function hasUnsafeEditorialText(value: string): boolean {
+  return UNSAFE_SCALAR.test(value);
+}
+
 function scalar(
   value: unknown,
   max: number,
@@ -123,7 +127,7 @@ function scalar(
       Array.from(value).length >= 1 &&
       Array.from(value).length <= max &&
       !EDGE_SPACE.test(value) &&
-      (!rejectUnsafeText || !UNSAFE_SCALAR.test(value)))
+      (!rejectUnsafeText || !hasUnsafeEditorialText(value)))
   );
 }
 
@@ -264,6 +268,7 @@ function validateDraftDocument(
           seen.add(mark.type);
           if (mark.type === "link") {
             if (
+              (rejectUnsafeText && hasUnsafeEditorialText(node.text)) ||
               !keys(mark, ["type", "attrs"]) ||
               !isObject(mark.attrs) ||
               !keys(mark.attrs, ["href"]) ||

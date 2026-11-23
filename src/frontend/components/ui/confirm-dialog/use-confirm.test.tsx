@@ -1,6 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it } from "vitest";
+import { hasUnsafeEditorialText } from "@/shared/articles/draft-contract/draft-contract";
 import { useConfirm } from "./use-confirm";
 
 function Harness({ onAnswer }: { onAnswer: (answer: boolean) => void }) {
@@ -44,7 +45,11 @@ it("answers yes, no, Escape and backdrop, and returns focus", async () => {
   expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
 });
 
-function NoteHarness() {
+function NoteHarness({
+  validateNote,
+}: {
+  validateNote?: (note: string) => string | undefined;
+}) {
   const { ask, confirmDialog } = useConfirm();
   return (
     <>
@@ -56,6 +61,7 @@ function NoteHarness() {
             message: "Explain what needs changing.",
             noteLabel: "Note to the author",
             noteMax: 20,
+            validateNote,
             cancelLabel: "Cancel",
           })
         }
@@ -80,4 +86,23 @@ it("keeps a typed note on backdrop clicks and allows explicit cancel", async () 
   await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
   expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
   expect(opener).toHaveFocus();
+});
+
+it("keeps an invalid note in the dialog until it is corrected", async () => {
+  render(
+    <NoteHarness
+      validateNote={(note) =>
+        hasUnsafeEditorialText(note) ? "Remove control characters." : undefined
+      }
+    />,
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Return" }));
+  const note = screen.getByRole("textbox", { name: "Note to the author" });
+  fireEvent.change(note, { target: { value: "Revise the lede\u000b" } });
+  const confirm = screen.getByRole("button", { name: "Confirm" });
+  expect(confirm).toBeDisabled();
+  expect(note).toHaveAccessibleDescription(/Remove control characters/);
+  expect(note).toHaveValue("Revise the lede\u000b");
+  fireEvent.change(note, { target: { value: "Revise the lede" } });
+  expect(confirm).toBeEnabled();
 });

@@ -12,6 +12,7 @@ import {
   returnArticleAction,
   submitArticleAction,
 } from "@/backend/articles/article-lifecycle/article-lifecycle-actions";
+import { hasUnsafeEditorialText } from "@/shared/articles/draft-contract/draft-contract";
 import type {
   ArticleLifecycleCommand,
   ArticleLifecycleResult,
@@ -176,6 +177,10 @@ export function ArticleLifecycleControls({
           confirmLabel: spec.label,
           cancelLabel: "Cancel",
           noteLabel: "Note to the author",
+          validateNote: (value) =>
+            hasUnsafeEditorialText(value)
+              ? "Remove control characters from the note."
+              : undefined,
         });
         if (!note) return;
         command = { ...command, note };
