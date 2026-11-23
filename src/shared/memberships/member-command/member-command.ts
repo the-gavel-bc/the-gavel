@@ -1,3 +1,4 @@
+import { hasUnsupportedDisplayCharacter } from "@/shared/validation/display-text/display-text";
 import { z } from "zod";
 import { isDraftUuid } from "@/shared/articles/draft-cursor/draft-cursor";
 import { staffRoleSchema } from "@/shared/memberships/staff-roles/staff-roles";
@@ -10,6 +11,10 @@ const displayName = z
   .min(1)
   .max(120)
   .refine((value) => value === value.trim() && !/[\p{Cc}\p{Cf}]/u.test(value));
+
+export const newStaffDisplayNameSchema = displayName.refine(
+  (name) => !hasUnsupportedDisplayCharacter(name),
+);
 
 export const memberCommandSchema = z.discriminatedUnion("kind", [
   z.strictObject({

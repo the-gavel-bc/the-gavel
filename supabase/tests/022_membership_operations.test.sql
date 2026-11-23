@@ -91,6 +91,9 @@ select is((public.change_membership_role('00000000-0000-0000-0000-000000000004',
 select is((public.approve_membership('90000000-0000-0000-0000-000000000006',
   '80000000-0000-0000-0000-000000000927','author',U&'Name\202ESpoof',1)->>'code'),
   'invalid_input','membership approval rejects Unicode format characters');
+select is(public.approve_membership('90000000-0000-0000-0000-000000000006',
+  '80000000-0000-0000-0000-000000000935','author',U&'Name\2800Spoof',1)->>'code',
+  'invalid_input','approval rejects invisible filler before creating a profile');
 reset role;
 insert into private.membership_write_receipts(
   actor_user_id,request_id,operation,target_user_id,payload_hash,result)
@@ -100,14 +103,14 @@ values('00000000-0000-0000-0000-000000000004',
   private.membership_payload_hash(pg_catalog.jsonb_build_object(
     'operation','approve','target','90000000-0000-0000-0000-000000000005'::uuid,
     'expectedVersion',null,'role','author'::public.app_role,
-    'displayName','Legacy Member')),
+    'displayName',U&'Legacy\2800Member')),
   '{"ok":true,"targetUserId":"90000000-0000-0000-0000-000000000005",
     "role":"author","active":true,"version":1,"changed":true,"replayed":false}'::jsonb);
 set local role authenticated;
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);
 select is((public.approve_membership('90000000-0000-0000-0000-000000000005',
-  '80000000-0000-0000-0000-000000000932','author','Legacy Member')->>'replayed'),
-  'true','exact legacy null-version receipt still replays');
+  '80000000-0000-0000-0000-000000000932','author',U&'Legacy\2800Member')->>'replayed'),
+  'true','exact legacy null-version receipt with filler still replays');
 select is((public.approve_membership('90000000-0000-0000-0000-000000000005',
   '80000000-0000-0000-0000-000000000930','author','Unlisted Member')->>'code'),
   'invalid_input','legacy null-version approval is rejected');
@@ -191,10 +194,12 @@ select is((select count(*)::integer from public.audit_events where
   resource_type='membership' and action='membership.deactivated' and
   resource_id='90000000-0000-0000-0000-000000000005'),1,
   'deactivation emits one audit event');
+update public.profiles set display_name=U&'Legacy\2800Member'
+  where auth_user_id='90000000-0000-0000-0000-000000000005';
 select set_config('request.jwt.claim.sub','90000000-0000-0000-0000-000000000006',true);
 set local role authenticated;
 select is((public.approve_membership('90000000-0000-0000-0000-000000000005',
-  '80000000-0000-0000-0000-000000000928','author','Reactivated Member',4)->>'ok'),
+  '80000000-0000-0000-0000-000000000928','author',U&'Legacy\2800Member',4)->>'ok'),
   'true','another administrator explicitly reactivates a member');
 select is((select count(*)::integer from public.audit_events
   where action='membership.reactivated' and resource_id='90000000-0000-0000-0000-000000000005'),2,
@@ -205,12 +210,15 @@ select is((select pg_catalog.to_jsonb(e)->'detail' from public.audit_events e
   '{"previousRole":"administrator","newRole":"author"}'::jsonb,
   'reactivation records prior and granted roles');
 select is((public.approve_membership('90000000-0000-0000-0000-000000000005',
-  '80000000-0000-0000-0000-000000000928','author','Reactivated Member',4)->>'replayed'),
+  '80000000-0000-0000-0000-000000000928','author',U&'Legacy\2800Member',4)->>'replayed'),
   'true','reactivation exact retry replays');
 reset role;
 select is((select count(*)::integer from public.audit_events
   where action='membership.reactivated' and resource_id='90000000-0000-0000-0000-000000000005'),2,
   'reactivation retry does not duplicate audit history');
 
+select is((select display_name from public.profiles
+  where auth_user_id='90000000-0000-0000-0000-000000000005'),
+  U&'Legacy\2800Member','reactivation retains the existing legacy display name');
 select * from finish();
 rollback;

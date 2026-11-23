@@ -58,7 +58,7 @@ export function AddPeopleForm() {
     const { entries, invalid } = parseInviteText(text);
     if (invalid.length) {
       fields.show(event.currentTarget, {
-        text: `Only Boston College addresses (name@bc.edu) can be added. Check ${invalid.slice(0, 3).join(", ")}${invalid.length > 3 ? "…" : ""}.`,
+        text: `Only Boston College addresses (name@bc.edu) can be added. Remove invisible characters from names. Check ${invalid.slice(0, 3).join(", ")}${invalid.length > 3 ? "…" : ""}.`,
       });
       return;
     }

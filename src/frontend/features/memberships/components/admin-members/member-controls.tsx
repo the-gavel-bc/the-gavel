@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { MemberSummary } from "@/backend/memberships/member-directory/member-directory";
 import { manageMembershipAction } from "@/backend/memberships/member-command/member-actions";
 import { manageInvitationAction } from "@/backend/memberships/invitation-command/invitation-actions";
+import { newStaffDisplayNameSchema } from "@/shared/memberships/member-command/member-command";
 import { Button } from "@/frontend/components/ui/button/button";
 import {
   STAFF_ROLE_OPTIONS,
@@ -24,7 +25,7 @@ type Failure =
   | "request_conflict"
   | "unavailable";
 const messages: Record<Failure, string> = {
-  invalid_input: "Check the role and try again.",
+  invalid_input: "Check the name and role, then try again.",
   forbidden: "Your administrator access no longer permits this change.",
   not_found: "This person is no longer available.",
   conflict: "This changed elsewhere. Reload to see its current state.",
@@ -176,6 +177,10 @@ export function MemberControls({
 
   async function reactivate() {
     if (blocked || !member.userId || !member.eligible) return;
+    const currentName = newStaffDisplayNameSchema.safeParse(member.displayName);
+    const name = currentName.success
+      ? currentName
+      : newStaffDisplayNameSchema.safeParse(member.email.split("@")[0]);
     if (
       role === "administrator" &&
       !(await confirm({
@@ -194,7 +199,7 @@ export function MemberControls({
         requestId: requestId(),
         expectedVersion: member.version,
         role,
-        displayName: member.displayName ?? member.email.split("@")[0],
+        displayName: name.success ? name.data : "Staff member",
       }),
     );
   }

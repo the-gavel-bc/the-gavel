@@ -1,3 +1,4 @@
+import { hasUnsupportedDisplayCharacter } from "@/shared/validation/display-text/display-text";
 import { z } from "zod";
 import { isDraftUuid } from "@/shared/articles/draft-cursor/draft-cursor";
 import { staffRoleSchema } from "@/shared/memberships/staff-roles/staff-roles";
@@ -9,6 +10,9 @@ const displayName = z
   .min(1)
   .max(120)
   .refine((value) => value === value.trim() && !/[\p{Cc}\p{Cf}]/u.test(value));
+const newDisplayName = displayName.refine(
+  (name) => !hasUnsupportedDisplayCharacter(name),
+);
 const email = z
   .string()
   .max(255)
@@ -121,6 +125,10 @@ export function parseInvitationResult(
   return { ok: true, changed: true };
 }
 
+// Keep BOM characters visible to name validation while trimming pasted spacing.
+const trimPastedText = (value: string) =>
+  value.replace(/^[^\S\uFEFF]+|[^\S\uFEFF]+$/gu, "");
+
 /**
  * Turns pasted text into entries: one per line (or separated by commas or
  * semicolons). A line may read `email` or `email, Display Name`.
@@ -133,14 +141,14 @@ export function parseInviteText(text: string): {
   const entries: { email: string; displayName: string | null }[] = [];
   const invalid: string[] = [];
   for (const line of text.split(/\r?\n|;/u)) {
-    const trimmed = line.trim();
+    const trimmed = trimPastedText(line);
     if (!trimmed) continue;
     // Accept email, email plus a comma-separated name, and Name <email>.
-    const parts = trimmed.split(",").map((part) => part.trim());
+    const parts = trimmed.split(",").map(trimPastedText);
     const explicit = parts.flatMap((part) => {
-      const angle = /^(.*?)\s*<([^<>]+)>$/u.exec(part);
+      const angle = /^(.*?)<([^<>]+)>$/u.exec(part);
       return angle
-        ? [{ address: angle[2].trim(), name: angle[1].trim() || null }]
+        ? [{ address: angle[2].trim(), name: trimPastedText(angle[1]) || null }]
         : part.includes("@")
           ? [{ address: part, name: null }]
           : [];
@@ -164,7 +172,7 @@ export function parseInviteText(text: string): {
       }
       if (seen.has(parsed.data)) continue;
       seen.add(parsed.data);
-      const checked = name ? displayName.safeParse(name) : null;
+      const checked = name ? newDisplayName.safeParse(name) : null;
       if (checked && !checked.success) {
         invalid.push(trimmed);
         continue;

@@ -58,6 +58,27 @@ select is(public.invite_staff('a0000000-0000-0000-0000-000000000017',
   pg_catalog.jsonb_build_array(pg_catalog.jsonb_build_object('email','format-name@bc.edu',
     'role','author','displayName',U&'Name\202ESpoof')))
   ->>'code','invalid_input','format characters are rejected in SQL invitation names');
+select is(public.invite_staff('a0000000-0000-0000-0000-000000000025',
+  jsonb_build_array(jsonb_build_object('email','valid-staff-fixture@bc.edu','role','author'),
+    jsonb_build_object('email','filler-staff-fixture@bc.edu','role','author','displayName',U&'Name\3164Spoof')))
+  ->>'code','invalid_input','a batch with an invisible filler name is rejected atomically');
+reset role;
+select is((select count(*)::int from private.membership_invitations
+  where email in ('valid-staff-fixture@bc.edu','filler-staff-fixture@bc.edu')),0,
+  'the invalid mixed batch creates no listings');
+insert into private.membership_write_receipts(actor_user_id,request_id,operation,payload_hash,result)
+values('00000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000026','invite',
+  private.membership_payload_hash(jsonb_build_object('operation','invite','entries',
+    jsonb_build_array(jsonb_build_object('email','legacy-filler@bc.edu','role','author','displayName',U&'Name\3164Old')))),
+  '{"ok":true,"added":1,"updated":0,"skipped":[],"replayed":false}'::jsonb);
+set local role authenticated;
+select is(public.invite_staff('a0000000-0000-0000-0000-000000000026',
+  jsonb_build_array(jsonb_build_object('email','legacy-filler@bc.edu','role','author','displayName',U&'Name\3164Old'))),
+  '{"ok":true,"added":1,"updated":0,"skipped":[],"replayed":true}'::jsonb,
+  'an exact legacy invitation receipt with filler still replays');
+select is(public.invite_staff('a0000000-0000-0000-0000-000000000026',
+  jsonb_build_array(jsonb_build_object('email','legacy-filler@bc.edu','role','author','displayName',U&'Other\3164Name')))
+  ->>'code','request_conflict','changing a legacy invitation payload cannot reuse its receipt');
 select is(public.invite_staff('a0000000-0000-0000-0000-000000000004',
   '[{"email":"a@bc.edu","role":"author"},{"email":"A@bc.edu","role":"author"}]'::jsonb)
   ->>'code','invalid_input','duplicate addresses in one request are rejected');
@@ -253,5 +274,17 @@ select is((select pg_catalog.count(*)::int from public.list_membership_audit_eve
   'one person sees their listing and claim events only');
 select is((select pg_catalog.count(*)::int from public.list_membership_audit_events(
   51,null,null,'90000000-0000-0000-0000-0000000000ff')),0,'an unknown person has no events');
+-- Simulate a pending pre-upgrade invitation with an unsafe old listing name.
+insert into auth.users(id,email,email_confirmed_at,raw_app_meta_data,raw_user_meta_data)
+values('a0000000-0000-0000-0000-000000000027','legacy-name-claim@bc.edu',now(),
+  '{"provider":"google","providers":["google"]}'::jsonb,'{"full_name":"Supported Google Name"}'::jsonb);
+insert into private.membership_invitations(email,role,display_name,invited_by)
+values('legacy-name-claim@bc.edu','author',U&'Legacy\2800Name','00000000-0000-0000-0000-000000000004');
+set local role authenticated;
+select set_config('request.jwt.claim.sub','a0000000-0000-0000-0000-000000000027',true);
+select ok(public.claim_invitation(),'a legacy listing can still be claimed');
+reset role;
+select is((select display_name from public.profiles where auth_user_id='a0000000-0000-0000-0000-000000000027'),
+  'Supported Google Name','claim falls back to an eligible profile name');
 select * from finish();
 rollback;

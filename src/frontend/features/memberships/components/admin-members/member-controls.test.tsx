@@ -177,3 +177,26 @@ it("reactivates an inactive member with their existing name", async () => {
     expect.objectContaining({ kind: "approve", displayName: "Admin" }),
   );
 });
+
+it("can reactivate when the stored name and email local part have invisible characters", async () => {
+  const email = "new\u3164@bc.edu";
+  mocks.member.mockResolvedValue({ ok: true });
+  render(
+    <MemberControls
+      member={{
+        ...active,
+        email,
+        displayName: "Legacy\u2800Member",
+        state: "inactive",
+        role: "author",
+      }}
+      isSelf={false}
+    />,
+  );
+  await userEvent.click(
+    screen.getByRole("button", { name: `Reactivate ${email}` }),
+  );
+  expect(mocks.member).toHaveBeenCalledWith(
+    expect.objectContaining({ kind: "approve", displayName: "Staff member" }),
+  );
+});
