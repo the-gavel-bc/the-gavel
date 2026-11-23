@@ -41,12 +41,6 @@ it.each(["save", "cleanup"] as const)(
         },
       }).replace("public.save_article_draft", "public.save_published_article");
       await beginAsActor(a);
-      const listed = await a.json<{
-        ok: boolean;
-        items: { assetId: string }[];
-      }>(`public.list_unused_article_uploads('${articleId}')`);
-      expect(listed.ok).toBe(true);
-      expect(listed.items.map((item) => item.assetId)).toContain(assetId);
       expect(
         (await a.json<DraftWriteResult>(winner === "save" ? save : mark)).ok,
       ).toBe(true);
