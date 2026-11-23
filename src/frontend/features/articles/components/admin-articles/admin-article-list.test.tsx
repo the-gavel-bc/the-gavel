@@ -1,3 +1,4 @@
+import buttonStyles from "@/frontend/components/ui/button/button.module.css";
 import { render, screen } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 vi.mock("next/navigation", () => ({
@@ -13,6 +14,13 @@ vi.mock("@/backend/articles/article-deletion/article-deletion-actions", () => ({
 import { AdminArticleList } from "./admin-article-list";
 
 const empty = { items: [], nextCursor: null };
+
+it("uses the shared button style for the dashboard filter", () => {
+  render(<AdminArticleList status="all" search="" page={empty} />);
+  expect(screen.getByRole("button", { name: "Apply filters" })).toHaveClass(
+    buttonStyles.button,
+  );
+});
 
 it("has no Manage button on rows", () => {
   render(

@@ -10,12 +10,12 @@ import { CategoryChips } from "../category-chips/category-chips";
 import { ReaderNavigation } from "@/frontend/components/site/reader-navigation/reader-navigation";
 import { SiteFooter } from "@/frontend/components/site/site-footer/site-footer";
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/sections/configured-letters/categories/campus",
+  usePathname: () => "/sections/letter-to-the-editor/categories/campus",
 }));
 const section = {
   id: "00000000-0000-4000-8000-000000000001",
   name: "Letter to the Editor",
-  slug: "configured-letters",
+  slug: "letter-to-the-editor",
   categories: [{ name: "Campus", slug: "campus" }],
 };
 const card = {
@@ -53,7 +53,7 @@ const archive = {
   section,
   category: section.categories[0],
   isLetters: true,
-  href: "/sections/configured-letters/categories/campus",
+  href: "/sections/letter-to-the-editor/categories/campus",
 };
 beforeEach(() =>
   vi.stubGlobal("matchMedia", () => ({

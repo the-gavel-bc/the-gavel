@@ -12,7 +12,7 @@ vi.mock("@/backend/public-homepage/public-homepage", () => ({
 vi.mock(
   "@/backend/public-site/public-site-navigation/public-site-navigation",
   () => ({
-    getPublicSiteNavigationForRequest: mocks.navigation,
+    getCachedPublicSiteNavigationForRequest: mocks.navigation,
   }),
 );
 vi.mock("next/navigation", () => ({

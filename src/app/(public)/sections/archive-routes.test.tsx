@@ -5,6 +5,10 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   read: vi.fn(),
+  resolve: vi.fn(),
+  redirect: vi.fn((href: string) => {
+    throw new Error("NEXT_REDIRECT " + href);
+  }),
   notFound: vi.fn(() => {
     throw new Error("NEXT_NOT_FOUND");
   }),
@@ -12,7 +16,13 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/backend/public-articles/public-archive/public-archive", () => ({
   getPublicArchiveForRequest: mocks.read,
 }));
-vi.mock("next/navigation", () => ({ notFound: mocks.notFound }));
+vi.mock("next/navigation", () => ({
+  notFound: mocks.notFound,
+  redirect: mocks.redirect,
+}));
+vi.mock("@/backend/taxonomy/taxonomy-redirect/taxonomy-redirect", () => ({
+  resolveTaxonomyRedirect: mocks.resolve,
+}));
 import Section, {
   generateMetadata as sectionMetadata,
 } from "./[sectionSlug]/page";
@@ -42,6 +52,7 @@ const lettersProps = {
 };
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.resolve.mockResolvedValue(null);
   mocks.read.mockResolvedValue({
     kind: "ok",
     archive,
@@ -131,4 +142,19 @@ it("forwards the letters cursor and excludes continuation pages from indexing", 
   expect(await lettersMetadata(props)).toMatchObject({
     robots: { index: false, follow: true },
   });
+});
+
+it("redirects retired section and category paths", async () => {
+  mocks.read.mockResolvedValue({ kind: "notFound" });
+  mocks.resolve
+    .mockResolvedValueOnce("/letters")
+    .mockResolvedValueOnce("/sections/sports");
+  await expect(Section(sectionProps)).rejects.toThrow("NEXT_REDIRECT /letters");
+  await expect(categoryMetadata(categoryProps)).rejects.toThrow(
+    "NEXT_REDIRECT /sections/sports",
+  );
+  expect(mocks.resolve.mock.calls).toEqual([
+    ["/sections/news"],
+    ["/sections/sports/categories/campus"],
+  ]);
 });

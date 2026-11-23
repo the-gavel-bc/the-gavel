@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/frontend/components/ui/button/button";
 import { useFieldErrors } from "@/frontend/components/ui/field-errors/use-field-errors";
 import { useState } from "react";
 import { CurationFeedback } from "./curation-feedback";
@@ -165,9 +166,9 @@ export function CreateTaxonomyForm({
           )}
         </>
       )}
-      <button type="submit" disabled={state.blocked}>
+      <Button type="submit" disabled={state.blocked}>
         {`Create ${noun}`}
-      </button>
+      </Button>
       {fields.messages}
       {note && <p role="status">{note}</p>}
       <CurationFeedback state={state} showSaved={false} />

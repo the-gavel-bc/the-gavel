@@ -4,7 +4,11 @@ const m = vi.hoisted(() => ({
   rpc: vi.fn(),
   revalidate: vi.fn(),
 }));
-vi.mock("next/cache", () => ({ revalidatePath: m.revalidate }));
+vi.mock("next/cache", () => ({
+  revalidatePath: m.revalidate,
+  updateTag: vi.fn(),
+  unstable_cache: vi.fn(),
+}));
 vi.mock("@/backend/auth/access/access", () => ({ getCurrentAccess: m.access }));
 vi.mock("@/backend/infrastructure/supabase/server/server", () => ({
   createServerSupabaseClient: async () => ({ rpc: m.rpc }),

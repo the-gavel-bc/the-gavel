@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/frontend/components/ui/button/button";
 import { useFieldErrors } from "@/frontend/components/ui/field-errors/use-field-errors";
 import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import { useRef, useState } from "react";
@@ -130,27 +131,32 @@ export function OwnProfileForm({ profile }: { profile: OwnProfile }) {
       </label>
       <ProfilePhotoControl name={name} photoUrl={profile.photoUrl} />
       {fields.messages}
-      <button type="submit" disabled={blocked}>
+      <Button type="submit" disabled={blocked}>
         Save profile
-      </button>
+      </Button>
       {pending && <p role="status">Saving profile…</p>}
       {result?.ok && <p role="status">Profile saved.</p>}
       {result && !result.ok && (
         <div role="alert">
           <p>{messages[result.code]}</p>
           {retry && (
-            <button
+            <Button
+              variant="secondary"
               type="button"
               disabled={pending}
               onClick={() => void run(retry)}
             >
               Retry original request
-            </button>
+            </Button>
           )}
           {["conflict", "request_conflict"].includes(result.code) && (
-            <button type="button" onClick={() => void reload()}>
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={() => void reload()}
+            >
               Reload profile
-            </button>
+            </Button>
           )}
         </div>
       )}

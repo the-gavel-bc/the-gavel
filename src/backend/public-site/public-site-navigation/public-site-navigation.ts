@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cache } from "react";
+import { cachePublicShellRead } from "@/backend/public-site/public-shell-cache/public-shell-cache";
 import { z } from "zod";
 import { createPublicReaderClient } from "@/backend/infrastructure/supabase/public-reader/public-reader";
 import {
@@ -91,5 +92,9 @@ export async function getPublicSiteNavigation(): Promise<PublicSiteNavigation> {
   }
 }
 
-// Reuse one active catalog within this render, without retaining it across requests.
+// Archive authorization needs the current catalog even when a shell snapshot exists.
 export const getPublicSiteNavigationForRequest = cache(getPublicSiteNavigation);
+
+export const getCachedPublicSiteNavigationForRequest = cache(
+  cachePublicShellRead("navigation", getPublicSiteNavigation),
+);

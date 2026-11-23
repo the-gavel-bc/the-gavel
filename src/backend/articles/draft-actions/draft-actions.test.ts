@@ -17,7 +17,11 @@ vi.mock("@/backend/auth/access/access", () => ({
 vi.mock("@/backend/infrastructure/supabase/server/server", () => ({
   createServerSupabaseClient: mocks.client,
 }));
-vi.mock("next/cache", () => ({ revalidatePath: mocks.revalidate }));
+vi.mock("next/cache", () => ({
+  revalidatePath: mocks.revalidate,
+  updateTag: vi.fn(),
+  unstable_cache: vi.fn(),
+}));
 import {
   createDraftAction,
   saveDraftAction,
@@ -108,6 +112,15 @@ for (const [name, action, command, args] of [
       expect(await invoke()).toEqual({ ok: false, code: "conflict" });
       expect(mocks.revalidate).not.toHaveBeenCalled();
     });
+    it.each(["40P01", "40001", "55P03"])(
+      "returns a retryable result for PostgreSQL %s",
+      async (code) => {
+        http.respond({ code, message: "private SQL failure" }, 500);
+        expect(await invoke()).toEqual({ ok: false, code: "retryable" });
+        expect(http.network).toHaveBeenCalledOnce();
+        expect(mocks.revalidate).not.toHaveBeenCalled();
+      },
+    );
     it("maps an uncertain transport or malformed receipt to unavailable without retry", async () => {
       http.respond({ message: "private SQL body" }, 500);
       expect(await invoke()).toEqual({ ok: false, code: "unavailable" });

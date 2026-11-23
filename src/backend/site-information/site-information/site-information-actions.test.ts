@@ -4,7 +4,11 @@ const mocks = vi.hoisted(() => ({
   rpc: vi.fn(),
   revalidate: vi.fn(),
 }));
-vi.mock("next/cache", () => ({ revalidatePath: mocks.revalidate }));
+vi.mock("next/cache", () => ({
+  revalidatePath: mocks.revalidate,
+  updateTag: vi.fn(),
+  unstable_cache: vi.fn(),
+}));
 vi.mock("@/backend/auth/access/access", () => ({
   getCurrentAccess: mocks.access,
 }));

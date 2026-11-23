@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { getPublicSiteNavigationForRequest } from "@/backend/public-site/public-site-navigation/public-site-navigation";
+import { getCachedPublicSiteNavigationForRequest } from "@/backend/public-site/public-site-navigation/public-site-navigation";
 import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
 import { PublicShell } from "@/frontend/components/site/public-shell/public-shell";
 import { ReaderSurface } from "@/frontend/features/reader/components/reader-layout/reader-layout";
@@ -14,7 +14,7 @@ export async function PublicReaderShell({
   >;
 }) {
   const [site, result] = await Promise.all([
-    getPublicSiteNavigationForRequest(),
+    getCachedPublicSiteNavigationForRequest(),
     footer,
   ]);
   return (

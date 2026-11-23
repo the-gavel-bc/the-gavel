@@ -16,7 +16,7 @@ const webp = Buffer.concat([
 ]);
 beforeEach(() => vi.clearAllMocks());
 
-it("serves a stored photo as cacheable WebP with nosniff", async () => {
+it("serves stored WebP without caching so profile hiding can take effect", async () => {
   mocks.rpc.mockResolvedValue({
     data: [{ bytes: `\\x${webp.toString("hex")}`, updated_at: "2026-11-17" }],
     error: null,
@@ -25,7 +25,7 @@ it("serves a stored photo as cacheable WebP with nosniff", async () => {
   expect(response.status).toBe(200);
   expect(response.headers.get("content-type")).toBe("image/webp");
   expect(response.headers.get("x-content-type-options")).toBe("nosniff");
-  expect(response.headers.get("cache-control")).toContain("max-age=300");
+  expect(response.headers.get("cache-control")).toBe("private, no-store");
   expect(Buffer.from(await response.arrayBuffer()).equals(webp)).toBe(true);
   const head = await HEAD(new Request("http://x"), ctx("jane-doe"));
   expect(head.status).toBe(200);

@@ -116,7 +116,7 @@ it("keeps articles and archives when navigation is unavailable", async () => {
   });
   expect(await urls()).toEqual([
     "https://gavel.example/",
-    "https://gavel.example/sections/letter-to-the-editor",
+    "https://gavel.example/letters",
     "https://gavel.example/authors/owner",
     "https://gavel.example/articles/story-1",
   ]);

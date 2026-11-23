@@ -91,25 +91,25 @@
   border-block-start: 1px solid var(--dash-line, #e3e6ee);
 }
 .chip {
-  background: #eceef2;
+  background: var(--dash-status-neutral-bg, #eceef2);
   border-radius: 999px;
-  color: #4a515c;
+  color: var(--dash-status-neutral-ink, #4a515c);
   font-size: 0.8125rem;
   font-weight: 600;
   justify-self: start;
   padding: 0.25rem 0.625rem;
 }
 .chip[data-action="article.published"] {
-  background: #e8f5ec;
-  color: #1e6b3a;
+  background: var(--dash-status-success-bg, #e8f5ec);
+  color: var(--dash-status-success-ink, #1e6b3a);
 }
 .chip[data-action="article.deleted"] {
   background: #fdecea;
   color: #b3261e;
 }
 .chip[data-action="article.archived"] {
-  background: #fff4e0;
-  color: #8a4b00;
+  background: var(--dash-status-warning-bg, #fff4e0);
+  color: var(--dash-status-warning-ink, #8a4b00);
 }
 .title,
 .meta {

@@ -1,3 +1,4 @@
+import { Button } from "@/frontend/components/ui/button/button";
 import { ArticlePageLink } from "../article-page-link/article-page-link";
 import { LinkButton } from "@/frontend/components/ui/link-button/link-button";
 import type { ArticlePage } from "@/backend/articles/draft-queries/draft-queries";
@@ -45,9 +46,9 @@ export function ArticleFilters({
           <option value="archived">Archived</option>
         </select>
       </div>
-      <button type="submit" className={toolbar.apply}>
+      <Button type="submit" className={toolbar.apply}>
         Apply filters
-      </button>
+      </Button>
     </form>
   );
 }

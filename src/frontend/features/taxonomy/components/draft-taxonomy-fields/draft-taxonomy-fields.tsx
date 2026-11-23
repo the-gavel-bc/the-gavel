@@ -1,3 +1,4 @@
+import { Button } from "@/frontend/components/ui/button/button";
 import { useLayoutEffect, useRef, useState } from "react";
 import { ensureTagAction } from "@/backend/taxonomy/ensure-tag/ensure-tag-action";
 import { tagNameSchema } from "@/shared/taxonomy/ensure-tag/ensure-tag";
@@ -181,7 +182,8 @@ export function DraftTaxonomyFields({
             return (
               <li key={id}>
                 {name}
-                <button
+                <Button
+                  variant="secondary"
                   type="button"
                   aria-label={`Remove tag ${name}`}
                   onClick={() =>
@@ -194,7 +196,7 @@ export function DraftTaxonomyFields({
                   }
                 >
                   ×
-                </button>
+                </Button>
               </li>
             );
           })}
@@ -218,13 +220,14 @@ export function DraftTaxonomyFields({
               }
             }}
           />
-          <button
+          <Button
+            variant="secondary"
             type="button"
             disabled={pending || draft.tagIds.length >= 10}
             onClick={() => void addTag()}
           >
             {pending ? "Adding tag…" : "Add tag"}
-          </button>
+          </Button>
         </div>
         <datalist id="draft-tag-options">
           {tags

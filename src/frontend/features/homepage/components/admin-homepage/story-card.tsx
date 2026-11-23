@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/frontend/components/ui/button/button";
 import { useState } from "react";
 import type { DragEvent } from "react";
 import {
@@ -117,27 +118,29 @@ export function SlotCard({
       <div className={styles.cardActions}>
         {group !== "lead" && (
           <>
-            <button
+            <Button
+              variant="secondary"
               type="button"
               disabled={blocked || index === 0}
               onClick={() => onShift(-1)}
               aria-label={`Move ${story.title} left in ${label}`}
             >
               <span aria-hidden="true">←</span>
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
               type="button"
               disabled={blocked || index === count - 1}
               onClick={() => onShift(1)}
               aria-label={`Move ${story.title} right in ${label}`}
             >
               <span aria-hidden="true">→</span>
-            </button>
+            </Button>
           </>
         )}
-        <button
+        <Button
           type="button"
-          data-variant="danger"
+          variant="danger"
           disabled={blocked}
           onClick={onRemove}
           aria-label={
@@ -147,7 +150,7 @@ export function SlotCard({
           }
         >
           <span aria-hidden="true">×</span>
-        </button>
+        </Button>
       </div>
     </li>
   );

@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/frontend/components/ui/button/button";
 import { useState } from "react";
 import type { TaxonomyItem } from "@/backend/taxonomy/admin-taxonomy/admin-taxonomy";
 import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
@@ -82,14 +83,15 @@ export function TagControls({
           onChange={(event) => setName(event.target.value)}
         />
       </label>
-      <button
+      <Button
+        variant="secondary"
         type="button"
         onClick={rename}
         disabled={state.blocked || normalized === item.name}
         aria-label={`Rename ${item.name}`}
       >
         Rename
-      </button>
+      </Button>
       {item.referencedLive ? (
         <>
           <label>
@@ -107,25 +109,26 @@ export function TagControls({
               ))}
             </select>
           </label>
-          <button
+          <Button
+            variant="secondary"
             type="button"
             onClick={() => void merge()}
             disabled={state.blocked || !target}
             aria-label={`Merge ${item.name}`}
           >
             Merge
-          </button>
+          </Button>
         </>
       ) : (
-        <button
+        <Button
           type="button"
-          data-variant="danger"
+          variant="danger"
           onClick={() => void remove()}
           disabled={state.blocked}
           aria-label={`Delete ${item.name}`}
         >
           Delete unused tag
-        </button>
+        </Button>
       )}
       {problem && <p role="alert">{problem}</p>}
       <CurationFeedback state={state} />

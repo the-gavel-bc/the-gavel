@@ -6,8 +6,10 @@
   color: var(--color-paper);
   cursor: pointer;
   display: inline-flex;
+  font: inherit;
   font-weight: 700;
   justify-content: center;
+  justify-self: start;
   min-height: var(--dash-control, 2.75rem);
   padding: var(--space-2) var(--dash-pill-pad, var(--space-6));
   text-decoration: none;
@@ -38,5 +40,22 @@
 @media (prefers-reduced-motion: reduce) {
   .button {
     transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .button {
+    border-color: ButtonText;
+  }
+
+  .button:focus-visible {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+
+  .button:disabled {
+    border-color: GrayText;
+    color: GrayText;
+    opacity: 1;
   }
 }

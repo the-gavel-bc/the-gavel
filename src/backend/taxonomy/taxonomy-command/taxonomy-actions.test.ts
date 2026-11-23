@@ -11,7 +11,11 @@ vi.mock("@/backend/auth/access/access", () => ({
 vi.mock("@/backend/infrastructure/supabase/server/server", () => ({
   createServerSupabaseClient: mocks.client,
 }));
-vi.mock("next/cache", () => ({ revalidatePath: mocks.revalidate }));
+vi.mock("next/cache", () => ({
+  revalidatePath: mocks.revalidate,
+  updateTag: vi.fn(),
+  unstable_cache: vi.fn(),
+}));
 import { updateTaxonomyAction } from "./taxonomy-actions";
 const command = {
   kind: "section",

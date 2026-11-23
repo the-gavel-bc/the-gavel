@@ -1,3 +1,4 @@
+import { Button } from "@/frontend/components/ui/button/button";
 import Link from "next/link";
 import type {
   MemberFilters,
@@ -7,6 +8,7 @@ import type {
 } from "@/backend/memberships/member-directory/member-directory";
 import { staffRoleLabels } from "@/shared/memberships/staff-roles/staff-roles";
 import { MemberControls } from "./member-controls";
+import { ProfileModeration } from "./profile-moderation";
 import { AddPeopleForm } from "./add-people-form";
 import styles from "./admin-members.module.css";
 
@@ -117,7 +119,7 @@ export function AdminMemberList({
               maxLength={100}
             />
           </label>
-          <button type="submit">Search</button>
+          <Button type="submit">Search</Button>
         </form>
         <details className={styles.add}>
           <summary>Add people</summary>
@@ -178,6 +180,7 @@ export function AdminMemberList({
                 member={member}
                 isSelf={member.userId === currentUserId}
               />
+              {member.userId && <ProfileModeration userId={member.userId} />}
             </li>
           ))}
         </ul>

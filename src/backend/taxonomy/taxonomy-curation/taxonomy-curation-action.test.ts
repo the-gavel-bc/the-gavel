@@ -11,7 +11,11 @@ vi.mock("@/backend/auth/access/access", () => ({
 vi.mock("@/backend/infrastructure/supabase/server/server", () => ({
   createServerSupabaseClient: mocks.client,
 }));
-vi.mock("next/cache", () => ({ revalidatePath: mocks.revalidate }));
+vi.mock("next/cache", () => ({
+  revalidatePath: mocks.revalidate,
+  updateTag: vi.fn(),
+  unstable_cache: vi.fn(),
+}));
 import { curateTaxonomyAction } from "./taxonomy-curation-action";
 
 const id = "81000000-0000-0000-0000-000000000001";

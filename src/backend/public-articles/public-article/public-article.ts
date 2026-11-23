@@ -44,7 +44,7 @@ const articleSchema = z.strictObject({
   section: taxonomy,
   owner: z.strictObject({
     displayName: text(120, 1),
-    slug,
+    slug: slug.nullable(),
     biography: text(5000).nullable(),
   }),
   categories: z.array(taxonomy).max(32),

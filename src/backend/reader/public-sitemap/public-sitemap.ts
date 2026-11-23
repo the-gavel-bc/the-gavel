@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getServerEnv } from "@/backend/infrastructure/env/server/server";
 import { createPublicReaderClient } from "@/backend/infrastructure/supabase/public-reader/public-reader";
 import { getPublicSiteNavigation } from "@/backend/public-site/public-site-navigation/public-site-navigation";
-import { isLettersSection } from "@/backend/public-articles/public-archive/public-archive";
+import { LETTERS_SECTION_SLUG } from "@/shared/reader/section-link/section-link";
 import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
 import {
   publicSlugSchema,
@@ -33,7 +33,7 @@ const articlesSchema = z.discriminatedUnion("kind", [
           section: slug(120),
           categories: slugs(120),
           tags: slugs(120),
-          authors: slugs(180).min(1),
+          authors: slugs(180),
         }),
       )
       .max(PAGE),
@@ -105,20 +105,14 @@ export async function getPublicSitemap(): Promise<PublicSitemapResult> {
     }
 
     const paths: string[] = ["/"];
-    // Navigation only supplies copy flags and the letters label. Without it,
-    // omit those pages and list letters at its section path, which also resolves.
+    // Navigation supplies copy flags for the information pages.
     const info = site.kind === "ok" ? site.information : null;
     if (info?.mission?.trim()) paths.push("/about");
     if (info?.submissionInstructions?.trim())
       paths.push("/letters/how-to-submit");
-    const letters = new Set(
-      site.kind === "ok"
-        ? site.sections.filter(isLettersSection).map((s) => s.slug)
-        : [],
-    );
     const sorted = (set: Set<string>) => [...set].sort();
     for (const s of sorted(sections))
-      paths.push(letters.has(s) ? "/letters" : `/sections/${s}`);
+      paths.push(s === LETTERS_SECTION_SLUG ? "/letters" : `/sections/${s}`);
     for (const c of sorted(categories)) {
       const [section, category] = c.split("/");
       paths.push(`/sections/${section}/categories/${category}`);

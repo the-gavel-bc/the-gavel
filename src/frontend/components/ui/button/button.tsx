@@ -1,12 +1,12 @@
 import styles from "./button.module.css";
-import type { ButtonHTMLAttributes } from "react";
+import type { ComponentPropsWithRef } from "react";
 
 export function Button({
   className,
   type = "button",
   variant,
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & {
+}: ComponentPropsWithRef<"button"> & {
   // "danger" marks destructive actions: outlined red, never the primary fill.
   // "secondary" is the quiet outlined style for the lesser of two actions.
   variant?: "danger" | "secondary";
