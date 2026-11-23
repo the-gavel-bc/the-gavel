@@ -1,5 +1,6 @@
 begin;
 select no_plan();
+\ir support/review-fixtures/review-fixtures.inc
 select ok(not has_function_privilege('anon','public.search_contributors(text)','execute'),'anonymous search denied');
 select ok(not has_function_privilege('anon','public.create_guest_contributor(uuid,text)','execute'),'anonymous guest creation denied');
 select ok(not has_table_privilege('authenticated','public.profiles','insert'),'direct guest insert closed');
@@ -41,31 +42,38 @@ select is(public.create_guest_contributor(gen_random_uuid(),repeat('x',121))->>'
 select is(public.create_guest_contributor(gen_random_uuid(),E'Bad\nName')->>'code','invalid_input','controls rejected');
 select is(public.search_contributors('')->>'code','invalid_input','empty search rejected');
 select is(public.search_contributors(repeat('x',121))->>'code','invalid_input','long search rejected');
-select is(public.create_guest_contributor('d8000000-0000-0000-0000-000000000001','New Guest')->>'created','true','author creates guest after the quota window expires');
-select is(public.create_guest_contributor('d8000000-0000-0000-0000-000000000001','New Guest')->>'replayed','true','same request replays');
+select is(public.create_guest_contributor('d8000000-0000-0000-0000-000000000001','New Guest '||pg_temp.review_fixture_token())->>'created','true','author creates guest after the quota window expires');
+select is(public.create_guest_contributor('d8000000-0000-0000-0000-000000000001','New Guest '||pg_temp.review_fixture_token())->>'replayed','true','same request replays');
 select is(public.create_guest_contributor('d8000000-0000-0000-0000-000000000001','Changed Guest')->>'code','request_conflict','changed request conflicts');
-select is(public.create_guest_contributor('d8000000-0000-0000-0000-000000000002','NEW GUEST')->>'created','true','a repeated name is a separate one-off credit');
-select isnt(public.create_guest_contributor('d8000000-0000-0000-0000-000000000002','NEW GUEST')->>'id',public.create_guest_contributor('d8000000-0000-0000-0000-000000000001','New Guest')->>'id','one-off credits are never shared by name');
-select is(public.create_guest_contributor(gen_random_uuid(),'New Guest!')->>'slug','new-guest-3','slug collision suffix allocated');
-select is(jsonb_array_length(public.search_contributors('ew gu')->'items'),0,'credit-only names are never suggested');
+select is(public.create_guest_contributor('d8000000-0000-0000-0000-000000000002','NEW GUEST '||upper(pg_temp.review_fixture_token()))->>'created','true','a repeated name is a separate one-off credit');
+select isnt(public.create_guest_contributor('d8000000-0000-0000-0000-000000000002','NEW GUEST '||upper(pg_temp.review_fixture_token()))->>'id',public.create_guest_contributor('d8000000-0000-0000-0000-000000000001','New Guest '||pg_temp.review_fixture_token())->>'id','one-off credits are never shared by name');
+select is(public.create_guest_contributor(gen_random_uuid(),'New Guest '||pg_temp.review_fixture_token()||'!')->>'slug','new-guest-'||pg_temp.review_fixture_token()||'-3','slug collision suffix allocated');
+select is(jsonb_array_length(public.search_contributors('guest '||pg_temp.review_fixture_token())->'items'),0,'credit-only names are never suggested');
 reset role;
-update public.profiles set display_name='Searchable Member' where auth_user_id=auth.uid();
+update public.profiles set display_name='Searchable Member '||pg_temp.review_fixture_token() where auth_user_id=auth.uid();
 set local role authenticated;
-select is(jsonb_array_length(public.search_contributors('searchable')->'items'),1,'people with accounts are found case-insensitively');
-select is(jsonb_array_length(public.search_contributors('%')->'items'),0,'wildcard search treated literally');
-select is((select array_agg(k order by k) from jsonb_object_keys(public.search_contributors('Searchable')->'items'->0) k),array['displayName','id','slug'],'search exposes only public fields');
+select is(jsonb_array_length(public.search_contributors('searchable member '||upper(pg_temp.review_fixture_token()))->'items'),1,'people with accounts are found case-insensitively');
+select is(jsonb_array_length(public.search_contributors('Member%'||pg_temp.review_fixture_token())->'items'),
+  0,'a percent inside the unique search phrase is treated literally');
+select is((select array_agg(k order by k) from jsonb_object_keys(public.search_contributors('searchable member '||upper(pg_temp.review_fixture_token()))->'items'->0) k),array['displayName','id','slug'],'search exposes only public fields');
 reset role;
-select is((select count(*)::integer from public.profiles where display_name='New Guest' and auth_user_id is null),1,'guest has no login');
+select is((select count(*)::integer from public.profiles where display_name='New Guest '||pg_temp.review_fixture_token() and auth_user_id is null),1,'guest has no login');
 select is((select count(*)::integer from public.audit_events where correlation_id='d8000000-0000-0000-0000-000000000001' and action='profile.created'),1,'retry audited once');
 select results_eq($$select (select count(*) from auth.users),(select count(*) from public.memberships),(select count(*) from public.article_contributors)$$,$$select users,members,credits from guest_before$$,'no identities memberships or credits created');
-insert into public.profiles(display_name,slug) select 'Bounded Guest '||n,'bounded-guest-'||n from generate_series(1,12) n;
-select is(jsonb_array_length(public.search_contributors('Bounded Guest')->'items'),0,'credit-only rows are not searchable');
-update public.profiles set active=false where display_name='Bounded Guest 1';
-select is_empty($$select 1 from jsonb_array_elements(public.search_contributors('Bounded Guest 1')->'items') v where v->>'displayName'='Bounded Guest 1'$$,'inactive profiles hidden');
+insert into public.profiles(display_name,slug) select 'Bounded Guest '||pg_temp.review_fixture_token()||' '||n,'bounded-guest-'||pg_temp.review_fixture_token()||'-'||n from generate_series(1,12) n;
+select is(jsonb_array_length(public.search_contributors('Bounded Guest '||pg_temp.review_fixture_token())->'items'),0,'credit-only rows are not searchable');
+update public.profiles set active=true,display_name='Member visibility '||pg_temp.review_fixture_token()
+  where auth_user_id='00000000-0000-0000-0000-000000000003';
+select is(jsonb_array_length(public.search_contributors('Member visibility '||pg_temp.review_fixture_token())->'items'),
+  1,'a linked active profile is searchable');
+update public.profiles set active=false
+  where auth_user_id='00000000-0000-0000-0000-000000000003';
+select is(jsonb_array_length(public.search_contributors('Member visibility '||pg_temp.review_fixture_token())->'items'),
+  0,'the linked profile stops appearing when inactive');
 update private.draft_write_limits set attempt_count=30,window_start=clock_timestamp() where actor_user_id=auth.uid();
 set local role authenticated;
 select is(public.create_guest_contributor(gen_random_uuid(),'Rate Guest')->>'code','rate_limited','creation rate limited');
-select is(public.create_guest_contributor('d8000000-0000-0000-0000-000000000001','New Guest')->>'replayed','true','receipt replay does not consume quota');
+select is(public.create_guest_contributor('d8000000-0000-0000-0000-000000000001','New Guest '||pg_temp.review_fixture_token())->>'replayed','true','receipt replay does not consume quota');
 select is(public.create_guest_contributor('d8000000-0000-0000-0000-000000000001','Changed Guest')->>'code',
   'request_conflict','a conflicting retry remains a conflict at quota');
 reset role;
