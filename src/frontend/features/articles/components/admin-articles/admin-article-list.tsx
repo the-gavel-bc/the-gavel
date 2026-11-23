@@ -1,3 +1,4 @@
+import { Button } from "@/frontend/components/ui/button/button";
 import Link from "next/link";
 import type {
   AdminArticlePage,
@@ -112,9 +113,9 @@ export function AdminArticleList({
             <option value="archived">Archived</option>
           </select>
         </div>
-        <button type="submit" className={styles.apply}>
+        <Button type="submit" className={styles.apply}>
           Apply filters
-        </button>
+        </Button>
         <Link className={styles.archives} href={toggleHref} prefetch={false}>
           {status === "archived" ? viewLabel[from] : "View archives"}
         </Link>

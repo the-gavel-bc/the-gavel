@@ -65,6 +65,7 @@ export const DRAFT_ERROR_CODES = [
   "request_conflict",
   "rate_limited",
   "unavailable",
+  "retryable",
 ] as const;
 export type DraftErrorCode = (typeof DRAFT_ERROR_CODES)[number];
 export type DraftFailure = {

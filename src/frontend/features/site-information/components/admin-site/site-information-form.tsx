@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/frontend/components/ui/button/button";
 import { useFieldErrors } from "@/frontend/components/ui/field-errors/use-field-errors";
 import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import { useRef, useState } from "react";
@@ -246,25 +247,27 @@ export function SiteInformationForm({
         />
       </label>
       {fields.messages}
-      <button type="submit" disabled={blocked}>
+      <Button type="submit" disabled={blocked}>
         Save site information
-      </button>
+      </Button>
       {pending && <p role="status">Saving site information…</p>}
       {result?.ok && <p role="status">Site information saved.</p>}
       {result && !result.ok && (
         <div role="alert">
           <p>{messages[result.code]}</p>
           {retry && (
-            <button
+            <Button
+              variant="secondary"
               type="button"
               disabled={pending}
               onClick={() => void run(retry)}
             >
               Retry original request
-            </button>
+            </Button>
           )}
           {["conflict", "request_conflict"].includes(result.code) && (
-            <button
+            <Button
+              variant="secondary"
               type="button"
               onClick={async () => {
                 if (
@@ -280,7 +283,7 @@ export function SiteInformationForm({
               }}
             >
               Reload site information
-            </button>
+            </Button>
           )}
         </div>
       )}

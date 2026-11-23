@@ -9,6 +9,14 @@
   --dash-page: #f6f7fb;
   --dash-danger: #b3261e;
   --dash-danger-soft: #fdf1f0;
+  --dash-status-warning-bg: #fff4e0;
+  --dash-status-warning-ink: #8a4b00;
+  --dash-status-success-bg: #e8f5ec;
+  --dash-status-success-ink: #1e6b3a;
+  --dash-status-neutral-bg: #eceef2;
+  --dash-status-neutral-ink: #4a515c;
+  --dash-status-info-bg: #e6eefc;
+  --dash-status-info-ink: #1e3f8f;
   /* Control height and pill padding: roomy for touch, compact with a mouse. */
   --dash-control: 2.75rem;
   --dash-pill-pad: var(--space-6);
@@ -209,52 +217,6 @@
   padding-inline: var(--space-2);
 }
 
-/* Buttons without their own class: primary for submit, outlined otherwise. */
-:where(.main) :where(button:not([class])) {
-  align-items: center;
-  background: var(--color-paper);
-  border: 1px solid var(--dash-accent);
-  border-radius: 999px;
-  color: var(--dash-accent);
-  cursor: pointer;
-  display: inline-flex;
-  font-weight: 600;
-  justify-content: center;
-  justify-self: start;
-  min-height: var(--dash-control);
-  padding: 0 var(--dash-pill-pad);
-  transition:
-    background-color 150ms ease,
-    color 150ms ease;
-}
-:where(.main) :where(button:not([class])):hover {
-  background: var(--dash-soft);
-}
-:where(.main) :where(button[type="submit"]:not([class])) {
-  background: var(--dash-accent);
-  color: var(--color-paper);
-}
-:where(.main) :where(button[type="submit"]:not([class])):hover {
-  background: #173b87;
-}
-:where(.main) :where(button:not([class])):disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-/* Destructive actions: outlined red, set apart from the primary fill. */
-:where(.main) :where(button[data-variant="danger"]:not([class])) {
-  border-color: var(--dash-danger);
-  color: var(--dash-danger);
-}
-:where(.main) :where(button[data-variant="danger"]:not([class])):hover {
-  background: var(--dash-danger-soft);
-}
-/* Neighbouring actions never touch. */
-:where(.main) :where(button:not([class])) + :where(button:not([class])) {
-  margin-inline-start: var(--space-2);
-}
-
 /* Feedback */
 :where(.main) :where(p[role="status"]:not(:empty)) {
   background: var(--dash-soft);
@@ -329,4 +291,34 @@
   background-repeat: no-repeat;
   background-size: 0.75rem;
   padding-inline-end: 2.75rem;
+}
+
+@media (pointer: coarse) {
+  .surface
+    :where(
+      button,
+      select,
+      textarea,
+      input:not([type="checkbox"], [type="radio"], [type="hidden"])
+    ) {
+    min-block-size: 44px;
+    min-inline-size: 44px;
+  }
+
+  .surface label:has(input:is([type="checkbox"], [type="radio"])) {
+    min-block-size: 44px;
+    align-content: center;
+  }
+}
+
+@media (forced-colors: active) {
+  .surface :focus-visible {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+
+  .main select:not([multiple]) {
+    appearance: auto;
+    background-image: none;
+  }
 }

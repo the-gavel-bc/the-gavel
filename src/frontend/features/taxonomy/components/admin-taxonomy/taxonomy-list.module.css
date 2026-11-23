@@ -62,12 +62,12 @@
   padding: 0.125rem 0.625rem;
 }
 .chip[data-state="active"] {
-  background: #e8f5ec;
-  color: #1e6b3a;
+  background: var(--dash-status-success-bg, #e8f5ec);
+  color: var(--dash-status-success-ink, #1e6b3a);
 }
 .chip[data-state="inactive"] {
-  background: #eceef2;
-  color: #4a515c;
+  background: var(--dash-status-neutral-bg, #eceef2);
+  color: var(--dash-status-neutral-ink, #4a515c);
 }
 .note {
   color: var(--color-muted);

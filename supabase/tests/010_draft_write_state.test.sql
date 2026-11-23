@@ -19,6 +19,8 @@ select throws_ok($$update private.draft_write_receipts set operation='delete'$$,
 select throws_ok($$update private.draft_write_receipts set expected_version=1$$,'23514',null,'create expected version must be NULL');
 select throws_ok($$update private.draft_write_receipts set payload_hash='x'::bytea$$,'23514',null,'receipt hash is SHA256 sized');
 select throws_ok($$update private.draft_write_receipts set result_version=0$$,'23514',null,'receipt version must be positive');
-select throws_ok($$delete from auth.users where id='00000000-0000-0000-0000-000000000002'$$,'23503',null,'private actor records restrict identity deletion');
+delete from auth.users where id='00000000-0000-0000-0000-000000000002';
+select ok(not exists(select 1 from private.draft_write_receipts)
+  and not exists(select 1 from private.draft_write_limits),'private actor state cascades when its Auth identity is erased');
 select * from finish();
 rollback;

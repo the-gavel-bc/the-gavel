@@ -1,3 +1,4 @@
+import { Button } from "@/frontend/components/ui/button/button";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import {
   createGuestContributorAction,
@@ -133,7 +134,9 @@ export function ContributorCombobox({
             ? "Too many requests. Try again in a minute."
             : result.code === "conflict"
               ? "You have reached the limit of 50 unattached one-off credits. You can still choose a member contributor."
-              : "Unable to create contributor. Review the name and try again.",
+              : result.code === "expired"
+                ? "That one-off credit expired. Add it again to create a new credit."
+                : "Unable to create contributor. Review the name and try again.",
         );
       }
     } catch {
@@ -218,7 +221,8 @@ export function ContributorCombobox({
         >
           {items.map((item, n) => (
             <li key={item.id} role="presentation">
-              <button
+              <Button
+                variant="secondary"
                 type="button"
                 role="option"
                 id={`${id}-option-${n}`}
@@ -228,12 +232,13 @@ export function ContributorCombobox({
                 onClick={() => select(item)}
               >
                 {item.displayName} ({item.slug})
-              </button>
+              </Button>
             </li>
           ))}
           {canCreate && (
             <li role="presentation">
-              <button
+              <Button
+                variant="secondary"
                 type="button"
                 role="option"
                 id={`${id}-option-${items.length}`}
@@ -243,7 +248,7 @@ export function ContributorCombobox({
                 onClick={() => void create()}
               >
                 {`Add '${name.data}' as a one-off credit`}
-              </button>
+              </Button>
             </li>
           )}
         </ul>
@@ -260,9 +265,13 @@ export function ContributorCombobox({
       </p>
       {error && <p role="alert">{error}</p>}
       {command && !creating && (
-        <button type="button" onClick={() => void create(command)}>
+        <Button
+          variant="secondary"
+          type="button"
+          onClick={() => void create(command)}
+        >
           Retry contributor creation
-        </button>
+        </Button>
       )}
     </div>
   );

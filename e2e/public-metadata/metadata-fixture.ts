@@ -1,3 +1,4 @@
+import { lockAccountFixtureCleanup } from "../../scripts/test-support/audit-fixture-cleanup";
 import { dbContainer } from "../support/db-container/db-container";
 import { execFileSync } from "node:child_process";
 import { createHash, createHmac } from "node:crypto";
@@ -119,7 +120,7 @@ export async function createFixture(project: string) {
       );
       if (!removed.ok) throw new Error("Synthetic image cleanup failed");
       sql(
-        `begin;delete from public.article_main_images where article_id in(select id from public.articles where slug like '${prefix}-story-%');delete from public.media_assets where id='${id(201)}';delete from private.media_cleanup_ledger where asset_id='${id(201)}';delete from private.media_key_registry where asset_id='${id(201)}';delete from public.article_tags where tag_id='${id(103)}';delete from public.article_categories where category_id='${id(102)}';delete from private.article_id_registry where article_id in(select id from public.articles where slug like '${prefix}-story-%');delete from public.articles where slug like '${prefix}-story-%';delete from public.categories where id='${id(102)}';delete from public.tags where id='${id(103)}';delete from public.sections where id='${id(101)}';delete from public.memberships where user_id='${user}';delete from public.profiles where id='${id(301)}';delete from auth.users where id='${user}';commit;`,
+        `begin;${lockAccountFixtureCleanup}delete from public.article_main_images where article_id in(select id from public.articles where slug like '${prefix}-story-%');delete from public.media_assets where id='${id(201)}';delete from private.media_cleanup_ledger where asset_id='${id(201)}';delete from private.media_key_registry where asset_id='${id(201)}';delete from public.article_tags where tag_id='${id(103)}';delete from public.article_categories where category_id='${id(102)}';delete from private.article_id_registry where article_id in(select id from public.articles where slug like '${prefix}-story-%');delete from public.articles where slug like '${prefix}-story-%';delete from public.categories where id='${id(102)}';delete from public.tags where id='${id(103)}';delete from public.sections where id='${id(101)}';delete from public.memberships where user_id='${user}';delete from public.profiles where id='${id(301)}';delete from auth.users where id='${user}';commit;`,
       );
     },
   };

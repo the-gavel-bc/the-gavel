@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { invalidatePublicShell } from "@/backend/public-site/public-shell-cache/public-shell-cache";
+import { draftRpcFailure } from "./draft-rpc-failure";
 import { getCurrentAccess } from "@/backend/auth/access/access";
 import { createServerSupabaseClient } from "@/backend/infrastructure/supabase/server/server";
 import {
@@ -45,7 +47,7 @@ export async function createDraftAction(
       p_request_id: parsed.value.requestId,
       p_draft: parsed.value.draft,
     });
-    if (error) return { ok: false, code: "unavailable" };
+    if (error) return draftRpcFailure(error);
     return refreshPrivatePaths(
       parseDraftWriteResult(data),
       parsed.value.requestId,
@@ -70,7 +72,7 @@ export async function saveDraftAction(
       p_request_id: parsed.value.requestId,
       p_draft: parsed.value.draft,
     });
-    if (error) return { ok: false, code: "unavailable" };
+    if (error) return draftRpcFailure(error);
     return refreshPrivatePaths(
       parseDraftWriteResult(data),
       parsed.value.requestId,
@@ -95,11 +97,10 @@ export async function savePublishedArticleAction(
       p_request_id: parsed.value.requestId,
       p_draft: parsed.value.draft,
     });
-    if (error) return { ok: false, code: "unavailable" };
-    return refreshPrivatePaths(
-      parseDraftWriteResult(data),
-      parsed.value.requestId,
-    );
+    if (error) return draftRpcFailure(error);
+    const result = parseDraftWriteResult(data);
+    if (result.ok) invalidatePublicShell();
+    return refreshPrivatePaths(result, parsed.value.requestId);
   } catch {
     return { ok: false, code: "unavailable" };
   }

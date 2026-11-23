@@ -1,10 +1,9 @@
 # Current work
 
-- Phase: Batches 1–7 implemented; Batch 7 reviewed and pushed. PR creation remains blocked by GitHub CLI authentication.
-- Branch: `fix/staff-role-hardening` in `/private/tmp/gavel-review-batch-7`, stacked on timestamp fix PR #127 / Batch 6 PR #126 / Batch 5 PR #125.
-- Batch 5 PR: [#125](https://github.com/dylandrozario/the-gavel/pull/125), stacked on [PR #124](https://github.com/dylandrozario/the-gavel/pull/124).
-- Approved scope and verification: [review fixes plan](docs/superpowers/plans/2026-11-19-review-fixes.md).
-- The server contributor cap is deferred pending representative data and legacy retry compatibility checks.
-- Batch 7: distinct last-administrator outcome, checked invitation roles and Unicode names, atomic listing retirement, versioned audit detail, typed role source, admin-grant confirmation, resilient invitation inputs/results, and invitation/approval invariants.
-- Git: Batch 7 commit `8aa3678` is pushed to `origin/fix/staff-role-hardening`. PR to `main` is not open because GitHub CLI auth is invalid. Apply database migrations before deploying the app; no production change has been made.
-- Verification: full Vitest passed (178 files, 1,228 tests; maxWorkers=2); full pgTAP passed (83 files, 2,540 assertions); full concurrency passed (23 files, 81 tests), with final staff race rerun 6/6. Focused staff pgTAP passed 130 assertions. Typecheck, lint, formatting, production build, isolated migration lint and generated-type parity passed. The rolled-back synthetic 5,000-member measurement is recorded in the plan. Final independent review found no issues. Reviewer did not rerun the reported gates. `git diff --check` passed.
+- Phase: Consolidated Batch 9 follow-ups on `fix/batch-9-review-follow-ups`, based on `main` at `258dac4`. PRs #143 through #147 merged earlier.
+- Scope: The six remaining slices 9b, 9c, 9d, 9e, 9h and 9i, plus the orphan-credit cleanup from 9a, share one PR. D-03, D-04, G-13 and Batch 10 stay deferred.
+- Plan and contract: [Combined fix plan](docs/code-reviews/COMBINED-FIX-PLAN.md), [ADR 0014](docs/decisions/0014-review-follow-up-decisions.md), and [deployment notes](docs/deployment.md).
+- Upgrade evidence: a rolled-back Letters migration retained the existing section ID and both legacy URLs. An older create receipt backfilled guest provenance. A reuse receipt did not.
+- Independent review: resolved a potential taxonomy lock inversion, provenance loss on account erasure, and disclosure of never-public tags through redirects. Archive browser verification also led to separating live route checks from cached navigation.
+- Local verification: 1,313 unit and component tests, 2,749 pgTAP assertions, ten focused race tests, PostgreSQL lint, and generated database type parity pass. The browser suite exercises the production build on desktop and mobile.
+- Rollout: maintainer review and hosted checks precede release. Use the [erasure runbook](docs/runbooks/auth-account-erasure.md) before executing any approved hard account deletion.

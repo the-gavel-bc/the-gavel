@@ -4,7 +4,11 @@ const m = vi.hoisted(() => ({
   rpc: vi.fn(),
   client: vi.fn(),
 }));
-vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("next/cache", () => ({
+  revalidatePath: vi.fn(),
+  updateTag: vi.fn(),
+  unstable_cache: vi.fn(),
+}));
 vi.mock("@/backend/auth/access/access", () => ({ getCurrentAccess: m.access }));
 vi.mock("@/backend/infrastructure/supabase/server/server", () => ({
   createServerSupabaseClient: m.client,
@@ -27,6 +31,15 @@ beforeEach(() => {
 });
 
 describe("lifecycle actions", () => {
+  it("allows an exact retry after the database reports serialization failure", async () => {
+    m.access.mockResolvedValue({ status: "active", role: "author" });
+    m.rpc.mockResolvedValue({ data: null, error: { code: "40001" } });
+    expect(await submitArticleAction(command)).toEqual({
+      ok: false,
+      code: "retryable",
+    });
+    expect(m.rpc).toHaveBeenCalledOnce();
+  });
   it.each(["author", "editor"])(
     "refuses restore for %s before the database",
     async (role) => {

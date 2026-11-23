@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { Button } from "@/frontend/components/ui/button/button";
 import styles from "./confirm-dialog.module.css";
 
 export type ConfirmOptions = {
@@ -123,18 +124,17 @@ export function useConfirm() {
           </div>
         )}
         <div className={styles.actions}>
-          <button
+          <Button
             ref={cancelButton}
             type="button"
-            className={styles.cancel}
+            variant="secondary"
             onClick={() => settle(false)}
           >
             {options.cancelLabel ?? "Keep editing"}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className={styles.confirm}
-            data-danger={options.danger || undefined}
+            variant={options.danger ? "danger" : undefined}
             disabled={
               Boolean(options.noteLabel) &&
               (note.trim() === "" || Boolean(noteError))
@@ -142,7 +142,7 @@ export function useConfirm() {
             onClick={() => settle(true, note)}
           >
             {options.confirmLabel ?? "Confirm"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

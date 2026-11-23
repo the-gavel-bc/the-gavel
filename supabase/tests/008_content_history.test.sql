@@ -59,12 +59,13 @@ select throws_ok(format('update public.article_revisions set snapshot = %L::json
 update public.article_revisions set snapshot = '{"title":"Synthetic A snapshot"}' where id = '60000000-0000-0000-0000-000000000041';
 select throws_ok($$ update public.article_revisions set article_id = null where id = '60000000-0000-0000-0000-000000000041' $$, '23502', null, 'revision requires article_id');
 select throws_ok($$ update public.article_revisions set article_id = '90000000-0000-0000-0000-000000000099' where id = '60000000-0000-0000-0000-000000000041' $$, '23503', null, 'revision rejects missing article_id');
-select throws_ok($$ update public.article_revisions set actor_user_id = null where id = '60000000-0000-0000-0000-000000000041' $$, '23502', null, 'revision requires actor_user_id');
+select lives_ok($$ update public.article_revisions set actor_user_id = null where id = '60000000-0000-0000-0000-000000000041' $$,
+  'revision accepts a redacted actor');
 select throws_ok($$ update public.article_revisions set actor_user_id = '90000000-0000-0000-0000-000000000099' where id = '60000000-0000-0000-0000-000000000041' $$, '23503', null, 'revision rejects missing actor_user_id');
 select throws_ok($$ delete from public.articles where id = '50000000-0000-0000-0000-000000000044' $$, '23503', null, 'revision-only article deletion is restricted');
 select throws_ok($$ update public.articles set id = '90000000-0000-0000-0000-000000000099' where id = '50000000-0000-0000-0000-000000000044' $$, '23503', null, 'revision-only article identity change is restricted');
-select throws_ok($$ delete from auth.users where id = '00000000-0000-0000-0000-000000000041' $$, '23503', null, 'revision-only actor deletion is restricted');
 select throws_ok($$ update auth.users set id = '90000000-0000-0000-0000-000000000099' where id = '00000000-0000-0000-0000-000000000041' $$, '23503', null, 'revision-only actor identity change is restricted');
+select lives_ok($$ delete from auth.users where id = '00000000-0000-0000-0000-000000000041' $$, 'revision-only actor deletion clears the reference');
 delete from public.article_revisions where id = '60000000-0000-0000-0000-000000000044';
 delete from public.articles where id = '50000000-0000-0000-0000-000000000044';
 select lives_ok($$ insert into public.audit_events (id, actor_user_id, action, resource_type, resource_id) values
@@ -90,29 +91,33 @@ select lives_ok($$ insert into public.audit_events (actor_user_id, action, resou
   'audit supplies UUID and timestamp defaults');
 select ok((select id is not null and created_at = now() and correlation_id is null from public.audit_events
   where resource_id = '50000000-0000-0000-0000-000000000098'), 'audit defaults include NULL correlation');
-delete from public.audit_events where resource_id = '50000000-0000-0000-0000-000000000098';
-select lives_ok($$ update public.audit_events set correlation_id = '80000000-0000-0000-0000-000000000041' $$, 'audit correlation accepts a UUID');
-select lives_ok($$ update public.audit_events set correlation_id = null $$, 'audit correlation accepts NULL');
-select throws_ok($$ update public.audit_events set correlation_id = 'not-a-uuid' $$, '22P02', null, 'audit correlation rejects malformed UUID');
-select throws_ok(format('update public.audit_events set action = %L', value), '23514', null, 'audit rejects unapproved action: ' || value)
-from (values ('article.scheduled'), ('membership.approved'), (''), ('ARTICLE.CREATED')) as bad(value);
-select throws_ok(format('update public.audit_events set resource_type = %L', value), '23514', null, 'audit rejects resource type: ' || value)
-from (values ('profile'), ('Article'), ('')) as bad(value);
+select throws_ok($$ update public.audit_events set correlation_id = '80000000-0000-0000-0000-000000000041' $$,
+  '55000',null,'existing audit correlation cannot be changed');
+select throws_ok($$ delete from public.audit_events $$,'55000',null,'owner cannot delete an audit event');
+select throws_ok($$ insert into public.audit_events (action,resource_type,resource_id,correlation_id)
+  values('article.created','article','50000000-0000-0000-0000-000000000041','not-a-uuid') $$,'22P02',null,'audit correlation rejects malformed UUID');
+select throws_ok(format('insert into public.audit_events(action,resource_type,resource_id) values(%L,%L,%L)',
+  value,'article','50000000-0000-0000-0000-000000000041'),'23514',null,'audit rejects unapproved action: '||value)
+from (values ('article.scheduled'), ('membership.approved'), (''), ('ARTICLE.CREATED')) bad(value);
+select throws_ok(format('insert into public.audit_events(action,resource_type,resource_id) values(%L,%L,%L)',
+  'article.created',value,'50000000-0000-0000-0000-000000000041'),'23514',null,'audit rejects resource type: '||value)
+from (values ('profile'), ('Article'), ('')) bad(value);
 select results_eq($$ select column_name::text collate "default" from information_schema.columns where table_schema = 'public' and table_name = 'audit_events' order by column_name $$,
   array['action','actor_user_id','correlation_id','created_at','detail','id','resource_id','resource_type']::text[],
   'audit uses only the accepted metadata columns, with no body, snapshot or free-form payload');
-select throws_ok($$ update public.audit_events set actor_user_id = null $$, '23502', null, 'audit requires actor_user_id');
-select throws_ok($$ update public.audit_events set action = null $$, '23502', null, 'audit requires action');
-select throws_ok($$ update public.audit_events set resource_type = null $$, '23502', null, 'audit requires resource_type');
-select throws_ok($$ update public.audit_events set resource_id = null $$, '23502', null, 'audit requires resource_id');
-select throws_ok($$ update public.audit_events set created_at = null $$, '23502', null, 'audit requires created_at');
-
-select throws_ok($$ update public.audit_events set actor_user_id = '90000000-0000-0000-0000-000000000099' $$,
-  '23503', null, 'audit actor must exist');
-select throws_ok($$ delete from auth.users where id = '00000000-0000-0000-0000-000000000042' $$,
-  '23503', null, 'audit-only actor deletion is restricted');
-select throws_ok($$ update auth.users set id = '90000000-0000-0000-0000-000000000099' where id = '00000000-0000-0000-0000-000000000042' $$,
-  '23503', null, 'audit-only actor identity change is restricted');
+select throws_ok($$update public.audit_events set actor_user_id=null$$,'55000',null,'manual actor nullification is denied');
+select throws_ok($$insert into public.audit_events(resource_type,resource_id) values('article','50000000-0000-0000-0000-000000000041')$$,'23502',null,'audit requires action');
+select throws_ok($$insert into public.audit_events(action,resource_id) values('article.created','50000000-0000-0000-0000-000000000041')$$,'23502',null,'audit requires resource type');
+select throws_ok($$insert into public.audit_events(action,resource_type) values('article.created','article')$$,'23502',null,'audit requires resource id');
+select throws_ok($$insert into public.audit_events(action,resource_type,resource_id,created_at)
+  values('article.created','article','50000000-0000-0000-0000-000000000041',null)$$,'23502',null,'audit requires creation time');
+select throws_ok($$insert into public.audit_events(actor_user_id,action,resource_type,resource_id)
+  values('90000000-0000-0000-0000-000000000099','article.created','article','50000000-0000-0000-0000-000000000041')$$,
+  '23503',null,'non-null audit actor must exist');
+select throws_ok($$update auth.users set id='90000000-0000-0000-0000-000000000099' where id='00000000-0000-0000-0000-000000000042'$$,
+  '23503',null,'audit-only actor identity change is restricted');
+select lives_ok($$delete from auth.users where id='00000000-0000-0000-0000-000000000042'$$,
+  'audit-only actor erasure keeps the event and clears the reference');
 
 set local role anon;
 select set_config('request.jwt.claim.sub', '', true);

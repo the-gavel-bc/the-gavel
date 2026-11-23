@@ -51,6 +51,25 @@ it("retries uncertainty with the exact submitted UUID/payload and retains input"
   expect(result.current.phase).toBe("idle");
   expect(result.current.dirty).toBe(true);
 });
+it("keeps the exact command for a retryable rejection without losing newer edits", async () => {
+  actions.create
+    .mockResolvedValueOnce({ ok: false, code: "retryable" })
+    .mockResolvedValueOnce(success);
+  const { result } = renderHook(() => useDraftCommand(baseDraft));
+  await act(async () => {
+    await result.current.submit();
+  });
+  expect(result.current.failure?.code).toBe("retryable");
+  act(() => result.current.update({ ...baseDraft, title: "Newer edit" }));
+  await act(async () => {
+    await result.current.submit();
+  });
+  expect(actions.create.mock.calls[1][0]).toEqual(
+    actions.create.mock.calls[0][0],
+  );
+  expect(result.current.draft.title).toBe("Newer edit");
+  expect(result.current.dirty).toBe(true);
+});
 it("uses a fresh UUID after a definitive rejection and preserves edited input", async () => {
   actions.create.mockResolvedValue({ ok: false, code: "slug_conflict" });
   const { result } = renderHook(() => useDraftCommand(baseDraft));

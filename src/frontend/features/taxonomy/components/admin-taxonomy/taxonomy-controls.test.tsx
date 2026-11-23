@@ -108,3 +108,19 @@ it("cannot delete an item stories use", () => {
   render(<TaxonomyControls item={{ ...item, inUse: true }} kind="section" />);
   expect(screen.getByRole("button", { name: "Delete News" })).toBeDisabled();
 });
+
+it("allows navigation order edits while keeping the Letters name fixed", async () => {
+  const letters = {
+    ...item,
+    name: "Letter to the Editor",
+    slug: "letter-to-the-editor",
+  };
+  render(<TaxonomyControls item={letters} kind="section" />);
+  await userEvent.click(
+    screen.getByRole("button", { name: "Edit Letter to the Editor" }),
+  );
+  expect(screen.getByRole("textbox", { name: "Name" })).toHaveAttribute(
+    "readonly",
+  );
+  expect(screen.getByLabelText("Navigation order")).toBeEnabled();
+});

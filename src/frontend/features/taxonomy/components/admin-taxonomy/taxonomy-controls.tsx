@@ -1,4 +1,5 @@
 "use client";
+import { isLettersSection } from "@/shared/reader/section-link/section-link";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
@@ -41,6 +42,7 @@ export function TaxonomyControls({
   const [result, setResult] = useState<TaxonomyResult | null>(null);
   const [retry, setRetry] = useState<TaxonomyCommand | null>(null);
   const busy = useRef(false);
+  const lettersNameLocked = kind === "section" && isLettersSection(item);
   const blocked = pending || Boolean(retry) || Boolean(result?.ok);
   async function run(command: TaxonomyCommand) {
     if (busy.current) return;
@@ -164,10 +166,12 @@ export function TaxonomyControls({
               value={name}
               maxLength={120}
               disabled={blocked || labelLocked}
+              readOnly={lettersNameLocked}
               onChange={(event) => setName(event.target.value)}
             />
           </label>
           {labelLocked && <p>This category name awaits confirmation.</p>}
+          {lettersNameLocked && <p>The Letter to the Editor name is fixed.</p>}
           <label>
             Navigation order
             <input
@@ -194,27 +198,34 @@ export function TaxonomyControls({
           {item.referencedLive && (
             <p>Published or archived references prevent deactivation.</p>
           )}
-          <button type="button" onClick={save} disabled={blocked}>
+          <Button
+            variant="secondary"
+            type="button"
+            onClick={save}
+            disabled={blocked}
+          >
             Save {item.name}
-          </button>
+          </Button>
           {pending && <p role="status">Saving taxonomy…</p>}
           {result?.ok && <p role="status">Taxonomy saved. Refreshing…</p>}
           {result && !result.ok && (
             <div role="alert">
               <p>{messages[result.code]}</p>
               {retry && (
-                <button
+                <Button
+                  variant="secondary"
                   type="button"
                   disabled={pending}
                   onClick={() => void run(retry)}
                 >
                   Retry original request
-                </button>
+                </Button>
               )}
               {["conflict", "not_found", "request_conflict"].includes(
                 result.code,
               ) && (
-                <button
+                <Button
+                  variant="secondary"
                   type="button"
                   onClick={() => {
                     setResult(null);
@@ -222,7 +233,7 @@ export function TaxonomyControls({
                   }}
                 >
                   Reload taxonomy
-                </button>
+                </Button>
               )}
             </div>
           )}

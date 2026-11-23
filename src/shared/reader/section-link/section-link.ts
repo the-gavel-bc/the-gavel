@@ -1,6 +1,7 @@
-// Preserve the approved label rule until taxonomy has a stable letters identifier.
-export function isLettersSection(section: { name: string }): boolean {
-  return section.name.toLowerCase() === "letter to the editor";
+export const LETTERS_SECTION_SLUG = "letter-to-the-editor";
+
+export function isLettersSection(section: { slug: string }): boolean {
+  return section.slug === LETTERS_SECTION_SLUG;
 }
 
 export function sectionHref(section: { name: string; slug: string }): string {

@@ -24,7 +24,10 @@ const text = (max: number, min = 0) =>
     const length = Array.from(s).length;
     return length >= min && length <= max;
   });
-const publicPerson = z.strictObject({ displayName: text(120, 1), slug });
+const publicPerson = z.strictObject({
+  displayName: text(120, 1),
+  slug: slug.nullable(),
+});
 export const publicArticleCardSchema = z.strictObject({
   id: uuid,
   slug,

@@ -178,7 +178,7 @@ export type Database = {
       };
       article_revisions: {
         Row: {
-          actor_user_id: string;
+          actor_user_id: string | null;
           article_id: string;
           created_at: string;
           id: string;
@@ -187,7 +187,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
-          actor_user_id: string;
+          actor_user_id?: string | null;
           article_id: string;
           created_at?: string;
           id?: string;
@@ -195,7 +195,7 @@ export type Database = {
           snapshot_version?: number;
         };
         Update: {
-          actor_user_id?: string;
+          actor_user_id?: string | null;
           article_id?: string;
           created_at?: string;
           id?: string;
@@ -335,7 +335,7 @@ export type Database = {
       audit_events: {
         Row: {
           action: string;
-          actor_user_id: string;
+          actor_user_id: string | null;
           correlation_id: string | null;
           created_at: string;
           detail: Json | null;
@@ -346,7 +346,7 @@ export type Database = {
         ComputedFields: never;
         Insert: {
           action: string;
-          actor_user_id: string;
+          actor_user_id?: string | null;
           correlation_id?: string | null;
           created_at?: string;
           detail?: Json | null;
@@ -356,7 +356,7 @@ export type Database = {
         };
         Update: {
           action?: string;
-          actor_user_id?: string;
+          actor_user_id?: string | null;
           correlation_id?: string | null;
           created_at?: string;
           detail?: Json | null;
@@ -470,7 +470,7 @@ export type Database = {
           request_id: string;
           sha256: string | null;
           status: string;
-          uploader_user_id: string;
+          uploader_user_id: string | null;
           width: number | null;
         };
         ComputedFields: never;
@@ -486,7 +486,7 @@ export type Database = {
           request_id: string;
           sha256?: string | null;
           status?: string;
-          uploader_user_id: string;
+          uploader_user_id?: string | null;
           width?: number | null;
         };
         Update: {
@@ -501,7 +501,7 @@ export type Database = {
           request_id?: string;
           sha256?: string | null;
           status?: string;
-          uploader_user_id?: string;
+          uploader_user_id?: string | null;
           width?: number | null;
         };
         Relationships: [
@@ -555,6 +555,7 @@ export type Database = {
           edit_version: number;
           id: string;
           photo_updated_at: string | null;
+          public_page_hidden: boolean;
           slug: string;
           slug_frozen: boolean;
           updated_at: string;
@@ -569,6 +570,7 @@ export type Database = {
           edit_version?: number;
           id?: string;
           photo_updated_at?: string | null;
+          public_page_hidden?: boolean;
           slug: string;
           slug_frozen?: boolean;
           updated_at?: string;
@@ -582,6 +584,7 @@ export type Database = {
           edit_version?: number;
           id?: string;
           photo_updated_at?: string | null;
+          public_page_hidden?: boolean;
           slug?: string;
           slug_frozen?: boolean;
           updated_at?: string;
@@ -1061,6 +1064,17 @@ export type Database = {
         };
         Returns: Json;
       };
+      moderate_member_profile: {
+        Args: {
+          p_clear_biography: boolean;
+          p_expected_version: number;
+          p_hide_page: boolean;
+          p_request_id: string;
+          p_reset_display_name: boolean;
+          p_user_id: string;
+        };
+        Returns: Json;
+      };
       publish_article: {
         Args: {
           p_article_id: string;
@@ -1100,6 +1114,10 @@ export type Database = {
       request_article_image_upload: {
         Args: { p_article_id: string; p_request_id: string };
         Returns: Json;
+      };
+      resolve_taxonomy_redirect: {
+        Args: { p_source_path: string };
+        Returns: string;
       };
       restore_article: {
         Args: {
@@ -1210,6 +1228,7 @@ export type Database = {
         Returns: Json;
       };
       suggest_public_articles: { Args: { p_query: string }; Returns: Json };
+      sweep_orphan_guest_credits: { Args: { p_limit: number }; Returns: Json };
       update_category_taxonomy: {
         Args: {
           p_active: boolean;

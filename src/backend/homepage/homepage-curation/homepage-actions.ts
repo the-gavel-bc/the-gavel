@@ -1,5 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
+import { invalidatePublicShell } from "@/backend/public-site/public-shell-cache/public-shell-cache";
 import { getCurrentAccess } from "@/backend/auth/access/access";
 import { createServerSupabaseClient } from "@/backend/infrastructure/supabase/server/server";
 import {
@@ -28,7 +29,10 @@ export async function saveHomepageAction(
     });
     if (error) return { ok: false, code: "unavailable" };
     const result = parseHomepageResult(data);
-    if (result.ok) revalidatePath("/dashboard/admin/homepage");
+    if (result.ok) {
+      invalidatePublicShell();
+      revalidatePath("/dashboard/admin/homepage");
+    }
     return result;
   } catch {
     return { ok: false, code: "unavailable" };

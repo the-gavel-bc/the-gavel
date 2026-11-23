@@ -1,5 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
+import { invalidatePublicShell } from "@/backend/public-site/public-shell-cache/public-shell-cache";
 import { getCurrentAccess } from "@/backend/auth/access/access";
 import { createServerSupabaseClient } from "@/backend/infrastructure/supabase/server/server";
 import {
@@ -34,7 +35,10 @@ export async function updateTaxonomyAction(
         : await client.rpc("update_category_taxonomy", args);
     if (error) return { ok: false, code: "unavailable" };
     const result = parseTaxonomyResult(data, value);
-    if (result.ok) revalidatePath("/dashboard/admin/taxonomy");
+    if (result.ok) {
+      invalidatePublicShell();
+      revalidatePath("/dashboard/admin/taxonomy");
+    }
     return result;
   } catch {
     return { ok: false, code: "unavailable" };

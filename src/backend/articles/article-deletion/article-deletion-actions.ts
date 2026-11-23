@@ -1,5 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
+import { invalidatePublicShell } from "@/backend/public-site/public-shell-cache/public-shell-cache";
 import { getCurrentAccess } from "@/backend/auth/access/access";
 import { createServerSupabaseClient } from "@/backend/infrastructure/supabase/server/server";
 import {
@@ -27,6 +28,7 @@ export async function deleteArticleAction(
     if (error) return { ok: false, code: "unavailable" };
     const result = parseDeletionResult(data, parsed.data.articleId);
     if (result.ok) {
+      invalidatePublicShell();
       try {
         revalidatePath("/dashboard/admin/articles");
         revalidatePath("/dashboard/admin/audit");

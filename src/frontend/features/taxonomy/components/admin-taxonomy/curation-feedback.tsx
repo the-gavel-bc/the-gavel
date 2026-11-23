@@ -1,3 +1,4 @@
+import { Button } from "@/frontend/components/ui/button/button";
 import { curationMessages, type useCuration } from "./use-curation";
 
 export function CurationFeedback({
@@ -16,20 +17,21 @@ export function CurationFeedback({
         <div role="alert">
           <p>{curationMessages[result.code]}</p>
           {retry && (
-            <button
+            <Button
+              variant="secondary"
               type="button"
               disabled={pending}
               onClick={() => void run(retry)}
             >
               Retry original request
-            </button>
+            </Button>
           )}
           {["conflict", "not_found", "request_conflict"].includes(
             result.code,
           ) && (
-            <button type="button" onClick={reload}>
+            <Button variant="secondary" type="button" onClick={reload}>
               Reload taxonomy
-            </button>
+            </Button>
           )}
         </div>
       )}

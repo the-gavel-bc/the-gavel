@@ -151,7 +151,7 @@ Task 15 introduces a narrow permanent media-cleanup ledger and daily Vercel job 
 
 ## Public route composition
 
-The sibling `(home)` and `(public)` Next.js route groups dynamically compose the reader shell through `src/app/_components/public-reader-shell/public-reader-shell.tsx`. The homepage page, CSS and tests belong to `(home)`; other public pages remain in `(public)`. Both layouts load anonymous no-store navigation and footer data in parallel. The shared server shell passes checked data into frontend presentation, which never imports backend queries. Public URLs and existing not-found/error boundaries remain unchanged. Neither group wraps dashboard or auth routes; PublicShell remains usable without data for auth screens.
+The sibling `(home)` and `(public)` Next.js route groups dynamically compose the reader shell through `src/app/_components/public-reader-shell/public-reader-shell.tsx`. The homepage page, CSS and tests belong to `(home)`; other public pages remain in `(public)`. Both layouts load anonymous navigation and footer data in parallel. Shared shell data uses a 60-second cache for validated navigation and standalone footer cards. Editorial changes expire it on commit. The homepage shares one live snapshot with its footer. Archive routes check current taxonomy separately so cached navigation cannot extend or delay route visibility. The shared server shell passes checked data into frontend presentation, which never imports backend queries. Public URLs and existing not-found/error boundaries remain unchanged. Neither group wraps dashboard or auth routes; PublicShell remains usable without data for auth screens.
 
 ## Request-scoped homepage reuse
 

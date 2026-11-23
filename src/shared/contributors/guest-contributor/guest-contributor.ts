@@ -26,6 +26,7 @@ const failureSchema = z.strictObject({
   code: z.enum([
     "invalid_input",
     "conflict",
+    "expired",
     "forbidden",
     "rate_limited",
     "request_conflict",

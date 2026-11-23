@@ -30,6 +30,7 @@ const failureMessage = {
   request_conflict:
     "This request cannot be reused. Reload to review the article.",
   rate_limited: "Too many attempts. Wait a minute, then retry.",
+  retryable: "The database was busy. Retry the original request.",
   unavailable:
     "We could not confirm this change. Retry the original request to confirm it.",
 } as const;
@@ -222,7 +223,8 @@ export function ArticleLifecycleControls({
     setRetries((previous) => ({
       ...previous,
       [operation]:
-        !next.ok && (next.code === "unavailable" || retry)
+        !next.ok &&
+        (next.code === "unavailable" || next.code === "retryable" || retry)
           ? command
           : undefined,
     }));

@@ -4,7 +4,6 @@ import {
   isLettersSection,
   sectionHref,
 } from "@/shared/reader/section-link/section-link";
-export { isLettersSection } from "@/shared/reader/section-link/section-link";
 import {
   getPublicSiteNavigationForRequest,
   type PublicSiteNavigation,
@@ -48,8 +47,7 @@ export async function getPublicArchive(
     kind === "letters"
       ? site.sections.find(isLettersSection)
       : site.sections.find((section) => section.slug === sectionSlug);
-  if (!section)
-    return { kind: kind === "letters" ? "unavailable" : "notFound" };
+  if (!section) return { kind: "notFound" };
   const category =
     kind === "category"
       ? section.categories.find((category) => category.slug === categorySlug)

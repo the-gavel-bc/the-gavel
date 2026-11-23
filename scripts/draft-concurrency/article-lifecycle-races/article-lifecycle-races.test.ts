@@ -89,7 +89,7 @@ it("serializes a publication-date edit before a competing publish", async () => 
       values('${articleId}','${assetId}','Race image','The Gavel');
       commit;`);
     await beginAsActor(a);
-    const dateEdit = a.json<DraftWriteResult>(
+    const dateEdit = await a.json<DraftWriteResult>(
       saveCommand(articleId, 1, randomUUID(), {
         ...DRAFT,
         content,
@@ -102,7 +102,7 @@ it("serializes a publication-date edit before a competing publish", async () => 
     );
     await waitForLock(observer, b);
     await a.execute("commit;");
-    expect(await dateEdit).toMatchObject({ ok: true, version: 2 });
+    expect(dateEdit).toMatchObject({ ok: true, version: 2 });
     expect(await publish).toEqual({ ok: false, code: "conflict" });
     await b.execute("commit;");
     expect(

@@ -1,3 +1,4 @@
+import { lockAccountFixtureCleanup } from "../../scripts/test-support/audit-fixture-cleanup";
 import { dbContainer } from "../support/db-container/db-container";
 import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
@@ -50,7 +51,7 @@ test.beforeAll(({}, info) => {
       ('${id(302)}',null,'Guest Writer ${project}','${prefix}-guest',E'Literal <script>window.authorBioExecuted=true</script>\n\nSecond paragraph.',true),
       ('${id(303)}',null,'Empty Writer ${project}','${prefix}-empty',null,true),
       ('${id(304)}','${userId(userNumber + 1)}','Inactive Writer ${project}','${prefix}-inactive','Hidden author biography.',false);
-    insert into public.memberships(user_id,role,active,approved_by,approved_at,revoked_at) values('${userId(userNumber)}','author',false,'00000000-0000-0000-0000-000000000004',now(),now());
+    insert into public.memberships(user_id,role,active,approved_by,approved_at,revoked_at) values('${userId(userNumber)}','author',true,'00000000-0000-0000-0000-000000000004',now(),null);
     insert into public.sections(id,name,slug,active) values('${id(101)}','Author News ${project}','${prefix}-news',true),('${id(102)}','Author Hidden ${project}','${prefix}-hidden',false);
     insert into public.articles(id,owner_profile_id,section_id,title,slug,content,status,published_at,archived_at)
     select ('7e000000-0000-0000-0000-'||lpad((${project === "desktop" ? 1000 : 2000}+n)::text,12,'0'))::uuid,
@@ -67,7 +68,7 @@ test.beforeAll(({}, info) => {
 });
 test.afterAll(() => {
   if (!installed) return;
-  sql(`delete from public.article_contributors where article_id in (select id from public.articles where slug like '${prefix}-story-%');
+  sql(`${lockAccountFixtureCleanup}delete from public.article_contributors where article_id in (select id from public.articles where slug like '${prefix}-story-%');
     delete from private.article_id_registry where article_id in (select id from public.articles where slug like '${prefix}-story-%');
     delete from public.articles where slug like '${prefix}-story-%';delete from public.sections where slug like '${prefix}-%';
     delete from public.memberships where user_id in ('${userId(userNumber)}','${userId(userNumber + 1)}');delete from public.profiles where slug like '${prefix}-%';delete from auth.users where id in ('${userId(userNumber)}','${userId(userNumber + 1)}');`);
@@ -144,7 +145,7 @@ test("member links open escaped biographies and one-off credits stay unlinked", 
     ),
   ).toBe(true);
 });
-test("public author pages survive membership deactivation but hide inactive profiles and private stories", async ({
+test("public author pages hide inactive profiles and private stories", async ({
   page,
   context,
   browser,
@@ -212,4 +213,28 @@ test("public author pages survive membership deactivation but hide inactive prof
   } finally {
     await nojs.close();
   }
+});
+
+test("deactivated members have a plain byline and no public author page", async ({
+  page,
+}) => {
+  sql(
+    `update public.memberships set active=false,revoked_at=now() where user_id='${userId(userNumber)}';`,
+  );
+  const hidden = await page.goto(`/authors/${prefix}-member`);
+  expect(hidden?.status()).toBe(404);
+  const story = await page.goto(`/articles/${prefix}-story-1`);
+  expect(story?.status()).toBe(200);
+  const main = page.getByRole("main");
+  await expect(
+    main.getByText(`By Guest Writer ${project}, Member Writer ${project}`, {
+      exact: false,
+    }),
+  ).toBeVisible();
+  await expect(
+    main.getByRole("link", { name: `Member Writer ${project}`, exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    main.getByText("Second paragraph.", { exact: false }),
+  ).toHaveCount(0);
 });

@@ -7,16 +7,16 @@
   margin-block: 0 var(--space-4);
 }
 .chip {
-  background: #fff4e0;
+  background: var(--dash-status-warning-bg, #fff4e0);
   border-radius: 999px;
-  color: #8a4b00;
+  color: var(--dash-status-warning-ink, #8a4b00);
   font-size: 0.8125rem;
   font-weight: 700;
   padding: 0.25rem 0.75rem;
 }
 .chip[data-ok] {
-  background: #e8f5ec;
-  color: #1e6b3a;
+  background: var(--dash-status-success-bg, #e8f5ec);
+  color: var(--dash-status-success-ink, #1e6b3a);
 }
 .tiles {
   display: grid;

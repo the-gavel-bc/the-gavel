@@ -133,7 +133,7 @@ export function reduceDraftSave(
           ...state,
           lastResult: result,
           uncertain,
-          pending: uncertain ? pending : null,
+          pending: uncertain || result.code === "retryable" ? pending : null,
           phase: uncertain ? "uncertain" : definitive ? "conflict" : "error",
         };
       }

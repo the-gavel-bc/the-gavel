@@ -107,16 +107,18 @@ export function ArticleDeletion({
             </GuardedDashboardLink>
           )}
           {retry && (
-            <button
+            <Button
+              variant="secondary"
               type="button"
               disabled={pending}
               onClick={() => void run(retry)}
             >
               Retry deletion
-            </button>
+            </Button>
           )}
           {["conflict", "request_conflict"].includes(result.code) && (
-            <button
+            <Button
+              variant="secondary"
               type="button"
               onClick={async () => {
                 if (
@@ -131,7 +133,7 @@ export function ArticleDeletion({
               }}
             >
               Reload article
-            </button>
+            </Button>
           )}
         </div>
       )}

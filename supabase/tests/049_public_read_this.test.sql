@@ -72,6 +72,10 @@ reset role;
 delete from public.article_main_images where article_id='59000000-0000-0000-0000-000000000012';
 -- Legacy overlong profile identities are rejected by the existing checked map.
 insert into public.profiles(id,display_name,slug) values('19000000-0000-0000-0000-000000000049','Unsafe footer owner',repeat('x',181));
+insert into auth.users(id,email) values('99000000-0000-0000-0000-000000000049','19000000-0000-0000-0000-000000000049@bc.edu');
+insert into public.memberships(user_id,role,active,approved_by,approved_at)
+values('99000000-0000-0000-0000-000000000049','author',true,'00000000-0000-0000-0000-000000000004',now());
+update public.profiles set auth_user_id='99000000-0000-0000-0000-000000000049' where id='19000000-0000-0000-0000-000000000049';
 update public.articles set owner_profile_id='19000000-0000-0000-0000-000000000049' where slug='footer-story-12';
 set local role anon;
 select is(public.get_public_read_this(),'{"kind":"unavailable"}'::jsonb,'unsafe mapped cards fail closed');

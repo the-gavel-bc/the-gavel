@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/frontend/components/ui/button/button";
 import { useRef, useState } from "react";
 import {
   listHomepageStoriesAction,
@@ -104,20 +105,22 @@ export function StoryLibrary({
               aria-label="Search titles"
             />
           </label>
-          <button type="submit" disabled={blocked || loading}>
+          <Button type="submit" disabled={blocked || loading}>
             Search
-          </button>
+          </Button>
         </form>
         <div className={styles.pager}>
-          <button
+          <Button
+            variant="secondary"
             type="button"
             aria-label="Previous stories"
             disabled={blocked || loading || index === 0}
             onClick={() => setIndex(index - 1)}
           >
             <span aria-hidden="true">←</span>
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="secondary"
             type="button"
             aria-label="More stories"
             disabled={
@@ -128,7 +131,7 @@ export function StoryLibrary({
             onClick={() => void forward()}
           >
             <span aria-hidden="true">→</span>
-          </button>
+          </Button>
         </div>
       </div>
       {error && <p role="alert">{error}</p>}
@@ -148,30 +151,33 @@ export function StoryLibrary({
                 <StoryImage story={story} />
                 <p className={styles.cardTitle}>{story.title}</p>
                 <div className={styles.addRow}>
-                  <button
+                  <Button
+                    variant="secondary"
                     type="button"
                     aria-label={`Set ${story.title} as lead`}
                     disabled={blocked || taken}
                     onClick={() => onAdd(story, "lead")}
                   >
                     Lead
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="secondary"
                     type="button"
                     aria-label={`Add ${story.title} to Featured News`}
                     disabled={blocked || taken || full.includes("featured")}
                     onClick={() => onAdd(story, "featured")}
                   >
                     Featured
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="secondary"
                     type="button"
                     aria-label={`Add ${story.title} to Read This`}
                     disabled={blocked || taken || full.includes("readThis")}
                     onClick={() => onAdd(story, "readThis")}
                   >
                     Read
-                  </button>
+                  </Button>
                 </div>
               </li>
             );

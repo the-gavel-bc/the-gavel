@@ -87,13 +87,13 @@ it("isolates list failure and does not query missing catalog scopes", async () =
     kind: "unavailable",
   });
 });
-it("maps letters through the approved label without assuming a database slug", async () => {
+it("maps letters through the stable section slug even with a different label", async () => {
   mocks.catalog.mockResolvedValue({
     kind: "ok",
     sections: [
       {
-        name: "Letter to the Editor",
-        slug: "configured-editor-letters",
+        name: "Letters desk",
+        slug: "letter-to-the-editor",
         categories: [],
       },
     ],
@@ -103,29 +103,32 @@ it("maps letters through the approved label without assuming a database slug", a
     archive: {
       href: "/letters",
       isLetters: true,
-      title: "Letter to the Editor",
+      title: "Letters desk",
     },
   });
   expect(mocks.list).toHaveBeenCalledExactlyOnceWith({
-    scope: { kind: "section", slug: "configured-editor-letters" },
+    scope: { kind: "section", slug: "letter-to-the-editor" },
     limit: 12,
   });
   expect(
-    await getPublicArchive("section", "configured-editor-letters", ""),
+    await getPublicArchive("section", "letter-to-the-editor", ""),
   ).toMatchObject({
     kind: "ok",
     archive: { href: "/letters", isLetters: true },
   });
-  mocks.catalog.mockResolvedValue({ kind: "ok", sections: [news] });
+  mocks.catalog.mockResolvedValue({
+    kind: "ok",
+    sections: [{ ...news, name: "Letter to the Editor" }],
+  });
   expect(await getPublicArchive("letters", "", "")).toEqual({
-    kind: "unavailable",
+    kind: "notFound",
   });
 });
 
 it("preserves a letters category URL rather than appending it to the letters root", async () => {
   const section = {
     name: "Letter to the Editor",
-    slug: "configured-letters",
+    slug: "letter-to-the-editor",
     categories: [{ name: "Campus", slug: "campus" }],
   };
   mocks.catalog.mockResolvedValue({ kind: "ok", sections: [section] });
@@ -134,7 +137,7 @@ it("preserves a letters category URL rather than appending it to the letters roo
   ).toMatchObject({
     kind: "ok",
     archive: {
-      href: "/sections/configured-letters/categories/campus",
+      href: "/sections/letter-to-the-editor/categories/campus",
       isLetters: true,
     },
   });

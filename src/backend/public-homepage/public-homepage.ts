@@ -1,5 +1,6 @@
 import "server-only";
 import { cache } from "react";
+import { cachePublicShellRead } from "@/backend/public-site/public-shell-cache/public-shell-cache";
 import { z } from "zod";
 import { createPublicReaderClient } from "@/backend/infrastructure/supabase/public-reader/public-reader";
 import { publicArticleCardSchema as card } from "@/backend/public-articles/article-card-schema/article-card-schema";
@@ -79,7 +80,7 @@ const readThisSchema = z.discriminatedUnion("kind", [
 ]);
 
 // Other public routes need only footer cards, never full homepage composition.
-export async function getPublicReadThis(): Promise<
+async function readPublicReadThis(): Promise<
   { kind: "ok"; readThis: PublicArticleCard[] } | { kind: "unavailable" }
 > {
   try {
@@ -101,3 +102,8 @@ export async function getPublicReadThis(): Promise<
     return { kind: "unavailable" };
   }
 }
+
+export const getPublicReadThis = cachePublicShellRead(
+  "footer",
+  readPublicReadThis,
+);

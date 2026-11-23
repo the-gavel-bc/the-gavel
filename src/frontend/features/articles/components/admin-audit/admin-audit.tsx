@@ -1,3 +1,4 @@
+import { Button } from "@/frontend/components/ui/button/button";
 import Link from "next/link";
 import type {
   AuditAction,
@@ -65,7 +66,7 @@ export function AdminAudit({
             placeholder="Search by article, person or date"
           />
         </label>
-        <button type="submit">Search</button>
+        <Button type="submit">Search</Button>
       </form>
       <nav aria-label="Filter activity" className={styles.pills}>
         <Link

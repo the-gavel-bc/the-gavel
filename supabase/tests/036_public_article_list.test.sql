@@ -59,7 +59,7 @@ select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004'
 select is(public.list_public_articles('section','list-proof',null,2,null),(select value from list_proof),'authenticated and anonymous outputs match');
 reset role;
 set local role anon;
-select is(jsonb_array_length(public.list_public_articles('author',(select slug from public.profiles where id='10000000-0000-0000-0000-000000000002'),null,24,null)->'items'),3,'owner with multiple credits is not duplicated');
+select is(jsonb_array_length(public.list_public_articles('author','author-a',null,24,null)->'items'),3,'owner with multiple credits is not duplicated');
 reset role;
 update public.categories set active=false where slug='list-category';
 set local role anon;

@@ -45,7 +45,7 @@ export function ArticleContext({
           )}
         </nav>
       )}
-      {article.owner.biography && (
+      {article.owner.biography && article.owner.slug && (
         <section className={styles.bio}>
           <h2>About {article.owner.displayName}</h2>
           <p>{article.owner.biography}</p>

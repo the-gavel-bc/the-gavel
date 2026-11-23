@@ -11,7 +11,10 @@ vi.mock("@/backend/auth/access/access", () => ({
 vi.mock("@/backend/infrastructure/supabase/server/server", () => ({
   createServerSupabaseClient: mocks.client,
 }));
-vi.mock("next/cache", () => ({ revalidatePath: mocks.revalidate }));
+vi.mock("next/cache", () => ({
+  revalidatePath: mocks.revalidate,
+  updateTag: vi.fn(),
+}));
 import { manageMembershipAction } from "./member-actions";
 
 const targetUserId = "90000000-0000-0000-0000-000000000005";

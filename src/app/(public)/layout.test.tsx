@@ -11,7 +11,7 @@ vi.mock("@/backend/public-homepage/public-homepage", () => ({
 }));
 vi.mock(
   "@/backend/public-site/public-site-navigation/public-site-navigation",
-  () => ({ getPublicSiteNavigationForRequest: mocks.read }),
+  () => ({ getCachedPublicSiteNavigationForRequest: mocks.read }),
 );
 vi.mock("next/navigation", () => ({
   usePathname: () => "/",

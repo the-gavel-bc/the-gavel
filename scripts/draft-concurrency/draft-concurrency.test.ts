@@ -1,3 +1,4 @@
+import { clearAuditFixtureRows } from "../test-support/audit-fixture-cleanup";
 import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import type { DraftWriteResult } from "../../src/shared/articles/draft-contract/draft-contract";
@@ -49,7 +50,7 @@ describe("serialized draft create operations", () => {
         await observer.execute(`begin;
           delete from private.draft_write_receipts where actor_user_id='${otherUser}';
           delete from private.draft_write_limits where actor_user_id='${otherUser}';
-          delete from public.audit_events where actor_user_id='${otherUser}';
+          ${clearAuditFixtureRows(`actor_user_id='${otherUser}'`)}
           delete from public.article_revisions where actor_user_id='${otherUser}';
           delete from private.article_id_registry where article_id in (select id from public.articles where owner_profile_id='${otherProfile}');
           delete from public.articles where owner_profile_id='${otherProfile}';

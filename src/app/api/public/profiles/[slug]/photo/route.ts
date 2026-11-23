@@ -1,8 +1,7 @@
 import { createPublicReaderClient } from "@/backend/infrastructure/supabase/public-reader/public-reader";
 
 export const dynamic = "force-dynamic";
-const cache =
-  "public, max-age=300, s-maxage=300, must-revalidate, proxy-revalidate";
+const cache = "private, no-store";
 type Context = { params: Promise<{ slug: string }> };
 
 const text = (status: number, body: string, head: boolean) =>

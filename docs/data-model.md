@@ -153,7 +153,7 @@ Allowlisted editable values such as mission text, contact email, social URLs, an
 
 ### slug_redirects
 
-Maps previous public paths to current destinations when published slugs or routes change.
+The private table reserves previous public taxonomy paths. Each redirect tracks a target by taxonomy ID, so repeated slug changes and tag merges resolve directly to the current destination.
 
 ## Constraints and indexes
 
@@ -172,7 +172,7 @@ Maps previous public paths to current destinations when published slugs or route
 - Favor additive, backward-compatible production changes; pair destructive changes with backup, rollout, and rollback steps.
 - Legacy WordPress data migration is out of scope for the MVP.
 
-Known deferred constraint: deleting an approving Auth identity is currently rejected by approval-state invariants despite the foreign key's `SET NULL` clause. Choose preserved-history versus deletion semantics before introducing infrastructure identity deletion procedures; ordinary membership deactivation does not delete Auth users.
+Hard deletion of an Auth user anonymizes the retained profile, clears approver, uploader and history actor references, and cascades actor-owned receipts and limits. Articles keep their owner and all audit events and revision snapshots survive. See the [account erasure runbook](runbooks/auth-account-erasure.md).
 
 Local reset, pgTAP, lint, and type generation require a running Docker-compatible container runtime. The local project is not linked to a hosted Supabase project.
 
@@ -186,7 +186,7 @@ The [accepted draft contract](superpowers/specs/2026-10-22-private-draft-workflo
 
 `20261022010200_draft_snapshot.sql` adds private snapshot capture: a `gavel-article-snapshot` version-one envelope with an explicit 15-field article object and sorted category/tag/contributor selections. The helper preserves stored bodies and enforces the existing snapshot byte bound; UTC formatting avoids session-dependent timestamps. It creates no revision itself, grants no application execution, and enables no restore endpoint.
 
-`20261022010100_draft_write_guards.sql` implements private locking/quota/hash helpers; `20261022010110_draft_numeric_order.sql` fixes canonical integer-valued credit orders through a new migration. `20261022010300_create_article_draft.sql` enables the narrow authenticated create transaction. Receipts have no article FK or body; actor references remain restrictive. All existing direct table grants/policies are unchanged.
+`20261022010100_draft_write_guards.sql` implements private locking/quota/hash helpers; `20261022010110_draft_numeric_order.sql` fixes canonical integer-valued credit orders through a new migration. `20261022010300_create_article_draft.sql` enables the narrow authenticated create transaction. Receipts store neither an article foreign key nor a body. Actor receipts now cascade under the account erasure policy. All existing direct table grants/policies are unchanged.
 
 ### Versioned draft save boundary
 
@@ -230,9 +230,9 @@ Explicit interrupted-upload cancellation uses the existing uploading → deletin
 
 ## Author-created guest contributors
 
-Since 2026-11-16 these are one-off credits: each typed name creates its own credit-only profile (no account link) and is not reused across articles or suggested by search. Credit-only profiles are hidden from anonymous profile reads, so they have no public page. Existing guest credits were not rewritten; they follow the same rules. Orphaned credit-only rows (credits later removed from every article) are not deleted automatically, because retained revisions may still refer to them.
+Since 2026-11-16 these are one-off credits: each typed name creates its own credit-only profile (no account link) and is not reused across articles or suggested by search. Credit-only profiles are hidden from anonymous profile reads, so they have no public page. Existing guest credits were not rewritten; they follow the same rules. A bounded cleanup removes one-off credits after 30 days only when a private marker proves one-off creation and no current article or revision refers to the profile. The marker survives the creator’s account erasure. Frozen slugs, article ownership, publishing attribution, and stored photos also keep a profile from being removed.
 
-Active members can search active profiles through `search_contributors(text)`, a bounded ten-result substring projection returning only ID, display name and slug. `create_guest_contributor(uuid,text)` accepts a request UUID and the existing trimmed 1–120-character profile-name contract, reuses an active case-insensitive match, or creates a no-login guest with the existing slug allocator. Actor/request receipts bind exact payloads and preserve replay; creation writes one profile audit event. Administrators retain profile editing/deactivation. Credits still grant no permissions. See the [editor plan](superpowers/plans/2026-11-12-editor-tags-contributors-photo.md).
+Active members can search active profiles through `search_contributors(text)`, a bounded ten-result substring projection returning only ID, display name and slug. `create_guest_contributor(uuid,text)` accepts a request UUID and the existing trimmed 1–120-character profile-name contract, creates a separate no-login guest profile with the existing slug allocator. Actor/request receipts bind exact payloads and preserve replay; creation writes one profile audit event. Administrators retain profile editing/deactivation. Credits still grant no permissions. See the [editor plan](superpowers/plans/2026-11-12-editor-tags-contributors-photo.md).
 
 ## Main-photo caption
 
