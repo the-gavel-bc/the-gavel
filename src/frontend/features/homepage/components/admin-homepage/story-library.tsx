@@ -8,8 +8,6 @@ import { dragProps, StoryImage, type DragHandlers } from "./story-card";
 import type { Group, Story } from "./homepage-arrangement";
 import styles from "./homepage-editor.module.css";
 
-const searchPattern = /^[\p{L}\p{N} '\-]+$/u;
-
 export function StoryLibrary({
   initial,
   blocked,
@@ -64,10 +62,8 @@ export function StoryLibrary({
   async function search(event: React.FormEvent) {
     event.preventDefault();
     const value = text.trim();
-    if (value.length > 80 || (value && !searchPattern.test(value))) {
-      onNotice(
-        "Search accepts letters, numbers, spaces, apostrophes and hyphens.",
-      );
+    if (value.length > 80 || /[\p{Cc}]/u.test(value)) {
+      onNotice("Enter up to 80 characters without control characters.");
       return;
     }
     onNotice("");

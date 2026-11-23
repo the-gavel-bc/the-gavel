@@ -196,6 +196,59 @@ export async function getAdminArticlesPage(
   }
 }
 
+const homepageLibrarySchema = pageSchema.pick({ cursor: true, search: true });
+const homepageLibraryRowSchema = rowSchema.pick({
+  id: true,
+  title: true,
+  updated_at: true,
+});
+const HOME_LIBRARY_PAGE_SIZE = 12;
+
+export async function getHomepageLibraryPage(input: unknown): Promise<{
+  items: { id: string; title: string }[];
+  nextCursor: string | null;
+}> {
+  const parsed = homepageLibrarySchema.safeParse(input);
+  if (!parsed.success) throw new Error("Invalid homepage library request.");
+  const search = parsed.data.search || null;
+  const cursor =
+    parsed.data.cursor === undefined
+      ? null
+      : decodeAdminArticleCursor(parsed.data.cursor);
+  if (
+    parsed.data.cursor !== undefined &&
+    (!cursor || cursor.status !== "published" || cursor.search !== search)
+  )
+    throw new Error("Invalid homepage library request.");
+  const client = await adminReader();
+  const { data, error } = await client.rpc("list_homepage_eligible_stories", {
+    p_limit: HOME_LIBRARY_PAGE_SIZE + 1,
+    ...(search ? { p_search: search } : {}),
+    ...(cursor
+      ? { p_before_updated_at: cursor.updatedAt, p_before_id: cursor.id }
+      : {}),
+  });
+  if (error) throw new Error("Unable to load homepage stories.");
+  const rows = z
+    .array(homepageLibraryRowSchema)
+    .max(HOME_LIBRARY_PAGE_SIZE + 1)
+    .parse(data);
+  const page = rows.slice(0, HOME_LIBRARY_PAGE_SIZE);
+  const last = page.at(-1);
+  return {
+    items: page.map(({ id, title }) => ({ id, title })),
+    nextCursor:
+      rows.length > HOME_LIBRARY_PAGE_SIZE && last
+        ? encodeAdminArticleCursor({
+            id: last.id,
+            updatedAt: last.updated_at,
+            status: "published",
+            search,
+          })
+        : null,
+  };
+}
+
 export async function getAdminArticleDetail(
   articleId: string,
 ): Promise<AdminArticleSummary | null> {
