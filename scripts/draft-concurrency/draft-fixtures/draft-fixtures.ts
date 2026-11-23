@@ -1,3 +1,4 @@
+import { clearAuditFixtureRows } from "../../test-support/audit-fixture-cleanup";
 import type { DraftInput } from "../../../src/shared/articles/draft-contract/draft-contract";
 import {
   DatabaseSession,
@@ -73,7 +74,7 @@ export async function withDraftFixtures(
       delete from private.draft_write_receipts where actor_user_id='${ACTOR}';
       delete from private.draft_write_limits where actor_user_id='${ACTOR}';
       delete from private.media_write_receipts where actor_user_id='${ACTOR}';
-      delete from public.audit_events where actor_user_id='${ACTOR}';
+      ${clearAuditFixtureRows(`actor_user_id='${ACTOR}'`)}
       delete from public.article_main_images where article_id in(select id from public.articles where owner_profile_id='${PROFILE}');
       delete from private.article_revision_media_refs where article_id in(select id from public.articles where owner_profile_id='${PROFILE}');
       delete from public.article_body_images where article_id in(select id from public.articles where owner_profile_id='${PROFILE}');

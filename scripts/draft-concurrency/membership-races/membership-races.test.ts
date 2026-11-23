@@ -1,3 +1,4 @@
+import { clearAuditFixtureRows } from "../../test-support/audit-fixture-cleanup";
 import { randomUUID } from "node:crypto";
 import { expect, it } from "vitest";
 import {
@@ -62,7 +63,7 @@ it("serializes duplicate approval and stale deactivation on one membership", asy
     if (prepared)
       await observer.execute(`begin;
         delete from private.membership_write_receipts where actor_user_id='${actor}' or target_user_id='${target}';
-        delete from public.audit_events where actor_user_id='${actor}' or (resource_type='membership' and resource_id='${target}');
+        ${clearAuditFixtureRows(`actor_user_id='${actor}' or (resource_type='membership' and resource_id='${target}')`)}
         delete from public.memberships where user_id='${target}';
         delete from public.memberships where user_id='${actor}';
         delete from public.profiles where auth_user_id='${target}';
@@ -120,7 +121,7 @@ it("prevents two administrators from demoting each other into lockout", async ()
     if (prepared)
       await observer.execute(`begin;
         delete from private.membership_write_receipts where actor_user_id in ('${actor}','${second}') or target_user_id in ('${actor}','${second}');
-        delete from public.audit_events where actor_user_id in ('${actor}','${second}') or (resource_type='membership' and resource_id in ('${actor}','${second}'));
+        ${clearAuditFixtureRows(`actor_user_id in ('${actor}','${second}') or (resource_type='membership' and resource_id in ('${actor}','${second}'))`)}
         delete from public.memberships where user_id='${second}';
         delete from public.memberships where user_id='${actor}';
         delete from public.profiles where auth_user_id='${second}';
@@ -183,7 +184,7 @@ it("allows only the first of two administrators trying to deactivate each other"
     if (prepared)
       await observer.execute(`begin;
         delete from private.membership_write_receipts where actor_user_id in ('${actor}','${second}') or target_user_id in ('${actor}','${second}');
-        delete from public.audit_events where actor_user_id in ('${actor}','${second}') or (resource_type='membership' and resource_id in ('${actor}','${second}'));
+        ${clearAuditFixtureRows(`actor_user_id in ('${actor}','${second}') or (resource_type='membership' and resource_id in ('${actor}','${second}'))`)}
         delete from public.memberships where user_id in ('${actor}','${second}');
         delete from public.profiles where auth_user_id in ('${actor}','${second}');
         delete from auth.users where id in ('${actor}','${second}');commit;`);

@@ -3,6 +3,8 @@ import { expect, it } from "vitest";
 import { waitForLock } from "../database-session/database-session";
 import {
   ACTOR,
+  DRAFT,
+  createCommand,
   beginAsActor,
   withDraftFixtures,
 } from "../draft-fixtures/draft-fixtures";
@@ -98,6 +100,90 @@ it("uses one open guest slot when two creations overlap", async () => {
           returning profile_id
         )
         delete from public.profiles where id in(select profile_id from guest_receipts);`);
+    }
+  });
+});
+
+it("keeps a guest credit when a draft attaches it during a sweep", async () => {
+  await withDraftFixtures(async ({ observer, a, b }) => {
+    const token = randomUUID();
+    await observer.execute(`insert into public.profiles(id,display_name,slug,created_at)
+      values('${token}','Sweep attachment fixture','sweep-attachment-${token}',now()-interval '31 days');
+      insert into private.guest_credit_provenance(profile_id) values('${token}');
+      insert into private.profile_write_receipts(actor_user_id,request_id,operation,profile_id,payload_hash,result,created_at)
+      values('${ACTOR}','${token}','create_guest_author','${token}',
+        private.membership_payload_hash(jsonb_build_object('fixture','${token}')),
+        '{"created":true}',now()-interval '31 days');`);
+    try {
+      await beginAsActor(a);
+      expect(
+        await a.json(
+          createCommand(randomUUID(), {
+            ...DRAFT,
+            contributors: [
+              { profileId: token, role: "writer", displayOrder: 0 },
+            ],
+          }),
+        ),
+      ).toMatchObject({ ok: true });
+
+      await b.execute("begin;set local role service_role;");
+      expect(
+        await b.json("public.sweep_orphan_guest_credits(100)"),
+      ).toMatchObject({
+        ok: true,
+        deleted: 0,
+      });
+      await b.execute("commit;");
+      await a.execute("commit;");
+      expect(
+        await observer.json(
+          `exists(select 1 from public.article_contributors where profile_id='${token}')`,
+        ),
+      ).toBe(true);
+    } finally {
+      await Promise.all([a.close(), b.close()]);
+      await observer.execute(`delete from public.article_contributors where profile_id='${token}';
+        delete from private.profile_write_receipts where request_id='${token}';
+        delete from public.profiles where id='${token}';`);
+    }
+  });
+});
+
+it("allows only one overlapping sweep to delete a credit", async () => {
+  await withDraftFixtures(async ({ observer, a, b }) => {
+    const token = randomUUID();
+    await observer.execute(`insert into public.profiles(id,display_name,slug,created_at)
+      values('${token}','Concurrent sweep fixture','sweep-race-${token}',now()-interval '31 days');
+      insert into private.guest_credit_provenance(profile_id) values('${token}');
+      insert into private.profile_write_receipts(actor_user_id,request_id,operation,profile_id,payload_hash,result,created_at)
+      values('${ACTOR}','${token}','create_guest_author','${token}',
+        private.membership_payload_hash(jsonb_build_object('fixture','${token}')),
+        '{"created":true}',now()-interval '31 days');`);
+    try {
+      await a.execute("begin;set local role service_role;");
+      expect(await a.json("public.sweep_orphan_guest_credits(100)")).toEqual({
+        ok: true,
+        deleted: 1,
+        busy: false,
+      });
+      await b.execute("begin;set local role service_role;");
+      expect(await b.json("public.sweep_orphan_guest_credits(100)")).toEqual({
+        ok: true,
+        deleted: 0,
+        busy: true,
+      });
+      await b.execute("commit;");
+      await a.execute("commit;");
+      expect(
+        await observer.json(
+          `exists(select 1 from public.profiles where id='${token}')`,
+        ),
+      ).toBe(false);
+    } finally {
+      await Promise.all([a.close(), b.close()]);
+      await observer.execute(`delete from private.profile_write_receipts where request_id='${token}';
+        delete from public.profiles where id='${token}';`);
     }
   });
 });

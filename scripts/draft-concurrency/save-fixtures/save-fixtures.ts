@@ -1,3 +1,4 @@
+import { clearAuditFixtureRows } from "../../test-support/audit-fixture-cleanup";
 import type {
   DraftInput,
   DraftWriteResult,
@@ -74,7 +75,7 @@ export async function withSaveFixtures(
         await observer.execute(`begin;
         delete from private.draft_write_receipts where actor_user_id='${ADMIN}';
         delete from private.draft_write_limits where actor_user_id='${ADMIN}';
-        delete from public.audit_events where actor_user_id='${ADMIN}';
+        ${clearAuditFixtureRows(`actor_user_id='${ADMIN}'`)}
         delete from public.article_revisions where actor_user_id='${ADMIN}';
         delete from public.profiles where id='${ADMIN_PROFILE}';
         delete from public.memberships where user_id='${ADMIN}';delete from auth.users where id='${ADMIN}';commit;`);

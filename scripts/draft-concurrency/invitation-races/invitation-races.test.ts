@@ -1,3 +1,4 @@
+import { clearAuditFixtureRows } from "../../test-support/audit-fixture-cleanup";
 import { randomUUID } from "node:crypto";
 import { expect, it } from "vitest";
 import {
@@ -59,8 +60,8 @@ it("serializes concurrent claims so one invitation creates one membership", asyn
     if (prepared)
       await observer.execute(`begin;
         delete from private.membership_write_receipts where actor_user_id='${actor}' or target_user_id='${invitee}';
-        delete from public.audit_events where actor_user_id in ('${actor}','${invitee}')
-          or (resource_id='${invitee}' and resource_type='membership');
+        ${clearAuditFixtureRows(`actor_user_id in ('${actor}','${invitee}')
+          or (resource_id='${invitee}' and resource_type='membership')`)}
         delete from private.membership_invitations where email='${email}';
         delete from public.memberships where user_id in ('${actor}','${invitee}');
         delete from public.profiles where auth_user_id in ('${actor}','${invitee}');
@@ -205,9 +206,9 @@ async function cleanupStaffRace(
   await observer.execute(`begin;
     delete from private.membership_write_receipts
       where actor_user_id in ('${actor}','${invitee}') or target_user_id='${invitee}';
-    delete from public.audit_events where actor_user_id in ('${actor}','${invitee}')
+    ${clearAuditFixtureRows(`actor_user_id in ('${actor}','${invitee}')
       or resource_id in ('${actor}','${invitee}')
-      or resource_id in (select id from private.membership_invitations where email='${email}');
+      or resource_id in (select id from private.membership_invitations where email='${email}')`)}
     delete from private.membership_invitations where email='${email}';
     delete from public.memberships where user_id in ('${actor}','${invitee}');
     delete from public.profiles where auth_user_id in ('${actor}','${invitee}');

@@ -229,3 +229,27 @@ test("archives enforce public visibility, real scope404, empty/recovery states a
     ).toBeVisible();
   }
 });
+
+test("a retired section address redirects to its live archive without the old cursor", async ({
+  page,
+  request,
+}) => {
+  const from = `/sections/${prefix}-retired`;
+  const to = `/sections/${prefix}-news`;
+  sql(`insert into private.slug_redirects(source_path,target_kind,target_id,was_public)
+    values('${from}','section','${id(101)}',true);`);
+  try {
+    const response = await request.get(`${from}?cursor=obsolete`, {
+      maxRedirects: 0,
+    });
+    expect(response.status()).toBe(307);
+    expect(response.headers().location).toBe(to);
+    await page.goto(from);
+    await expect(page).toHaveURL(to);
+    await expect(
+      page.getByRole("main").getByRole("heading", { level: 1 }),
+    ).toBeVisible();
+  } finally {
+    sql(`delete from private.slug_redirects where source_path='${from}';`);
+  }
+});

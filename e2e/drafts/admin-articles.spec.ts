@@ -108,3 +108,22 @@ test("bad cursor has a safe recovery; inactive administrator loses access", asyn
   await expect(page).toHaveURL(/access-pending/);
   fixture.setAdminAccess(true);
 });
+
+test("dashboard filters keep keyboard focus visible and touch targets usable", async ({
+  context,
+  page,
+}) => {
+  await setLocalSession(context, fixture.users.admin);
+  await page.emulateMedia({ forcedColors: "active" });
+  await page.goto("/dashboard/admin/articles");
+  const apply = page.getByRole("button", { name: "Apply filters" });
+  await page.keyboard.press("Tab");
+  await apply.focus();
+  await expect(apply).toBeFocused();
+  await expect(apply).toHaveCSS("outline-style", "solid");
+  if (await page.evaluate(() => matchMedia("(pointer: coarse)").matches)) {
+    const target = await apply.boundingBox();
+    expect(target?.height).toBeGreaterThanOrEqual(44);
+    expect(target?.width).toBeGreaterThanOrEqual(44);
+  }
+});

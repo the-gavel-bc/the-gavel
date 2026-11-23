@@ -1,3 +1,4 @@
+import { clearAuditFixtureRows } from "../../../scripts/test-support/audit-fixture-cleanup";
 import { dbContainer } from "../db-container/db-container";
 import { execFileSync } from "node:child_process";
 import { localSupabase } from "../local-supabase/local-supabase";
@@ -408,7 +409,7 @@ export function draftListFixture(
           where actor_user_id in (${quoted(userIds)}) or target_user_id='${uuid(base + 5)}';
           delete from private.membership_invitations
           where email='aaaa-task9-${project}@bc.edu' and invited_by='${uuid(users.admin)}';
-          delete from public.audit_events where resource_type='membership' and resource_id='${uuid(base + 5)}';
+          ${clearAuditFixtureRows(`resource_type='membership' and resource_id='${uuid(base + 5)}'`)}
           delete from public.memberships where user_id='${uuid(base + 5)}';
           delete from public.profiles where auth_user_id='${uuid(base + 5)}';
           delete from auth.users where id='${uuid(base + 5)}';`);
@@ -445,7 +446,7 @@ export function draftListFixture(
         delete from private.taxonomy_write_receipts where actor_user_id in (${quoted(userIds)});
         delete from private.homepage_write_receipts where actor_user_id in (${quoted(userIds)});
         delete from private.draft_write_limits where actor_user_id in (${quoted(userIds)});
-        delete from public.audit_events where actor_user_id in (${quoted(userIds)});
+        ${clearAuditFixtureRows(`actor_user_id in (${quoted(userIds)})`)}
         delete from public.article_revisions where actor_user_id in (${quoted(userIds)});
         delete from public.article_categories where article_id in (select id from public.articles where owner_profile_id in (${quoted(userIds)}));
         delete from public.article_tags where article_id in (select id from public.articles where owner_profile_id in (${quoted(userIds)}));
