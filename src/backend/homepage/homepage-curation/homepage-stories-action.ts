@@ -1,7 +1,7 @@
 "use server";
 
 import { getCurrentAccess } from "@/backend/auth/access/access";
-import { getAdminArticlesPage } from "@/backend/articles/admin-article-queries/admin-article-queries";
+import { getHomepageLibraryPage } from "@/backend/articles/admin-article-queries/admin-article-queries";
 import { getHomepageImageUrls } from "./homepage-images";
 
 export type LibraryStory = {
@@ -24,9 +24,7 @@ export async function listHomepageStoriesAction(input: {
     const access = await getCurrentAccess();
     if (access.status !== "active" || access.role !== "administrator")
       return { ok: false, code: "forbidden" };
-    const page = await getAdminArticlesPage({
-      status: "published",
-      pageSize: 12,
+    const page = await getHomepageLibraryPage({
       ...(input.search ? { search: input.search } : {}),
       ...(input.cursor ? { cursor: input.cursor } : {}),
     });
@@ -36,7 +34,7 @@ export async function listHomepageStoriesAction(input: {
       items: page.items.map((a) => ({
         id: a.id,
         title: a.title,
-        status: a.status,
+        status: "published",
         imageUrl: images[a.id] ?? null,
       })),
       nextCursor: page.nextCursor,

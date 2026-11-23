@@ -9,7 +9,7 @@ vi.mock("@/backend/auth/access/access", () => ({
 }));
 vi.mock(
   "@/backend/articles/admin-article-queries/admin-article-queries",
-  () => ({ getAdminArticlesPage: mocks.page }),
+  () => ({ getHomepageLibraryPage: mocks.page }),
 );
 vi.mock("./homepage-images", () => ({ getHomepageImageUrls: mocks.images }));
 import { listHomepageStoriesAction } from "./homepage-stories-action";
@@ -39,8 +39,6 @@ it("returns a page of twelve published stories with images", async () => {
     nextCursor: "next",
   });
   expect(mocks.page).toHaveBeenCalledWith({
-    status: "published",
-    pageSize: 12,
     search: "st",
   });
 });

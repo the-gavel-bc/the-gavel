@@ -3,7 +3,10 @@ import { unstable_rethrow } from "next/navigation";
 import { requireActiveMembership } from "@/backend/auth/access/access";
 import { getHomepageImageUrls } from "@/backend/homepage/homepage-curation/homepage-images";
 import { listHomepageStoriesAction } from "@/backend/homepage/homepage-curation/homepage-stories-action";
-import { getAdminHomepageCuration } from "@/backend/homepage/homepage-curation/homepage-curation";
+import {
+  getAdminHomepageCuration,
+  type HomepageArticle,
+} from "@/backend/homepage/homepage-curation/homepage-curation";
 import { HomepageEditor } from "@/frontend/features/homepage/components/admin-homepage/homepage-editor";
 
 export const metadata = { title: "Homepage curation" };
@@ -25,13 +28,11 @@ export default async function AdminHomepagePage() {
       listHomepageStoriesAction({}),
     ]);
     if (!library.ok) throw new Error("Unable to load stories.");
-    // Show what the live homepage shows now: saved picks, with the newest
-    // published stories filling any slot nobody has chosen.
-    const shown = curation.effective;
+    const saved = curation.saved;
     images = await getHomepageImageUrls(
-      [shown.lead, ...shown.featured, ...shown.readThis]
-        .filter((story) => story !== null)
-        .map((story) => story.id),
+      [saved.lead, ...saved.featured, ...saved.readThis].flatMap((story) =>
+        story?.status === "published" ? [story.id] : [],
+      ),
     );
   } catch (error) {
     unstable_rethrow(error);
@@ -45,9 +46,27 @@ export default async function AdminHomepagePage() {
       </>
     );
   }
-  const withImage = (story: { id: string; title: string }) => ({
+  const { saved, effective } = curation;
+  const savedIds = new Set(
+    [saved.lead, ...saved.featured, ...saved.readThis].map(
+      (story) => story?.id,
+    ),
+  );
+  const live = [
+    ...(effective.lead ? [{ ...effective.lead, group: "lead" as const }] : []),
+    ...effective.featured.map((story) => ({
+      ...story,
+      group: "featured" as const,
+    })),
+    ...effective.readThis.map((story) => ({
+      ...story,
+      group: "readThis" as const,
+    })),
+  ];
+  const liveIds = new Set(live.map((story) => story.id));
+  const withImage = (story: HomepageArticle) => ({
     ...story,
-    status: "published" as const,
+    eligible: liveIds.has(story.id),
     imageUrl: images[story.id] ?? null,
   });
   return (
@@ -56,12 +75,11 @@ export default async function AdminHomepagePage() {
       <HomepageEditor
         version={curation.version}
         saved={{
-          lead: curation.effective.lead
-            ? withImage(curation.effective.lead)
-            : null,
-          featured: curation.effective.featured.map(withImage),
-          readThis: curation.effective.readThis.map(withImage),
+          lead: saved.lead ? withImage(saved.lead) : null,
+          featured: saved.featured.map(withImage),
+          readThis: saved.readThis.map(withImage),
         }}
+        automatic={live.filter((story) => !savedIds.has(story.id))}
         library={{ items: library.items, nextCursor: library.nextCursor }}
       />
     </>

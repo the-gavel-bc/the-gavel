@@ -21,6 +21,11 @@ test("administrator saves ordered published homepage selections", async ({
   );
   await setLocalSession(context, fixture.users.admin);
   await page.goto("/dashboard/admin/homepage");
+  const fillers = page.getByRole("region", {
+    name: "Automatic on the live homepage",
+  });
+  await expect(fillers).toBeVisible();
+  await expect(fillers.getByRole("button")).toHaveCount(0);
   const lead = `${fixture.label} own 20`;
   const featured = `${fixture.label} own 21`;
   const remove = page.getByRole("button", {
@@ -40,7 +45,12 @@ test("administrator saves ordered published homepage selections", async ({
     .getByRole("button", { name: `Add ${featured} to Featured News` })
     .click();
   await page.getByRole("button", { name: "Save homepage selections" }).click();
-  await expect(page.getByText("Homepage selections saved.")).toBeVisible();
+  await expect(
+    page
+      .getByText("Homepage selections saved.")
+      .filter({ visible: true })
+      .last(),
+  ).toBeVisible();
   await page.reload();
   await expect(
     page.getByRole("region", { name: "Lead story" }).getByText(lead),
@@ -58,7 +68,9 @@ test("administrator sees published candidates; author cannot open curation", asy
   await expect(page.getByText("Administrator access required.")).toBeVisible();
   await setLocalSession(context, fixture.users.admin);
   await page.goto("/dashboard/admin/homepage");
-  await expect(page.getByRole("heading", { name: "Homepage" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Homepage", exact: true }),
+  ).toBeVisible();
   await expect(
     page
       .getByRole("region", { name: "Published stories" })

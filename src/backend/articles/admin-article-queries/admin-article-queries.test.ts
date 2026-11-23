@@ -22,6 +22,7 @@ import {
   encodeAdminArticleCursor,
   getAdminArticleDetail,
   getAdminArticlesPage,
+  getHomepageLibraryPage,
 } from "./admin-article-queries";
 
 let http: ReturnType<typeof queryTestClient>;
@@ -138,4 +139,43 @@ it("rejects a cursor with changed search and preserves microseconds", async () =
   await getAdminArticlesPage({ cursor, search: "News" });
   const url = new URL(String(http.network.mock.calls[0][0]));
   expect(url.searchParams.get("or")).toContain(updatedAt);
+});
+
+it("uses the checked homepage RPC and binds the cursor to its search", async () => {
+  const rows = Array.from({ length: 13 }, (_, index) => ({
+    id: `80000000-0000-0000-0000-${String(index + 1).padStart(12, "0")}`,
+    title: "Homepage item",
+    updated_at: updatedAt,
+  }));
+  http.respond(rows);
+  const page = await getHomepageLibraryPage({ search: "Campus%" });
+  expect(page.items).toHaveLength(12);
+  expect(page.nextCursor).toEqual(expect.any(String));
+  expect(String(http.network.mock.calls[0][0])).toContain(
+    "/rpc/list_homepage_eligible_stories",
+  );
+  expect(JSON.parse(String(http.network.mock.calls[0][1]?.body))).toEqual({
+    p_limit: 13,
+    p_search: "Campus%",
+  });
+  await expect(
+    getHomepageLibraryPage({ search: "Other", cursor: page.nextCursor }),
+  ).rejects.toThrow("Invalid homepage library request.");
+  expect(http.network).toHaveBeenCalledTimes(1);
+
+  http.respond([rows[12]]);
+  const next = await getHomepageLibraryPage({
+    search: "Campus%",
+    cursor: page.nextCursor,
+  });
+  expect(next).toEqual({
+    items: [{ id: rows[12].id, title: "Homepage item" }],
+    nextCursor: null,
+  });
+  expect(JSON.parse(String(http.network.mock.calls[1][1]?.body))).toMatchObject(
+    {
+      p_before_id: rows[11].id,
+      p_before_updated_at: updatedAt,
+    },
+  );
 });

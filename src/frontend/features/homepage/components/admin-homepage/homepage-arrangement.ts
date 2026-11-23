@@ -6,6 +6,7 @@ export type Story = {
   title: string;
   status: "draft" | "published" | "archived";
   imageUrl: string | null;
+  eligible?: boolean;
 };
 export type Group = "lead" | "featured" | "readThis";
 export type RowGroup = Exclude<Group, "lead">;

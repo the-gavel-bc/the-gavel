@@ -104,9 +104,13 @@ export function SlotCard({
       <StoryImage story={story} />
       <div className={styles.cardBody}>
         <p className={styles.cardTitle}>{story.title}</p>
-        {story.status !== "published" && (
+        {(story.status !== "published" || story.eligible === false) && (
           <strong className={styles.warn}>
-            ({story.status}; remove before saving)
+            (
+            {story.status === "published"
+              ? "Unavailable to readers"
+              : story.status}
+            . Remove before saving.)
           </strong>
         )}
       </div>

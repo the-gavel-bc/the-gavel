@@ -951,6 +951,19 @@ export type Database = {
           resource_id: string;
         }[];
       };
+      list_homepage_eligible_stories: {
+        Args: {
+          p_before_id?: string;
+          p_before_updated_at?: string;
+          p_limit: number;
+          p_search?: string;
+        };
+        Returns: {
+          id: string;
+          title: string;
+          updated_at: string;
+        }[];
+      };
       list_membership_audit_events: {
         Args: {
           p_before_at?: string;

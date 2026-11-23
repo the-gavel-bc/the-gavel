@@ -32,7 +32,7 @@ import styles from "./homepage-editor.module.css";
 
 const messages = {
   invalid_input:
-    "Select distinct published stories within the slot limits. Remove archived selections before saving.",
+    "Select distinct published stories within the slot limits. Remove archived selections or stories unavailable to readers before saving.",
   forbidden: "Your administrator access no longer permits this change.",
   conflict:
     "Homepage selections changed elsewhere. Reload to review the latest version.",
@@ -45,10 +45,12 @@ const messages = {
 export function HomepageEditor({
   version: initialVersion,
   saved,
+  automatic = [],
   library,
 }: {
   version: number;
   saved: Choices;
+  automatic?: { id: string; title: string; group: Group }[];
   library: LibraryPage;
 }) {
   const router = useRouter();
@@ -156,7 +158,11 @@ export function HomepageEditor({
   }
   function save() {
     if (blocked) return;
-    if (selected.some((item) => item.status !== "published")) {
+    if (
+      selected.some(
+        (item) => item.status !== "published" || item.eligible === false,
+      )
+    ) {
       setResult({ ok: false, code: "invalid_input" });
       return;
     }
@@ -207,6 +213,23 @@ export function HomepageEditor({
         onShift={shift}
         onRemove={remove}
       />
+      {automatic.length > 0 && (
+        <section
+          className={styles.automatic}
+          aria-labelledby="automatic-homepage-stories"
+        >
+          <h2 id="automatic-homepage-stories">
+            Automatic on the live homepage
+          </h2>
+          <ul>
+            {automatic.map((story) => (
+              <li key={story.id}>
+                {groupLabel[story.group]} — {story.title}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       <StoryLibrary
         initial={library}
         blocked={blocked}

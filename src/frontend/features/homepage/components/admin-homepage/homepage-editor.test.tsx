@@ -137,9 +137,11 @@ it("rejects unsafe search text before any request", async () => {
   renderEditor();
   const notice = screen.getByRole("alert");
   expect(notice).toBeEmptyDOMElement();
-  await userEvent.type(screen.getByLabelText("Search titles"), "a<b");
+  fireEvent.change(screen.getByLabelText("Search titles"), {
+    target: { value: "a\u001Cb" },
+  });
   await userEvent.click(screen.getByRole("button", { name: "Search" }));
-  expect(notice).toHaveTextContent(/letters, numbers/);
+  expect(notice).toHaveTextContent(/without control characters/);
   expect(mocks.list).not.toHaveBeenCalled();
 });
 
@@ -211,4 +213,47 @@ it("drags a row story onto the lead, swapping the old lead into its slot", () =>
   });
   expect(within(lead).getByText("Story 2")).toBeVisible();
   expect(within(featured).getByText("Story 9")).toBeVisible();
+});
+
+it("shows live fillers as read-only and only sends explicitly chosen stories", async () => {
+  mocks.save.mockResolvedValue({ ok: true, version: 2, changed: true });
+  render(
+    <HomepageEditor
+      version={1}
+      saved={empty}
+      library={library}
+      automatic={[{ id: id(3), title: "Automatic fallback", group: "lead" }]}
+    />,
+  );
+  const filler = within(
+    screen.getByRole("region", { name: "Automatic on the live homepage" }),
+  );
+  expect(filler.getByText(/Automatic fallback/)).toBeVisible();
+  expect(filler.queryByRole("button")).not.toBeInTheDocument();
+  await userEvent.click(
+    screen.getByRole("button", { name: "Add Story 1 to Featured News" }),
+  );
+  await userEvent.click(
+    screen.getByRole("button", { name: "Save homepage selections" }),
+  );
+  expect(mocks.save).toHaveBeenCalledWith(
+    expect.objectContaining({
+      lead: null,
+      featured: [id(1)],
+      readThis: [],
+    }),
+  );
+});
+
+it("searches punctuation literally through the story library", async () => {
+  mocks.list.mockResolvedValue({
+    ok: true,
+    items: [story(10, { title: "100% turnout" })],
+    nextCursor: null,
+  });
+  renderEditor();
+  await userEvent.type(screen.getByLabelText("Search titles"), "100%");
+  await userEvent.click(screen.getByRole("button", { name: "Search" }));
+  expect(mocks.list).toHaveBeenCalledWith({ search: "100%" });
+  expect(await screen.findByText("100% turnout")).toBeVisible();
 });
