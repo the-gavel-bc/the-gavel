@@ -147,7 +147,7 @@ select results_eq($$ select id::text from public.sections where id::text like '2
 select results_eq($$ select id::text from public.categories where id::text like '30000000-%' order by id $$,
   array['30000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000005']::text[], 'anonymous: categories catalog visibility');
 select results_eq($$ select id::text from public.tags where id::text like '40000000-%' order by id $$,
-  array['40000000-0000-0000-0000-000000000001', '40000000-0000-0000-0000-000000000002']::text[], 'anonymous: tags catalog visibility');
+  array[]::text[], 'anonymous: unpublished tags stay private');
 select throws_ok($$ insert into public.sections (name, slug) values ('Forbidden', 'forbidden') $$, '42501', null, 'anonymous: sections insert denied');
 select throws_ok($$ update public.sections set name = 'Forbidden' $$, '42501', null, 'anonymous: sections update denied');
 select throws_ok($$ delete from public.sections $$, '42501', null, 'anonymous: sections delete denied');
@@ -165,7 +165,7 @@ select results_eq($$ select id::text from public.sections where id::text like '2
 select results_eq($$ select id::text from public.categories where id::text like '30000000-%' order by id $$,
   array['30000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000005']::text[], 'inactive member: categories catalog visibility');
 select results_eq($$ select id::text from public.tags where id::text like '40000000-%' order by id $$,
-  array['40000000-0000-0000-0000-000000000001', '40000000-0000-0000-0000-000000000002']::text[], 'inactive member: tags catalog visibility');
+  array[]::text[], 'inactive member: unpublished tags stay private');
 select throws_ok($$ insert into public.sections (name, slug) values ('Forbidden', 'forbidden') $$, '42501', null, 'inactive member: sections insert denied');
 select throws_ok($$ update public.sections set name = 'Forbidden' $$, '42501', null, 'inactive member: sections update denied');
 select throws_ok($$ delete from public.sections $$, '42501', null, 'inactive member: sections delete denied');
@@ -239,7 +239,7 @@ select results_eq($$ select id::text from public.sections where id::text like '2
 select results_eq($$ select id::text from public.categories where id::text like '30000000-%' order by id $$,
   array['30000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000005']::text[], 'non-Google administrator: categories catalog visibility');
 select results_eq($$ select id::text from public.tags where id::text like '40000000-%' order by id $$,
-  array['40000000-0000-0000-0000-000000000001', '40000000-0000-0000-0000-000000000002']::text[], 'non-Google administrator: tags catalog visibility');
+  array[]::text[], 'non-Google administrator: unpublished tags stay private');
 
 set local role postgres;
 update auth.users set raw_app_meta_data = '{"provider":"google","providers":["google"]}'::jsonb, email_confirmed_at = null where id = '00000000-0000-0000-0000-000000000004';
@@ -250,7 +250,7 @@ select results_eq($$ select id::text from public.sections where id::text like '2
 select results_eq($$ select id::text from public.categories where id::text like '30000000-%' order by id $$,
   array['30000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000005']::text[], 'unconfirmed administrator: categories catalog visibility');
 select results_eq($$ select id::text from public.tags where id::text like '40000000-%' order by id $$,
-  array['40000000-0000-0000-0000-000000000001', '40000000-0000-0000-0000-000000000002']::text[], 'unconfirmed administrator: tags catalog visibility');
+  array[]::text[], 'unconfirmed administrator: unpublished tags stay private');
 
 set local role postgres;
 update auth.users set email_confirmed_at = now(), email = 'synthetic-admin@example.test' where id = '00000000-0000-0000-0000-000000000004';
@@ -261,7 +261,7 @@ select results_eq($$ select id::text from public.sections where id::text like '2
 select results_eq($$ select id::text from public.categories where id::text like '30000000-%' order by id $$,
   array['30000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000005']::text[], 'out-of-domain administrator: categories catalog visibility');
 select results_eq($$ select id::text from public.tags where id::text like '40000000-%' order by id $$,
-  array['40000000-0000-0000-0000-000000000001', '40000000-0000-0000-0000-000000000002']::text[], 'out-of-domain administrator: tags catalog visibility');
+  array[]::text[], 'out-of-domain administrator: unpublished tags stay private');
 
 set local role postgres;
 update auth.users set email = 'gavel-taxonomy-4@bc.edu' where id = '00000000-0000-0000-0000-000000000004';
@@ -272,7 +272,7 @@ select results_eq($$ select id::text from public.sections where id::text like '2
 select results_eq($$ select id::text from public.categories where id::text like '30000000-%' order by id $$,
   array['30000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000005']::text[], 'deactivated administrator: categories catalog visibility');
 select results_eq($$ select id::text from public.tags where id::text like '40000000-%' order by id $$,
-  array['40000000-0000-0000-0000-000000000001', '40000000-0000-0000-0000-000000000002']::text[], 'deactivated administrator: tags catalog visibility');
+  array[]::text[], 'deactivated administrator: unpublished tags stay private');
 
 select * from finish();
 rollback;

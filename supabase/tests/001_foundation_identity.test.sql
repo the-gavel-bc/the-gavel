@@ -59,8 +59,8 @@ select ok(
 set local role anon;
 select results_eq(
   $$ select count(slug) from public.profiles $$,
-  array[4::bigint],
-  'anonymous readers see active public profiles'
+  array[3::bigint],
+  'anonymous readers see profiles of active members'
 );
 
 set local role authenticated;

@@ -28,6 +28,10 @@ insert into public.profiles(id,display_name,slug) values
  ('14000000-0000-0000-0000-000000000002','Sitemap guest','sm-guest'),
  ('14000000-0000-0000-0000-000000000003','Sitemap draft credit','sm-draft-credit'),
  ('14000000-0000-0000-0000-000000000004','Sitemap inactive','sm-inactive');
+insert into auth.users(id,email) values('94000000-0000-0000-0000-000000000001','14000000-0000-0000-0000-000000000001@bc.edu');
+insert into public.memberships(user_id,role,active,approved_by,approved_at)
+values('94000000-0000-0000-0000-000000000001','author',true,'00000000-0000-0000-0000-000000000004',now());
+update public.profiles set auth_user_id='94000000-0000-0000-0000-000000000001' where id='14000000-0000-0000-0000-000000000001';
 -- Future timestamps keep fixture rows ahead of any seeded publications.
 insert into public.articles(id,owner_profile_id,section_id,title,slug,status,published_at,archived_at) values
  ('54000000-0000-0000-0000-000000000001','14000000-0000-0000-0000-000000000001','24000000-0000-0000-0000-000000000001','One','sm-one','published','2025-12-31T23:59:59Z',null),
