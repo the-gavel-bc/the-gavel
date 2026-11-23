@@ -7,7 +7,6 @@ Items found by a review that were deliberately not done, with the reason, so the
 | Media | Browser (Playwright) test of the editor upload flow | The e2e fixtures have no editor account, and the suite needs the isolated local Supabase on port 54321 | Add an editor user to the e2e fixtures; test: author submits, upload control locked; editor uploads on the submitted article |
 | Media | Screen for `purge_article_image` | Rare takedown tool; the owner accepted a database-level tool for now | Runbook `docs/runbooks/purge-article-image.md` is written; build an admin screen if takedowns become routine |
 | Media | The daily cleanup still re-sweeps every retired key forever | Indexed and concurrency-capped, but the policy change (stop re-sweeping old successes) needs real ledger sizes | Revisit when the ledger holds tens of thousands of keys; measure a full sweep against its 40 s budget |
-| Media | `list_unused_article_uploads` has no interface caller | Kept as a documented database function with tests; removing it is a separate migration | Drop the function and its tests if no screen is planned |
 | Media | Raw per-reviewer reports for the media run were not saved | The first run captured them in chat only | Later runs save raw reports under `docs/code-reviews/raw/` in the reviewer's checkout |
 | Auth | Session expiry mid-edit reads as lost access (LOGIC-002) | A full fix needs a distinct signed-out result in every draft action and a preserved redirect target; only a message hint was added | Add an `unauthenticated` result code, pass a validated `next` through sign-in |
 | Auth | Google `hd` claim is never verified (SEC-002) | Depends on what Google sends for non-Workspace accounts with a bc.edu address; cannot be settled from the code, and requiring a missing claim would lock people out | In staging, sign in with such an account and inspect `auth.identities.identity_data`; then require `hd` if present |
@@ -86,7 +85,6 @@ The owner delegated the open decisions; they are resolved in [ADR 0014](../decis
 | 3 Cache navigation and footer | 60 s cache with on-demand revalidation | Resolves C-23 |
 | 4 Retryable result code | New code in the draft and lifecycle error contract and client retry behavior | Resolves part of C-16 |
 | 6 Homepage editor baseline | Load chosen picks only; filler read-only; shared eligibility rule | Resolves D-06 |
-| 17 Drop dead functions | One migration dropping `list_unused_article_uploads` and the three dead retired-media functions | Also needs types regenerated |
 | 18 Hosted settings | Verify and record email signup disabled, the `hd` claim, backup and recovery plan | Not code; owner or dashboard action |
 | 15 Design system | One button component, shared status tokens, scoped dashboard selectors, forced-colours and 44 px touch targets, no dark mode recorded | Resolves D-16, D-19 parts |
 
@@ -113,7 +111,7 @@ See [RUNTIME-VERIFICATION.md](RUNTIME-VERIFICATION.md). Not proven: tag merge pa
 | Media | `save_*` and the lifecycle function evaluate `article_authority` inside a `WHERE ... FOR UPDATE` (ARCH-008) | Accepted. After a lock wait the expected-version check, not the predicate, rejects stale writes; covered by the versioned conflict tests. Recorded in ADR 0012. |
 | Media | `article_authority` does not itself check Auth eligibility (SEC-005) | Accepted with a documented precondition: callers prove eligibility, because checking inside would turn an ineligible identity's `forbidden` into `not_found`. Guarded by pgTAP `069`. Recorded in ADR 0012. |
 | Media | Reviewer claim that editors cannot cancel uploads (TEST-002) | Rejected: the cancel path is `mark_article_image_for_removal`, which uses `article_authority`. |
-| Media | Reviewer claim of a dead `listUnusedArticleUploads` TypeScript action (LOGIC-006) | Rejected: no such action exists; only the database function remains (see the table above). |
+| Media | Reviewer claim of a dead `listUnusedArticleUploads` TypeScript action (LOGIC-006) | Rejected: no such action exists. The obsolete database function was removed in Batch 9j. |
 | Media | Cleanup and expiry cron routes return 404 outside production (preview deployments have no coverage) | Left as is: scheduled deletion jobs must not run against preview data. Revisit only if a staging environment with real storage is added. |
 | Media | Media changes on published articles are administrator-only | Decided (owner delegated, chosen for security): recorded in ADR 0012. |
 | Auth | Submit-for-review rule differs between SQL (any owner) and the interface (authors only) | Decided: leave SQL permissive (harmless, owner only) and offer submit to authors only, since editors and administrators publish directly. The permission matrix now says "not needed". |

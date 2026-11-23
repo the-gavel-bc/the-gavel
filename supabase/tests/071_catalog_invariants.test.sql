@@ -47,6 +47,7 @@ select is_empty($$
     else false end
 $$, 'Anonymous readers have no write grants on application relations');
 
+select hasnt_function('public', 'list_unused_article_uploads', array['uuid','uuid','integer']);
 select hasnt_function('public', 'record_media_cleanup_health', array['boolean']);
 select hasnt_function('public', 'register_retired_media_key', array['uuid','uuid','uuid']);
 select hasnt_function('public', 'finish_retired_article_scan', array['uuid','uuid','integer','boolean']);

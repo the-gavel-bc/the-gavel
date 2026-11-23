@@ -1036,10 +1036,6 @@ export type Database = {
           user_id: string;
         }[];
       };
-      list_unused_article_uploads: {
-        Args: { p_after_id?: string; p_article_id: string; p_limit?: number };
-        Returns: Json;
-      };
       mark_article_image_for_removal: {
         Args: { p_asset_id: string };
         Returns: Json;

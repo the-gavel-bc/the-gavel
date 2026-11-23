@@ -12,7 +12,7 @@ select is((select count(*)::int from pg_proc p join pg_namespace n on n.oid=p.pr
 select is((select count(*)::int from pg_proc p join pg_namespace n on n.oid=p.pronamespace
   where n.nspname='public' and p.proname in ('save_article_draft','save_published_article',
     'request_article_image_upload','mark_article_image_for_removal','admit_article_image_upload',
-    'list_unused_article_uploads','set_article_main_image','finalize_article_image_upload',
+    'set_article_main_image','finalize_article_image_upload',
     'complete_article_image_removal','begin_article_image_upload')
     and pg_get_functiondef(p.oid) !~ 'article_authority'),0,
   'article write and media functions all use article_authority');
