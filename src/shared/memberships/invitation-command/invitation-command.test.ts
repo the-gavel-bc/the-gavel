@@ -113,3 +113,19 @@ it("accepts only safe action results matching the command", () => {
       code: "unavailable",
     });
 });
+
+it.each(["\u0892", "\u2800", "\u3164"])(
+  "rejects invisible pasted names",
+  (character) => {
+    const line = `Name${character}Here <staff@bc.edu>`;
+    expect(parseInviteText(line)).toEqual({ entries: [], invalid: [line] });
+  },
+);
+
+it.each([
+  "\uFEFFName <staff@bc.edu>",
+  "staff@bc.edu, Name\uFEFF",
+  "Name\uFEFF <staff@bc.edu>",
+])("rejects invisible edge characters before trimming a pasted name", (line) =>
+  expect(parseInviteText(line)).toEqual({ entries: [], invalid: [line] }),
+);
