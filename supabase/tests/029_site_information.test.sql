@@ -8,7 +8,8 @@ select ok(not has_table_privilege('anon','public.site_information','SELECT'),'an
 select ok(not has_function_privilege('anon','public.save_site_information(integer,uuid,text,text,text,text,text,text,text)','EXECUTE'),'anonymous save denied');
 update auth.users set email='site-'||right(id::text,1)||'@bc.edu',email_confirmed_at=now(),
  raw_app_meta_data='{"provider":"google"}'::jsonb where id in (
- '00000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000002','00000000-0000-0000-0000-000000000004');
+ '00000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000002','00000000-0000-0000-0000-000000000003','00000000-0000-0000-0000-000000000004');
+update public.memberships set role='editor', active=true where user_id='00000000-0000-0000-0000-000000000003';
 set local role authenticated;
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',true);
 select is((select count(*)::integer from public.get_site_information()),0,'inactive member cannot read');
@@ -16,6 +17,10 @@ select is(public.save_site_information(1,'83000000-0000-0000-0000-000000000000',
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',true);
 select is((select count(*)::integer from public.get_site_information()),0,'author cannot read settings');
 select is(public.save_site_information(1,'83000000-0000-0000-0000-000000000001','Mission',null,null,null,null,null,null)->>'code','forbidden','author cannot save');
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000003',true);
+select is((select count(*)::integer from public.get_site_information()),0,'editor cannot read administrator settings');
+select is(public.save_site_information(1,gen_random_uuid(),'Denied',null,null,null,null,null,null)->>'code',
+  'forbidden','editor cannot save administrator settings');
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);
 select is((select count(*)::integer from public.get_site_information()),1,'administrator can read');
 select is(public.save_site_information(1,'83000000-0000-0000-0000-000000000002','<script>',null,null,null,null,null,null)->>'code','invalid_input','markup rejected');
@@ -56,6 +61,11 @@ set local role authenticated;
 select is((select count(*)::integer from public.get_site_information()),0,'ineligible administrator cannot read');
 select is(public.save_site_information(2,'83000000-0000-0000-0000-000000000009','Denied',null,null,null,null,null,null)->>'code','forbidden','ineligible administrator cannot save');
 reset role;
-select is((select count(*)::integer from public.audit_events where action='site_information.updated'),1,'only changed save audited');
+select results_eq(
+  $$select correlation_id from public.audit_events where action='site_information.updated'
+    and correlation_id in ('83000000-0000-0000-0000-000000000006','83000000-0000-0000-0000-000000000008',
+      '83000000-0000-0000-0000-000000000010')$$,
+  $$values ('83000000-0000-0000-0000-000000000006'::uuid)$$,
+  'only the committed change among these requests is audited');
 select * from finish();
 rollback;

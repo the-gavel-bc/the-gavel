@@ -41,6 +41,11 @@ select is((public.change_membership_role('00000000-0000-0000-0000-000000000004',
 select is((public.deactivate_membership('00000000-0000-0000-0000-000000000004',1,
   '80000000-0000-0000-0000-000000002402')->>'code'),
   'forbidden','author cannot deactivate an administrator');
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000003',true);
+select throws_ok($$select * from public.list_membership_audit_events()$$,
+  '42501',null,'editor cannot read membership events');
+select throws_ok($$select * from public.list_membership_audit_events_v2()$$,
+  '42501',null,'editor cannot read detailed membership events');
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);
 select is((public.change_membership_role('00000000-0000-0000-0000-000000000003',1,
   '80000000-0000-0000-0000-000000002403','author')->>'ok'),

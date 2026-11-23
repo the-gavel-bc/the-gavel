@@ -17,7 +17,8 @@ select ok(not has_function_privilege('anon','public.save_homepage_selections(int
   'anonymous cannot execute curation save');
 update auth.users set email='homepage-'||right(id::text,1)||'@bc.edu',email_confirmed_at=now(),
   raw_app_meta_data='{"provider":"google"}'::jsonb
-  where id in ('00000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000002','00000000-0000-0000-0000-000000000004');
+  where id in ('00000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000002','00000000-0000-0000-0000-000000000003','00000000-0000-0000-0000-000000000004');
+update public.memberships set role='editor', active=true where user_id='00000000-0000-0000-0000-000000000003';
 delete from public.homepage_selections;
 update public.homepage_curation set edit_version=1;
 insert into public.sections(id,name,slug) values('83000000-0000-0000-0000-000000000001','Homepage test section','homepage-test-section');
@@ -38,6 +39,11 @@ select is((public.save_homepage_selections(1,'83000000-0000-0000-0000-0000000000
   'forbidden','author cannot curate homepage');
 select throws_ok($$ select public.get_admin_homepage_curation() $$,'42501',null,
   'author cannot read administrator curation');
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000003',true);
+select is(public.save_homepage_selections(1,gen_random_uuid(),null,'{}','{}')->>'code',
+  'forbidden','editor cannot curate homepage');
+select throws_ok($$ select public.get_admin_homepage_curation() $$,'42501',null,
+  'editor cannot read saved curation');
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);
 select is((public.save_homepage_selections(1,'83000000-0000-0000-0000-000000000021',
   '83000000-0000-0000-0000-000000000001',array['83000000-0000-0000-0000-000000000001'::uuid],'{}')->>'code'),
