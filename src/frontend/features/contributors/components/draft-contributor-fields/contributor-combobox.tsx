@@ -131,7 +131,9 @@ export function ContributorCombobox({
         setError(
           result.code === "rate_limited"
             ? "Too many requests. Try again in a minute."
-            : "Unable to create contributor. Review the name and try again.",
+            : result.code === "conflict"
+              ? "You have reached the limit of 50 unattached one-off credits. You can still choose a member contributor."
+              : "Unable to create contributor. Review the name and try again.",
         );
       }
     } catch {

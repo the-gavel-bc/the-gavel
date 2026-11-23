@@ -337,3 +337,20 @@ it("keeps two credits whose creation results arrive in the same render", async (
     "second",
   ]);
 });
+
+it("explains the open credit cap without selecting the rejected name", async () => {
+  mocks.search.mockResolvedValue({ ok: true, items: [] });
+  mocks.create.mockResolvedValueOnce({ ok: false, code: "conflict" });
+  render(<Form />);
+  const input = screen.getByRole("combobox", { name: "Contributor 1" });
+  await userEvent.clear(input);
+  await userEvent.type(input, "Another Person");
+  await screen.findByRole("option", {
+    name: "Add 'Another Person' as a one-off credit",
+  });
+  await userEvent.keyboard("{ArrowDown}{Enter}");
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    /50 unattached one-off credits/,
+  );
+  expect(input).not.toHaveValue("Another Person (another-person)");
+});

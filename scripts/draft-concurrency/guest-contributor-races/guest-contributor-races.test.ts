@@ -60,3 +60,44 @@ it("uses the last guest quota slot once while an exact retry waits", async () =>
     }
   });
 });
+
+it("uses one open guest slot when two creations overlap", async () => {
+  await withDraftFixtures(async ({ observer, a, b }) => {
+    const token = randomUUID();
+    const command = `public.create_guest_contributor('${randomUUID()}','Open race ${token}')`;
+    const other = `public.create_guest_contributor('${randomUUID()}','Competing open race ${token}')`;
+    await observer.execute(`with guests as (
+      insert into public.profiles(display_name,slug)
+      select 'Open race fixture ${token} '||n,'open-race-fixture-${token}-'||n
+      from generate_series(1,49) n returning id
+    )
+    insert into private.profile_write_receipts(actor_user_id,request_id,operation,profile_id,payload_hash,result)
+    select '${ACTOR}',gen_random_uuid(),'create_guest_author',id,
+      private.membership_payload_hash(jsonb_build_object('fixture',id)),jsonb_build_object('created',true) from guests;`);
+    try {
+      await beginAsActor(a);
+      const first = await a.json(command);
+      expect(first).toMatchObject({ ok: true, created: true });
+      await beginAsActor(b);
+      const next = b.json(other);
+      await waitForLock(observer, b);
+      await a.execute("commit;");
+      expect(await next).toEqual({ ok: false, code: "conflict" });
+      expect(await b.json(command)).toMatchObject({ ok: true, replayed: true });
+      await b.execute("commit;");
+      expect(
+        await observer.json(
+          `(select count(*) from private.profile_write_receipts where actor_user_id='${ACTOR}')`,
+        ),
+      ).toBe(50);
+    } finally {
+      await Promise.all([a.close(), b.close()]);
+      await observer.execute(`with guest_receipts as (
+        delete from private.profile_write_receipts
+          where actor_user_id='${ACTOR}' and operation='create_guest_author'
+          returning profile_id
+        )
+        delete from public.profiles where id in(select profile_id from guest_receipts);`);
+    }
+  });
+});
