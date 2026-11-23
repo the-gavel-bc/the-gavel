@@ -182,7 +182,11 @@ export function DraftForm({
     if (!command.pending) {
       const invalid = {
         ...draftMetadataErrors(command.draft),
-        ...draftSelectionErrors(command.draft, currentOptions),
+        ...draftSelectionErrors(
+          command.draft,
+          currentOptions,
+          command.contributorLimit,
+        ),
       };
       if (categories.loading || categories.error)
         invalid.categoryIds =
@@ -394,6 +398,7 @@ export function DraftForm({
           }
         />
         <DraftContributorFields
+          contributorLimit={command.contributorLimit}
           key={catalog.revision}
           value={command.draft.contributors}
           options={catalog.options.contributors}

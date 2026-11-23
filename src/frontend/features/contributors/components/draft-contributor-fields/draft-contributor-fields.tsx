@@ -1,24 +1,26 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { ContributorCombobox } from "./contributor-combobox";
-import type {
-  DraftInput,
-  DraftContributor,
+import {
+  MAX_CONTRIBUTORS,
+  type DraftInput,
+  type DraftContributor,
 } from "@/shared/articles/draft-contract/draft-contract";
 import type { DraftOptions } from "@/backend/articles/draft-options/draft-options";
 import { Button } from "@/frontend/components/ui/button/button";
-import { MAX_CONTRIBUTORS } from "@/frontend/features/articles/draft-selections/draft-selections";
 import styles from "./draft-contributor-fields.module.css";
 type Credits = DraftInput["contributors"];
 export function DraftContributorFields({
   value,
   options,
   error,
+  contributorLimit = MAX_CONTRIBUTORS,
   onChange,
   onOption,
 }: {
   value: Credits;
   options: DraftOptions["contributors"];
   error?: string;
+  contributorLimit?: number;
   onChange: (update: (current: Credits) => Credits) => void;
   onOption?: (contributor: DraftOptions["contributors"][number]) => void;
 }) {
@@ -209,10 +211,10 @@ export function DraftContributorFields({
         type="button"
         variant="secondary"
         data-add-contributor=""
-        disabled={value.length >= MAX_CONTRIBUTORS}
+        disabled={value.length >= contributorLimit}
         title={
-          value.length >= MAX_CONTRIBUTORS
-            ? `Up to ${MAX_CONTRIBUTORS} contributors.`
+          value.length >= contributorLimit
+            ? `Up to ${contributorLimit} contributors.`
             : undefined
         }
         onClick={() => {

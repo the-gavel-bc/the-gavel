@@ -1,10 +1,12 @@
-import type { DraftInput } from "../../../../shared/articles/draft-contract/draft-contract";
+import {
+  MAX_CONTRIBUTORS,
+  type DraftInput,
+} from "../../../../shared/articles/draft-contract/draft-contract";
 import type { DraftOptions } from "../../../../backend/articles/draft-options/draft-options";
-/** One article credits at most this many people. */
-export const MAX_CONTRIBUTORS = 5;
 export function draftSelectionErrors(
   draft: DraftInput,
   options: DraftOptions,
+  contributorLimit = MAX_CONTRIBUTORS,
 ): Record<string, string> {
   const errors: Record<string, string> = {};
   const includes = (choices: { id: string }[], id: string) =>
@@ -35,7 +37,7 @@ export function draftSelectionErrors(
     errors.contributors =
       "Choose a contributor for each row or remove the empty row.";
   } else if (
-    draft.contributors.length > MAX_CONTRIBUTORS ||
+    draft.contributors.length > contributorLimit ||
     new Set(pairs).size !== pairs.length ||
     draft.contributors.some(
       (c) =>
@@ -46,6 +48,6 @@ export function draftSelectionErrors(
         c.displayOrder > 2147483647,
     )
   )
-    errors.contributors = `Choose up to ${MAX_CONTRIBUTORS} available contributors, each with a different role for the same person.`;
+    errors.contributors = `Choose up to ${contributorLimit} available contributors, each with a different role for the same person.`;
   return errors;
 }

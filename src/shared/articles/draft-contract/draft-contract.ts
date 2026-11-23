@@ -6,6 +6,12 @@ import {
 } from "../publication-date/publication-date";
 export { draftJsonbByteLength, isValidDraftLink };
 
+/** Keep older articles editable while preventing their credit count from growing. */
+export const MAX_CONTRIBUTORS = 5;
+export function draftContributorLimit(savedCount = 0): number {
+  return Math.max(MAX_CONTRIBUTORS, savedCount);
+}
+
 export type DraftMark =
   { type: "bold" | "italic" } | { type: "link"; attrs: { href: string } };
 export type DraftInline =
