@@ -12,14 +12,15 @@ import {
 } from "@/shared/site-information/site-information/site-information-command";
 import type { SiteInformation } from "@/backend/site-information/site-information/site-information";
 const fieldMessages: Record<string, string> = {
-  mission: "Enter plain text for the mission, up to 5,000 characters.",
+  mission:
+    "Enter plain text for the mission, up to 5,000 characters. Remove invisible format characters.",
   contactEmail: "Enter a valid contact email address.",
   instagramUrl: "Enter an HTTPS Instagram profile URL.",
   spotifyUrl: "Enter an HTTPS Spotify URL.",
   linkedinUrl: "Enter an HTTPS LinkedIn profile or organization URL.",
   facebookUrl: "Enter an HTTPS Facebook page URL.",
   submissionInstructions:
-    "Enter plain text for submission instructions, up to 5,000 characters.",
+    "Enter plain text for submission instructions, up to 5,000 characters. Remove invisible format characters.",
 };
 const messages = {
   invalid_input:

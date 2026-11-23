@@ -5,6 +5,7 @@ import {
 } from "@/backend/contributors/guest-contributor/guest-contributor-actions";
 import {
   contributorNameSchema,
+  newGuestNameSchema,
   type ContributorChoice,
   type GuestContributorCommand,
 } from "@/shared/contributors/guest-contributor/guest-contributor";
@@ -88,7 +89,7 @@ export function ContributorCombobox({
       clearTimeout(timer);
     };
   }, [query]);
-  const name = contributorNameSchema.safeParse(query);
+  const name = newGuestNameSchema.safeParse(query);
   const canCreate =
     name.success &&
     !loading &&

@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { getCurrentAccess } from "@/backend/auth/access/access";
 import { createServerSupabaseClient } from "@/backend/infrastructure/supabase/server/server";
 import {
-  siteInformationCommandSchema,
+  siteInformationTransportSchema,
   parseSiteInformationResult,
   type SiteInformationCommand,
   type SiteInformationResult,
@@ -11,7 +11,8 @@ import {
 export async function saveSiteInformationAction(
   command: SiteInformationCommand,
 ): Promise<SiteInformationResult> {
-  const parsed = siteInformationCommandSchema.safeParse(command);
+  // The RPC resolves exact legacy receipts before applying new text rules.
+  const parsed = siteInformationTransportSchema.safeParse(command);
   if (!parsed.success) return { ok: false, code: "invalid_input" };
   try {
     const access = await getCurrentAccess();

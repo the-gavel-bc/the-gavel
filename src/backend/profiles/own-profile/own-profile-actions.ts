@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { getCurrentAccess } from "@/backend/auth/access/access";
 import { createServerSupabaseClient } from "@/backend/infrastructure/supabase/server/server";
 import {
-  ownProfileCommandSchema,
+  ownProfileTransportSchema,
   parseOwnProfileResult,
   type OwnProfileCommand,
   type OwnProfileResult,
@@ -12,7 +12,8 @@ import {
 export async function saveOwnProfileAction(
   command: OwnProfileCommand,
 ): Promise<OwnProfileResult> {
-  const parsed = ownProfileCommandSchema.safeParse(command);
+  // The RPC resolves exact legacy receipts before applying new text rules.
+  const parsed = ownProfileTransportSchema.safeParse(command);
   if (!parsed.success) return { ok: false, code: "invalid_input" };
   try {
     const access = await getCurrentAccess();

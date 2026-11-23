@@ -71,10 +71,10 @@ export function OwnProfileForm({ profile }: { profile: OwnProfile }) {
       for (const issue of parsed.error.issues) {
         if (issue.path[0] === "displayName")
           errors.displayName =
-            "Enter a display name without edge spaces or control characters.";
+            "Enter a display name without edge spaces, control characters, or invisible format characters.";
         if (issue.path[0] === "biography")
           errors.biography =
-            "Enter a biography up to 5,000 characters without control characters.";
+            "Enter a biography up to 5,000 characters without control or invisible format characters.";
       }
       fields.show(event.currentTarget, errors);
       setResult(

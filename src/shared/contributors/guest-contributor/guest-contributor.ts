@@ -1,3 +1,4 @@
+import { hasUnsupportedDisplayCharacter } from "@/shared/validation/display-text/display-text";
 import { z } from "@/shared/validation/zod/zod";
 import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
 const uuid = z.custom<string>(isDraftUuid);
@@ -7,6 +8,13 @@ export const contributorNameSchema = z
   .min(1)
   .max(120)
   .refine((name) => !/[\u0000-\u001f\u007f]/u.test(name));
+export const newGuestNameSchema = z
+  .string()
+  .refine(
+    (name) => !hasUnsupportedDisplayCharacter(name),
+    "Remove invisible format characters.",
+  )
+  .pipe(contributorNameSchema);
 export const contributorChoiceSchema = z.strictObject({
   id: uuid,
   displayName: z.string().min(1).max(120),
@@ -38,10 +46,14 @@ export const guestContributorResultSchema = z.union([
   }),
   failureSchema,
 ]);
-export const guestContributorCommandSchema = z.strictObject({
+export const guestContributorTransportSchema = z.strictObject({
   requestId: uuid,
   displayName: contributorNameSchema,
 });
+export const guestContributorCommandSchema =
+  guestContributorTransportSchema.extend({
+    displayName: newGuestNameSchema,
+  });
 export type ContributorSearchResult = z.infer<
   typeof contributorSearchResultSchema
 >;
