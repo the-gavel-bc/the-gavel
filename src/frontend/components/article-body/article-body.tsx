@@ -120,14 +120,21 @@ function blocks(
 function prepare(
   content: unknown,
   resolveImage?: (assetId: string) => BodyImage | null,
+  allowMissingImages = false,
 ):
   | { kind: "invalid" }
   | { kind: "empty" }
-  | { kind: "ok"; content: DraftDocument; images: Map<string, BodyImage> } {
+  | {
+      kind: "ok";
+      content: DraftDocument;
+      images: Map<string, BodyImage>;
+      missingImages: boolean;
+    } {
   try {
     if (!isValidDraftDocument(content)) return { kind: "invalid" };
     if (content === null) return { kind: "empty" };
     const images = new Map<string, BodyImage>();
+    let missingImages = false;
     // Preflight the whole validated document so unresolved media cannot expose
     // a partially rendered body. Recursion below is bounded by canonical depth.
     const pending = [...content.document.content];
@@ -142,13 +149,17 @@ function prepare(
               height: resolved.height,
             }
           : null;
+        if (!image && allowMissingImages) {
+          missingImages = true;
+          continue;
+        }
         if (!validImage(image, block.attrs.assetId)) return { kind: "invalid" };
         images.set(block.attrs.assetId.toLowerCase(), image);
       } else if (block.type === "blockquote") pending.push(...block.content);
       else if (block.type === "bulletList" || block.type === "orderedList")
         for (const item of block.content) pending.push(...item.content);
     }
-    return { kind: "ok", content, images };
+    return { kind: "ok", content, images, missingImages };
   } catch {
     return { kind: "invalid" };
   }
@@ -156,19 +167,22 @@ function prepare(
 export function ArticleBody({
   content,
   resolveImage,
+  allowMissingImages = false,
   label = "Article body",
   unavailableMessage = "Article content is unavailable.",
 }: {
   content: unknown;
   resolveImage?: (assetId: string) => BodyImage | null;
+  allowMissingImages?: boolean;
   label?: string;
   unavailableMessage?: string;
 }) {
-  const prepared = prepare(content, resolveImage);
+  const prepared = prepare(content, resolveImage, allowMissingImages);
   if (prepared.kind === "invalid") return <p>{unavailableMessage}</p>;
   if (prepared.kind === "empty") return <p>No body content yet.</p>;
   return (
     <section className={styles.body} aria-label={label}>
+      {prepared.missingImages && <p>Some draft images are unavailable.</p>}
       {blocks(prepared.content.document.content, prepared.images)}
     </section>
   );

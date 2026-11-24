@@ -237,3 +237,7 @@ The mounted private form keeps its original draft/published save mode. If a revi
 ## Canonical section-root links
 
 Reader navigation, footer, story cards/heroes/headers, home section links and archive breadcrumbs/chips use the browser-safe `shared/reader/section-link` helper. The approved case-insensitive `Letter to the Editor` label maps section roots to `/letters`; other roots retain encoded section slugs. Category links stay `/sections/<section>/categories/<category>`, including letters categories. Existing routes, redirects, metadata policy and publication checks are unchanged.
+
+## Editorial article preview
+
+The draft save bar shows **Preview article** to editors and administrators who can edit a saved draft. The action pauses while there are unsaved edits or an in-flight save, lifecycle operation, or media change. The preview uses the shared reader article frame, with a small draft notice and a **Back to editor** link. The public route supplies related stories and public media addresses. The preview supplies private media addresses and handles absent saved content.

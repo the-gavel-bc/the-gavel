@@ -7,7 +7,7 @@ import type { DraftInput } from "@/shared/articles/draft-contract/draft-contract
 export const metadata = { title: "New draft" };
 
 export default async function NewDraftPage() {
-  await requireActiveMembership();
+  const access = await requireActiveMembership();
   let options;
   try {
     options = await getDraftOptions();
@@ -38,7 +38,11 @@ export default async function NewDraftPage() {
   return (
     <>
       <h1>New draft</h1>
-      <DraftForm initialDraft={initialDraft} options={options} />
+      <DraftForm
+        initialDraft={initialDraft}
+        options={options}
+        canPreview={access.role !== "author"}
+      />
     </>
   );
 }

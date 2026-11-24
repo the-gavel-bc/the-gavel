@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { PublicArticle } from "@/backend/public-articles/public-article/public-article";
+import type { ReaderArticle } from "@/shared/reader/reader-article/reader-article";
 import styles from "./article-credits.module.css";
 const roles = [
   ["writer", "Written by"],
@@ -7,7 +7,7 @@ const roles = [
   ["creative", "Creative contributors"],
 ] as const;
 
-export function ArticleCredits({ article }: { article: PublicArticle }) {
+export function ArticleCredits({ article }: { article: ReaderArticle }) {
   return (
     <dl className={styles.credits}>
       {roles.map(([role, label]) => {

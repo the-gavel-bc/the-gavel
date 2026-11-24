@@ -366,3 +366,5 @@ Findings and decisions are in [docs/code-reviews/AREA-1-AUTH-REPORT.md](code-rev
 
 
 Administrator profile moderation changes public presentation without changing membership, article ownership, or editorial permissions. Dashboard writes and the database independently check administrator access. Public profile photos are reauthorized for every request. The audit table denies service-role update, delete, and truncate. Its trigger also denies owner mutations and permits only a foreign-key action that clears the actor during Auth erasure while keeping every other event field identical.
+
+Editorial preview checks the current editor or administrator role and the existing draft edit capability on every fresh request. The saved article and attached media descriptors are read through the user's cookie-scoped Supabase client and existing RLS. The preview uses generic metadata and private, no-store responses. Author links and biographies come only from the existing public profile projection. Draft topic names appear as text so their slugs stay out of public navigation. The public article route continues to require publication.

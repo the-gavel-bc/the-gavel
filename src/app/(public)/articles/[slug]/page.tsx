@@ -7,11 +7,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getPublicArticleForRequest } from "@/backend/public-articles/public-article/public-article";
 import { getArticleContext } from "@/backend/public-articles/article-context/article-context";
-import { ArticleHeader } from "@/frontend/features/reader/components/article-header/article-header";
-import { ArticleCredits } from "@/frontend/features/reader/components/article-credits/article-credits";
-import { ArticleContext } from "@/frontend/features/reader/components/article-context/article-context";
-import { PublicArticleBody } from "@/frontend/features/reader/components/public-article-body/public-article-body";
-import styles from "./page.module.css";
+import { ReaderArticleFrame } from "@/frontend/features/reader/components/reader-article-frame/reader-article-frame";
+import styles from "@/frontend/features/reader/components/reader-article-frame/reader-article-frame.module.css";
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -38,19 +35,5 @@ export default async function ArticlePage({ params }: Props) {
     );
   const article = result.article;
   const related = await getArticleContext(article.id, article.section.slug);
-  return (
-    <div className={styles.page}>
-      <div className={styles.progress} aria-hidden="true" />
-      <article aria-label={article.title} className={styles.article}>
-        <ArticleHeader article={article} />
-        <ArticleCredits article={article} />
-        <PublicArticleBody
-          content={article.content}
-          articleId={article.id}
-          images={article.bodyImages}
-        />
-      </article>
-      <ArticleContext article={article} related={related} />
-    </div>
-  );
+  return <ReaderArticleFrame article={article} related={related} />;
 }
