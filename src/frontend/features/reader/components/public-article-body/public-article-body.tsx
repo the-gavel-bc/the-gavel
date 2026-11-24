@@ -3,19 +3,27 @@ import {
   type BodyImage,
 } from "@/frontend/components/article-body/article-body";
 import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
+import {
+  publicArticleImageUrl,
+  type ArticleImageUrl,
+} from "@/shared/reader/reader-article/reader-article";
 import styles from "./public-article-body.module.css";
 
 export function PublicArticleBody({
   content,
   articleId,
   images,
+  imageUrl = publicArticleImageUrl,
+  allowMissingImages = false,
 }: {
   content: unknown;
   articleId: string;
+  imageUrl?: ArticleImageUrl;
+  allowMissingImages?: boolean;
   images: readonly { id: string; width: number; height: number }[];
 }) {
   if (
-    !content ||
+    (!content && !allowMissingImages) ||
     !isDraftUuid(articleId) ||
     !Array.isArray(images) ||
     images.length > 5000
@@ -37,7 +45,7 @@ export function PublicArticleBody({
     )
       return <p>Article content is unavailable.</p>;
     media.set(image.id.toLowerCase(), {
-      src: `/api/public/articles/${articleId.toLowerCase()}/media/${image.id.toLowerCase()}`,
+      src: imageUrl(articleId, image.id),
       width: image.width,
       height: image.height,
     });
@@ -46,6 +54,7 @@ export function PublicArticleBody({
     <div className={styles.prose}>
       <ArticleBody
         content={content}
+        allowMissingImages={allowMissingImages}
         resolveImage={(id) => media.get(id.toLowerCase()) ?? null}
       />
     </div>

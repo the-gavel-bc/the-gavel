@@ -30,6 +30,7 @@ import { draftSelectionErrors } from "@/frontend/features/articles/draft-selecti
 import { useDraftCategories } from "./use-draft-categories";
 import { DraftConflictPanel } from "../draft-conflict-panel/draft-conflict-panel";
 import { useDraftNavigationGuard } from "../../../../components/dashboard/draft-navigation-guard/draft-navigation-guard";
+import buttonStyles from "@/frontend/components/ui/button/button.module.css";
 import { GuardedDashboardLink } from "../../../../components/dashboard/guarded-dashboard-link/guarded-dashboard-link";
 import { ArticleMedia } from "../article-media/article-media";
 import type { MainImage } from "@/backend/media/media-queries/media-queries";
@@ -71,6 +72,7 @@ export function DraftForm({
   status = "draft",
   review,
   capabilities,
+  canPreview = false,
 }: {
   initialDraft: DraftInput;
   options: DraftOptions;
@@ -80,6 +82,7 @@ export function DraftForm({
   /** Review state and what this member may do; absent for new drafts. */
   review?: { requestedAt: string | null; note: string | null };
   capabilities?: ArticleCapabilities;
+  canPreview?: boolean;
 }) {
   const command = useDraftCommand(initialDraft, article, status);
   const [editorFailure, setEditorFailure] = useState<DraftFailure | null>(null);
@@ -152,6 +155,11 @@ export function DraftForm({
   // A photo chosen before the draft exists: the draft is created first, then
   // ArticleMedia uploads it. The editor stays mounted so the file survives.
   const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
+  const handOffPhoto = useCallback((dirty: boolean) => {
+    setMediaDirty(dirty);
+    // ArticleMedia owns the initial file from its first render onward.
+    setPendingPhoto(null);
+  }, []);
   const createdInPlace = useRef(false);
   const [inPlace, setInPlace] = useState(false);
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -212,6 +220,19 @@ export function DraftForm({
       router.refresh();
     }
   }
+  const previewId =
+    canPreview && status === "draft" ? command.article?.id : undefined;
+  const previewBlocked =
+    command.dirty ||
+    Boolean(command.pending) ||
+    command.phase === "saving" ||
+    Boolean(editorFailure) ||
+    mediaDirty ||
+    mediaBusy ||
+    bodyMediaDirty ||
+    Boolean(pendingPhoto) ||
+    lifecycleBusy ||
+    recoveryBlocked;
   const saveStatus =
     command.phase === "saving"
       ? status === "published"
@@ -495,7 +516,7 @@ export function DraftForm({
             });
           }}
           onBusyChange={setMediaBusy}
-          onDirtyChange={setMediaDirty}
+          onDirtyChange={handOffPhoto}
         />
       )}
       <fieldset
@@ -518,13 +539,18 @@ export function DraftForm({
           <p role="status">
             {editorFailure ? "Body needs attention before saving." : saveStatus}
           </p>
-          <p>
+          <p className={styles.visibilityNote}>
             {status === "published"
               ? "This article remains published when you save changes."
               : review?.requestedAt
                 ? "In review. Only editors can change it until it is published or returned."
                 : "Your draft stays private."}
           </p>
+          {previewId && previewBlocked && (
+            <p id="preview-blocked">
+              Finish saving your changes and media before previewing.
+            </p>
+          )}
         </div>
         <div className={styles.saveLeft}>
           <Button
@@ -535,6 +561,25 @@ export function DraftForm({
           >
             Cancel
           </Button>
+          {previewId &&
+            (previewBlocked ? (
+              <Button
+                type="button"
+                variant="secondary"
+                disabled
+                aria-describedby="preview-blocked"
+              >
+                Preview article
+              </Button>
+            ) : (
+              <a
+                className={buttonStyles.button}
+                data-variant="secondary"
+                href={`/dashboard/articles/${previewId}/preview`}
+              >
+                Preview article
+              </a>
+            ))}
           {command.article && (
             <ArticleLifecycleControls
               compact

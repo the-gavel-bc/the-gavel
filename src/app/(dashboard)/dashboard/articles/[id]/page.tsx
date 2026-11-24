@@ -13,7 +13,7 @@ export default async function EditDraftPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireActiveMembership();
+  const access = await requireActiveMembership();
   const { id } = await params;
   if (!isDraftUuid(id)) notFound();
   const recovery = (
@@ -107,6 +107,7 @@ export default async function EditDraftPage({
         options={options}
         initialImage={mainImage}
         status={detail.status}
+        canPreview={access.role !== "author"}
         review={detail.review}
         capabilities={detail.capabilities}
         article={{

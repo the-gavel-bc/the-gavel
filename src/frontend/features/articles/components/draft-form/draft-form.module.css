@@ -105,7 +105,7 @@
     font-size: 0.875rem;
   }
   /* The visibility note is dropped here; the save status stays. */
-  .saveText p:not([role="status"]) {
+  .saveText .visibilityNote {
     display: none;
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import styles from "./page.module.css";
+import styles from "@/frontend/features/reader/components/reader-article-frame/reader-article-frame.module.css";
 export default function ArticleError({
   reset,
 }: {

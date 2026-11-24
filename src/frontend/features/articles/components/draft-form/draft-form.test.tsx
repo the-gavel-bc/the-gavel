@@ -1101,3 +1101,45 @@ it("blocks saving an empty contributor row until it is filled or removed", async
   );
   expect(mocks.create).not.toHaveBeenCalled();
 });
+
+it("previews only an acknowledged draft and blocks during a pending save or media write", async () => {
+  const updatedAt = "2026-11-24T12:00:00Z";
+  const id = baseDraft.sectionId;
+  render(
+    <DraftForm
+      canPreview
+      initialDraft={baseDraft}
+      options={options}
+      article={{ id, version: 1, updatedAt }}
+    />,
+  );
+  const link = () => screen.getByRole("link", { name: "Preview article" });
+  expect(link()).toHaveAttribute("href", `/dashboard/articles/${id}/preview`);
+  await userEvent.type(screen.getByLabelText(/Title/), " changed");
+  const previewButton = () =>
+    screen.getByRole("button", { name: "Preview article" });
+  expect(previewButton()).toBeDisabled();
+  let finishSave!: (value: unknown) => void;
+  mocks.save.mockReturnValue(
+    new Promise((resolve) => {
+      finishSave = resolve;
+    }),
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Save draft" }));
+  expect(previewButton()).toBeDisabled();
+  await act(async () =>
+    finishSave({
+      ok: true,
+      articleId: id,
+      version: 2,
+      updatedAt,
+      replayed: false,
+      changed: true,
+    }),
+  );
+  expect(link()).toBeVisible();
+  await userEvent.click(
+    screen.getByRole("button", { name: "Start deferred image write" }),
+  );
+  expect(previewButton()).toBeDisabled();
+});

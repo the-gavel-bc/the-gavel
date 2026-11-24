@@ -11,7 +11,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-.context nav {
+.topics {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem 3rem;
@@ -25,7 +25,7 @@
   padding: 0;
 }
 /* Topic chips, as in the demo. */
-.context nav a {
+.topicChip {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -41,12 +41,12 @@
     border-color var(--reader-fast) var(--reader-ease);
 }
 /* Keeps a 44px tap target around the slim chip. */
-.context nav a::before {
+a.topicChip::before {
   position: absolute;
   inset: -0.375rem 0;
   content: "";
 }
-.context nav a:hover {
+a.topicChip:hover {
   border-color: var(--reader-blue);
   background: var(--reader-soft);
 }

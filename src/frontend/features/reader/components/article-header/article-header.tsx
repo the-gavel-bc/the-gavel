@@ -1,23 +1,39 @@
 import { sectionHref } from "@/shared/reader/section-link/section-link";
 import Link from "next/link";
-import type { PublicArticle } from "@/backend/public-articles/public-article/public-article";
+import {
+  publicArticleImageUrl,
+  type ArticleImageUrl,
+  type ReaderArticle,
+} from "@/shared/reader/reader-article/reader-article";
 import styles from "./article-header.module.css";
 
 // Credited writers in order, or the article owner when none are credited,
 // matching the byline on previews. People with an author page are links.
-const byline = (article: PublicArticle) => {
+const byline = (article: ReaderArticle) => {
   const writers = article.contributors
     .filter((person) => person.role === "writer")
     .sort((a, b) => a.displayOrder - b.displayOrder);
   return writers.length ? writers : [article.owner];
 };
 
-export function ArticleHeader({ article }: { article: PublicArticle }) {
+export function ArticleHeader({
+  article,
+  imageUrl = publicArticleImageUrl,
+  linkSection = true,
+}: {
+  article: ReaderArticle;
+  imageUrl?: ArticleImageUrl;
+  linkSection?: boolean;
+}) {
   return (
     <header className={styles.header}>
-      <Link className={styles.kicker} href={sectionHref(article.section)}>
-        {article.section.name}
-      </Link>
+      {linkSection ? (
+        <Link className={styles.kicker} href={sectionHref(article.section)}>
+          {article.section.name}
+        </Link>
+      ) : (
+        <span className={styles.kicker}>{article.section.name}</span>
+      )}
       <h1>{article.title}</h1>
       {article.excerpt && <p className={styles.dek}>{article.excerpt}</p>}
       <p className={styles.date}>
@@ -52,7 +68,7 @@ export function ArticleHeader({ article }: { article: PublicArticle }) {
           {/* Keep authorized media outside the image optimizer's derivative cache. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={`/api/public/articles/${article.id}/media/${article.mainImage.id}`}
+            src={imageUrl(article.id, article.mainImage.id)}
             width={article.mainImage.width}
             height={article.mainImage.height}
             alt={article.mainImage.alt}

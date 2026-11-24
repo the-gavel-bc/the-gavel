@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { PublicArticle } from "@/backend/public-articles/public-article/public-article";
+import type { ReaderArticle } from "@/shared/reader/reader-article/reader-article";
 import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
 import { ArticleCard } from "../article-card/article-card";
 import styles from "./article-context.module.css";
@@ -7,25 +7,33 @@ import styles from "./article-context.module.css";
 export function ArticleContext({
   article,
   related,
+  linkTopics = true,
 }: {
-  article: PublicArticle;
+  article: ReaderArticle;
   related: PublicArticleCard[];
+  linkTopics?: boolean;
 }) {
+  const Topics = linkTopics ? "nav" : "section";
   return (
     <div className={styles.context}>
       {(article.categories.length > 0 || article.tags.length > 0) && (
-        <nav aria-label="Article topics">
+        <Topics className={styles.topics} aria-label="Article topics">
           {article.categories.length > 0 && (
             <div>
               <h2>Categories</h2>
               <ul>
                 {article.categories.map((category) => (
                   <li key={category.id}>
-                    <Link
-                      href={`/sections/${article.section.slug}/categories/${category.slug}`}
-                    >
-                      {category.name}
-                    </Link>
+                    {linkTopics ? (
+                      <Link
+                        className={styles.topicChip}
+                        href={`/sections/${article.section.slug}/categories/${category.slug}`}
+                      >
+                        {category.name}
+                      </Link>
+                    ) : (
+                      <span className={styles.topicChip}>{category.name}</span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -37,13 +45,22 @@ export function ArticleContext({
               <ul>
                 {article.tags.map((tag) => (
                   <li key={tag.id}>
-                    <Link href={`/tags/${tag.slug}`}>{tag.name}</Link>
+                    {linkTopics ? (
+                      <Link
+                        className={styles.topicChip}
+                        href={`/tags/${tag.slug}`}
+                      >
+                        {tag.name}
+                      </Link>
+                    ) : (
+                      <span className={styles.topicChip}>{tag.name}</span>
+                    )}
                   </li>
                 ))}
               </ul>
             </div>
           )}
-        </nav>
+        </Topics>
       )}
       {article.owner.biography && article.owner.slug && (
         <section className={styles.bio}>
