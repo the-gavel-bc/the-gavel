@@ -1,5 +1,7 @@
 begin;
 select no_plan();
+-- Start from no image, whatever the database held (rolled back at the end).
+delete from private.site_about_image;
 update auth.users set email='about-'||right(id::text,1)||'@bc.edu',email_confirmed_at=now(),
  raw_app_meta_data='{"provider":"google"}'::jsonb where id in (
  '00000000-0000-0000-0000-000000000002','00000000-0000-0000-0000-000000000003','00000000-0000-0000-0000-000000000004');
