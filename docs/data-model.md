@@ -99,6 +99,8 @@ Migrations `20261119010000_editor_role_enum.sql` and `20261119020000_editor_role
 
 ### Publication date
 
+Migration `20261124030000_demo_article_import.sql` adds `private.demo_import_ledger` (demo article id, imported article id, content hash) and `private.demo_import_profiles` (the archive owner profile and the one-off writer credits the import created); both have row-level security and no application grants. See [ADR 0015](decisions/0015-demo-article-import.md).
+
 Migration `20261124020000_article_corrections.sql` adds nullable `articles.correction` (1–2,000 plain characters) and `correction_updated_at` (both set or both null) with select grants for `authenticated`; public readers get them only through `get_public_article`. See [API contract](api-contracts.md).
 
 Migration `20261121010000_publication_date.sql` adds nullable `articles.publication_date date` (Eastern calendar date set by whoever may edit the article; null means the publish day) with a select grant for `authenticated`, and backfills it for rows with `published_at`. That historical backfill advanced `updated_at` on affected rows. Its stored dates are preserved because backfilled dates and explicitly chosen dates cannot be distinguished reliably. `published_at` remains the single value public queries order by. `private.capture_draft_snapshot` includes `publicationDate` only when set, so stored-versus-input comparison matches the canonical input. Helpers: `private.publication_date_allowed(date)` and `private.published_at_for(date, timestamptz)`.

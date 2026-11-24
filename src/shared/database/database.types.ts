@@ -938,6 +938,15 @@ export type Database = {
           submission_instructions: string;
         }[];
       };
+      import_demo_article: {
+        Args: {
+          p_actor_user_id: string;
+          p_dry_run: boolean;
+          p_image: Json;
+          p_payload: Json;
+        };
+        Returns: Json;
+      };
       invite_staff: {
         Args: { p_entries: Json; p_request_id: string };
         Returns: Json;
