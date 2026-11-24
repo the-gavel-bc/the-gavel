@@ -38,10 +38,9 @@ it("promotes the first section story without duplicating it and preserves native
   expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("News");
   expect(screen.getAllByRole("link", { name: "Story 1" })).toHaveLength(1);
   expect(screen.getByRole("heading", { name: "Story 1" }).tagName).toBe("H2");
-  expect(screen.getByRole("link", { name: "Older articles" })).toHaveAttribute(
-    "href",
-    "/sections/news?cursor=opaque_token",
-  );
+  expect(
+    screen.getByRole("link", { name: "Load more articles" }),
+  ).toHaveAttribute("href", "/sections/news?cursor=opaque_token");
   expect(screen.getByRole("link", { name: "Campus" })).toHaveAttribute(
     "href",
     "/sections/news/categories/campus",
@@ -74,7 +73,9 @@ it("keeps category breadcrumbs and chips scoped to the parent section", () => {
       .getByRole("navigation", { name: "Categories" })
       .querySelector('[aria-current="page"]'),
   ).toHaveTextContent("Campus");
-  expect(screen.getByRole("link", { name: "Older articles" })).toHaveAttribute(
+  expect(
+    screen.getByRole("link", { name: "Load more articles" }),
+  ).toHaveAttribute(
     "href",
     "/sections/news/categories/campus?cursor=opaque_token",
   );
@@ -97,6 +98,13 @@ it("distinguishes empty archives, final continuation pages, invalid cursors and 
     "href",
     "/sections/news",
   );
+  // Styled like the other page buttons: it sits in the pagination nav.
+  expect(
+    within(screen.getByRole("navigation", { name: "Article pages" })).getByRole(
+      "link",
+      { name: "Newest articles" },
+    ),
+  ).toBeVisible();
   rerender(<ArchiveGrid result={{ kind: "invalid", archive }} />);
   expect(
     screen.getByText("This article page is invalid or expired."),
@@ -161,8 +169,7 @@ it("renders sectionless tag archives as a grid without section-only controls", (
     "href",
     "/sections/news",
   );
-  expect(screen.getByRole("link", { name: "Older articles" })).toHaveAttribute(
-    "href",
-    "/tags/campus-life?cursor=opaque_token",
-  );
+  expect(
+    screen.getByRole("link", { name: "Load more articles" }),
+  ).toHaveAttribute("href", "/tags/campus-life?cursor=opaque_token");
 });

@@ -102,16 +102,16 @@ test("archives paginate natively and bind equal category slugs to the selected s
   await expect(main.getByRole("heading", { level: 1 })).toHaveText(
     `Campus news ${project}`,
   );
-  const older = main.getByRole("link", { name: "Older articles" });
+  const older = main.getByRole("link", { name: "Load more articles" });
   const cursor = new URL(
     (await older.getAttribute("href"))!,
     page.url(),
   ).searchParams.get("cursor")!;
   await older.click();
   await expect(main.getByRole("article")).toHaveCount(1);
-  await expect(main.getByRole("link", { name: "Older articles" })).toHaveCount(
-    0,
-  );
+  await expect(
+    main.getByRole("link", { name: "Load more articles" }),
+  ).toHaveCount(0);
   await expect(
     main.getByRole("link", { name: `${prefix} story 1`, exact: true }),
   ).toBeVisible();
@@ -194,7 +194,7 @@ test("archives enforce public visibility, real scope404, empty/recovery states a
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
     ).toBe(true);
-    await content.getByRole("link", { name: "Older articles" }).click();
+    await content.getByRole("link", { name: "Load more articles" }).click();
     await expect(content.getByRole("article")).toHaveCount(1);
     await content
       .getByRole("link", { name: `${prefix} story 1`, exact: true })
