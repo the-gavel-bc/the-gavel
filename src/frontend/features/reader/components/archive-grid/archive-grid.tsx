@@ -3,10 +3,10 @@ import { sectionHref } from "@/shared/reader/section-link/section-link";
 import type { ReactNode } from "react";
 import type { PublicArchiveResult } from "@/backend/public-articles/public-archive/public-archive";
 import { ArchiveHeader } from "../archive-header/archive-header";
-import { ArticleGrid } from "../reader-layout/reader-layout";
 import { ArticleCard } from "../article-card/article-card";
 import { ArticlePagination } from "../pagination/pagination";
 import { ArchiveLead } from "./archive-lead";
+import { ArchiveMore } from "./archive-more";
 import { ReaderState } from "../reader-states/reader-states";
 import styles from "./archive-grid.module.css";
 
@@ -34,7 +34,7 @@ export function ArchiveGrid({
         <ArchiveHeader archive={archive} />
         {introduction}
         <p>This article page is invalid or expired.</p>
-        <Link href={archive.href}>Newest articles</Link>
+        <ArticlePagination newestHref={archive.href} />
       </div>
     );
   const lead =
@@ -51,41 +51,35 @@ export function ArchiveGrid({
           <ArchiveLead article={lead} />
         </div>
       )}
-      {cards.length > 0 && (
-        <ArticleGrid>
-          {cards.map((article) => (
-            <ArticleCard key={article.id} article={article} headingLevel={2} />
-          ))}
-        </ArticleGrid>
-      )}
-      {result.items.length === 0 &&
-        (result.continuation ? (
-          <h2>No more articles</h2>
-        ) : (
-          <ReaderState
-            kind="empty"
-            action={
-              archive.category && archive.section
-                ? {
-                    href: sectionHref(archive.section),
-                    label: `See all ${archive.section.name} stories`,
+      <ArchiveMore
+        href={archive.href}
+        newestHref={result.continuation ? archive.href : null}
+        nextCursor={result.nextCursor}
+        empty={
+          <>
+            {result.items.length === 0 &&
+              (result.continuation ? (
+                <h2>No more articles</h2>
+              ) : (
+                <ReaderState
+                  kind="empty"
+                  action={
+                    archive.category && archive.section
+                      ? {
+                          href: sectionHref(archive.section),
+                          label: `See all ${archive.section.name} stories`,
+                        }
+                      : undefined
                   }
-                : undefined
-            }
-          />
-        ))}
-      {result.continuation && (
-        <p className={styles.newest}>
-          <Link href={archive.href}>Newest articles</Link>
-        </p>
-      )}
-      <ArticlePagination
-        nextHref={
-          result.nextCursor
-            ? `${archive.href}?cursor=${encodeURIComponent(result.nextCursor)}`
-            : null
+                />
+              ))}
+          </>
         }
-      />
+      >
+        {cards.map((article) => (
+          <ArticleCard key={article.id} article={article} headingLevel={2} />
+        ))}
+      </ArchiveMore>
     </div>
   );
 }

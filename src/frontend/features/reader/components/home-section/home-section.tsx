@@ -2,7 +2,6 @@ import { sectionHref } from "@/shared/reader/section-link/section-link";
 import Link from "next/link";
 import type { PublicHomepage } from "@/shared/reader/homepage/homepage";
 import { ArrowRightIcon } from "@/frontend/components/site/site-icons/site-icons";
-import { ArticleGrid } from "../reader-layout/reader-layout";
 import { ArticleCard } from "../article-card/article-card";
 import styles from "./home-section.module.css";
 export function HomeSection({
@@ -24,11 +23,12 @@ export function HomeSection({
           <ArrowRightIcon />
         </Link>
       </div>
-      <ArticleGrid>
+      {/* Phones: one row that scrolls sideways; wider screens: a grid. */}
+      <div className={styles.stories}>
         {section.articles.map((article) => (
           <ArticleCard key={article.id} article={article} variant="home" />
         ))}
-      </ArticleGrid>
+      </div>
     </section>
   );
 }

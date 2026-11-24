@@ -25,7 +25,7 @@ export function ArchiveHeader({ archive }: { archive: PublicArchiveContext }) {
       </nav>
       <h1>{archive.title}</h1>
       {archive.isLetters && (
-        <p>
+        <p className={styles.submit}>
           <Link href="/letters/how-to-submit">How to submit a letter</Link>
         </p>
       )}

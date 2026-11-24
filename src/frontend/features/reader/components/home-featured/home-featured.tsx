@@ -3,7 +3,8 @@ import type { PublicArticleCard } from "@/shared/reader/article-card/article-car
 import { StoryImage } from "../story-image/story-image";
 import { PreviewMeta } from "../preview-meta/preview-meta";
 import styles from "./home-featured.module.css";
-// Full-width blue band with compact thumbnail rows, as on the live site.
+// Full-width blue band of stories, as on the live site; on phones the
+// stories form one row that scrolls sideways.
 export function HomeFeatured({ articles }: { articles: PublicArticleCard[] }) {
   if (!articles.length) return null;
   return (

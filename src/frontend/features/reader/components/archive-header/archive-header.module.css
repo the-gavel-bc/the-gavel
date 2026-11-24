@@ -34,3 +34,29 @@
   margin-block: 0.75rem 0.5rem;
   overflow-wrap: anywhere;
 }
+/* Same outlined pill as the archive page buttons. */
+.submit {
+  margin: 1rem 0 0;
+}
+.submit a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.5rem;
+  color: var(--reader-blue);
+  border: 1px solid currentcolor;
+  border-radius: 999px;
+  font: 600 1rem/1.4 var(--reader-sans);
+  text-decoration: none;
+  transition:
+    background var(--reader-fast) var(--reader-ease),
+    color var(--reader-fast) var(--reader-ease);
+}
+.submit a:hover {
+  color: #fff;
+  background: var(--reader-blue);
+}
+.submit a:focus-visible {
+  outline: 3px solid var(--reader-blue);
+  outline-offset: 3px;
+}

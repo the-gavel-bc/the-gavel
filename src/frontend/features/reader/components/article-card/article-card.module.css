@@ -63,28 +63,3 @@
   color: inherit;
   background: var(--reader-soft);
 }
-/* Small screens: after a section's first story, homepage cards become
-   compact rows (thumbnail beside byline and title, no summary), so the page
-   is far shorter to scroll. */
-@media (max-width: 44.999rem) {
-  .home:not(:first-child) .story {
-    display: grid;
-    grid-template-columns: minmax(6rem, 2fr) 3fr;
-    grid-template-rows: auto 1fr;
-    column-gap: 1rem;
-  }
-  .home:not(:first-child) .image {
-    grid-row: 1 / -1;
-    align-self: start;
-  }
-  .home:not(:first-child) .meta {
-    margin-top: 0;
-  }
-  .home:not(:first-child) .title {
-    margin-bottom: 0;
-    font-size: 1.125rem;
-  }
-  .home:not(:first-child) .excerpt {
-    display: none;
-  }
-}

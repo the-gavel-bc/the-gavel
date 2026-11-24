@@ -7,6 +7,7 @@ import type {
   PublicSiteInformation,
 } from "@/shared/reader/site-navigation/site-navigation";
 import { StoryImage } from "@/frontend/features/reader/components/story-image/story-image";
+import { BackToTop } from "../back-to-top/back-to-top";
 import { MailIcon } from "../site-icons/site-icons";
 import { socialLinks } from "../social-links/social-links";
 import styles from "./site-footer.module.css";
@@ -101,8 +102,8 @@ export function SiteFooter({
       </div>
       <div className={styles.bottom}>
         <p>© {new Date().getUTCFullYear()} The Gavel · Boston College</p>
-        {/* Any unmatched fragment scrolls to the top; no script needed. */}
-        <a href="#top">Back to top ↑</a>
+        {/* Without JavaScript any unmatched fragment scrolls to the top. */}
+        <BackToTop href="#top">Back to top ↑</BackToTop>
         <Link href="/sign-in">Member sign in</Link>
       </div>
     </footer>
