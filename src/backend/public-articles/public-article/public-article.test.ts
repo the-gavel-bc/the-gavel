@@ -1,10 +1,25 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ rpc: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+  rpc: vi.fn(),
+  photoAt: null as string | null,
+}));
 vi.mock(
   "@/backend/infrastructure/supabase/public-reader/public-reader",
   () => ({
-    createPublicReaderClient: () => ({ rpc: mocks.rpc }),
+    createPublicReaderClient: () => ({
+      rpc: mocks.rpc,
+      from: () => {
+        const query = {
+          select: () => query,
+          eq: () => query,
+          maybeSingle: async () => ({
+            data: { photo_updated_at: mocks.photoAt },
+          }),
+        };
+        return query;
+      },
+    }),
   }),
 );
 
@@ -42,6 +57,16 @@ const article = {
 
 describe("getPublicArticle", () => {
   beforeEach(() => vi.resetAllMocks());
+  it("adds the owner's photo URL when they have a photo", async () => {
+    mocks.photoAt = "2026-11-01T00:00:00+00:00";
+    mocks.rpc.mockResolvedValue({ data: { kind: "ok", article }, error: null });
+    const result = await getPublicArticle("public-story");
+    mocks.photoAt = null;
+    expect(result.kind === "ok" && result.article.owner.photoUrl).toBe(
+      `/api/public/profiles/writer/photo?v=${Date.parse("2026-11-01T00:00:00+00:00")}`,
+    );
+  });
+
   it("returns validated public detail", async () => {
     mocks.rpc.mockResolvedValue({ data: { kind: "ok", article }, error: null });
     expect(await getPublicArticle("public-story")).toEqual({

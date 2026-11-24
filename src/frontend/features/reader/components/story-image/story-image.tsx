@@ -1,5 +1,6 @@
 import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
 import mark from "@/frontend/assets/brand/gavel-mark.png";
+import { ReaderImage } from "@/frontend/components/reader-image/reader-image";
 import styles from "./story-image.module.css";
 
 // Authorized media route, used directly: image optimization could retain stale
@@ -19,8 +20,7 @@ export function StoryImage({
       className={`${styles.frame} ${image ? styles.loading : ""} ${className ?? ""}`}
     >
       {image ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <ReaderImage
           src={`/api/public/articles/${article.id}/media/${image.id}`}
           alt={image.alt}
           width={image.width}

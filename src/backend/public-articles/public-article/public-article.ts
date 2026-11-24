@@ -46,6 +46,7 @@ const articleSchema = z.strictObject({
     displayName: text(120, 1),
     slug: slug.nullable(),
     biography: text(5000).nullable(),
+    photoUrl: z.string().nullable().optional(),
   }),
   categories: z.array(taxonomy).max(32),
   tags: z.array(taxonomy).max(64),
@@ -89,9 +90,33 @@ export async function getPublicArticle(
     );
     if (error) return { kind: "unavailable" };
     const result = resultSchema.safeParse(data);
-    return result.success ? result.data : { kind: "unavailable" };
+    if (!result.success) return { kind: "unavailable" };
+    if (result.data.kind === "ok") {
+      const photoUrl = await ownerPhotoUrl(result.data.article.owner.slug);
+      if (photoUrl) result.data.article.owner.photoUrl = photoUrl;
+    }
+    return result.data;
   } catch {
     return { kind: "unavailable" };
+  }
+}
+
+// The detail function does not return the photo; a missing one just means no picture.
+async function ownerPhotoUrl(ownerSlug: string | null) {
+  if (!ownerSlug) return null;
+  try {
+    const { data } = await createPublicReaderClient()
+      .from("profiles")
+      .select("photo_updated_at")
+      .eq("slug", ownerSlug)
+      .eq("active", true)
+      .maybeSingle();
+    const at = data?.photo_updated_at ? Date.parse(data.photo_updated_at) : NaN;
+    return Number.isNaN(at)
+      ? null
+      : `/api/public/profiles/${ownerSlug}/photo?v=${at}`;
+  } catch {
+    return null;
   }
 }
 

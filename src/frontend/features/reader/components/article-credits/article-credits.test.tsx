@@ -7,9 +7,9 @@ const article = {
   owner: { displayName: "Owner Person", slug: "owner-person" },
   contributors: [
     {
-      displayName: "Staff Writer",
-      slug: "staff-writer",
-      role: "writer",
+      displayName: "Staff Editor",
+      slug: "staff-editor",
+      role: "editor",
       displayOrder: 0,
     },
     {
@@ -23,12 +23,32 @@ const article = {
 
 it("links people with author pages and shows one-off credits as plain text", () => {
   render(<ArticleCredits article={article} />);
-  expect(screen.getByRole("link", { name: "Staff Writer" })).toHaveAttribute(
+  expect(screen.getByRole("link", { name: "Staff Editor" })).toHaveAttribute(
     "href",
-    "/authors/staff-writer",
+    "/authors/staff-editor",
   );
   expect(screen.getByText("Guest Photographer")).toBeVisible();
   expect(
     screen.queryByRole("link", { name: "Guest Photographer" }),
   ).not.toBeInTheDocument();
+});
+
+it("leaves writers to the header byline", () => {
+  render(
+    <ArticleCredits
+      article={
+        {
+          contributors: [
+            {
+              displayName: "Writer",
+              slug: null,
+              role: "writer",
+              displayOrder: 0,
+            },
+          ],
+        } as unknown as PublicArticle
+      }
+    />,
+  );
+  expect(screen.queryByText("Writer")).not.toBeInTheDocument();
 });

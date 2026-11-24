@@ -114,7 +114,6 @@ it("renders semantic article, attribution, authorized media, safe body and scope
   for (const text of [
     article.excerpt,
     "Readable public body",
-    "Written by",
     "Edited by",
     "Creative contributors",
     "Photo: Photographer",

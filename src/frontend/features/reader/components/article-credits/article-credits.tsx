@@ -1,8 +1,8 @@
 import Link from "next/link";
 import type { ReaderArticle } from "@/shared/reader/reader-article/reader-article";
 import styles from "./article-credits.module.css";
+// Writers are already in the header byline.
 const roles = [
-  ["writer", "Written by"],
   ["editor", "Edited by"],
   ["creative", "Creative contributors"],
 ] as const;
