@@ -75,16 +75,10 @@
   outline: 3px solid var(--reader-blue);
   outline-offset: 4px;
 }
-/* Wide screens, beside the Latest column: the lead fills the column's full
-   height so the two sides start and end on the same lines. */
-@media (min-width: 80rem) {
+/* Beside the Latest column: centered on it vertically, so the space above
+   and below the lead matches. */
+@media (min-width: 56rem) {
   .hero {
-    align-self: stretch;
-  }
-  .story {
-    height: 100%;
-  }
-  .story::before {
-    display: none;
+    align-self: center;
   }
 }
