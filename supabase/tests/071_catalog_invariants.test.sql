@@ -28,6 +28,8 @@ $$, $$
     'public.get_public_homepage()',
     'public.get_public_profile_photo(text)',
     'public.get_public_read_this()',
+    'public.get_public_site_about_image()',
+    'public.get_public_site_about_image_meta()',
     'public.get_public_site_navigation()',
     'public.list_public_articles(text,text,text,integer,jsonb)',
     'public.list_public_sitemap_articles(timestamp with time zone,uuid,integer)',
