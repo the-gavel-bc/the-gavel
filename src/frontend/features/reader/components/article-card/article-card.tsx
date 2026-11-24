@@ -34,7 +34,7 @@ export function ArticleCard({
   const home = variant === "home";
   const Heading = headingLevel === 2 ? "h2" : "h3";
   return (
-    <article className={`${styles.card} ${home ? styles.home : ""}`}>
+    <article className={styles.card}>
       {!home && (
         <Link className={styles.section} href={sectionHref(article.section)}>
           {article.section.name}

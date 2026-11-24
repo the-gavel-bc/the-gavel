@@ -69,13 +69,20 @@
     transition: none;
   }
 }
-/* Small screens: first Featured story full size, the rest compact rows. */
+/* Phones: one row of full stories that scrolls sideways, the next story
+   peeking in; same pattern as the homepage section rows. */
 @media (max-width: 44.999rem) {
-  .inner li:not(:first-child) .story {
-    grid-template-columns: minmax(6rem, 2fr) 3fr;
-    align-items: start;
+  .inner ol {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: min(80%, 20rem);
+    gap: 1rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 0.75rem;
   }
-  .inner li:not(:first-child) h3 {
-    font-size: 1.125rem;
+  .inner li {
+    scroll-snap-align: start;
   }
 }
