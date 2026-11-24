@@ -18,6 +18,7 @@ export function draftListFixture(
     | "media"
     | "bodyMedia"
     | "published"
+    | "preview"
     | "lifecycle"
     | "admin"
     | "audit"
@@ -33,44 +34,46 @@ export function draftListFixture(
     throw new Error("Unknown local browser project.");
   const base =
     (project === "desktop" ? 860 : 880) +
-    (suite === "deletion"
-      ? 720
-      : suite === "site"
-        ? 680
-        : suite === "homepage"
-          ? 640
-          : suite === "profile"
-            ? 600
-            : suite === "taxonomy"
-              ? 560
-              : suite === "contributors"
-                ? 520
-                : suite === "members"
-                  ? 480
-                  : suite === "audit"
-                    ? 440
-                    : suite === "admin"
-                      ? 400
-                      : suite === "lifecycle"
-                        ? 360
-                        : suite === "published"
-                          ? 320
-                          : suite === "bodyMedia"
-                            ? 280
-                            : suite === "media"
-                              ? 240
-                              : suite === "recover"
-                                ? 200
-                                : suite === "save"
-                                  ? 160
-                                  : suite === "select"
-                                    ? 120
-                                    : suite === "edit"
-                                      ? 80
-                                      : suite === "create"
-                                        ? 40
-                                        : 0);
-  const prefix = `${suite === "deletion" ? "phase4-task15" : suite === "site" ? "phase4-task14" : suite === "homepage" ? "phase4-task13" : suite === "profile" ? "phase4-task12" : suite === "taxonomy" ? "phase4-task11" : suite === "contributors" ? "phase4-task10" : suite === "members" ? "phase4-task9" : suite === "audit" ? "phase4-task8" : suite === "admin" ? "phase4-task7" : suite === "lifecycle" ? "phase4-task6" : suite === "published" ? "phase4-task5" : suite === "bodyMedia" ? "phase4-task4" : suite === "media" ? "phase4-task3" : suite === "save" || suite === "recover" ? `task10-${suite}` : suite === "select" ? "task9" : suite === "edit" ? "task8" : suite === "create" ? "task7" : "task6"}-${project}`;
+    (suite === "preview"
+      ? 760
+      : suite === "deletion"
+        ? 720
+        : suite === "site"
+          ? 680
+          : suite === "homepage"
+            ? 640
+            : suite === "profile"
+              ? 600
+              : suite === "taxonomy"
+                ? 560
+                : suite === "contributors"
+                  ? 520
+                  : suite === "members"
+                    ? 480
+                    : suite === "audit"
+                      ? 440
+                      : suite === "admin"
+                        ? 400
+                        : suite === "lifecycle"
+                          ? 360
+                          : suite === "published"
+                            ? 320
+                            : suite === "bodyMedia"
+                              ? 280
+                              : suite === "media"
+                                ? 240
+                                : suite === "recover"
+                                  ? 200
+                                  : suite === "save"
+                                    ? 160
+                                    : suite === "select"
+                                      ? 120
+                                      : suite === "edit"
+                                        ? 80
+                                        : suite === "create"
+                                          ? 40
+                                          : 0);
+  const prefix = `${suite === "preview" ? "editorial-preview" : suite === "deletion" ? "phase4-task15" : suite === "site" ? "phase4-task14" : suite === "homepage" ? "phase4-task13" : suite === "profile" ? "phase4-task12" : suite === "taxonomy" ? "phase4-task11" : suite === "contributors" ? "phase4-task10" : suite === "members" ? "phase4-task9" : suite === "audit" ? "phase4-task8" : suite === "admin" ? "phase4-task7" : suite === "lifecycle" ? "phase4-task6" : suite === "published" ? "phase4-task5" : suite === "bodyMedia" ? "phase4-task4" : suite === "media" ? "phase4-task3" : suite === "save" || suite === "recover" ? `task10-${suite}` : suite === "select" ? "task9" : suite === "edit" ? "task8" : suite === "create" ? "task7" : "task6"}-${project}`;
   const uuid = (n: number) =>
     `00000000-0000-0000-0000-${String(n).padStart(12, "0")}`;
   const id = (n: number) =>
@@ -184,10 +187,16 @@ export function draftListFixture(
       `);
     },
     makeInReview(articleNumber: number) {
-      if (!installed || suite !== "lifecycle")
+      if (!installed || (suite !== "lifecycle" && suite !== "preview"))
         throw new Error("Not a lifecycle fixture.");
       sql(`update public.articles set review_requested_at=now(),review_note=null
         where id='${id(articleNumber)}' and status='draft';`);
+    },
+    setPreviewEditor(active: boolean) {
+      if (!installed || suite !== "preview")
+        throw new Error("Not a preview fixture.");
+      sql(`update public.memberships set role='editor',active=${active},
+        revoked_at=${active ? "null" : "now()"} where user_id='${uuid(users.other)}';`);
     },
     makeArchivedReady() {
       if (!installed || suite !== "admin")
@@ -246,7 +255,8 @@ export function draftListFixture(
         (suite !== "select" &&
           suite !== "save" &&
           suite !== "recover" &&
-          suite !== "taxonomy")
+          suite !== "taxonomy" &&
+          suite !== "preview")
       )
         throw new Error("Not a selection fixture.");
       sql(`do $$ begin
@@ -427,6 +437,7 @@ export function draftListFixture(
           suite === "bodyMedia" ||
           suite === "published" ||
           suite === "lifecycle" ||
+          suite === "preview" ||
           suite === "admin" ||
           suite === "deletion"
             ? `
