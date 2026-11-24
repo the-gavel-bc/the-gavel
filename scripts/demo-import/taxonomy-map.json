@@ -1,0 +1,42 @@
+{
+  "news/": { "section": "features", "category": "outside-of-bc" },
+  "news/allston-brighton": {
+    "section": "allston-brighton",
+    "category": "news"
+  },
+  "news/campus": { "section": "features", "category": "on-campus" },
+  "news/boston": { "section": "features", "category": "outside-of-bc" },
+  "news/national": { "section": "features", "category": "outside-of-bc" },
+  "news/international": { "section": "features", "category": "outside-of-bc" },
+  "features/": { "section": "features", "category": "on-campus" },
+  "features/investigations": { "section": "features", "category": "on-campus" },
+  "features/profiles": { "section": "features", "category": "on-campus" },
+  "features/student-life": { "section": "features", "category": "on-campus" },
+  "opinions/": { "section": "opinions", "category": "campus-pov" },
+  "opinions/columns": { "section": "opinions", "category": "campus-pov" },
+  "opinions/editorials": { "section": "opinions", "category": "campus-pov" },
+  "opinions/letter-to-the-editor": {
+    "section": "letter-to-the-editor",
+    "category": null
+  },
+  "sports/": { "section": "sports", "category": null },
+  "sports/bc-athletics": { "section": "sports", "category": null },
+  "sports/pro-sports": { "section": "sports", "category": null },
+  "culture/": { "section": "culture", "category": "arts-and-entertainment" },
+  "culture/arts": {
+    "section": "culture",
+    "category": "arts-and-entertainment"
+  },
+  "culture/film-tv": {
+    "section": "culture",
+    "category": "arts-and-entertainment"
+  },
+  "culture/music": {
+    "section": "culture",
+    "category": "arts-and-entertainment"
+  },
+  "culture/gavel-groove": {
+    "section": "culture",
+    "category": "arts-and-entertainment"
+  }
+}
