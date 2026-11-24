@@ -97,3 +97,12 @@
 .letters section {
   max-width: 46rem;
 }
+.aboutImage {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 32rem;
+  object-fit: cover;
+  background: var(--reader-soft);
+  border-radius: var(--reader-radius);
+}

@@ -22,7 +22,6 @@ const information = {
   spotifyUrl: null,
   linkedinUrl: null,
   facebookUrl: null,
-  submissionInstructions: null,
 };
 describe("site information form", () => {
   beforeEach(() => vi.clearAllMocks());

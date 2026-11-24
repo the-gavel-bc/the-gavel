@@ -2,13 +2,16 @@ import { contactMailto } from "@/shared/reader/contact-link/contact-link";
 import Link from "next/link";
 import type { PublicSiteInformation } from "@/shared/reader/site-navigation/site-navigation";
 import illustration from "@/frontend/assets/brand/letters-illustration.jpg";
+import { ReaderImage } from "@/frontend/components/reader-image/reader-image";
 import styles from "./site-information.module.css";
 export function SiteInformationPage({
   page,
   information,
+  aboutImage = null,
 }: {
   page: "about" | "submission";
   information: PublicSiteInformation | null;
+  aboutImage?: { alt: string; url: string } | null;
 }) {
   // Null fields are unset copy; a null projection means the read failed.
   const about = page === "about";
@@ -26,7 +29,19 @@ export function SiteInformationPage({
       className={about ? styles.page : `${styles.page} ${styles.letters}`}
     >
       {about ? (
-        <h1>{title}</h1>
+        <>
+          <h1>{title}</h1>
+          {aboutImage && (
+            <ReaderImage
+              className={styles.aboutImage}
+              src={aboutImage.url}
+              width={1600}
+              height={900}
+              alt={aboutImage.alt}
+              decoding="async"
+            />
+          )}
+        </>
       ) : (
         <>
           <div className={styles.banner}>

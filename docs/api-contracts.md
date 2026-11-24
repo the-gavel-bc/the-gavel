@@ -238,7 +238,11 @@ Private object keys are retained in a permanent registry and cleanup ledger. A b
 
 ## Administrator site information
 
-`get_site_information()` returns the allowlisted settings only to an eligible active administrator. `save_site_information(expected_version, request_id, mission, contact_email, instagram_url, submission_instructions, spotify_url, linkedin_url, facebook_url)` checks the same authority and validates each named field. Empty fields are represented by null. Social links must be HTTPS on their official hosts: `instagram.com`, `open.spotify.com`, `linkedin.com` (company, school, showcase or profile paths) and `facebook.com`, with no query strings. The earlier six-argument save is removed (see the [Phase 5 final tasks plan](superpowers/plans/2026-11-11-phase-five-final-tasks.md)). Changed saves increment the version and atomically record a bounded audit event. Exact retries return their original result; stale edits and changed request payloads return conflicts. No caller-supplied arbitrary key, HTML, audit data, or public read is supported. See the [Task 14 plan](superpowers/plans/2026-11-07-admin-site-information.md).
+`get_site_information()` returns the allowlisted settings only to an eligible active administrator. `save_site_information(expected_version, request_id, mission, contact_email, instagram_url, submission_instructions, spotify_url, linkedin_url, facebook_url)` checks the same authority and validates each named field. Empty fields are represented by null. Social links must be HTTPS on their official hosts: `instagram.com`, `open.spotify.com`, `linkedin.com` (company, school, showcase or profile paths) and `facebook.com`, with no query strings. The earlier six-argument save is removed (see the [Phase 5 final tasks plan](superpowers/plans/2026-11-11-phase-five-final-tasks.md)). Changed saves increment the version and atomically record a bounded audit event. Exact retries return their original result; stale edits and changed request payloads return conflicts. The admin form no longer edits submission instructions: the server action sends back the stored text so the existing text stays and keeps rendering on `/letters/how-to-submit`; a concurrent change makes the save a conflict. No caller-supplied arbitrary key, HTML, audit data, or public read is supported. See the [Task 14 plan](superpowers/plans/2026-11-07-admin-site-information.md).
+
+### About page image
+
+`set_site_about_image(bytes, alt)` and `remove_site_about_image()` are administrator-only (same checks and global lock as the settings save) and write one `site_information.image_changed` audit event per change (a removal with nothing stored records none). The bytes must be a WebP of at most 1 MiB; the server action first re-encodes any JPEG, PNG or WebP upload (5 MB limit) to a WebP at most 1600 px wide, so the original is never stored. Alt text is required (1–240 plain characters). The image lives in `private.site_about_image` (one row, no direct grants). `get_public_site_about_image_meta()` and `get_public_site_about_image()` are public reads; `GET /api/public/site/about-image` serves `image/webp` with `nosniff` and no-store, and the About page and admin screen append `?v=<update time>`. Plan: [about image plan](superpowers/plans/2026-11-24-site-about-image.md).
 
 ## Integrated Phase 4 authorization verification
 
@@ -327,7 +331,6 @@ The existing reservation, processing admission, upload claim, trusted finalizati
 ## Unused image expiry (2026-11-18)
 
 Service-role functions: `claim_expired_unused_uploads(p_older_than interval default '7 days', p_limit integer default 25)` returns `(asset_id, object_key)` for images it has hidden (`deleting`); retention under one day or a limit outside 1 to 100 is refused with SQLSTATE 22023. `complete_expired_unused_upload(p_asset_id)` returns `{ok:true,replayed}` or `{ok:false,code:"conflict"}`. The cron route `GET /api/internal/unused-upload-cleanup` returns `{ok, claimed, deleted, failed}` (503 when any image failed; failures are retried the next day).
-
 
 ## Review follow-up contracts
 

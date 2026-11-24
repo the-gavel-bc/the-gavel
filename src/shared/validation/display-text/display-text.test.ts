@@ -25,7 +25,6 @@ it.each(["\u0892", "\u202e", "\u2800", "\u3164", "\u{E0001}"])(
     const site = {
       ...base,
       mission: text,
-      submissionInstructions: text,
       contactEmail: null,
       instagramUrl: null,
       spotifyUrl: null,

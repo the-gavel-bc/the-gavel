@@ -20,13 +20,22 @@ export async function saveSiteInformationAction(
     if (access.status !== "active" || access.role !== "administrator")
       return { ok: false, code: "forbidden" };
     const client = await createServerSupabaseClient();
+    // Submission instructions are no longer editable; the save function still
+    // takes them, so send back the stored text. A concurrent change bumps the
+    // version, which makes the save a conflict rather than a stale overwrite.
+    const { data: stored, error: readError } = await client.rpc(
+      "get_site_information",
+    );
+    const keptInstructions =
+      (Array.isArray(stored) && stored[0]?.submission_instructions) || null;
+    if (readError) return { ok: false, code: "unavailable" };
     const { data, error } = await client.rpc("save_site_information", {
       p_expected_version: parsed.data.expectedVersion,
       p_request_id: parsed.data.requestId,
       p_mission: parsed.data.mission as string,
       p_contact_email: parsed.data.contactEmail as string,
       p_instagram_url: parsed.data.instagramUrl as string,
-      p_submission_instructions: parsed.data.submissionInstructions as string,
+      p_submission_instructions: keptInstructions as string,
       p_spotify_url: parsed.data.spotifyUrl as string,
       p_linkedin_url: parsed.data.linkedinUrl as string,
       p_facebook_url: parsed.data.facebookUrl as string,

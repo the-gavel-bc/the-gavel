@@ -20,8 +20,6 @@ const fieldMessages: Record<string, string> = {
   spotifyUrl: "Enter an HTTPS Spotify URL.",
   linkedinUrl: "Enter an HTTPS LinkedIn profile or organization URL.",
   facebookUrl: "Enter an HTTPS Facebook page URL.",
-  submissionInstructions:
-    "Enter plain text for submission instructions, up to 5,000 characters. Remove invisible format characters.",
 };
 const messages = {
   invalid_input:
@@ -51,9 +49,6 @@ export function SiteInformationForm({
   const [spotifyUrl, setSpotifyUrl] = useState(information.spotifyUrl ?? "");
   const [linkedinUrl, setLinkedinUrl] = useState(information.linkedinUrl ?? "");
   const [facebookUrl, setFacebookUrl] = useState(information.facebookUrl ?? "");
-  const [submissionInstructions, setSubmissionInstructions] = useState(
-    information.submissionInstructions ?? "",
-  );
   const [version, setVersion] = useState(information.version);
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<SiteInformationResult | null>(null);
@@ -65,7 +60,6 @@ export function SiteInformationForm({
     spotifyUrl,
     linkedinUrl,
     facebookUrl,
-    submissionInstructions,
   ]);
   const [acknowledged, setAcknowledged] = useState(values);
   const busy = useRef(false);
@@ -100,7 +94,6 @@ export function SiteInformationForm({
           command.spotifyUrl ?? "",
           command.linkedinUrl ?? "",
           command.facebookUrl ?? "",
-          command.submissionInstructions ?? "",
         ]),
       );
       router.refresh();
@@ -118,7 +111,6 @@ export function SiteInformationForm({
       spotifyUrl: spotifyUrl || null,
       linkedinUrl: linkedinUrl || null,
       facebookUrl: facebookUrl || null,
-      submissionInstructions: submissionInstructions || null,
     };
     const parsed = siteInformationCommandSchema.safeParse(command);
     if (!parsed.success) {
@@ -229,20 +221,6 @@ export function SiteInformationForm({
           onChange={(e) => {
             setFacebookUrl(e.target.value);
             fields.clear("facebookUrl");
-          }}
-        />
-      </label>
-      <label>
-        Submission instructions
-        <textarea
-          {...fields.input("submissionInstructions")}
-          value={submissionInstructions}
-          maxLength={5000}
-          rows={5}
-          disabled={blocked}
-          onChange={(e) => {
-            setSubmissionInstructions(e.target.value);
-            fields.clear("submissionInstructions");
           }}
         />
       </label>
