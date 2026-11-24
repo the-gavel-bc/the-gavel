@@ -50,7 +50,7 @@ Newsletter signup is deferred.
 | `/dashboard/admin/members`       | Staff list: counts by role, search and filters, add people by email, change role, deactivate/remove | Admin          |
 | `/dashboard/admin/taxonomy`      | Manage sections and categories; view tags                                                           | Admin          |
 | `/dashboard/admin/homepage`      | Curate lead, Featured News, and Read This                                                           | Admin          |
-| `/dashboard/admin/site`          | Edit allowlisted site information                                                                   | Admin          |
+| `/dashboard/admin/site`          | Edit allowlisted site information and the About page image                                          | Admin          |
 | `/dashboard/admin/audit`         | Review audit activity                                                                               | Admin          |
 
 Task 10's administrator contributor route was removed with the one-off credits change (2026-11-16): credits typed in the editor are the only way to credit someone without an account, and there is no contributor directory to administer.

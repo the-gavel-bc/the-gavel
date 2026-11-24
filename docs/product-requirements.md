@@ -96,13 +96,14 @@ Draft -> (In review) -> Published -> Archived -> Permanently deleted
 - Everything an author can do.
 - Reads, edits, publishes, or returns (with a required note) any article in review.
 - Publishes their own articles without review.
-- Archives only the articles they published. Cannot edit published articles, restore, delete, or manage taxonomy, homepage, site information, or memberships.
+- Archives only the articles they published, and adds or changes the public correction note on those and on articles in review. Cannot edit published articles, restore, delete, or manage taxonomy, homepage, site information, or memberships.
 
 ### Administrator
 
 - All editor abilities across all content, including editing published articles.
 - Approve, deactivate, and assign application memberships.
-- Manage contributors, taxonomy, homepage selections, editable site information, archives, and permanent deletion.
+- Manage contributors, taxonomy, homepage selections, editable site information (mission, contact and social links, and the About page image; submission instructions are no longer edited in the dashboard), archives, and permanent deletion.
+- Add or change the correction note on any draft or published article.
 - Application-administrator status does not automatically grant GitHub, Vercel, Supabase, Google Cloud, DNS, or source-code access.
 
 ## Acceptance criteria
