@@ -5,6 +5,7 @@ import {
   type ArticleImageUrl,
   type ReaderArticle,
 } from "@/shared/reader/reader-article/reader-article";
+import { ReaderImage } from "@/frontend/components/reader-image/reader-image";
 import styles from "./article-header.module.css";
 
 // Credited writers in order, or the article owner when none are credited,
@@ -66,8 +67,7 @@ export function ArticleHeader({
       {article.mainImage && (
         <figure>
           {/* Keep authorized media outside the image optimizer's derivative cache. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <ReaderImage
             src={imageUrl(article.id, article.mainImage.id)}
             width={article.mainImage.width}
             height={article.mainImage.height}

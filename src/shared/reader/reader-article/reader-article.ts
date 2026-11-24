@@ -11,7 +11,7 @@ export type ReaderArticle = {
   publishedAt: string;
   content: DraftDocument | null;
   section: Taxonomy;
-  owner: Person & { biography: string | null };
+  owner: Person & { biography: string | null; photoUrl?: string | null };
   categories: Taxonomy[];
   tags: Taxonomy[];
   contributors: (Person & {

@@ -17,6 +17,7 @@
   display: inline-flex;
   align-items: center;
   min-height: 2.75rem;
+  margin-bottom: -0.75rem;
   color: var(--reader-blue);
   font: 700 0.75rem/1.4 var(--reader-sans);
   letter-spacing: 0.09em;

@@ -68,7 +68,23 @@ a.topicChip:hover {
   text-transform: none;
 }
 .bio {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
   max-width: 68ch;
+}
+.photo {
+  flex: none;
+  width: 6rem;
+  height: 6rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  object-fit: cover;
+}
+@media (max-width: 30rem) {
+  .bio {
+    flex-direction: column;
+  }
 }
 .bio p {
   white-space: pre-line;

@@ -1,3 +1,4 @@
+import { ReaderImage } from "@/frontend/components/reader-image/reader-image";
 import type { ReactNode } from "react";
 import {
   isDraftUuid,
@@ -96,8 +97,7 @@ function blocks(
           <figure key={index}>
             {image ? (
               // Media routes enforce access/cache lifetime; optimizer derivatives are intentionally avoided.
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <ReaderImage
                 src={image.src}
                 width={image.width}
                 height={image.height}

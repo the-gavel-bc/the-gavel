@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReaderArticle } from "@/shared/reader/reader-article/reader-article";
 import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
 import { ArticleCard } from "../article-card/article-card";
+import { ReaderImage } from "@/frontend/components/reader-image/reader-image";
 import styles from "./article-context.module.css";
 
 export function ArticleContext({
@@ -64,11 +65,26 @@ export function ArticleContext({
       )}
       {article.owner.biography && article.owner.slug && (
         <section className={styles.bio}>
-          <h2>About {article.owner.displayName}</h2>
-          <p>{article.owner.biography}</p>
-          <Link className={styles.more} href={`/authors/${article.owner.slug}`}>
-            More from {article.owner.displayName}
-          </Link>
+          {article.owner.photoUrl && (
+            <ReaderImage
+              className={styles.photo}
+              src={article.owner.photoUrl}
+              width={96}
+              height={96}
+              alt={`Photo of ${article.owner.displayName}`}
+              decoding="async"
+            />
+          )}
+          <div>
+            <h2>About {article.owner.displayName}</h2>
+            <p>{article.owner.biography}</p>
+            <Link
+              className={styles.more}
+              href={`/authors/${article.owner.slug}`}
+            >
+              More from {article.owner.displayName}
+            </Link>
+          </div>
         </section>
       )}
       {related.length > 0 && (
