@@ -49,6 +49,8 @@ const snapshot = z.object({
   owner_profile_id: uuid,
   review_requested_at: z.string().nullable(),
   publication_date: z.string().refine(isCalendarDate).nullable(),
+  correction: z.string().max(2000).nullable(),
+  correction_updated_at: z.string().nullable(),
   content: z.unknown(),
   section: taxonomy,
   owner: person.nullable(),
@@ -145,7 +147,7 @@ export async function getEditorialArticlePreview(
       .from("articles")
       .select(
         `
-      id,title,excerpt,owner_profile_id,review_requested_at,publication_date,content,
+      id,title,excerpt,owner_profile_id,review_requested_at,publication_date,correction,correction_updated_at,content,
       section:sections!articles_section_id_fkey(id,name,slug),
       owner:profiles!articles_owner_profile_id_fkey(display_name,slug,active),
       article_contributors(contribution_role,display_order,profile:profiles(display_name,slug,active)),
@@ -255,6 +257,8 @@ export async function getEditorialArticlePreview(
               }
             : null,
         bodyImages,
+        correction: row.correction,
+        correctedAt: row.correction_updated_at,
       },
     };
   } catch {

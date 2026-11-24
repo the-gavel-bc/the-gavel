@@ -36,6 +36,8 @@ const row = {
   owner_profile_id: ownerId,
   review_requested_at: null,
   publication_date: "2026-03-08",
+  correction: null,
+  correction_updated_at: null,
   content: null,
   section: { id, name: "News", slug: "news" },
   owner: { display_name: "Writer", slug: "writer", active: true },

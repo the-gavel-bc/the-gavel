@@ -14,6 +14,8 @@ export type ArticleCapabilities = {
   publish: boolean;
   returnToAuthor: boolean;
   archive: boolean;
+  /** Add, change or remove the public correction note. */
+  correct: boolean;
   restore: boolean;
 };
 
@@ -32,6 +34,12 @@ export function articleCapabilities(s: ArticleStanding): ArticleCapabilities {
     publish: draft && (admin || (editor && (s.isOwner || s.inReview))),
     returnToAuthor: draft && s.inReview && (admin || editor),
     archive: s.status === "published" && (admin || (editor && s.publishedByMe)),
+    correct:
+      s.status !== "archived" &&
+      (admin ||
+        (editor &&
+          ((draft && s.inReview) ||
+            (s.status === "published" && s.publishedByMe)))),
     restore: s.status === "archived" && admin,
   };
 }

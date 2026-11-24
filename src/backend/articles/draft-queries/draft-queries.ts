@@ -163,6 +163,7 @@ export type DraftDetailResult =
       updatedAt: string;
       review: ArticleReview;
       capabilities: ArticleCapabilities;
+      correction: string | null;
       draft: DraftInput;
       unavailableSelections: {
         sectionId: string | null;
@@ -182,6 +183,7 @@ export type DraftDetailResult =
       title: string;
       review: ArticleReview;
       capabilities: ArticleCapabilities;
+      correction: string | null;
     }
   | {
       kind: "unsupportedContent";
@@ -189,6 +191,7 @@ export type DraftDetailResult =
       articleId: string;
       version: number;
       capabilities: ArticleCapabilities;
+      correction: string | null;
     }
   | { kind: "notFound" };
 
@@ -224,7 +227,7 @@ export async function getDraftEditorData(
     let query = client
       .from("articles")
       .select(
-        "id,title,slug,status,section_id,edit_version,updated_at,owner_profile_id,review_requested_at,review_note,published_by_profile_id,excerpt,content,seo_keyphrase,meta_description,publication_date,article_categories(category_id),article_tags(tag_id),article_contributors(profile_id,contribution_role,display_order)",
+        "id,title,slug,status,section_id,edit_version,updated_at,owner_profile_id,review_requested_at,review_note,published_by_profile_id,excerpt,content,seo_keyphrase,meta_description,publication_date,correction,article_categories(category_id),article_tags(tag_id),article_contributors(profile_id,contribution_role,display_order)",
       )
       .eq("id", articleId);
     // Authors see only their own articles; editors and administrators rely on
@@ -260,6 +263,7 @@ export async function getDraftEditorData(
           articleId: summary.id,
           version: summary.edit_version,
           capabilities,
+          correction: data.correction,
         },
         options: null,
       };
@@ -273,6 +277,7 @@ export async function getDraftEditorData(
           title: summary.title,
           review,
           capabilities,
+          correction: data.correction,
         },
         options: null,
       };
@@ -308,6 +313,7 @@ export async function getDraftEditorData(
       updatedAt: summary.updated_at,
       review,
       capabilities,
+      correction: data.correction,
       draft,
       unavailableSelections: {
         sectionId: options.sections.some(

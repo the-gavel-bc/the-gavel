@@ -258,3 +258,22 @@ it("renders the optional main photo caption before its credit as safe text", asy
   );
   expect(document.querySelector("article script")).toBeNull();
 });
+
+it("shows a correction after the body and marks the article updated", async () => {
+  mocks.read.mockResolvedValue({
+    kind: "ok",
+    article: {
+      ...article,
+      correction: "An earlier version misstated the date.",
+      correctedAt: "2026-11-12T15:00:00Z",
+    },
+  });
+  mocks.context.mockResolvedValue({ related: [] });
+  render(await Page({ params }));
+  expect(
+    screen.getByRole("complementary", { name: "Correction" }),
+  ).toHaveTextContent("Correction: An earlier version misstated the date.");
+  expect(screen.getByText(/Updated/)).toHaveTextContent(
+    "Updated November 12, 2026",
+  );
+});

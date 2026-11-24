@@ -5,6 +5,7 @@ import { getDraftEditorData } from "@/backend/articles/draft-queries/draft-queri
 import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
 import { DraftForm } from "@/frontend/features/articles/components/draft-form/draft-form";
 import { getArticleMainImage } from "@/backend/media/media-queries/media-queries";
+import { ArticleCorrection } from "@/frontend/features/articles/components/article-correction/article-correction";
 import { ArticleLifecycleControls } from "@/frontend/features/articles/components/article-lifecycle-controls/article-lifecycle-controls";
 export const metadata = { title: "Article details" };
 
@@ -61,6 +62,13 @@ export default async function EditDraftPage({
           capabilities={detail.capabilities}
           disabled={false}
         />
+        {detail.capabilities.correct && (
+          <ArticleCorrection
+            key={`${detail.articleId}:${detail.correction ?? ""}`}
+            articleId={detail.articleId}
+            correction={detail.correction}
+          />
+        )}
         <Link href="/dashboard">My articles</Link>
       </>
     );
@@ -116,6 +124,13 @@ export default async function EditDraftPage({
           updatedAt: detail.updatedAt,
         }}
       />
+      {detail.capabilities.correct && (
+        <ArticleCorrection
+          key={`${detail.articleId}:${detail.correction ?? ""}`}
+          articleId={detail.articleId}
+          correction={detail.correction}
+        />
+      )}
     </>
   );
 }

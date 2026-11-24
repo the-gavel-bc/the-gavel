@@ -22,6 +22,10 @@ export type ReaderArticle = {
     | (ReaderImage & { alt: string; credit: string; caption: string | null })
     | null;
   bodyImages: ReaderImage[];
+  /** Plain-text note editors add after publication or review. */
+  correction?: string | null;
+  /** When the correction was added or last changed; drives "Updated". */
+  correctedAt?: string | null;
 };
 
 export type ArticleImageUrl = (articleId: string, assetId: string) => string;

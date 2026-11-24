@@ -53,6 +53,12 @@ export function ReaderArticleFrame({
             allowMissingImages={Boolean(preview)}
           />
         )}
+        {article.correction && (
+          <aside className={styles.correction} aria-label="Correction">
+            <strong>Correction: </strong>
+            {article.correction}
+          </aside>
+        )}
       </article>
       <ArticleContext
         article={article}

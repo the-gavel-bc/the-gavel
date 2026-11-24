@@ -93,14 +93,16 @@ Draft rows require both lifecycle timestamps NULL; published rows require public
 
 Authenticated eligible active members read owned articles; eligible active administrators read all. The stable fixed-search-path `private.can_read_article(uuid)` resolves ownership through private profile Auth links and current membership without exposing those links or recursing through article RLS. Anonymous readers have no article grant, even for synthetic published rows. Every application write remains denied, including administrator writes. See [article security controls](security-and-permissions.md#implemented-private-article-controls).
 
-
 ### Editor role and review state
 
 Migrations `20261119010000_editor_role_enum.sql` and `20261119020000_editor_role_review.sql` add the `editor` value to `app_role` and three columns on `articles`: `review_requested_at` (set when an author submits a draft, cleared when an editor returns it; a draft with it set is "in review"), `review_note` (the editor's note, 1 to 500 trimmed characters, cleared on resubmit or publish) and `published_by_profile_id` (who published it; only that editor or an administrator may archive it, and articles published earlier have none). The `articles_review_queue_idx` partial index serves the review queue. Migration `20261121020000_review_lifecycle_fixes.sql` clears stale review metadata on published and archived rows without changing their edit versions or timestamps. The `articles_review_metadata_only_on_drafts` constraint limits review metadata to drafts. `draft_write_receipts.operation` gains `submit` and `return`; `audit_events` gains `article.submitted` and `article.returned` (later `article.image_purged`). `private.article_authority(article, user, mode)` is the single access predicate; see [ADR 0012](decisions/0012-editor-role-and-review-state.md).
 
 ### Publication date
 
+Migration `20261124020000_article_corrections.sql` adds nullable `articles.correction` (1–2,000 plain characters) and `correction_updated_at` (both set or both null) with select grants for `authenticated`; public readers get them only through `get_public_article`. See [API contract](api-contracts.md).
+
 Migration `20261121010000_publication_date.sql` adds nullable `articles.publication_date date` (Eastern calendar date set by whoever may edit the article; null means the publish day) with a select grant for `authenticated`, and backfills it for rows with `published_at`. That historical backfill advanced `updated_at` on affected rows. Its stored dates are preserved because backfilled dates and explicitly chosen dates cannot be distinguished reliably. `published_at` remains the single value public queries order by. `private.capture_draft_snapshot` includes `publicationDate` only when set, so stored-versus-input comparison matches the canonical input. Helpers: `private.publication_date_allowed(date)` and `private.published_at_for(date, timestamptz)`.
+
 ## Implemented article/category links
 
 `supabase/migrations/20261021020000_article_categories.sql` is authoritative for `article_categories`. Each row contains required `article_id`, `category_id`, and `section_id`, with primary key `(article_id, category_id)`. Both parent tables have unique `(id, section_id)` constraints; restrictive composite foreign keys require the link's section to match both parents. Changing either parent's section or identity while links exist is rejected, as is deleting a referenced parent. A reverse category/section index complements the article-leading primary key.
