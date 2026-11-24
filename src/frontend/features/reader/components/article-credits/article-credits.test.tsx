@@ -52,3 +52,23 @@ it("leaves writers to the header byline", () => {
   );
   expect(screen.queryByText("Writer")).not.toBeInTheDocument();
 });
+
+it("renders nothing when only writers are credited", () => {
+  const { container } = render(
+    <ArticleCredits
+      article={
+        {
+          contributors: [
+            {
+              displayName: "Writer",
+              slug: null,
+              role: "writer",
+              displayOrder: 0,
+            },
+          ],
+        } as unknown as PublicArticle
+      }
+    />,
+  );
+  expect(container).toBeEmptyDOMElement();
+});
