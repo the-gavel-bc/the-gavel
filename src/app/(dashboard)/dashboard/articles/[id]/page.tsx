@@ -64,7 +64,7 @@ export default async function EditDraftPage({
         />
         {detail.capabilities.correct && (
           <ArticleCorrection
-            key={`${detail.articleId}:${detail.correction ?? ""}`}
+            key={detail.articleId}
             articleId={detail.articleId}
             correction={detail.correction}
           />
@@ -126,7 +126,7 @@ export default async function EditDraftPage({
       />
       {detail.capabilities.correct && (
         <ArticleCorrection
-          key={`${detail.articleId}:${detail.correction ?? ""}`}
+          key={detail.articleId}
           articleId={detail.articleId}
           correction={detail.correction}
         />
