@@ -35,25 +35,28 @@ Membership approval/promotion, last-eligible-administrator counting and trusted-
 
 ## Authorization matrix
 
-| Action                                          | Public |                   Author |                    Editor |        Administrator |
-| ----------------------------------------------- | -----: | -----------------------: | ------------------------: | -------------------: |
-| Read published content                          |    Yes |                      Yes |                       Yes |                  Yes |
-| Read own drafts/archives                        |     No |                      Yes |                       Yes |                  Yes |
-| Read another author's drafts/archives           |     No |                       No |         Only in review[1] |                  Yes |
-| Create an article                               |     No |                      Yes |                       Yes |                  Yes |
-| Edit an article                                 |     No | Own draft, not in review | Own draft or in review[1] | Any, incl. published |
-| Submit a draft for review                       |     No |               Owner only |                Not needed |           Not needed |
-| Return an article in review to its author       |     No |                       No |                       Yes |                  Yes |
-| Publish an article                              |     No |                       No | Own draft or in review[1] |                  Any |
-| Archive an article                              |     No |                       No |  Only ones they published |                  Any |
-| Restore an archived article                     |     No |                       No |                        No |                  Yes |
-| Permanently delete an archived article          |     No |                       No |                        No |                  Yes |
-| Edit own public profile                         |     No |                      Yes |                       Yes |                  Yes |
-| Manage memberships and roles                    |     No |                       No |                        No |                  Yes |
-| Manage taxonomy, homepage, and site information |     No |                       No |                        No |                  Yes |
-| Review audit history                            |     No |                       No |                        No |                  Yes |
+| Action                                                              | Public |                   Author |                          Editor |          Administrator |
+| ------------------------------------------------------------------- | -----: | -----------------------: | ------------------------------: | ---------------------: |
+| Read published content                                              |    Yes |                      Yes |                             Yes |                    Yes |
+| Read own drafts/archives                                            |     No |                      Yes |                             Yes |                    Yes |
+| Read another author's drafts/archives                               |     No |                       No |               Only in review[1] |                    Yes |
+| Create an article                                                   |     No |                      Yes |                             Yes |                    Yes |
+| Edit an article                                                     |     No | Own draft, not in review |       Own draft or in review[1] |   Any, incl. published |
+| Submit a draft for review                                           |     No |               Owner only |                      Not needed |             Not needed |
+| Return an article in review to its author                           |     No |                       No |                             Yes |                    Yes |
+| Publish an article                                                  |     No |                       No |       Own draft or in review[1] |                    Any |
+| Archive an article                                                  |     No |                       No |        Only ones they published |                    Any |
+| Add or change a correction note                                     |     No |                       No | In review or own publication[2] | Any draft or published |
+| Restore an archived article                                         |     No |                       No |                              No |                    Yes |
+| Permanently delete an archived article                              |     No |                       No |                              No |                    Yes |
+| Edit own public profile                                             |     No |                      Yes |                             Yes |                    Yes |
+| Manage memberships and roles                                        |     No |                       No |                              No |                    Yes |
+| Manage taxonomy, homepage, and site information (incl. About image) |     No |                       No |                              No |                    Yes |
+| Review audit history                                                |     No |                       No |                              No |                    Yes |
 
 [1] "In review" means a draft with `review_requested_at` set and status `draft`; editors also read articles they published, but not archived or published articles they did not publish (public readers use the public routes). The decision lives in one private predicate, `private.article_authority(article, user, mode)`, which every article read, save, media and lifecycle function calls; the interface only mirrors it (`article-permissions.ts`). Review state is a pair of columns on drafts rather than a new article status, so every published-only public boundary is unchanged. See the [editor role plan](superpowers/plans/2026-11-19-editor-role.md).
+
+[2] Mode `correct` of `private.article_authority`, used only by `set_article_correction` (see the [corrections plan](superpowers/plans/2026-11-24-article-corrections.md)). Browser journeys in `e2e/roles/` and `supabase/tests/091_admin_only_role_boundary.test.sql` check the matrix end to end; the one-time demo import function is callable only by the service role ([ADR 0015](decisions/0015-demo-article-import.md)).
 
 Additional credits never imply ownership. Each article has one designated owner.
 
@@ -363,7 +366,6 @@ Only the signed-in active member can set or remove their own photo; the database
 ## Area 1 review follow-ups (authentication and access)
 
 Findings and decisions are in [docs/code-reviews/AREA-1-AUTH-REPORT.md](code-reviews/AREA-1-AUTH-REPORT.md). Implemented: the editor read scope above, error handling in the sign-in callback, a second membership read when `claim_invitation` reports false (another request claimed first), cause-neutral wording on the access-pending page, and a session-expiry hint on the editor's save failure. Open items needing a decision outside the code: confirm in staging what Google identity data carries for non-Workspace accounts with a bc.edu address and decide whether to require the `hd` claim; rate limit `/api/session/desk` at the platform.
-
 
 Administrator profile moderation changes public presentation without changing membership, article ownership, or editorial permissions. Dashboard writes and the database independently check administrator access. Public profile photos are reauthorized for every request. The audit table denies service-role update, delete, and truncate. Its trigger also denies owner mutations and permits only a foreign-key action that clears the actor during Auth erasure while keeping every other event field identical.
 
