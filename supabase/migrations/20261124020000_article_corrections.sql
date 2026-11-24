@@ -14,22 +14,16 @@ alter table public.articles
   add constraint articles_correction_pair_check check ((correction is null) = (correction_updated_at is null));
 grant select (correction, correction_updated_at) on public.articles to authenticated;
 
-alter table public.audit_events drop constraint audit_events_action_resource_check;
-alter table public.audit_events add constraint audit_events_action_resource_check check (
-  (resource_type = 'article' and action in ('article.created','article.updated','article.published',
-    'article.archived','article.restored','article.deleted','article.owner_changed',
-    'article.submitted','article.returned','article.image_purged','article.corrected'))
-  or (resource_type = 'membership' and action in ('membership.approved','membership.role_changed',
-    'membership.deactivated','membership.invited','membership.invitation_changed',
-    'membership.invitation_removed','membership.claimed','membership.reactivated'))
-  or (resource_type = 'profile' and action in ('profile.created','profile.updated','profile.deactivated'))
-  or (resource_type = 'section' and action in ('section.updated','section.created','section.deleted'))
-  or (resource_type = 'category' and action in ('category.updated','category.created','category.deleted'))
-  or (resource_type = 'homepage' and action = 'homepage.updated')
-  or (resource_type = 'site_information' and action in ('site_information.updated'))
-  or (resource_type = 'tag' and action in ('tag.renamed','tag.merged','tag.deleted'))
-) not valid;
-alter table public.audit_events validate constraint audit_events_action_resource_check;
+-- Keep every action other migrations allowed; add the correction event.
+do $$ declare previous_expression text; begin
+  select pg_catalog.pg_get_expr(conbin,conrelid) into strict previous_expression
+    from pg_catalog.pg_constraint where conrelid='public.audit_events'::regclass
+      and conname='audit_events_action_resource_check';
+  alter table public.audit_events drop constraint audit_events_action_resource_check;
+  execute pg_catalog.format('alter table public.audit_events add constraint audit_events_action_resource_check check ((%s) or (resource_type = %L and action = %L)) not valid',
+    previous_expression,'article','article.corrected');
+  alter table public.audit_events validate constraint audit_events_action_resource_check;
+end $$;
 
 alter table private.draft_write_receipts drop constraint draft_write_receipts_check;
 alter table private.draft_write_receipts add constraint draft_write_receipts_check check (
