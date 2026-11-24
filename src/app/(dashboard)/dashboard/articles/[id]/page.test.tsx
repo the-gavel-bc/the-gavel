@@ -36,6 +36,14 @@ vi.mock("next/navigation", async (load) => ({
   ...(await load<typeof import("next/navigation")>()),
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }));
+vi.mock(
+  "@/frontend/features/articles/components/article-correction/article-correction",
+  () => ({
+    ArticleCorrection: ({ correction }: { correction: string | null }) => (
+      <p>Correction panel: {correction ?? "none"}</p>
+    ),
+  }),
+);
 import Page from "./page";
 const id = baseDraft.sectionId,
   params = { params: Promise.resolve({ id }) };
@@ -53,6 +61,8 @@ beforeEach(() => {
 it("loads the same form with the current version for an editable draft", async () => {
   mocks.detail.mockResolvedValue({
     kind: "editable",
+    capabilities: { correct: false },
+    correction: null,
     articleId: id,
     version: 4,
     updatedAt: "2026-10-23T12:00:00Z",
@@ -72,6 +82,8 @@ it("loads the same form with the current version for an editable draft", async (
 it("opens a published article with main-photo editing and no body-image upload controls", async () => {
   mocks.detail.mockResolvedValue({
     kind: "editable",
+    capabilities: { correct: false },
+    correction: null,
     status: "published",
     articleId: id,
     version: 4,
@@ -140,6 +152,8 @@ it("guards direct access and masks missing or invalid IDs", async () => {
 it("offers deliberate repair controls for unavailable selections", async () => {
   mocks.detail.mockResolvedValue({
     kind: "editable",
+    capabilities: { correct: false },
+    correction: null,
     articleId: id,
     version: 1,
     updatedAt: "2026-10-23T12:00:00Z",
@@ -154,4 +168,34 @@ it("offers deliberate repair controls for unavailable selections", async () => {
   render(await Page(params));
   expect(screen.getByLabelText("Unavailable category 1")).toBeChecked();
   expect(screen.getByRole("button", { name: "Save draft" })).toBeVisible();
+});
+
+it("offers the correction panel only when the caller may correct", async () => {
+  const detail = {
+    kind: "editable",
+    articleId: id,
+    version: 4,
+    updatedAt: "2026-10-23T12:00:00Z",
+    draft: baseDraft,
+    correction: "Fixed a date.",
+    unavailableSelections: {
+      sectionId: null,
+      categoryIds: [],
+      tagIds: [],
+      contributorIds: [],
+    },
+  };
+  mocks.detail.mockResolvedValue({
+    ...detail,
+    capabilities: { correct: true },
+  });
+  const { unmount } = render(await Page(params));
+  expect(screen.getByText("Correction panel: Fixed a date.")).toBeVisible();
+  unmount();
+  mocks.detail.mockResolvedValue({
+    ...detail,
+    capabilities: { correct: false },
+  });
+  render(await Page(params));
+  expect(screen.queryByText(/Correction panel/)).toBeNull();
 });

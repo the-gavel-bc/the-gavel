@@ -54,3 +54,12 @@
     transform: scaleX(1);
   }
 }
+.correction {
+  margin-top: 2rem;
+  padding: 1rem 1.125rem;
+  border-left: 4px solid var(--reader-blue);
+  background: var(--reader-soft);
+  font: 1rem/1.6 var(--reader-serif);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}

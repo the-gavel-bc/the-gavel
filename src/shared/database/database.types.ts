@@ -247,6 +247,8 @@ export type Database = {
         Row: {
           archived_at: string | null;
           content: Json | null;
+          correction: string | null;
+          correction_updated_at: string | null;
           created_at: string;
           edit_version: number;
           excerpt: string | null;
@@ -269,6 +271,8 @@ export type Database = {
         Insert: {
           archived_at?: string | null;
           content?: Json | null;
+          correction?: string | null;
+          correction_updated_at?: string | null;
           created_at?: string;
           edit_version?: number;
           excerpt?: string | null;
@@ -290,6 +294,8 @@ export type Database = {
         Update: {
           archived_at?: string | null;
           content?: Json | null;
+          correction?: string | null;
+          correction_updated_at?: string | null;
           created_at?: string;
           edit_version?: number;
           excerpt?: string | null;
@@ -1190,6 +1196,15 @@ export type Database = {
       search_contributors: { Args: { p_query: string }; Returns: Json };
       search_public_articles: {
         Args: { p_cursor?: Json; p_limit?: number; p_query: string };
+        Returns: Json;
+      };
+      set_article_correction: {
+        Args: {
+          p_article_id: string;
+          p_correction: string;
+          p_expected_correction: string;
+          p_request_id: string;
+        };
         Returns: Json;
       };
       set_article_main_image: {

@@ -65,4 +65,19 @@ describe("articleCapabilities", () => {
     expect(caps({ ...admin, status: "archived" }).restore).toBe(true);
     expect(caps({ ...admin })).toMatchObject({ edit: true, publish: true });
   });
+  it("lets only editors and administrators add corrections", () => {
+    expect(caps({}).correct).toBe(false);
+    expect(caps({ status: "published" }).correct).toBe(false);
+    const editor = { role: "editor", isOwner: false } as const;
+    expect(caps({ ...editor }).correct).toBe(false);
+    expect(caps({ ...editor, inReview: true }).correct).toBe(true);
+    expect(caps({ ...editor, status: "published" }).correct).toBe(false);
+    expect(
+      caps({ ...editor, status: "published", publishedByMe: true }).correct,
+    ).toBe(true);
+    const admin = { role: "administrator", isOwner: false } as const;
+    expect(caps({ ...admin }).correct).toBe(true);
+    expect(caps({ ...admin, status: "published" }).correct).toBe(true);
+    expect(caps({ ...admin, status: "archived" }).correct).toBe(false);
+  });
 });

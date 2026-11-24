@@ -70,6 +70,12 @@ const articleSchema = z.strictObject({
     })
     .nullable(),
   bodyImages: z.array(z.strictObject(image)).max(5000),
+  correction: text(2000, 1).nullable().optional(),
+  correctedAt: z
+    .string()
+    .refine((value) => !Number.isNaN(Date.parse(value)))
+    .nullable()
+    .optional(),
 });
 const resultSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("notFound") }),

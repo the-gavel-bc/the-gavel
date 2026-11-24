@@ -8,6 +8,12 @@ import {
 import { ReaderImage } from "@/frontend/components/reader-image/reader-image";
 import styles from "./article-header.module.css";
 
+const formatDate = (value: string) =>
+  new Intl.DateTimeFormat("en-US", {
+    dateStyle: "long",
+    timeZone: "America/New_York",
+  }).format(new Date(value));
+
 // Credited writers in order, or the article owner when none are credited,
 // matching the byline on previews. People with an author page are links.
 const byline = (article: ReaderArticle) => {
@@ -58,11 +64,19 @@ export function ArticleHeader({
         </span>
         <span aria-hidden="true"> · </span>
         <time dateTime={article.publishedAt}>
-          {new Intl.DateTimeFormat("en-US", {
-            dateStyle: "long",
-            timeZone: "America/New_York",
-          }).format(new Date(article.publishedAt))}
+          {formatDate(article.publishedAt)}
         </time>
+        {article.correctedAt && (
+          <>
+            <span aria-hidden="true"> · </span>
+            <span>
+              Updated{" "}
+              <time dateTime={article.correctedAt}>
+                {formatDate(article.correctedAt)}
+              </time>
+            </span>
+          </>
+        )}
       </p>
       {article.mainImage && (
         <figure>
