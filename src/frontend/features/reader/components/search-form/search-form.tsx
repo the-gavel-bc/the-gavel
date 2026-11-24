@@ -13,7 +13,8 @@ export function SearchForm({
   invalid?: boolean;
   navigation?: boolean;
 }) {
-  // Navigation search collapses to an icon; the first press opens the field.
+  // Navigation search collapses to an icon; the first press opens the field,
+  // a second press closes it again (or searches when text was typed).
   // Without JavaScript an empty press submits and lands on the search page.
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -100,9 +101,24 @@ export function SearchForm({
           type="submit"
           aria-expanded={navigation ? open : undefined}
           aria-controls={navigation ? id : undefined}
+          // Keep focus in the field while pressing, so a browser that does not
+          // focus buttons on click (Safari) cannot collapse the bar first.
+          onMouseDown={
+            navigation ? (event) => event.preventDefault() : undefined
+          }
           onClick={(event) => {
             if (!navigation || (open && input.current?.value.trim())) return;
             event.preventDefault();
+            // A second press on an open, empty bar closes it.
+            if (open) {
+              close();
+              // A mouse or touch press (detail > 0) just lets go of the field,
+              // so no focus ring appears; a keyboard press keeps focus on the
+              // button so keyboard users do not lose their place.
+              if (event.detail > 0) input.current?.blur();
+              else toggle.current?.focus();
+              return;
+            }
             expand();
             input.current?.focus();
           }}
