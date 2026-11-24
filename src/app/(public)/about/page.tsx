@@ -3,6 +3,7 @@ import {
   excludedMetadata,
 } from "@/backend/reader/public-metadata/public-metadata";
 import type { Metadata } from "next";
+import { getAboutImage } from "@/backend/site-information/about-image/about-image";
 import { getPublicSiteNavigationForRequest } from "@/backend/public-site/public-site-navigation/public-site-navigation";
 import { SiteInformationPage } from "@/frontend/features/reader/components/site-information/site-information";
 export const dynamic = "force-dynamic";
@@ -17,10 +18,14 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 export default async function AboutPage() {
-  const result = await getPublicSiteNavigationForRequest();
+  const [result, aboutImage] = await Promise.all([
+    getPublicSiteNavigationForRequest(),
+    getAboutImage(),
+  ]);
   return (
     <SiteInformationPage
       page="about"
+      aboutImage={aboutImage}
       information={result.kind === "ok" ? result.information : null}
     />
   );

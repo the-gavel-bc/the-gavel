@@ -22,7 +22,6 @@ export type SiteInformation = {
   spotifyUrl: string | null;
   linkedinUrl: string | null;
   facebookUrl: string | null;
-  submissionInstructions: string | null;
 };
 export async function getSiteInformation(): Promise<SiteInformation> {
   await connection();
@@ -42,7 +41,6 @@ export async function getSiteInformation(): Promise<SiteInformation> {
       spotifyUrl: row.spotify_url,
       linkedinUrl: row.linkedin_url,
       facebookUrl: row.facebook_url,
-      submissionInstructions: row.submission_instructions,
     };
   } catch {
     throw new Error("Unable to load site information.");

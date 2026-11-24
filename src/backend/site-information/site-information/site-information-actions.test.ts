@@ -25,7 +25,6 @@ const command = {
   spotifyUrl: null,
   linkedinUrl: null,
   facebookUrl: null,
-  submissionInstructions: null,
 };
 describe("site information save", () => {
   beforeEach(() => vi.clearAllMocks());
@@ -39,6 +38,10 @@ describe("site information save", () => {
   });
   it("saves as administrator and returns safe validated results", async () => {
     mocks.access.mockResolvedValue({ status: "active", role: "administrator" });
+    mocks.rpc.mockResolvedValueOnce({
+      data: [{ submission_instructions: "Kept text" }],
+      error: null,
+    });
     mocks.rpc.mockResolvedValue({
       data: { ok: true, version: 2, changed: true, replayed: false },
       error: null,
@@ -53,6 +56,10 @@ describe("site information save", () => {
   });
   it("forwards the social links to the save RPC", async () => {
     mocks.access.mockResolvedValue({ status: "active", role: "administrator" });
+    mocks.rpc.mockResolvedValueOnce({
+      data: [{ submission_instructions: "Kept text" }],
+      error: null,
+    });
     mocks.rpc.mockResolvedValue({
       data: { ok: true, version: 2, changed: true, replayed: false },
       error: null,
@@ -69,11 +76,13 @@ describe("site information save", () => {
         p_spotify_url: "https://open.spotify.com/show/2abc",
         p_linkedin_url: "https://www.linkedin.com/company/the-gavel/",
         p_facebook_url: "https://www.facebook.com/bcgavel",
+        p_submission_instructions: "Kept text",
       }),
     );
   });
   it("reports uncertain database failures without leaking details", async () => {
     mocks.access.mockResolvedValue({ status: "active", role: "administrator" });
+    mocks.rpc.mockResolvedValueOnce({ data: [{}], error: null });
     mocks.rpc.mockResolvedValue({ data: null, error: { message: "private" } });
     expect(await saveSiteInformationAction(command)).toEqual({
       ok: false,

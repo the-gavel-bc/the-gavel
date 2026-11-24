@@ -61,11 +61,10 @@ export const siteInformationTransportSchema = z.strictObject({
   spotifyUrl: social("spotify"),
   linkedinUrl: social("linkedin"),
   facebookUrl: social("facebook"),
-  submissionInstructions: text,
 });
 export const siteInformationCommandSchema =
   siteInformationTransportSchema.superRefine((value, context) => {
-    for (const field of ["mission", "submissionInstructions"] as const) {
+    for (const field of ["mission"] as const) {
       if (hasUnsupportedDisplayCharacter(value[field])) {
         context.addIssue({
           code: "custom",

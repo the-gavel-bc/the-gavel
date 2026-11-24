@@ -902,6 +902,19 @@ export type Database = {
         }[];
       };
       get_public_read_this: { Args: Record<PropertyKey, never>; Returns: Json };
+      get_public_site_about_image: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          bytes: string;
+        }[];
+      };
+      get_public_site_about_image_meta: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          alt: string;
+          updated_at: string;
+        }[];
+      };
       get_public_site_navigation: {
         Args: Record<PropertyKey, never>;
         Returns: Json;
@@ -1107,6 +1120,10 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: Json;
       };
+      remove_site_about_image: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
       rename_tag: {
         Args: { p_id: string; p_name: string; p_request_id: string };
         Returns: Json;
@@ -1205,6 +1222,10 @@ export type Database = {
         Returns: Json;
       };
       set_own_profile_photo: { Args: { p_bytes: string }; Returns: Json };
+      set_site_about_image: {
+        Args: { p_alt: string; p_bytes: string };
+        Returns: Json;
+      };
       staff_summary: {
         Args: Record<PropertyKey, never>;
         Returns: {

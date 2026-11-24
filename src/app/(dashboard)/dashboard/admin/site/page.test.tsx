@@ -13,6 +13,13 @@ vi.mock("@/backend/auth/access/access", () => ({
 vi.mock("@/backend/site-information/site-information/site-information", () => ({
   getSiteInformation: mocks.read,
 }));
+vi.mock("@/backend/site-information/about-image/about-image", () => ({
+  getAboutImage: async () => null,
+}));
+vi.mock(
+  "@/frontend/features/site-information/components/admin-site/about-image-control",
+  () => ({ AboutImageControl: () => <p>About image</p> }),
+);
 vi.mock(
   "@/frontend/features/site-information/components/admin-site/site-information-form",
   () => ({
@@ -41,7 +48,6 @@ it("shows settings on success and a safe retry link on failure", async () => {
   const information = {
     version: 1,
     mission: "Fixture mission",
-    submissionInstructions: null,
     contactEmail: null,
     instagramUrl: null,
     spotifyUrl: null,

@@ -96,3 +96,22 @@ it("keeps configured safe contact destinations on the About page", () => {
     information.instagramUrl,
   );
 });
+
+it("shows the About image under the title only when one is set", () => {
+  const { rerender } = render(
+    <SiteInformationPage
+      page="about"
+      information={information}
+      aboutImage={{
+        alt: "The newsroom",
+        url: "/api/public/site/about-image?v=1",
+      }}
+    />,
+  );
+  expect(screen.getByRole("img", { name: "The newsroom" })).toHaveAttribute(
+    "src",
+    "/api/public/site/about-image?v=1",
+  );
+  rerender(<SiteInformationPage page="about" information={information} />);
+  expect(screen.queryByRole("img")).toBeNull();
+});

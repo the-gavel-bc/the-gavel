@@ -13,7 +13,6 @@ const valid = {
   spotifyUrl: null,
   linkedinUrl: null,
   facebookUrl: null,
-  submissionInstructions: "Send a letter.\nInclude your name.",
 };
 
 describe("site information command", () => {
@@ -28,7 +27,6 @@ describe("site information command", () => {
         spotifyUrl: null,
         linkedinUrl: null,
         facebookUrl: null,
-        submissionInstructions: null,
       }).success,
     ).toBe(true);
   });
@@ -39,7 +37,7 @@ describe("site information command", () => {
       { ...valid, contactEmail: "invalid@" },
       { ...valid, instagramUrl: "javascript:alert(1)" },
       { ...valid, instagramUrl: "https://instagram.com.evil.test/path" },
-      { ...valid, submissionInstructions: "x".repeat(5001) },
+      { ...valid, submissionInstructions: "no longer editable" },
     ])
       expect(siteInformationCommandSchema.safeParse(value).success).toBe(false);
   });
