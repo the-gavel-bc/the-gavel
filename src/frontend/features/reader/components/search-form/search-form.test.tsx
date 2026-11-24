@@ -53,6 +53,31 @@ it("opens the navigation field on the first press instead of submitting", () => 
   expect(button).toHaveFocus();
 });
 
+it("closes the open navigation bar when the icon is pressed again", () => {
+  const submit = vi.fn((event: Event) => event.preventDefault());
+  render(<SearchForm id="nav-search" navigation />);
+  screen
+    .getByRole("search", { name: "Site search" })
+    .addEventListener("submit", submit);
+  const button = screen.getByRole("button", { name: "Search" });
+  fireEvent.click(button);
+  expect(button).toHaveAttribute("aria-expanded", "true");
+  fireEvent.mouseDown(button);
+  fireEvent.click(button, { detail: 1 });
+  expect(button).toHaveAttribute("aria-expanded", "false");
+  // A pointer press leaves nothing focused, so no focus ring is drawn.
+  expect(button).not.toHaveFocus();
+  expect(document.activeElement).toBe(document.body);
+  expect(submit).not.toHaveBeenCalled();
+
+  // From the keyboard, focus stays on the button.
+  fireEvent.click(button);
+  expect(button).toHaveAttribute("aria-expanded", "true");
+  fireEvent.click(button, { detail: 0 });
+  expect(button).toHaveAttribute("aria-expanded", "false");
+  expect(button).toHaveFocus();
+});
+
 it("keeps the page search a plain submit form", () => {
   render(<SearchForm id="page-search" />);
   expect(screen.getByRole("button", { name: "Search" })).not.toHaveAttribute(
