@@ -38,6 +38,8 @@ const resultSchema = z.discriminatedUnion("ok", [
   }),
 ]);
 
+const readerSchema = z.strictObject({ version, hidden: z.boolean() });
+
 async function administratorClient() {
   const access = await getCurrentAccess();
   return access.status === "active" && access.role === "administrator"
@@ -50,14 +52,11 @@ export async function readProfileModerationAction(userId: string) {
   try {
     const client = await administratorClient();
     if (!client) return null;
-    const { data, error } = await client
-      .from("profiles")
-      .select("edit_version,public_page_hidden")
-      .eq("auth_user_id", userId)
-      .maybeSingle();
-    return !error && data
-      ? { version: data.edit_version, hidden: data.public_page_hidden }
-      : null;
+    const { data, error } = await client.rpc("get_member_profile_moderation", {
+      p_user_id: userId,
+    });
+    const settings = readerSchema.safeParse(data);
+    return !error && settings.success ? settings.data : null;
   } catch {
     return null;
   }

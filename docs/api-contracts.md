@@ -344,6 +344,8 @@ Draft create and save, published save, and lifecycle mutations return `retryable
 
 `moderate_member_profile` takes a target Auth user UUID, profile version, request UUID, and booleans to hide the public page, clear the biography, and reset the display name. An eligible active administrator may use it from Member Directory. Exact retries preserve the receipt. Public author pages, profile photos, byline links, and sitemap author URLs require active membership and a publicly visible profile. Hidden authors retain a plain-text byline and their articles remain public. The owner slug may be null and a sitemap article can have zero author URLs. Profile photos are served with private/no-store so moderation takes effect on the next request.
 
+`get_member_profile_moderation` takes a target Auth user UUID and returns `{version, hidden}` for that member's profile, or null when the caller is not an active administrator or the member does not exist. The moderation panel reads through it because staff roles have no column grant on `profiles.edit_version` or `public_page_hidden`.
+
 The service-only `sweep_orphan_guest_credits` RPC deletes up to 100 qualifying 30-day-old profiles per call and returns counts. Creation receipts survive the sweep. Exact replay of a swept credit returns `expired`; the editor can issue a new credit request. The scheduled route checks the configured production cron secret before creating a service client.
 
 ## Editorial article preview

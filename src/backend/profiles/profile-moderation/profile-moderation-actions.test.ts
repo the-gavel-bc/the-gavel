@@ -69,3 +69,20 @@ it("uses the same target, version and request ID for moderation", async () => {
   });
   expect(mocks.invalidate).toHaveBeenCalledOnce();
 });
+it("reads moderation settings through the administrator-only function", async () => {
+  mocks.access.mockResolvedValue({ status: "active", role: "administrator" });
+  mocks.rpc.mockResolvedValue({
+    data: { version: 3, hidden: true },
+    error: null,
+  });
+  await expect(readProfileModerationAction(userId)).resolves.toEqual({
+    version: 3,
+    hidden: true,
+  });
+  expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith(
+    "get_member_profile_moderation",
+    { p_user_id: userId },
+  );
+  mocks.rpc.mockResolvedValue({ data: null, error: null });
+  await expect(readProfileModerationAction(userId)).resolves.toBeNull();
+});
