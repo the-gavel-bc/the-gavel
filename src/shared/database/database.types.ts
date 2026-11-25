@@ -884,6 +884,10 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: Json;
       };
+      get_member_profile_moderation: {
+        Args: { p_user_id: string };
+        Returns: Json;
+      };
       get_own_public_profile: {
         Args: Record<PropertyKey, never>;
         Returns: {
