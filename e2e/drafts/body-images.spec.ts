@@ -27,7 +27,6 @@ test("owner inserts and reopens an accessible private body image", async ({
     mimeType: "image/png",
     buffer: png,
   });
-  await page.getByRole("button", { name: "Upload body image" }).click();
   await expect(page.getByText("Image ready to insert.")).toBeVisible();
   await page.getByLabel("Body image alt text").fill("Red newsroom graphic");
   await page.keyboard.press("Tab");

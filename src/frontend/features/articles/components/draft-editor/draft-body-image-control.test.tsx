@@ -48,7 +48,6 @@ it("inserts only the finalized asset ID and bounded text into the body", async (
         files: [new File(["image"], "image.png", { type: "image/png" })],
       },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Upload body image" }));
     await waitFor(() =>
       expect(
         screen.getByRole("button", { name: "Insert body image" }),
@@ -159,12 +158,11 @@ it("keeps a throttled body upload retryable with the same reservation", async ()
         files: [new File(["image"], "image.png", { type: "image/png" })],
       },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Upload body image" }));
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "retry the same file",
     );
     expect(remove).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Upload body image" }));
+    fireEvent.click(screen.getByRole("button", { name: "Retry upload" }));
     await screen.findByText("Image ready to insert.");
     expect(reserve.mock.calls[1]).toEqual(reserve.mock.calls[0]);
     remove.mockResolvedValue({ ok: true });

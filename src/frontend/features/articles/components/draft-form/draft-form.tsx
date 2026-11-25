@@ -372,6 +372,60 @@ export function DraftForm({
           Returned by an editor: {review.note}
         </p>
       )}
+      {!command.article && (
+        <section
+          aria-labelledby="new-draft-image-heading"
+          className={styles.newPhoto}
+        >
+          <h2 id="new-draft-image-heading">Main image</h2>
+          <p>
+            JPEG, PNG or WebP, up to 10 MB. Choosing a photo saves your draft
+            first, then uploads it.
+          </p>
+          <label htmlFor="article-image-file">Image file</label>
+          <input
+            id="article-image-file"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            disabled={!ready || command.phase === "saving"}
+            onChange={(event) => {
+              const photo = event.target.files?.[0] ?? null;
+              setPendingPhoto(photo);
+              if (photo) void save(photo);
+            }}
+          />
+          {pendingPhoto && (
+            <p>
+              {pendingPhoto.name} will upload once the draft is saved. Fix any
+              highlighted fields, then choose Create draft.
+            </p>
+          )}
+        </section>
+      )}
+      {command.article && (
+        <ArticleMedia
+          initialFile={pendingPhoto}
+          published={status === "published"}
+          article={command.article}
+          initialImage={initialImage ?? null}
+          disabled={
+            command.dirty ||
+            Boolean(command.pending) ||
+            command.phase === "saving" ||
+            command.phase === "conflict" ||
+            lifecycleBusy
+          }
+          onCommit={(result) => {
+            command.acknowledgeArticle({
+              id: result.articleId,
+              version: result.version,
+              updatedAt: result.updatedAt,
+            });
+          }}
+          onBusyChange={setMediaBusy}
+          onDirtyChange={handOffPhoto}
+        />
+      )}
       <fieldset
         disabled={
           !ready ||
@@ -465,60 +519,6 @@ export function DraftForm({
           }}
         />
       </fieldset>
-      {!command.article && (
-        <section
-          aria-labelledby="new-draft-image-heading"
-          className={styles.newPhoto}
-        >
-          <h2 id="new-draft-image-heading">Main image</h2>
-          <p>
-            JPEG, PNG or WebP, up to 10 MB. Choosing a photo saves your draft
-            first, then uploads it.
-          </p>
-          <label htmlFor="article-image-file">Image file</label>
-          <input
-            id="article-image-file"
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            disabled={!ready || command.phase === "saving"}
-            onChange={(event) => {
-              const photo = event.target.files?.[0] ?? null;
-              setPendingPhoto(photo);
-              if (photo) void save(photo);
-            }}
-          />
-          {pendingPhoto && (
-            <p>
-              {pendingPhoto.name} will upload once the draft is saved. Fix any
-              highlighted fields, then choose Create draft.
-            </p>
-          )}
-        </section>
-      )}
-      {command.article && (
-        <ArticleMedia
-          initialFile={pendingPhoto}
-          published={status === "published"}
-          article={command.article}
-          initialImage={initialImage ?? null}
-          disabled={
-            command.dirty ||
-            Boolean(command.pending) ||
-            command.phase === "saving" ||
-            command.phase === "conflict" ||
-            lifecycleBusy
-          }
-          onCommit={(result) => {
-            command.acknowledgeArticle({
-              id: result.articleId,
-              version: result.version,
-              updatedAt: result.updatedAt,
-            });
-          }}
-          onBusyChange={setMediaBusy}
-          onDirtyChange={handOffPhoto}
-        />
-      )}
       <fieldset
         disabled={
           !ready ||

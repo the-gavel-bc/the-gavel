@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useEditorState } from "@tiptap/react";
 import type { Editor, ChainedCommands } from "@tiptap/core";
 import { Button } from "@/frontend/components/ui/button/button";
@@ -11,10 +11,13 @@ import styles from "./draft-toolbar.module.css";
 export function DraftToolbar({
   editor,
   disabled,
+  children,
 }: {
   editor: Editor | null;
   disabled: boolean;
   onError: (failure: DraftFailure) => void;
+  /** Extra insert controls shown beside the link buttons. */
+  children?: ReactNode;
 }) {
   const [href, setHref] = useState("");
   const [invalid, setInvalid] = useState(false);
@@ -146,6 +149,7 @@ export function DraftToolbar({
         >
           Remove link
         </Button>
+        {children}
       </div>
     </div>
   );

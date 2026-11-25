@@ -315,91 +315,107 @@ export function ArticleMedia({
       className={styles.section}
     >
       <h2 id="article-main-image-heading">Main image</h2>
-      <p>
-        JPEG, PNG or WebP, up to 10 MB. The photo uploads as soon as you choose
-        it; add alt text and a photo credit, then attach it.
+      <p className={styles.hint}>
+        JPEG, PNG or WebP, up to 10 MB. It uploads when chosen; add alt text and
+        a credit, then attach it.
       </p>
       {disabled && <p>Save your draft changes before managing its image.</p>}
-      {image && (
-        <>
-          {/* Private media route: only the owner or an administrator can load it. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            className={styles.preview}
-            src={`/api/articles/${article.id}/media/${image.assetId}`}
-            alt={image.altText}
-            loading="lazy"
-          />
-          <p>
-            Attached image: {image.altText} — {image.credit}
-          </p>
-        </>
-      )}
-      <div className={styles.fields}>
-        <label htmlFor="article-image-file">Image file</label>
-        <input
-          id="article-image-file"
-          ref={fileInput}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          disabled={
-            mutationLocked ||
-            Boolean(assetId) ||
-            Boolean(uploadRequestId) ||
-            Boolean(cleanupAssetId)
-          }
-          onChange={(event) => {
-            const selected = event.target.files?.[0] ?? null;
-            setFile(selected);
-            setAssetId(null);
-            setUploadRequestId(null);
-            setStatus("");
-            setError("");
-            // Upload immediately; alt text and credit can be typed meanwhile.
-            if (selected) void upload(selected);
-          }}
-        />
-        {file && !assetId && !busy && (
-          <Button
-            type="button"
-            disabled={mutationLocked}
-            onClick={() => void upload()}
-          >
-            {error ? "Retry upload" : "Upload image"}
-          </Button>
+      <div className={styles.body}>
+        {(image || preview) && (
+          <div className={styles.thumb}>
+            {preview ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img className={styles.preview} src={preview} alt="" />
+            ) : (
+              image && (
+                <>
+                  {/* Private media route: only the owner or an administrator can load it. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    className={styles.preview}
+                    src={`/api/articles/${article.id}/media/${image.assetId}`}
+                    alt={image.altText}
+                    loading="lazy"
+                  />
+                  <p className={styles.hint}>
+                    Attached image: {image.altText} — {image.credit}
+                  </p>
+                </>
+              )
+            )}
+          </div>
         )}
-        {preview && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img className={styles.preview} src={preview} alt="" />
-        )}
-        <label htmlFor="article-image-alt">Alt text</label>
-        <input
-          id="article-image-alt"
-          value={altText}
-          maxLength={240}
-          disabled={locked}
-          onChange={(event) => setAltText(event.target.value)}
-        />
-        <label htmlFor="article-image-credit">Image credit</label>
-        <input
-          id="article-image-credit"
-          value={credit}
-          maxLength={240}
-          disabled={locked}
-          onChange={(event) => setCredit(event.target.value)}
-        />
-        <label htmlFor="article-image-caption">Caption</label>
-        <textarea
-          id="article-image-caption"
-          value={caption}
-          maxLength={400}
-          disabled={locked}
-          aria-describedby="article-image-caption-hint"
-          onChange={(event) => setCaption(event.target.value)}
-        />
-        <p id="article-image-caption-hint">
-          Optional. Up to 400 characters, shown under the photo.
-        </p>
+        <div className={styles.fields}>
+          <div className={styles.wide}>
+            <label htmlFor="article-image-file">Image file</label>
+            <input
+              id="article-image-file"
+              ref={fileInput}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              disabled={
+                mutationLocked ||
+                Boolean(assetId) ||
+                Boolean(uploadRequestId) ||
+                Boolean(cleanupAssetId)
+              }
+              onChange={(event) => {
+                const selected = event.target.files?.[0] ?? null;
+                setFile(selected);
+                setAssetId(null);
+                setUploadRequestId(null);
+                setStatus("");
+                setError("");
+                // Upload immediately; alt text and credit can be typed meanwhile.
+                if (selected) void upload(selected);
+              }}
+            />
+            {file && !assetId && !busy && (
+              <Button
+                type="button"
+                disabled={mutationLocked}
+                onClick={() => void upload()}
+              >
+                {error ? "Retry upload" : "Upload image"}
+              </Button>
+            )}
+          </div>
+          <div className={styles.field}>
+            <label htmlFor="article-image-alt">Alt text</label>
+            <input
+              id="article-image-alt"
+              value={altText}
+              maxLength={240}
+              disabled={locked}
+              onChange={(event) => setAltText(event.target.value)}
+            />
+          </div>
+          <div className={styles.field}>
+            <label htmlFor="article-image-credit">Image credit</label>
+            <input
+              id="article-image-credit"
+              value={credit}
+              maxLength={240}
+              disabled={locked}
+              onChange={(event) => setCredit(event.target.value)}
+            />
+          </div>
+          <div className={styles.wide}>
+            <label htmlFor="article-image-caption">Caption</label>
+            <textarea
+              id="article-image-caption"
+              rows={2}
+              value={caption}
+              maxLength={400}
+              disabled={locked}
+              aria-describedby="article-image-caption-hint"
+              onChange={(event) => setCaption(event.target.value)}
+            />
+            <p id="article-image-caption-hint" className={styles.hint}>
+              Optional. Up to 400 characters, shown under the photo.
+            </p>
+          </div>
+        </div>
       </div>
       <div className={styles.actions}>
         <Button
