@@ -89,3 +89,38 @@
   font-weight: 700;
   margin: 0;
 }
+/* Body images show as a compact chip in the editor; readers see the full photo. */
+.content :global(.draft-image-chip) {
+  align-items: center;
+  background: var(--dash-page, #f6f7fb);
+  border: 1px solid var(--dash-line, #e3e6ee);
+  border-radius: 8px;
+  display: grid;
+  gap: 0 var(--space-3);
+  grid-template-columns: auto minmax(0, 1fr);
+  margin: var(--space-3) 0;
+  max-width: 32rem;
+  padding: var(--space-2) var(--space-3);
+}
+.content :global(.draft-image-chip img) {
+  aspect-ratio: 1;
+  border-radius: 4px;
+  grid-row: span 2;
+  height: 2.5rem;
+  object-fit: cover;
+  width: 2.5rem;
+}
+.content :global(.draft-image-chip span) {
+  font-size: 0.875rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.content :global(.draft-image-chip figcaption) {
+  color: var(--dash-muted, #5b6472);
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+.content :global(.draft-image-chip.ProseMirror-selectednode) {
+  outline: 2px solid var(--color-brand, #1e4aa8);
+  outline-offset: 2px;
+}

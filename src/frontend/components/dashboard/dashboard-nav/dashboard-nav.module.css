@@ -76,3 +76,32 @@
     transition: none;
   }
 }
+/* Small spinner on the link being loaded; hidden until navigation is pending. */
+.pending {
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  border-right-color: transparent;
+  display: inline-block;
+  height: 0.75em;
+  margin-inline-start: 0.5em;
+  opacity: 0;
+  vertical-align: -0.05em;
+  width: 0.75em;
+}
+.pending[data-pending="true"] {
+  animation: dashboard-nav-spin 0.7s linear infinite;
+  opacity: 0.8;
+  transition: opacity 0.1s 0.1s;
+}
+@keyframes dashboard-nav-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pending[data-pending="true"] {
+    animation: none;
+    border-right-color: currentColor;
+    opacity: 0.5;
+  }
+}

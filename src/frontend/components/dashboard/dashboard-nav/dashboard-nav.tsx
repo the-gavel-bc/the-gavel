@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
+import { useLinkStatus } from "next/link";
 import { GuardedDashboardLink as Link } from "../guarded-dashboard-link/guarded-dashboard-link";
 import styles from "./dashboard-nav.module.css";
 
@@ -21,6 +22,22 @@ const admin = [
 
 type Item = { href: string; label: string; exact?: boolean };
 
+// Marks the clicked link while its page loads, so slow server renders still
+// get instant feedback. Without JavaScript, links are ordinary page loads.
+function PendingLabel({ label }: { label: string }) {
+  const { pending } = useLinkStatus();
+  return (
+    <>
+      {label}
+      <span
+        className={styles.pending}
+        data-pending={pending}
+        aria-hidden="true"
+      />
+    </>
+  );
+}
+
 export function isActive(pathname: string, { href, exact }: Item) {
   return exact
     ? pathname === href
@@ -38,7 +55,7 @@ function Group({ items, pathname }: { items: Item[]; pathname: string }) {
             prefetch={false}
             aria-current={isActive(pathname, item) ? "page" : undefined}
           >
-            {item.label}
+            <PendingLabel label={item.label} />
           </Link>
         </li>
       ))}

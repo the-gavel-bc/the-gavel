@@ -6,6 +6,9 @@ import sharp from "sharp";
 const maxBytes = 10 * 1024 * 1024;
 const maxSide = 6_000;
 const maxPixels = 24_000_000;
+// Stored photos are capped at this long edge: sharp on a 2x screen at full
+// article width, and far smaller files than camera originals.
+const storedMaxSide = 2_400;
 const allowedFormats = {
   jpeg: "image/jpeg",
   png: "image/png",
@@ -65,6 +68,12 @@ export async function processArticleImage(
       failOn: "error",
     })
       .rotate()
+      .resize({
+        width: storedMaxSide,
+        height: storedMaxSide,
+        fit: "inside",
+        withoutEnlargement: true,
+      })
       .webp({ quality: 82, effort: 4 })
       .toBuffer({ resolveWithObject: true });
     if (output.data.byteLength > maxBytes)

@@ -41,7 +41,12 @@ export const getCurrentAccess = cache(async (): Promise<AccessState> => {
       .select("role, active")
       .eq("user_id", user.id)
       .maybeSingle();
-  let { data: membership, error } = await readMembership();
+  const readProfile = () => client.rpc("current_profile");
+  // Independent reads: run them together to save a round trip per page.
+  let [{ data: membership, error }, profileRead] = await Promise.all([
+    readMembership(),
+    readProfile(),
+  ]);
   if (error) throw new Error("Unable to verify membership access.");
   if (!membership?.active) {
     // An administrator may have listed this address ahead of time; the first
@@ -54,9 +59,10 @@ export const getCurrentAccess = cache(async (): Promise<AccessState> => {
     ({ data: membership, error } = await readMembership());
     if (error) throw new Error("Unable to verify membership access.");
     if (!membership?.active) return { status: "pending" };
+    // The claim may have just created the profile.
+    profileRead = await readProfile();
   }
-  const { data: profiles, error: profileError } =
-    await client.rpc("current_profile");
+  const { data: profiles, error: profileError } = profileRead;
   if (profileError) throw new Error("Unable to verify membership access.");
   const profile = profiles?.[0];
   if (!profile) return { status: "pending" };

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { randomBytes } from "node:crypto";
 import sharp from "sharp";
 import { draftListFixture } from "../support/draft-list-fixture/draft-list-fixture";
 import { setLocalSession } from "../support/local-supabase/local-supabase";
@@ -92,4 +93,52 @@ test("authorized reader sees saved body text and image without JavaScript", asyn
   } finally {
     await context.close();
   }
+});
+
+test("a camera-sized photo is shrunk below the hosting upload limit", async ({
+  context,
+  page,
+}) => {
+  await setLocalSession(context, fixture.users.author);
+  // Record the size of each uploaded file as the browser sends it.
+  await page.addInitScript(() => {
+    const send = window.fetch.bind(window);
+    const uploads: number[] = [];
+    (window as unknown as { uploads: number[] }).uploads = uploads;
+    window.fetch = (input, init) => {
+      const file = init?.body instanceof FormData && init.body.get("file");
+      if (file instanceof Blob) uploads.push(file.size);
+      return send(input, init);
+    };
+  });
+  await page.goto(`/dashboard/articles/${fixture.id(21)}`);
+  const [width, height] = [5000, 3750];
+  const raw = await sharp(randomBytes(width * height * 3), {
+    raw: { width, height, channels: 3 },
+  })
+    .blur(1.2)
+    .raw()
+    .toBuffer();
+  const photo = await sharp(raw, { raw: { width, height, channels: 3 } })
+    .jpeg({ quality: 92 })
+    .toBuffer();
+  // Vercel rejects function request bodies over 4.5 MB.
+  const limit = 4.5 * 1024 * 1024;
+  expect(photo.byteLength).toBeGreaterThan(limit);
+  await page.getByRole("button", { name: "Insert image" }).click();
+  await page.getByLabel("Body image file").setInputFiles({
+    name: "camera.jpg",
+    mimeType: "image/jpeg",
+    buffer: photo,
+  });
+  await expect(page.getByText("Image ready to insert.")).toBeVisible();
+  const sent = await page.evaluate(
+    () => (window as unknown as { uploads: number[] }).uploads,
+  );
+  expect(sent).toHaveLength(1);
+  expect(sent[0]).toBeLessThan(limit);
+  await expect(page.getByText("Image ready to insert.")).toBeVisible();
+  await page.getByLabel("Body image alt text").fill("Camera photo");
+  await page.getByRole("button", { name: "Insert body image" }).click();
+  await expect(page.getByText("[Image: Camera photo]")).toBeVisible();
 });

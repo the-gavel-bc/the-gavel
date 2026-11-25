@@ -1,4 +1,5 @@
 "use client";
+import { shrinkImage } from "@/frontend/features/media/shrink-image/shrink-image";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -58,10 +59,15 @@ export function AboutImageControl({
     if (input.current) input.current.value = "";
   }
 
-  function upload(file: File | undefined) {
-    if (!file) return;
+  async function upload(chosen: File | undefined) {
+    if (!chosen) return;
     if (!alt.trim()) return setProblem(messages.invalid_input);
-    if (!accepted.includes(file.type)) return setProblem(messages.invalid_type);
+    if (!accepted.includes(chosen.type))
+      return setProblem(messages.invalid_type);
+    // Server actions accept at most 4 MB, below this control's 5 MB cap.
+    const prepared = await shrinkImage(chosen);
+    if (!prepared.ok) return setProblem(messages.too_large);
+    const file = prepared.file;
     if (file.size > maxBytes) return setProblem(messages.too_large);
     const form = new FormData();
     form.set("image", file);
@@ -121,7 +127,7 @@ export function AboutImageControl({
         aria-label="About page image file"
         accept={accepted.join(",")}
         disabled={pending}
-        onChange={(event) => upload(event.target.files?.[0])}
+        onChange={(event) => void upload(event.target.files?.[0])}
       />
       <div className={styles.actions}>
         <Button
