@@ -49,7 +49,6 @@ test("administrator previews a saved draft with real media and returns to the ed
   await expect(page.getByText("Image attached.")).toBeVisible();
 
   await page.getByLabel("Body image file").setInputFiles(file);
-  await page.getByRole("button", { name: "Upload body image" }).click();
   await expect(page.getByText("Image ready to insert.")).toBeVisible();
   await page.getByLabel("Body image alt text").fill("Preview body photo");
   await page.getByLabel("Body image caption").fill("Body caption.");

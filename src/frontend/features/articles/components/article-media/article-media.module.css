@@ -1,30 +1,69 @@
+/* Compact card: preview beside a two-column field grid on wide screens. */
 .section {
   display: grid;
-  gap: 0.75rem;
+  gap: var(--space-3);
   background: var(--color-paper);
   border: 1px solid var(--dash-line, #e3e6ee);
   border-radius: 12px;
-  padding: var(--space-6);
+  padding: var(--space-4);
+}
+.section h2,
+.section p {
+  margin: 0;
+}
+.hint {
+  color: var(--dash-muted, #5b6472);
+  font-size: 0.875rem;
+}
+.body {
+  display: grid;
+  gap: var(--space-3);
+}
+.thumb {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
 }
 .fields {
   display: grid;
-  gap: 0.5rem;
-  max-width: 32rem;
+  gap: var(--space-3);
 }
-.fields input {
+.field,
+.wide {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.fields input:not([type="file"]),
+.fields textarea {
   width: 100%;
-  min-height: var(--dash-control, 2.75rem);
+  min-height: 2.25rem;
+  font-size: 0.9375rem;
+}
+.fields textarea {
+  resize: vertical;
 }
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: var(--space-2);
 }
 .preview {
   aspect-ratio: 3 / 2;
   background: var(--dash-page, #f6f7fb);
-  border-radius: 10px;
-  max-width: 20rem;
+  border-radius: 8px;
+  max-width: 12rem;
   object-fit: cover;
   width: 100%;
+}
+@media (min-width: 48rem) {
+  .body:has(.thumb) {
+    grid-template-columns: 12rem minmax(0, 1fr);
+  }
+  .fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .wide {
+    grid-column: 1 / -1;
+  }
 }

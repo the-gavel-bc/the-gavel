@@ -11,6 +11,10 @@ import {
 import { requestArticleImageUpload } from "@/backend/media/media-actions/media-actions";
 import { removeUnusedArticleImage } from "@/backend/media/media-removal/media-removal";
 import { uploadReservationMessage } from "../article-media/upload-reservation-message";
+import styles from "./draft-body-image-control.module.css";
+
+/** The toolbar's image button opens this control's file picker. */
+export const BODY_IMAGE_FILE_ID = "body-image-file";
 
 export function DraftBodyImageControl({
   articleId,
@@ -76,8 +80,8 @@ export function DraftBodyImageControl({
     return false;
   }
 
-  async function upload() {
-    if (!file || locked || assetId || cleanupId) return;
+  async function upload(chosen: File | null = file) {
+    if (!chosen || locked || assetId || cleanupId) return;
     setBusy(true);
     setError("");
     setStatus("Uploading body image…");
@@ -92,7 +96,7 @@ export function DraftBodyImageControl({
         return;
       }
       const form = new FormData();
-      form.set("file", file);
+      form.set("file", chosen);
       const response = await fetch(
         `/api/articles/${articleId}/media/${reserved.assetId}`,
         { method: "POST", body: form },
@@ -206,103 +210,152 @@ export function DraftBodyImageControl({
     setStatus("Image updated. Save the draft to keep it.");
   }
 
+  const open = Boolean(
+    file || requestId || assetId || cleanupId || selected || busy || error,
+  );
   return (
-    <fieldset disabled={disabled} aria-label="Body image">
-      <legend>Body image</legend>
-      <p>
-        Upload a JPEG, PNG or WebP image, then add alt text and insert it. Save
-        the draft afterward.
-      </p>
-      <label htmlFor="body-image-file">Body image file</label>
-      <input
-        id="body-image-file"
-        ref={fileInput}
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        disabled={locked || Boolean(assetId || cleanupId || requestId)}
-        onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-      />
-      <Button
-        type="button"
-        disabled={locked || !file || Boolean(assetId || cleanupId)}
-        onClick={() => void upload()}
+    <>
+      <fieldset
+        disabled={disabled}
+        aria-label="Body image"
+        className={styles.panel}
+        hidden={!open}
       >
-        Upload body image
-      </Button>
-      <label htmlFor="body-image-alt">Body image alt text</label>
-      <input
-        id="body-image-alt"
-        value={alt}
-        maxLength={240}
-        onChange={(event) => setAlt(event.target.value)}
-      />
-      <label htmlFor="body-image-caption">Body image caption</label>
-      <input
-        id="body-image-caption"
-        value={caption}
-        maxLength={500}
-        onChange={(event) => setCaption(event.target.value)}
-      />
-      <Button type="button" disabled={locked || !assetId} onClick={insert}>
-        Insert body image
-      </Button>
-      {selected && (
-        <>
-          <Button type="button" disabled={locked} onClick={updateSelected}>
-            Update selected image
-          </Button>
-          <Button
-            type="button"
-            variant="danger"
-            disabled={locked}
-            onClick={async () => {
-              if (
-                !(await confirm({
-                  title: "Remove this image from the body?",
-                  message: "Save the draft to keep this change.",
-                  confirmLabel: "Remove body image",
-                  cancelLabel: "Keep",
-                  danger: true,
-                }))
-              )
-                return;
-              editor?.commands.deleteSelection();
-              setSelected(false);
-              setStatus(
-                "Image removed from body. Save the draft to keep this change.",
-              );
-            }}
-          >
-            Remove body image
-          </Button>
-        </>
-      )}
-      {(assetId || cleanupId) && (
-        <Button
-          type="button"
-          variant="danger"
-          disabled={locked}
-          onClick={async () => {
-            if (
-              await confirm({
-                title: "Discard this upload?",
-                message:
-                  "The uploaded image is removed. This cannot be undone.",
-                confirmLabel: "Discard upload",
-                cancelLabel: "Keep",
-                danger: true,
-              })
-            )
-              void discard();
+        <label htmlFor={BODY_IMAGE_FILE_ID} className={styles.srOnly}>
+          Body image file
+        </label>
+        <input
+          id={BODY_IMAGE_FILE_ID}
+          ref={fileInput}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className={styles.srOnly}
+          tabIndex={-1}
+          disabled={locked || Boolean(assetId || cleanupId || requestId)}
+          onChange={(event) => {
+            const chosen = event.target.files?.[0] ?? null;
+            setFile(chosen);
+            setError("");
+            // Upload at once; alt text and caption can be typed meanwhile.
+            if (chosen) void upload(chosen);
           }}
-        >
-          Discard upload
-        </Button>
-      )}
-      <p role="status">{status}</p>
-      {error && <p role="alert">{error}</p>}
-      <p>Video embeds await approved providers.</p>
+        />
+        <p className={styles.title}>
+          {selected ? "Selected image" : (file?.name ?? "Body image")}
+        </p>
+        <div className={styles.fields}>
+          <div className={styles.field}>
+            <label htmlFor="body-image-alt">Body image alt text</label>
+            <input
+              id="body-image-alt"
+              value={alt}
+              maxLength={240}
+              onChange={(event) => setAlt(event.target.value)}
+            />
+          </div>
+          <div className={styles.field}>
+            <label htmlFor="body-image-caption">Body image caption</label>
+            <input
+              id="body-image-caption"
+              value={caption}
+              maxLength={500}
+              onChange={(event) => setCaption(event.target.value)}
+            />
+          </div>
+        </div>
+        <div className={styles.actions}>
+          {file && !assetId && !busy && !cleanupId && (
+            <Button
+              type="button"
+              disabled={locked}
+              onClick={() => void upload()}
+            >
+              Retry upload
+            </Button>
+          )}
+          {!selected && (
+            <Button
+              type="button"
+              disabled={locked || !assetId}
+              onClick={insert}
+            >
+              Insert body image
+            </Button>
+          )}
+          {selected && (
+            <>
+              <Button type="button" disabled={locked} onClick={updateSelected}>
+                Update selected image
+              </Button>
+              <Button
+                type="button"
+                variant="danger"
+                disabled={locked}
+                onClick={async () => {
+                  if (
+                    !(await confirm({
+                      title: "Remove this image from the body?",
+                      message: "Save the draft to keep this change.",
+                      confirmLabel: "Remove body image",
+                      cancelLabel: "Keep",
+                      danger: true,
+                    }))
+                  )
+                    return;
+                  editor?.commands.deleteSelection();
+                  setSelected(false);
+                  setStatus(
+                    "Image removed from body. Save the draft to keep this change.",
+                  );
+                }}
+              >
+                Remove body image
+              </Button>
+            </>
+          )}
+          {(assetId || cleanupId) && (
+            <Button
+              type="button"
+              variant="danger"
+              disabled={locked}
+              onClick={async () => {
+                if (
+                  await confirm({
+                    title: "Discard this upload?",
+                    message:
+                      "The uploaded image is removed. This cannot be undone.",
+                    confirmLabel: "Discard upload",
+                    cancelLabel: "Keep",
+                    danger: true,
+                  })
+                )
+                  void discard();
+              }}
+            >
+              Discard upload
+            </Button>
+          )}
+          {file && !assetId && !busy && !cleanupId && !requestId && (
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={locked}
+              onClick={() => {
+                setFile(null);
+                setError("");
+                if (fileInput.current) fileInput.current.value = "";
+              }}
+            >
+              Cancel
+            </Button>
+          )}
+        </div>
+        {error && <p role="alert">{error}</p>}
+      </fieldset>
+      <p role="status" className={styles.status}>
+        {status}
+      </p>
       {confirmDialog}
-    </fieldset>
+    </>
   );
 }
