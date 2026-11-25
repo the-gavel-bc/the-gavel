@@ -379,8 +379,8 @@ export function DraftForm({
         >
           <h2 id="new-draft-image-heading">Main image</h2>
           <p>
-            JPEG, PNG or WebP, up to 10 MB. Choosing a photo saves your draft
-            first, then uploads it.
+            JPEG, PNG or WebP; large photos are resized. Choosing a photo saves
+            your draft first, then uploads it.
           </p>
           <label htmlFor="article-image-file">Image file</label>
           <input

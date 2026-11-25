@@ -1,4 +1,5 @@
 "use client";
+import { shrinkImage } from "@/frontend/features/media/shrink-image/shrink-image";
 
 import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -109,6 +110,13 @@ export function ArticleMedia({
     const requestId = uploadRequestId ?? crypto.randomUUID();
     setUploadRequestId(requestId);
     try {
+      const prepared = await shrinkImage(selected);
+      if (!prepared.ok) {
+        // Nothing was reserved for this attempt; keep any earlier reservation.
+        setUploadRequestId(uploadRequestId);
+        setError("This image is too large to upload. Try a smaller photo.");
+        return;
+      }
       const reservation = await requestArticleImageUpload(
         article.id,
         requestId,
@@ -119,7 +127,7 @@ export function ArticleMedia({
         return;
       }
       const body = new FormData();
-      body.set("file", selected);
+      body.set("file", prepared.file);
       const response = await fetch(
         `/api/articles/${article.id}/media/${reservation.assetId}`,
         { method: "POST", body },
@@ -316,8 +324,8 @@ export function ArticleMedia({
     >
       <h2 id="article-main-image-heading">Main image</h2>
       <p className={styles.hint}>
-        JPEG, PNG or WebP, up to 10 MB. It uploads when chosen; add alt text and
-        a credit, then attach it.
+        JPEG, PNG or WebP. Large photos are resized automatically. It uploads
+        when chosen; add alt text and a credit, then attach it.
       </p>
       {disabled && <p>Save your draft changes before managing its image.</p>}
       <div className={styles.body}>

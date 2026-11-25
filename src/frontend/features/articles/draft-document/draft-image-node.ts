@@ -26,12 +26,17 @@ export function createDraftImageNode(articleId?: string) {
     },
     addNodeView() {
       return ({ node }) => {
+        // A compact chip (thumbnail and label), not the full-size photo, so
+        // images do not push the surrounding text out of view while editing.
         const figure = document.createElement("figure");
+        figure.className = "draft-image-chip";
         const caption = document.createElement("figcaption");
         const image = document.createElement("img");
         const label = document.createElement("span");
         const preview = Boolean(articleId && isDraftUuid(articleId));
-        figure.append(preview ? image : label, caption);
+        figure.append(...(preview ? [image] : []), label, caption);
+        // The thumbnail already carries the alt text for screen readers.
+        if (preview) label.setAttribute("aria-hidden", "true");
         const update = (current: typeof node) => {
           if (current.type.name !== "image") return false;
           const { assetId, alt, caption: text } = current.attrs;
@@ -42,7 +47,8 @@ export function createDraftImageNode(articleId?: string) {
             image.onerror = () => {
               caption.textContent = "Private image preview unavailable.";
             };
-          } else label.textContent = `Image: ${alt}`;
+          }
+          label.textContent = `[Image: ${alt}]`;
           caption.textContent = text || "";
           return true;
         };

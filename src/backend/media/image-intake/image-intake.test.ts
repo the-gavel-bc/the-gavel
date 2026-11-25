@@ -31,6 +31,14 @@ describe("processArticleImage", () => {
     },
   );
 
+  it("caps the stored long edge at 2400 pixels", async () => {
+    const result = await processArticleImage(
+      await raster("jpeg", 3000, 1500),
+      "image/jpeg",
+    );
+    expect(result.ok && [result.width, result.height]).toEqual([2400, 1200]);
+  });
+
   it("rejects a declared type that disagrees with decoded bytes", async () => {
     const result = await processArticleImage(await raster("png"), "image/jpeg");
     expect(result).toEqual({ ok: false, code: "invalid_type" });

@@ -14,3 +14,12 @@
 .body a {
   text-decoration: underline;
 }
+
+/* Body photos fill the text column; tall portraits are capped so one image
+   never takes more than most of the screen, and stay centred. */
+.body figure img {
+  margin-inline: auto;
+  max-height: min(75vh, 44rem);
+  object-fit: contain;
+  width: auto;
+}

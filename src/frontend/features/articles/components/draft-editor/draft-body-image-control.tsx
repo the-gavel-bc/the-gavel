@@ -1,4 +1,5 @@
 "use client";
+import { shrinkImage } from "@/frontend/features/media/shrink-image/shrink-image";
 import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import { useEffect, useRef, useState } from "react";
 import type { Editor } from "@tiptap/core";
@@ -42,6 +43,13 @@ export function DraftBodyImageControl({
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const locked = disabled || busy || !editor;
+  // While a new upload is in progress, selecting an existing image must not
+  // overwrite the alt text and caption typed for the new one.
+  const pendingUpload = Boolean(file || requestId || assetId || cleanupId);
+  const uploading = useRef(false);
+  useEffect(() => {
+    uploading.current = pendingUpload;
+  }, [pendingUpload]);
   useEffect(
     () => onDirtyChange?.(Boolean(file || requestId || assetId || cleanupId)),
     [file, requestId, assetId, cleanupId, onDirtyChange],
@@ -53,8 +61,10 @@ export function DraftBodyImageControl({
       const node = selection instanceof NodeSelection ? selection.node : null;
       if (node?.type.name === "image") {
         setSelected(true);
-        setAlt(node.attrs.alt);
-        setCaption(node.attrs.caption ?? "");
+        if (!uploading.current) {
+          setAlt(node.attrs.alt);
+          setCaption(node.attrs.caption ?? "");
+        }
       } else setSelected(false);
     };
     sync();
@@ -89,6 +99,13 @@ export function DraftBodyImageControl({
     const retryId = requestId ?? crypto.randomUUID();
     setRequestId(retryId);
     try {
+      const prepared = await shrinkImage(chosen);
+      if (!prepared.ok) {
+        // Nothing was reserved for this attempt; keep any earlier reservation.
+        setRequestId(requestId);
+        setError("This image is too large to upload. Try a smaller photo.");
+        return;
+      }
       const reserved = await requestArticleImageUpload(articleId, retryId);
       if (!reserved.ok) {
         if (reserved.code !== "unavailable") setRequestId(null);
@@ -96,7 +113,7 @@ export function DraftBodyImageControl({
         return;
       }
       const form = new FormData();
-      form.set("file", chosen);
+      form.set("file", prepared.file);
       const response = await fetch(
         `/api/articles/${articleId}/media/${reserved.assetId}`,
         { method: "POST", body: form },
@@ -215,33 +232,36 @@ export function DraftBodyImageControl({
   );
   return (
     <>
+      {/* Outside the hidden panel: some browsers will not open a picker inside display: none. */}
+      <label htmlFor={BODY_IMAGE_FILE_ID} className={styles.srOnly}>
+        Body image file
+      </label>
+      <input
+        id={BODY_IMAGE_FILE_ID}
+        ref={fileInput}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className={styles.srOnly}
+        tabIndex={-1}
+        disabled={
+          disabled || locked || Boolean(assetId || cleanupId || requestId)
+        }
+        onChange={(event) => {
+          const chosen = event.target.files?.[0] ?? null;
+          setFile(chosen);
+          setError("");
+          // Upload at once; alt text and caption can be typed meanwhile.
+          if (chosen) void upload(chosen);
+        }}
+      />
       <fieldset
         disabled={disabled}
         aria-label="Body image"
         className={styles.panel}
         hidden={!open}
       >
-        <label htmlFor={BODY_IMAGE_FILE_ID} className={styles.srOnly}>
-          Body image file
-        </label>
-        <input
-          id={BODY_IMAGE_FILE_ID}
-          ref={fileInput}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          className={styles.srOnly}
-          tabIndex={-1}
-          disabled={locked || Boolean(assetId || cleanupId || requestId)}
-          onChange={(event) => {
-            const chosen = event.target.files?.[0] ?? null;
-            setFile(chosen);
-            setError("");
-            // Upload at once; alt text and caption can be typed meanwhile.
-            if (chosen) void upload(chosen);
-          }}
-        />
         <p className={styles.title}>
-          {selected ? "Selected image" : (file?.name ?? "Body image")}
+          {file?.name ?? (selected ? "Selected image" : "Body image")}
         </p>
         <div className={styles.fields}>
           <div className={styles.field}>
@@ -273,7 +293,7 @@ export function DraftBodyImageControl({
               Retry upload
             </Button>
           )}
-          {!selected && (
+          {(pendingUpload || !selected) && (
             <Button
               type="button"
               disabled={locked || !assetId}
@@ -282,7 +302,7 @@ export function DraftBodyImageControl({
               Insert body image
             </Button>
           )}
-          {selected && (
+          {selected && !pendingUpload && (
             <>
               <Button type="button" disabled={locked} onClick={updateSelected}>
                 Update selected image

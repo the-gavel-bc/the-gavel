@@ -1,4 +1,5 @@
 "use client";
+import { shrinkImage } from "@/frontend/features/media/shrink-image/shrink-image";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -57,9 +58,16 @@ export function ProfilePhotoControl({
     if (input.current) input.current.value = "";
   }
 
-  function upload(file: File | undefined) {
-    if (!file) return;
-    if (!accepted.includes(file.type)) return setProblem(messages.invalid_type);
+  async function upload(chosen: File | undefined) {
+    if (!chosen) return;
+    if (!accepted.includes(chosen.type))
+      return setProblem(messages.invalid_type);
+    const prepared = await shrinkImage(chosen, {
+      maxSide: 1200,
+      maxBytes: maxBytes - 256 * 1024,
+    });
+    if (!prepared.ok) return setProblem(messages.too_large);
+    const file = prepared.file;
     if (file.size > maxBytes) return setProblem(messages.too_large);
     const form = new FormData();
     form.set("photo", file);
@@ -104,7 +112,7 @@ export function ProfilePhotoControl({
           type="file"
           accept={accepted.join(",")}
           disabled={pending}
-          onChange={(event) => upload(event.target.files?.[0])}
+          onChange={(event) => void upload(event.target.files?.[0])}
         />
         <div className={styles.actions}>
           <Button
