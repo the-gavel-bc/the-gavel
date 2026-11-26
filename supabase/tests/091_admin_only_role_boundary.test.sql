@@ -6,7 +6,8 @@ select no_plan();
 -- "no editor denial" gaps recorded in the code reviews (D-22, D-23, D-25).
 update auth.users set email='boundary-'||right(id::text,1)||'@bc.edu',email_confirmed_at=now(),
   raw_app_meta_data='{"provider":"google","providers":["google"]}'::jsonb
-  where id in ('00000000-0000-0000-0000-000000000002','00000000-0000-0000-0000-000000000003');
+  where id in ('00000000-0000-0000-0000-000000000002','00000000-0000-0000-0000-000000000003',
+    '00000000-0000-0000-0000-000000000004');
 update public.memberships set role='author',active=true where user_id='00000000-0000-0000-0000-000000000002';
 update public.memberships set role='editor',active=true where user_id='00000000-0000-0000-0000-000000000003';
 
