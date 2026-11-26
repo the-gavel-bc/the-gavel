@@ -15,6 +15,13 @@ export type Choices = {
   featured: Story[];
   readThis: Story[];
 };
+// A story the live homepage shows in an unpicked slot.
+export type AutomaticStory = {
+  id: string;
+  title: string;
+  group: Group;
+  imageUrl: string | null;
+};
 export type Place = { group: Group; index: number };
 export type Outcome = { choices: Choices; error?: string };
 

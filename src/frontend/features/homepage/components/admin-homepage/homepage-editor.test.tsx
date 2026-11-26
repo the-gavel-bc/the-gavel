@@ -222,12 +222,28 @@ it("shows live fillers as read-only and only sends explicitly chosen stories", a
       version={1}
       saved={empty}
       library={library}
-      automatic={[{ id: id(3), title: "Automatic fallback", group: "lead" }]}
+      automatic={[
+        {
+          id: id(3),
+          title: "Automatic fallback",
+          group: "lead",
+          imageUrl: null,
+        },
+        {
+          id: id(4),
+          title: "Auto featured",
+          group: "featured",
+          imageUrl: null,
+        },
+      ]}
     />,
   );
-  const filler = within(
-    screen.getByRole("region", { name: "Automatic on the live homepage" }),
-  );
+  const filler = within(screen.getByRole("region", { name: "Lead story" }));
+  expect(
+    within(screen.getByRole("region", { name: "Featured News" })).getByText(
+      "Auto featured",
+    ),
+  ).toBeVisible();
   expect(filler.getByText(/Automatic fallback/)).toBeVisible();
   expect(filler.queryByRole("button")).not.toBeInTheDocument();
   await userEvent.click(

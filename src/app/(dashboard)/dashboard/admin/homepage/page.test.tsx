@@ -46,7 +46,7 @@ it("passes only saved picks to the editor and lists automatic fillers separately
     saved: { lead: removed, featured: [chosen], readThis: [] },
     effective: { lead: filler, featured: [chosen], readThis: [] },
   });
-  mocks.images.mockResolvedValue({});
+  mocks.images.mockResolvedValue({ automatic: "/media/automatic" });
   render(await AdminHomepagePage());
   expect(screen.getByText("Homepage editor")).toBeVisible();
   expect(mocks.editor).toHaveBeenCalledWith(
@@ -57,7 +57,7 @@ it("passes only saved picks to the editor and lists automatic fillers separately
         featured: [expect.objectContaining(chosen)],
         readThis: [],
       },
-      automatic: [{ ...filler, group: "lead" }],
+      automatic: [{ ...filler, group: "lead", imageUrl: "/media/automatic" }],
     }),
   );
 });

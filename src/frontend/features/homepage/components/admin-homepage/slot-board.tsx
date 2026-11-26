@@ -2,6 +2,7 @@
 import {
   groupLabel,
   ROW_LIMIT,
+  type AutomaticStory,
   type Choices,
   type RowGroup,
 } from "./homepage-arrangement";
@@ -20,6 +21,7 @@ export function SlotBoard({
   handlers,
   onShift,
   onRemove,
+  automatic = [],
 }: {
   choices: Choices;
   blocked: boolean;
@@ -27,8 +29,12 @@ export function SlotBoard({
   handlers: DragHandlers;
   onShift: (group: RowGroup, index: number, offset: -1 | 1) => void;
   onRemove: (group: "lead" | RowGroup, index: number) => void;
+  automatic?: AutomaticStory[];
 }) {
   const rows: RowGroup[] = ["featured", "readThis"];
+  // Empty slots show what the live homepage fills them with, in order.
+  const fill = (group: "lead" | RowGroup) =>
+    automatic.filter((story) => story.group === group);
   return (
     <div className={styles.board}>
       <section aria-label={groupLabel.lead} className={styles.leadSection}>
@@ -50,6 +56,7 @@ export function SlotBoard({
             <EmptyTile
               group="lead"
               index={0}
+              automatic={fill("lead")[0]}
               blocked={blocked}
               handlers={handlers}
             />
@@ -90,6 +97,7 @@ export function SlotBoard({
                   key={`empty-${n}`}
                   group={group}
                   index={stories.length}
+                  automatic={fill(group)[n]}
                   blocked={blocked}
                   handlers={handlers}
                 />

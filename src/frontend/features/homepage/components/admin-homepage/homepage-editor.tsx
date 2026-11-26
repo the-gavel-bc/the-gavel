@@ -20,6 +20,7 @@ import {
   selectedStories,
   shiftStory,
   type Choices,
+  type AutomaticStory,
   type Group,
   type Place,
   type RowGroup,
@@ -50,7 +51,7 @@ export function HomepageEditor({
 }: {
   version: number;
   saved: Choices;
-  automatic?: { id: string; title: string; group: Group }[];
+  automatic?: AutomaticStory[];
   library: LibraryPage;
 }) {
   const router = useRouter();
@@ -212,24 +213,8 @@ export function HomepageEditor({
         handlers={handlers}
         onShift={shift}
         onRemove={remove}
+        automatic={automatic}
       />
-      {automatic.length > 0 && (
-        <section
-          className={styles.automatic}
-          aria-labelledby="automatic-homepage-stories"
-        >
-          <h2 id="automatic-homepage-stories">
-            Automatic on the live homepage
-          </h2>
-          <ul>
-            {automatic.map((story) => (
-              <li key={story.id}>
-                {groupLabel[story.group]} — {story.title}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
       <StoryLibrary
         initial={library}
         blocked={blocked}
