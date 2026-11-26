@@ -1,6 +1,12 @@
 begin;
 select no_plan();
 
+-- The seeded administrator is not a Google bc.edu identity on a fresh
+-- database; make it one so it passes the eligibility check.
+update auth.users set email='moderation-admin@bc.edu',email_confirmed_at=now(),
+  raw_app_meta_data='{"provider":"google","providers":["google"]}'::jsonb
+  where id='00000000-0000-0000-0000-000000000004';
+
 create temp table reader_fixture as select gen_random_uuid() user_id;
 grant select on reader_fixture to authenticated,anon;
 insert into auth.users(id,email,email_confirmed_at,raw_app_meta_data)
