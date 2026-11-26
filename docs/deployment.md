@@ -1,6 +1,16 @@
 # Deployment and operations
 
-Status: Typed local configuration implemented; hosted projects and releases are not configured.
+Status: Production is live on Vercel with a hosted Supabase project (set up 2026-11-25). Staging is not configured.
+
+## Production setup
+
+- **Hosting:** Vercel project "the-gavel" (team "the-gavel"), building `main`. The default Vercel address is behind Vercel SSO protection; a public production domain has not been chosen yet.
+- **Database:** hosted Supabase project in us-west-2, linked from this repository (`supabase/.temp`). Apply migrations with `pnpm supabase db push` from the main checkout before deploying code that needs them.
+- **Auth:** Google provider enabled in Supabase; the Supabase Site URL and redirect allowlist point at the production origin and its `/auth/callback`.
+- **Environment variables (Vercel, Production):** `NEXT_PUBLIC_SUPABASE_URL` (bare origin, no path), `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SITE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (sensitive), and `CRON_SECRET` (sensitive, at least 32 characters) for the jobs in `vercel.json`. Redeploy after changing any of them.
+- **Content:** the demo site's 37 published articles were imported on 2026-11-26 after a database backup (see the [import runbook](runbooks/demo-article-import.md)). Homepage picks are chosen by an administrator.
+- **Storage:** the published-media read policy allows Storage's info operations as well as downloads (migration `20261126020000`); hosted Storage looks up object info before serving a file.
+- **Credentials:** if a secret key is exposed, create a new one in Supabase, update it in Vercel, redeploy, then delete the old key.
 
 ## Environments
 
@@ -28,11 +38,11 @@ The owner approved a server-only Supabase service-role key for Phase 4 Task 3 va
 
 Use `.env.example` only as a safe local template. Store real local values in the ignored `.env.local` file and hosted values in the relevant Vercel environment. Local, staging, and production values must remain separate.
 
-## Google provider setup (manual, not verified on hosted services)
+## Google provider setup
 
 Configure Google OAuth in the environment-specific Supabase/Google projects, using the provider callback URL shown by Supabase. Configure the canonical application origin and exact `/auth/callback` URL in the Supabase redirect allowlist. Restrict hosted identity creation to the approved `bc.edu` Google domain, and disable email/password signup (Authentication → Providers → Email) in every hosted project to match `supabase/config.toml`; the application independently denies non-Google, unconfirmed, non-`bc.edu`, and inactive/unapproved sessions, and any account whose linked providers include anything other than Google. Keep provider secrets in managed configuration. Local tests do not enable a real Google provider.
 
-Use HTTPS `SITE_URL` values in staging/production so session cookies are Secure. Browser sessions use HttpOnly cookies; foundation authentication and authenticated reads run on the server. Preview protection and hosted OAuth smoke checks remain launch gates.
+Use HTTPS `SITE_URL` values in staging/production so session cookies are Secure. Browser sessions use HttpOnly cookies; foundation authentication and authenticated reads run on the server. Hosted Google sign-in was verified on production on 2026-11-25.
 
 `/robots.txt` and `/sitemap.xml` read `SITE_URL` per request, so it must be the final production origin in the production runtime environment. Previews serve the same robots file and rely on Vercel protection rather than a disallow-all rule. Confirm both routes on the production origin as a release check.
 
@@ -111,11 +121,9 @@ Apply migrations `20261111060000` through `20261111060300` before deploying the 
 
 The ordinary pagination `CREATE INDEX` blocks writes during its build. Schedule an acceptable write pause; production build time and write overhead have not been measured. For a larger catalog, plan an operational concurrent build before migration rollout. The two-job image gate is per process and does not impose a deployment-wide cap. See the [optimization plan](superpowers/plans/2026-11-11-low-priority-optimizations.md) for scoped verification and measurements.
 
-
 ## Editorial review migrations
 
 Apply the pending migrations in version order before deploying the app that uses the revised RPCs. The November 19–21 release includes editor review authority, publication dates, audit updates, and guarded writes. Smoke-test submit, return, publish, archive, restore, and exact retries with author, editor, and administrator accounts. Verify that anonymous article, tag, and author reads still follow publication eligibility. Fix migration defects with a reviewed forward migration so existing receipts and article history remain available.
-
 
 The daily orphan-credit sweep runs at 05:00 UTC in production and uses the existing `CRON_SECRET` and Supabase service key. Monitor missed runs (HTTP 503) and sustained batches at the 100-credit limit. Disable the cron to pause future deletion. Point-in-time recovery is required to restore deleted data.
 

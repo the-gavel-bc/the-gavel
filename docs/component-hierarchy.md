@@ -1,6 +1,6 @@
 # Component hierarchy
 
-Status: Editorial dashboard routes through Phase 4 are implemented; public article/archive/search and site composition remain Phase 5 work. See [integrated evidence](reviews/phase-4-editorial-workflow.md).
+Status: Implemented. Public reader and editorial dashboard routes are live; see [integrated evidence](reviews/phase-4-editorial-workflow.md) and the [Phase 5 verification](reviews/phase-5-public-reader.md).
 
 The existing draft edit page loads the current private main-image link server-side. `ArticleMedia` in `DraftForm` reserves and uploads a JPEG/PNG/WebP image, collects alt text and credit, then saves the link through a separate versioned mutation. It can update image metadata, unlink the current image, or discard an upload that was never attached. Unsaved draft fields disable image changes; unsaved image input participates in the navigation guard. The current main-image link is described as text; body-image previews use the authenticated media route. Public rendering remains Phase 5 work.
 

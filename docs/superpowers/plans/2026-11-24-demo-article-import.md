@@ -1,6 +1,6 @@
 # Plan: import the demo site's articles
 
-Status: approved 2026-11-24; built and run against the local database (37 published articles, 0 drafts in the export). The hosted run is pending your approval; see the [runbook](../../runbooks/demo-article-import.md). Owner decisions are recorded below.
+Status: approved 2026-11-24; built and run against the local database (37 published articles, 0 drafts in the export). The hosted run was done on 2026-11-26 after a database backup: 37 published articles, 36 with photos; see the [runbook](../../runbooks/demo-article-import.md). Owner decisions are recorded below.
 
 ## Goal
 
