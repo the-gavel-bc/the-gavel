@@ -1,6 +1,6 @@
 # Performance batch: dashboard and reader responsiveness
 
-Status: planned 2026-11-26. Slice 1 built 2026-11-26; slices 2 and 3 not started.
+Status: planned 2026-11-26. Slice 1 built 2026-11-26; slice 2 measured and not needed; slice 3 not started.
 
 Source: two read-only reviews on 2026-11-26, one of the staff dashboard and one of the public reader. Their main claims were checked against the code. Items that were rejected, deferred or dropped (data caching for reader pages, full-page CDN caching, stale-while-revalidate on images, `getClaims`, the RLS rework, parallel related stories, sitemap caching) are recorded in [DEFERRED.md](../../code-reviews/DEFERRED.md#performance-review-decisions-2026-11-26).
 
@@ -77,6 +77,24 @@ Each slice is one small pull request, reviewed before the next one starts.
   - [data-model.md](../../data-model.md): the index;
   - [api-contracts.md](../../api-contracts.md): the suggestion contract is unchanged;
   - remove the ponytail note in a follow-up migration comment, not by editing the old migration.
+
+### Slice 2 results (2026-11-26): measured, index not built
+
+The 5,000 seeded published articles were added inside a transaction and rolled back afterwards. `EXPLAIN (ANALYZE)` of the suggestion query:
+
+| Query | Without index | With the trigram index |
+| --- | --- | --- |
+| Selective (`%4f3a%`, 1 match) | 5.2 ms, backward scan of `articles_recent_published_idx` | 6.2 ms; the planner kept the same scan and ignored the index |
+| Common (`%campus%`, 5,000 matches) | 4.7 ms, sequential scan plus top-6 sort | 6.8 ms, bitmap scan on the new index |
+
+- **Result:** at 5,000 articles, more than a century of output at a few hundred stories a year, the query takes about 5 ms. That is far from its 2 s statement timeout, and the index made it no faster.
+- **Write cost:** a GIN index would also add work to every article save.
+- **Decision:** the index is not built. Scans grow linearly, so recheck when the catalog passes about 50,000 published articles.
+- **50,000-row run:** attempted on the local Docker database, but the backend was killed for memory during the seed insert. The transaction rolled back and no data changed.
+- **Follow-up (owner request, 2026-11-26):** suggestions now match keywords instead of substrings. Every typed word must start a title word, and at least 3 characters are required (`20261126010000_keyword_search_suggestions.sql`).
+  - The existing full-text index stores whole words only, so it cannot match word starts. Matching therefore stays on titles.
+  - Timing at 5,000 seeded articles: a word that matches nothing scans every title in about 31 ms; common words stop after 6 matches in under 1 ms.
+  - The client still waits for a 300 ms pause and aborts stale lookups, and answers are cached for 30 s.
 
 ### Slice 3: images sized for the screen (#9)
 

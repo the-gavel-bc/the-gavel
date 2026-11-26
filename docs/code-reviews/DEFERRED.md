@@ -125,4 +125,6 @@ Two read-only reviews ran on 2026-11-26: the staff dashboard and the public read
 | — | Cold-start time on Vercel Hobby | Measure first | It is the most likely cause of slow first clicks, but it is a platform limit. | Compare a menu click's response time after a few idle minutes with an immediate second click (browser Network tab or Vercel logs). |
 | — | `ReaderImage` hydrates on every card; global search budget (80 searches, 40 suggestions per minute) | Low priority | Small cost; the search budget is a reliability concern only under real load. | Measure under real traffic. |
 
-C-22 (resized image variants) and the typeahead part of C-25 are now planned in the batch above.
+C-22 (resized image variants) is now planned in the batch above.
+
+The typeahead part of C-25 was measured on 2026-11-26. With 5,000 seeded published articles, the suggestion query took about 5 ms, and a `pg_trgm` index made it no faster, so the index was not built. Details are in the plan's slice 2 results. Recheck at about 50,000 published articles.
