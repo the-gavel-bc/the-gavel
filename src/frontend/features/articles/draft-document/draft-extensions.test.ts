@@ -49,10 +49,11 @@ it("keeps image IDs and text in the editor without accepting a source URL", () =
     expect(image?.getAttribute("src")).toBe(
       "/api/articles/50000000-0000-0000-0000-000000000701/media/60000000-0000-0000-0000-000000000701",
     );
-    image?.dispatchEvent(new Event("error"));
-    expect(editor.view.dom.querySelector("figcaption")?.textContent).toBe(
-      "Private image preview unavailable.",
-    );
+    // The editor shows a one-line placeholder; the preview is decorative.
+    expect(image?.getAttribute("alt")).toBe("");
+    expect(
+      editor.view.dom.querySelector(".draft-image-label")?.textContent,
+    ).toBe("[A photo]");
   } finally {
     editor.destroy();
   }

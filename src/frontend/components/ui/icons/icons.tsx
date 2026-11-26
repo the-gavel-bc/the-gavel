@@ -7,6 +7,16 @@ export const ArrowLeftIcon = () => (
     <path d="M20 12H5M10 7l-5 5 5 5" />
   </Icon>
 );
+export const ArrowUpIcon = () => (
+  <Icon>
+    <path d="M12 20V5M7 10l5-5 5 5" />
+  </Icon>
+);
+export const ArrowDownIcon = () => (
+  <Icon>
+    <path d="M12 4v15M7 14l5 5 5-5" />
+  </Icon>
+);
 export const CloseIcon = () => (
   <Icon>
     <path d="M6 6l12 12M18 6 6 18" />

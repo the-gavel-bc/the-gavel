@@ -2993,6 +2993,100 @@
         }
       },
       "want": "ok"
+    },
+    {
+      "name": "body image credit and file name",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 2,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "image",
+              "attrs": {
+                "assetId": "A0000000-0000-4000-8000-000000000001",
+                "alt": "Photo",
+                "caption": null,
+                "credit": "Jane Doe",
+                "name": "rally.jpg"
+              }
+            }
+          ]
+        }
+      },
+      "want": "ok"
+    },
+    {
+      "name": "null body image credit and file name",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 2,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "image",
+              "attrs": {
+                "assetId": "A0000000-0000-4000-8000-000000000001",
+                "alt": "Photo",
+                "caption": null,
+                "credit": null,
+                "name": null
+              }
+            }
+          ]
+        }
+      },
+      "want": "ok"
+    },
+    {
+      "name": "body image credit over 240 characters",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 2,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "image",
+              "attrs": {
+                "assetId": "A0000000-0000-4000-8000-000000000001",
+                "alt": "Photo",
+                "caption": null,
+                "credit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
+    },
+    {
+      "name": "body image file name over 200 characters",
+      "target": "content",
+      "value": {
+        "format": "gavel-draft",
+        "version": 2,
+        "document": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "image",
+              "attrs": {
+                "assetId": "A0000000-0000-4000-8000-000000000001",
+                "alt": "Photo",
+                "caption": null,
+                "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            }
+          ]
+        }
+      },
+      "want": "invalid_input"
     }
   ]
 }

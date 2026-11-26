@@ -21,7 +21,15 @@ export type DraftBlock =
   | DraftParagraph
   | {
       type: "image";
-      attrs: { assetId: string; alt: string; caption: string | null };
+      attrs: {
+        assetId: string;
+        alt: string;
+        caption: string | null;
+        /** Optional photo credit, shown after the caption. */
+        credit?: string | null;
+        /** Optional uploaded file name, shown only in the editor. */
+        name?: string | null;
+      };
     }
   | { type: "heading"; attrs: { level: 2 | 3 }; content?: DraftInline[] }
   | { type: "blockquote"; content: DraftBlock[] }
@@ -142,10 +150,14 @@ export function hasValidDraftImageText(
   alt: unknown,
   caption: unknown,
   rejectUnsafeText = true,
+  credit: unknown = null,
+  name: unknown = null,
 ): boolean {
   return (
     scalar(alt, 240, false, rejectUnsafeText) &&
-    scalar(caption, 500, true, rejectUnsafeText)
+    scalar(caption, 500, true, rejectUnsafeText) &&
+    scalar(credit, 240, true, rejectUnsafeText) &&
+    scalar(name, 200, true, rejectUnsafeText)
   );
 }
 
@@ -242,12 +254,14 @@ function validateDraftDocument(
       if (
         !keys(node, ["type", "attrs"]) ||
         !isObject(node.attrs) ||
-        !keys(node.attrs, ["assetId", "alt", "caption"]) ||
+        !keys(node.attrs, ["assetId", "alt", "caption"], ["credit", "name"]) ||
         !isDraftUuid(node.attrs.assetId) ||
         !hasValidDraftImageText(
           node.attrs.alt,
           node.attrs.caption,
           rejectUnsafeText,
+          node.attrs.credit ?? null,
+          node.attrs.name ?? null,
         ) ||
         imageIds.has(node.attrs.assetId.toLowerCase())
       )

@@ -89,38 +89,74 @@
   font-weight: 700;
   margin: 0;
 }
-/* Body images show as a compact chip in the editor; readers see the full photo. */
+/* Body images are a one-line placeholder, [file-name], in the editor;
+   readers see the full photo. Hover or selection shows a small preview. */
 .content :global(.draft-image-chip) {
   align-items: center;
-  background: var(--dash-page, #f6f7fb);
+  background: var(--dash-soft, #eef2fc);
   border: 1px solid var(--dash-line, #e3e6ee);
-  border-radius: 8px;
-  display: grid;
-  gap: 0 var(--space-3);
-  grid-template-columns: auto minmax(0, 1fr);
-  margin: var(--space-3) 0;
-  max-width: 32rem;
-  padding: var(--space-2) var(--space-3);
-}
-.content :global(.draft-image-chip img) {
-  aspect-ratio: 1;
-  border-radius: 4px;
-  grid-row: span 2;
-  height: 2.5rem;
-  object-fit: cover;
-  width: 2.5rem;
-}
-.content :global(.draft-image-chip span) {
+  border-radius: 6px;
+  color: var(--dash-accent, #1e4aa8);
+  cursor: pointer;
+  display: flex;
   font-size: 0.875rem;
   font-weight: 600;
-  overflow-wrap: anywhere;
+  gap: var(--space-2);
+  margin: var(--space-2) 0;
+  max-width: 100%;
+  padding: var(--space-1) var(--space-2);
+  position: relative;
+  width: fit-content;
 }
-.content :global(.draft-image-chip figcaption) {
-  color: var(--dash-muted, #5b6472);
-  font-size: 0.8125rem;
-  overflow-wrap: anywhere;
+.content :global(.draft-image-chip svg) {
+  fill: none;
+  flex: none;
+  height: 1rem;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+  width: 1rem;
+}
+.content :global(.draft-image-label) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.content :global(.draft-image-sr) {
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+.content :global(.draft-image-preview) {
+  background: var(--color-paper, #fff);
+  border: 1px solid var(--dash-line, #e3e6ee);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgb(20 22 28 / 16%);
+  display: none;
+  padding: var(--space-1);
+  pointer-events: none;
+  position: fixed;
+  z-index: 25;
+}
+.content :global(.draft-image-preview img) {
+  border-radius: 4px;
+  display: block;
+  max-height: 10rem;
+  max-width: 14rem;
+  object-fit: contain;
+}
+.content :global(.draft-image-chip:hover .draft-image-preview:has(img[src])) {
+  display: block;
 }
 .content :global(.draft-image-chip.ProseMirror-selectednode) {
-  outline: 2px solid var(--color-brand, #1e4aa8);
+  background: var(--dash-accent, #1e4aa8);
+  border-color: var(--dash-accent, #1e4aa8);
+  color: #fff;
+  outline: 2px solid var(--dash-accent, #1e4aa8);
   outline-offset: 2px;
 }

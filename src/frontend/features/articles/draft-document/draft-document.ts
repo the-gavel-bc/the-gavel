@@ -57,6 +57,11 @@ function translate(value: unknown, native: boolean): JSONContent {
       node.attrs = native
         ? { start: node.attrs.start, type: null }
         : { start: node.attrs.start };
+    } else if (node.type === "image" && node.attrs && !native) {
+      // Credit and file name are optional: an unset value is left out so
+      // articles saved before these fields existed round-trip unchanged.
+      for (const key of ["credit", "name"])
+        if (node.attrs[key] === null) delete node.attrs[key];
     } else if (node.attrs && Object.keys(node.attrs).length === 0)
       delete node.attrs;
     node.content?.forEach(visit);

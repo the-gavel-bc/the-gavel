@@ -1,4 +1,4 @@
-/* Small panel under the toolbar, shown only while an image is in progress or selected. */
+/* Panel for a new image, shown only while it uploads and its text is entered. */
 .panel {
   background: var(--dash-page, #f6f7fb);
   border: 1px solid var(--dash-line, #e3e6ee);
@@ -63,6 +63,65 @@
 }
 @media (min-width: 40rem) {
   .fields {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  }
+}
+
+.hint {
+  color: var(--dash-muted, #5d6470);
+  font-size: 0.8125rem;
+}
+.plain {
+  border: 0;
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  min-width: 0;
+  padding: 0;
+}
+/* Settings for the selected image, placed under its placeholder by script. */
+.popover {
+  background: var(--color-paper, #fff);
+  border: 1px solid var(--dash-line, #e3e6ee);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgb(20 22 28 / 18%);
+  display: grid;
+  gap: var(--space-2);
+  left: 8px;
+  max-height: min(32rem, calc(100dvh - 2rem));
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  position: fixed;
+  top: 8px;
+  width: min(30rem, calc(100vw - 16px));
+  z-index: 30;
+}
+.popover .fields {
+  grid-template-columns: 1fr;
+}
+.popoverHead {
+  align-items: center;
+  display: flex;
+  gap: var(--space-2);
+  justify-content: space-between;
+}
+.popoverHead .title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.popover .actions button {
+  font-size: 0.875rem;
+}
+/* Phones: a sheet along the bottom of the screen. */
+@media (max-width: 40rem) {
+  .popover {
+    border-radius: 16px 16px 0 0;
+    bottom: 0;
+    left: 0;
+    max-height: 70dvh;
+    top: auto;
+    width: 100%;
   }
 }

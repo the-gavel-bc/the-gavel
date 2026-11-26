@@ -114,14 +114,24 @@ function blocks(
             ) : (
               <span>Image: {block.attrs.alt}</span>
             )}
-            {block.attrs.caption && (
-              // Repeats the alt text: hidden from screen readers, which already read it.
-              <figcaption
-                aria-hidden={
-                  block.attrs.caption === block.attrs.alt || undefined
-                }
-              >
-                {block.attrs.caption}
+            {(block.attrs.caption || block.attrs.credit) && (
+              <figcaption>
+                {block.attrs.caption && (
+                  // A caption that repeats the alt text is hidden from screen
+                  // readers, which already read the alt text.
+                  <span
+                    aria-hidden={
+                      block.attrs.caption === block.attrs.alt || undefined
+                    }
+                  >
+                    {block.attrs.caption}{" "}
+                  </span>
+                )}
+                {block.attrs.credit && (
+                  <span className={styles.credit}>
+                    Photo: {block.attrs.credit}
+                  </span>
+                )}
               </figcaption>
             )}
           </figure>

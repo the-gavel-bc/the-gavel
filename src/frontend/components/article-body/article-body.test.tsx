@@ -149,3 +149,56 @@ it("shows a plain description when no media resolver was supplied", () => {
   expect(screen.getByText("Image: Campus")).toBeVisible();
   expect(screen.getByText("Caption")).toBeVisible();
 });
+
+it("shows the caption then the credit, and never shows the file name", () => {
+  const { container } = render(
+    <ArticleBody
+      content={document(
+        [
+          {
+            type: "image",
+            attrs: {
+              assetId: "61000000-0000-0000-0000-000000000001",
+              alt: "Students on the quad",
+              caption: "The rally drew hundreds.",
+              credit: "Jane Doe",
+              name: "IMG_2041.jpg",
+            },
+          },
+        ],
+        2,
+      )}
+    />,
+  );
+  expect(container.querySelector("figcaption")?.textContent).toBe(
+    "The rally drew hundreds. Photo: Jane Doe",
+  );
+  expect(container.textContent).not.toContain("IMG_2041");
+});
+
+it("hides a caption that repeats the alt text from screen readers only", () => {
+  const { container } = render(
+    <ArticleBody
+      content={document(
+        [
+          {
+            type: "image",
+            attrs: {
+              assetId: "61000000-0000-0000-0000-000000000001",
+              alt: "Campus",
+              caption: "Campus",
+              credit: "Staff",
+            },
+          },
+        ],
+        2,
+      )}
+    />,
+  );
+  const caption = screen.getByText("Campus", { selector: "span" });
+  expect(caption).toHaveAttribute("aria-hidden", "true");
+  expect(screen.getByText("Photo: Staff")).not.toHaveAttribute("aria-hidden");
+  expect(container.querySelector("figcaption")).not.toHaveAttribute(
+    "aria-hidden",
+  );
+});

@@ -51,7 +51,10 @@ test("administrator previews a saved draft with real media and returns to the ed
 
   await page.getByLabel("Body image file").setInputFiles(file);
   await expect(page.getByText("Image ready to insert.")).toBeVisible();
-  await page.getByLabel("Body image alt text").fill("Preview body photo");
+  const newImage = page.getByRole("group", { name: "New body image" });
+  await newImage.getByLabel("Alt text").fill("Preview body photo");
+  await newImage.getByLabel("Caption (optional)").fill("Body caption.");
+  await newImage.getByLabel("Credit (optional)").fill("Body photographer");
   await page.getByRole("button", { name: "Insert body image" }).click();
   await page.getByRole("button", { name: "Save draft" }).click();
   await expect(preview).toBeVisible();
@@ -72,7 +75,9 @@ test("administrator previews a saved draft with real media and returns to the ed
     page.locator("figcaption").filter({ hasText: "Preview main photo" }),
   ).toBeVisible();
   await expect(
-    page.locator("figcaption").filter({ hasText: "Preview body photo" }),
+    page
+      .locator("figcaption")
+      .filter({ hasText: "Body caption. Photo: Body photographer" }),
   ).toBeVisible();
   await expect(
     page.getByText("Saved body text for the preview."),
