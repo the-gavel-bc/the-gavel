@@ -1,5 +1,7 @@
 "use client";
 import { Button } from "@/frontend/components/ui/button/button";
+import { IconButton } from "@/frontend/components/ui/icon-button/icon-button";
+import { TrashIcon } from "@/frontend/components/ui/icons/icons";
 import { useState } from "react";
 import type { TaxonomyItem } from "@/backend/taxonomy/admin-taxonomy/admin-taxonomy";
 import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
@@ -120,15 +122,13 @@ export function TagControls({
           </Button>
         </>
       ) : (
-        <Button
-          type="button"
+        <IconButton
           variant="danger"
           onClick={() => void remove()}
           disabled={state.blocked}
-          aria-label={`Delete ${item.name}`}
-        >
-          Delete unused tag
-        </Button>
+          label={`Delete ${item.name}`}
+          icon={<TrashIcon />}
+        />
       )}
       {problem && <p role="alert">{problem}</p>}
       <CurationFeedback state={state} />

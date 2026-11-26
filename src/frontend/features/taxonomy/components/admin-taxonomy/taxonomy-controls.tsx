@@ -4,6 +4,12 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import { Button } from "@/frontend/components/ui/button/button";
+import { IconButton } from "@/frontend/components/ui/icon-button/icon-button";
+import {
+  CloseIcon,
+  PencilIcon,
+  TrashIcon,
+} from "@/frontend/components/ui/icons/icons";
 import { CurationFeedback } from "./curation-feedback";
 import { useCuration } from "./use-curation";
 import styles from "./taxonomy-controls.module.css";
@@ -132,29 +138,20 @@ export function TaxonomyControls({
   return (
     <div className={styles.manage}>
       <div className={styles.actions}>
-        <Button
-          type="button"
+        <IconButton
           variant="secondary"
           aria-expanded={open}
           onClick={() => setOpen((value) => !value)}
-          aria-label={`${open ? "Close" : "Edit"} ${item.name}`}
-        >
-          {open ? "Close" : "Edit"}
-        </Button>
-        <Button
-          type="button"
+          label={`${open ? "Close" : "Edit"} ${item.name}`}
+          icon={open ? <CloseIcon /> : <PencilIcon />}
+        />
+        <IconButton
           variant="danger"
           disabled={remover.blocked || item.inUse}
-          title={
-            item.inUse
-              ? "Stories use this, so it cannot be deleted. Deactivate it instead."
-              : undefined
-          }
           onClick={() => void remove()}
-          aria-label={`Delete ${item.name}`}
-        >
-          Delete
-        </Button>
+          label={`Delete ${item.name}`}
+          icon={<TrashIcon />}
+        />
       </div>
       <CurationFeedback state={remover} />
       {confirmDialog}

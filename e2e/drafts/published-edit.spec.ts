@@ -142,9 +142,9 @@ test("published photo stays private until attached and replacement updates publi
   try {
     const reader = await publicContext.newPage();
     const slug = fixture.article(20).article.slug;
-    for (const [color, alt, caption] of [
-      ["#bd222c", "Published baseline photo", "Baseline caption"],
-      ["#2244cc", "Published replacement photo", "Replacement caption"],
+    for (const [color, alt] of [
+      ["#bd222c", "Published baseline photo"],
+      ["#2244cc", "Published replacement photo"],
     ]) {
       const response = page.waitForResponse(
         (result) =>
@@ -171,9 +171,8 @@ test("published photo stays private until attached and replacement updates publi
           )
         ).status(),
       ).toBe(404);
-      await page.getByLabel("Alt text", { exact: true }).fill(alt);
+      await page.getByLabel("Alt text and caption", { exact: true }).fill(alt);
       await page.getByLabel("Image credit", { exact: true }).fill("The Gavel");
-      await page.getByLabel("Caption", { exact: true }).fill(caption);
       await page
         .getByRole("button", { name: "Attach image", exact: true })
         .click();
@@ -191,7 +190,7 @@ test("published photo stays private until attached and replacement updates publi
         )
         .toBeGreaterThan(0);
       await expect(reader.locator("figcaption")).toHaveText(
-        `${caption} Photo: The Gavel`,
+        `${alt} Photo: The Gavel`,
       );
     }
   } finally {
@@ -239,7 +238,9 @@ test("phones load a resized published photo; unpublished variants stay private",
     const variant = `/api/public/articles/${articleId}/media/${assetId}?w=480`;
     // Resizing never bypasses publication: an unattached upload stays private.
     expect((await reader.request.get(variant)).status()).toBe(404);
-    await page.getByLabel("Alt text", { exact: true }).fill("Wide photo");
+    await page
+      .getByLabel("Alt text and caption", { exact: true })
+      .fill("Wide photo");
     await page.getByLabel("Image credit", { exact: true }).fill("The Gavel");
     await page
       .getByRole("button", { name: "Attach image", exact: true })

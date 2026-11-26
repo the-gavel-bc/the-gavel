@@ -100,7 +100,17 @@ export function ArticleHeader({
             decoding="async"
           />
           <figcaption>
-            {article.mainImage.caption && <>{article.mainImage.caption} </>}
+            {article.mainImage.caption && (
+              // Repeats the alt text: hidden from screen readers, which already read it.
+              <span
+                aria-hidden={
+                  article.mainImage.caption === article.mainImage.alt ||
+                  undefined
+                }
+              >
+                {article.mainImage.caption}{" "}
+              </span>
+            )}
             Photo: {article.mainImage.credit}
           </figcaption>
         </figure>

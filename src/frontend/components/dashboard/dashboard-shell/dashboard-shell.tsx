@@ -4,6 +4,7 @@ import type { PropsWithChildren, ReactNode } from "react";
 import { SkipLink } from "@/frontend/components/site/skip-link/skip-link";
 import logo from "@/frontend/assets/brand/gavel-logo.png";
 import { DashboardNav } from "../dashboard-nav/dashboard-nav";
+import { DashboardBackLink } from "../back-link/back-link";
 
 export interface DashboardShellProps extends PropsWithChildren {
   displayName: string;
@@ -43,6 +44,7 @@ export function DashboardShell({
       <div className={styles.layout}>
         <DashboardNav isAdmin={isAdmin} canReview={canReview} />
         <main id="main-content" className={styles.main}>
+          <DashboardBackLink />
           {children}
         </main>
       </div>

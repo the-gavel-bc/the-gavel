@@ -1,5 +1,10 @@
 "use client";
 import { Button } from "@/frontend/components/ui/button/button";
+import { IconButton } from "@/frontend/components/ui/icon-button/icon-button";
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+} from "@/frontend/components/ui/icons/icons";
 import { useRef, useState } from "react";
 import {
   listHomepageStoriesAction,
@@ -110,28 +115,24 @@ export function StoryLibrary({
           </Button>
         </form>
         <div className={styles.pager}>
-          <Button
+          <IconButton
             variant="secondary"
-            type="button"
-            aria-label="Previous stories"
+            label="Previous stories"
+            icon={<ArrowLeftIcon />}
             disabled={blocked || loading || index === 0}
             onClick={() => setIndex(index - 1)}
-          >
-            <span aria-hidden="true">←</span>
-          </Button>
-          <Button
+          />
+          <IconButton
             variant="secondary"
-            type="button"
-            aria-label="More stories"
+            label="More stories"
+            icon={<ArrowRightIcon />}
             disabled={
               blocked ||
               loading ||
               (index + 1 >= pages.length && !page.nextCursor)
             }
             onClick={() => void forward()}
-          >
-            <span aria-hidden="true">→</span>
-          </Button>
+          />
         </div>
       </div>
       {error && <p role="alert">{error}</p>}
@@ -176,7 +177,7 @@ export function StoryLibrary({
                     disabled={blocked || taken || full.includes("readThis")}
                     onClick={() => onAdd(story, "readThis")}
                   >
-                    Read
+                    Read This
                   </Button>
                 </div>
               </li>

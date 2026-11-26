@@ -115,7 +115,14 @@ function blocks(
               <span>Image: {block.attrs.alt}</span>
             )}
             {block.attrs.caption && (
-              <figcaption>{block.attrs.caption}</figcaption>
+              // Repeats the alt text: hidden from screen readers, which already read it.
+              <figcaption
+                aria-hidden={
+                  block.attrs.caption === block.attrs.alt || undefined
+                }
+              >
+                {block.attrs.caption}
+              </figcaption>
             )}
           </figure>
         );

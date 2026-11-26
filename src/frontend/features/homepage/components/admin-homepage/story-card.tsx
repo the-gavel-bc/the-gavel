@@ -1,5 +1,10 @@
 "use client";
-import { Button } from "@/frontend/components/ui/button/button";
+import { IconButton } from "@/frontend/components/ui/icon-button/icon-button";
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  CloseIcon,
+} from "@/frontend/components/ui/icons/icons";
 import { useState } from "react";
 import type { DragEvent } from "react";
 import {
@@ -118,39 +123,33 @@ export function SlotCard({
       <div className={styles.cardActions}>
         {group !== "lead" && (
           <>
-            <Button
+            <IconButton
               variant="secondary"
-              type="button"
               disabled={blocked || index === 0}
               onClick={() => onShift(-1)}
-              aria-label={`Move ${story.title} left in ${label}`}
-            >
-              <span aria-hidden="true">←</span>
-            </Button>
-            <Button
+              label={`Move ${story.title} left in ${label}`}
+              icon={<ArrowLeftIcon />}
+            />
+            <IconButton
               variant="secondary"
-              type="button"
               disabled={blocked || index === count - 1}
               onClick={() => onShift(1)}
-              aria-label={`Move ${story.title} right in ${label}`}
-            >
-              <span aria-hidden="true">→</span>
-            </Button>
+              label={`Move ${story.title} right in ${label}`}
+              icon={<ArrowRightIcon />}
+            />
           </>
         )}
-        <Button
-          type="button"
+        <IconButton
           variant="danger"
           disabled={blocked}
           onClick={onRemove}
-          aria-label={
+          label={
             group === "lead"
               ? "Remove lead"
               : `Remove ${story.title} from ${label}`
           }
-        >
-          <span aria-hidden="true">×</span>
-        </Button>
+          icon={<CloseIcon />}
+        />
       </div>
     </li>
   );

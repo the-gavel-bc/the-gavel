@@ -37,7 +37,8 @@ export function DraftBodyImageControl({
   const [assetId, setAssetId] = useState<string | null>(null);
   const [cleanupId, setCleanupId] = useState<string | null>(null);
   const [alt, setAlt] = useState("");
-  const [caption, setCaption] = useState("");
+  // One description serves as both alt text and the caption.
+  const caption = alt;
   const [busy, setBusy] = useState(false);
   const [selected, setSelected] = useState(false);
   const [status, setStatus] = useState("");
@@ -63,7 +64,6 @@ export function DraftBodyImageControl({
         setSelected(true);
         if (!uploading.current) {
           setAlt(node.attrs.alt);
-          setCaption(node.attrs.caption ?? "");
         }
       } else setSelected(false);
     };
@@ -174,13 +174,13 @@ export function DraftBodyImageControl({
     const note = caption.trim();
     if (!hasValidDraftImageText(text, note || null)) {
       setError(
-        "Enter alt text up to 240 characters and a caption up to 500 characters. Remove control characters from both.",
+        "Enter alt text and caption up to 240 characters, without control characters.",
       );
       onError({
         ok: false,
         code: "invalid_input",
         fieldErrors: {
-          content: "Correct the body image alt text or caption before saving.",
+          content: "Correct the body image alt text and caption before saving.",
         },
       });
       return;
@@ -198,7 +198,6 @@ export function DraftBodyImageControl({
     setAssetId(null);
     setFile(null);
     setAlt("");
-    setCaption("");
     if (fileInput.current) fileInput.current.value = "";
     setStatus("Image inserted. Save the draft to keep it.");
   }
@@ -209,13 +208,13 @@ export function DraftBodyImageControl({
     const note = caption.trim();
     if (!hasValidDraftImageText(text, note || null)) {
       setError(
-        "Enter alt text up to 240 characters and a caption up to 500 characters. Remove control characters from both.",
+        "Enter alt text and caption up to 240 characters, without control characters.",
       );
       onError({
         ok: false,
         code: "invalid_input",
         fieldErrors: {
-          content: "Correct the body image alt text or caption before saving.",
+          content: "Correct the body image alt text and caption before saving.",
         },
       });
       return;
@@ -265,21 +264,14 @@ export function DraftBodyImageControl({
         </p>
         <div className={styles.fields}>
           <div className={styles.field}>
-            <label htmlFor="body-image-alt">Body image alt text</label>
+            <label htmlFor="body-image-alt">
+              Body image alt text and caption
+            </label>
             <input
               id="body-image-alt"
               value={alt}
               maxLength={240}
               onChange={(event) => setAlt(event.target.value)}
-            />
-          </div>
-          <div className={styles.field}>
-            <label htmlFor="body-image-caption">Body image caption</label>
-            <input
-              id="body-image-caption"
-              value={caption}
-              maxLength={500}
-              onChange={(event) => setCaption(event.target.value)}
             />
           </div>
         </div>

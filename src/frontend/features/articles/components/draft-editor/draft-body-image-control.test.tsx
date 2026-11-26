@@ -53,11 +53,8 @@ it("inserts only the finalized asset ID and bounded text into the body", async (
         screen.getByRole("button", { name: "Insert body image" }),
       ).toBeEnabled(),
     );
-    fireEvent.change(screen.getByLabelText("Body image alt text"), {
+    fireEvent.change(screen.getByLabelText("Body image alt text and caption"), {
       target: { value: "Campus scene" },
-    });
-    fireEvent.change(screen.getByLabelText("Body image caption"), {
-      target: { value: "At dusk" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Insert body image" }));
     expect(insertContent).toHaveBeenCalledWith({
@@ -65,7 +62,7 @@ it("inserts only the finalized asset ID and bounded text into the body", async (
       attrs: {
         assetId: "60000000-0000-0000-0000-000000000701",
         alt: "Campus scene",
-        caption: "At dusk",
+        caption: "Campus scene",
       },
     });
   } finally {
@@ -100,10 +97,10 @@ it("updates and removes a selected image without accepting a URL", async () => {
         onError={vi.fn()}
       />,
     );
-    expect(screen.getByLabelText("Body image alt text")).toHaveValue(
-      "Original",
-    );
-    fireEvent.change(screen.getByLabelText("Body image alt text"), {
+    expect(
+      screen.getByLabelText("Body image alt text and caption"),
+    ).toHaveValue("Original");
+    fireEvent.change(screen.getByLabelText("Body image alt text and caption"), {
       target: { value: "Updated" },
     });
     fireEvent.click(

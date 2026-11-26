@@ -128,14 +128,16 @@ export default async function EditDraftPage({
           version: detail.version,
           updatedAt: detail.updatedAt,
         }}
+        correction={
+          detail.capabilities.correct && (
+            <ArticleCorrection
+              key={detail.articleId}
+              articleId={detail.articleId}
+              correction={detail.correction}
+            />
+          )
+        }
       />
-      {detail.capabilities.correct && (
-        <ArticleCorrection
-          key={detail.articleId}
-          articleId={detail.articleId}
-          correction={detail.correction}
-        />
-      )}
     </>
   );
 }

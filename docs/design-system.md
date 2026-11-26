@@ -113,6 +113,11 @@ Slice 2:
   - A sticky save bar holds the save status, the visibility note and the save button.
   - Formatting buttons appear above the editor and show their pressed state.
 
+Navigation and icons (2026-11-26), from the [dashboard navigation plan](superpowers/plans/2026-11-26-dashboard-navigation-icons.md):
+
+- **Back arrow:** nested pages show "← <page>" at the top left of the main area; it returns to the previous dashboard page with its filters, or to the parent list.
+- **Icons:** dashboard icons live in `src/frontend/components/ui/icons` (24px grid, 2px stroke, `currentColor`, decorative). Icon-only actions use `IconButton`, whose label is the accessible name and the hover/focus tooltip. Use icons only where meaning is unambiguous; Archive, Restore, Delete, Deactivate and similar consequential actions keep text.
+
 ## Reader refresh (2026-11-13)
 
 From the [reader refresh plan](superpowers/plans/2026-11-13-reader-refresh.md), following the demo frontend:

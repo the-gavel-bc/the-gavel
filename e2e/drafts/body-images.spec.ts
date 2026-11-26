@@ -31,9 +31,6 @@ test("owner inserts and reopens an accessible private body image", async ({
   await expect(page.getByText("Image ready to insert.")).toBeVisible();
   await page.getByLabel("Body image alt text").fill("Red newsroom graphic");
   await page.keyboard.press("Tab");
-  await expect(page.getByLabel("Body image caption")).toBeFocused();
-  await page.keyboard.type("On campus");
-  await page.keyboard.press("Tab");
   await expect(
     page.getByRole("button", { name: "Insert body image" }),
   ).toBeFocused();
@@ -49,7 +46,6 @@ test("owner inserts and reopens an accessible private body image", async ({
     "src",
     /\/api\/articles\/[^/]+\/media\/[^/]+/,
   );
-  await expect(page.getByText("On campus")).toBeVisible();
 });
 
 test("another author cannot read a private body image", async ({ browser }) => {
@@ -89,7 +85,7 @@ test("authorized reader sees saved body text and image without JavaScript", asyn
     ).toBeVisible();
     await expect(
       page.getByRole("region", { name: "Read-only article body" }),
-    ).toContainText("On campus");
+    ).toContainText("Red newsroom graphic");
   } finally {
     await context.close();
   }

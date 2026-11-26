@@ -217,6 +217,38 @@
   padding-inline: var(--space-2);
 }
 
+/* File pickers: the browser's grey "Choose File" becomes an outlined pill. */
+:where(.main) :where(input[type="file"]) {
+  color: var(--dash-muted);
+  font: inherit;
+  font-size: 0.9375rem;
+  max-width: 100%;
+}
+.main input[type="file"]::file-selector-button {
+  background: var(--color-paper);
+  border: 1px solid var(--dash-accent);
+  border-radius: 999px;
+  color: var(--dash-accent);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  margin-inline-end: var(--space-3);
+  min-height: var(--dash-control);
+  padding: 0 var(--space-4);
+  transition: background-color 150ms ease;
+}
+.main input[type="file"]:hover::file-selector-button {
+  background: var(--dash-soft);
+}
+.main input[type="file"]:disabled::file-selector-button {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.main input[type="file"]:focus-visible {
+  outline: 2px solid var(--dash-accent);
+  outline-offset: 2px;
+}
+
 /* Feedback */
 :where(.main) :where(p[role="status"]:not(:empty)) {
   background: var(--dash-soft);
@@ -259,6 +291,33 @@
 }
 
 @media (max-width: 42rem) {
+  /* Phones: logo and account share one row instead of three. */
+  .headerInner {
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+  .identity img {
+    height: 2.25rem;
+  }
+  .account {
+    flex-wrap: nowrap;
+    font-size: 0.8125rem;
+    gap: var(--space-2);
+    justify-content: flex-end;
+    min-width: 0;
+  }
+  /* The name would be cut to a few letters: keep it for screen readers only. */
+  .account p {
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+  .account :global(button) {
+    white-space: nowrap;
+  }
   .layout {
     gap: var(--space-4);
     grid-template-columns: 1fr;
