@@ -23,3 +23,25 @@
   object-fit: contain;
   width: auto;
 }
+
+/* News-style figure: photo at column width (never upscaled), then the caption
+   and a smaller, muted credit beneath it, left-aligned with the text. */
+.body figure {
+  margin-block: 2rem;
+}
+.body figcaption {
+  border-bottom: 1px solid rgb(20 22 28 / 10%);
+  padding-block: 0.625rem;
+}
+.credit {
+  color: var(--reader-muted, #5d6470);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+@media (max-width: 40rem) {
+  .body figure {
+    margin-block: 1.5rem;
+  }
+}

@@ -10,7 +10,7 @@ import HardBreak from "@tiptap/extension-hard-break";
 import { BulletList, OrderedList, ListItem } from "@tiptap/extension-list";
 import { isValidDraftLink } from "../../../../shared/articles/draft-contract/draft-contract";
 import { DRAFT_LINK_ATTRIBUTES } from "./draft-document";
-import { createDraftImageNode } from "./draft-image-node";
+import { createDraftImageNode, DraftImageCursors } from "./draft-image-node";
 export function createDraftExtensions(articleId?: string) {
   return [
     Document,
@@ -25,6 +25,7 @@ export function createDraftExtensions(articleId?: string) {
     Italic,
     HardBreak.configure({ keepMarks: false }),
     createDraftImageNode(articleId),
+    DraftImageCursors,
     Link.configure({
       autolink: false,
       linkOnPaste: false,

@@ -185,6 +185,12 @@ export function DraftEditor({
               />
             )}
           </DraftToolbar>
+          {editor ? (
+            <EditorContent editor={editor} className={styles.content} />
+          ) : (
+            <p role="status">Loading body editor…</p>
+          )}
+          {/* After the body, so Tab moves from the text into image settings. */}
           {articleId && allowImageUpload && (
             <DraftBodyImageControl
               articleId={articleId}
@@ -193,11 +199,6 @@ export function DraftEditor({
               onError={reject}
               onDirtyChange={onMediaDirtyChange}
             />
-          )}
-          {editor ? (
-            <EditorContent editor={editor} className={styles.content} />
-          ) : (
-            <p role="status">Loading body editor…</p>
           )}
         </>
       )}

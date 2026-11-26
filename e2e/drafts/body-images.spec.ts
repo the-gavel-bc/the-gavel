@@ -29,23 +29,48 @@ test("owner inserts and reopens an accessible private body image", async ({
     buffer: png,
   });
   await expect(page.getByText("Image ready to insert.")).toBeVisible();
-  await page.getByLabel("Body image alt text").fill("Red newsroom graphic");
-  await page.keyboard.press("Tab");
-  await expect(
-    page.getByRole("button", { name: "Insert body image" }),
-  ).toBeFocused();
-  await page.keyboard.press("Enter");
+  const newImage = page.getByRole("group", { name: "New body image" });
+  await newImage.getByLabel("Alt text").fill("Red newsroom graphic");
+  await newImage.getByLabel("Credit (optional)").fill("Staff photographer");
+  await page.getByRole("button", { name: "Insert body image" }).click();
+  // The editor shows a one-line placeholder, and writing continues after it.
+  const body = page.getByRole("textbox", { name: "Article body" });
+  const chip = body.locator(".draft-image-chip");
+  await expect(chip).toHaveText(/\[synthetic\.png\]/);
+  await page.keyboard.type("Text after the photo.");
+  await expect(body.locator("p").last()).toHaveText("Text after the photo.");
+  expect(
+    await body.evaluate((root) =>
+      [...root.children].map((node) =>
+        node.classList.contains("draft-image-chip") ? "image" : node.tagName,
+      ),
+    ),
+  ).toEqual(expect.arrayContaining(["image", "P"]));
   await page.getByRole("button", { name: "Save draft" }).click();
   await expect(
     page.getByRole("status").filter({ hasText: "Draft saved" }),
   ).toBeVisible();
   await page.reload();
-  const image = page.getByRole("img", { name: "Red newsroom graphic" });
-  await expect(image).toBeVisible();
-  await expect(image).toHaveAttribute(
+  await expect(chip).toHaveText(/\[synthetic\.png\]/);
+  // Hovering shows a small preview of the private image.
+  await chip.hover();
+  const preview = chip.locator(".draft-image-preview img");
+  await expect(preview).toHaveAttribute(
     "src",
     /\/api\/articles\/[^/]+\/media\/[^/]+/,
   );
+  await expect(preview).toBeVisible();
+  // Clicking opens its settings beside it; Escape closes them.
+  await chip.click();
+  const settings = page.getByRole("dialog", { name: "Image settings" });
+  await expect(settings.getByLabel("Alt text")).toHaveValue(
+    "Red newsroom graphic",
+  );
+  await expect(settings.getByLabel("Credit (optional)")).toHaveValue(
+    "Staff photographer",
+  );
+  await settings.getByLabel("Caption (optional)").press("Escape");
+  await expect(settings).toHaveCount(0);
 });
 
 test("another author cannot read a private body image", async ({ browser }) => {
@@ -85,7 +110,7 @@ test("authorized reader sees saved body text and image without JavaScript", asyn
     ).toBeVisible();
     await expect(
       page.getByRole("region", { name: "Read-only article body" }),
-    ).toContainText("Red newsroom graphic");
+    ).toContainText("Photo: Staff photographer");
   } finally {
     await context.close();
   }
@@ -134,7 +159,10 @@ test("a camera-sized photo is shrunk below the hosting upload limit", async ({
   expect(sent).toHaveLength(1);
   expect(sent[0]).toBeLessThan(limit);
   await expect(page.getByText("Image ready to insert.")).toBeVisible();
-  await page.getByLabel("Body image alt text").fill("Camera photo");
+  await page
+    .getByRole("group", { name: "New body image" })
+    .getByLabel("Alt text")
+    .fill("Camera photo");
   await page.getByRole("button", { name: "Insert body image" }).click();
-  await expect(page.getByText("[Image: Camera photo]")).toBeVisible();
+  await expect(page.getByText("[camera.jpg]")).toBeVisible();
 });
