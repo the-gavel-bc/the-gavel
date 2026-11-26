@@ -54,7 +54,9 @@ export function roleFixture(project: string) {
     users,
     id,
     articles,
-    slug: (n: number) => `${prefix}-${n}`,
+    // Read the stored slug: saving a draft re-derives it from the title.
+    slug: (n: number) =>
+      sql(`select slug from public.articles where id='${id(n)}';`).trim(),
     title: (n: number) =>
       `Role ${n === 1 ? "draft" : n === 2 ? "published" : "in review"} ${project}`,
     setup() {

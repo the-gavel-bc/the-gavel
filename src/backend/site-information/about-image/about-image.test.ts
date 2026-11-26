@@ -16,7 +16,7 @@ vi.mock("@/backend/auth/access/access", () => ({
 vi.mock("@/backend/infrastructure/supabase/server/server", () => ({
   createServerSupabaseClient: async () => ({ rpc: mocks.rpc }),
 }));
-import { processAboutImage } from "./about-image";
+import { processAboutImage } from "./about-image-processing";
 import {
   removeAboutImageAction,
   saveAboutImageAction,

@@ -26,6 +26,12 @@ export default async function EditDraftPage({
       </Link>
     </>
   );
+  // Independent of the article read; started together to save a round trip.
+  // Settled here so a failure is only reported if the image is actually used.
+  const imageRead = getArticleMainImage(id).then(
+    (value) => ({ ok: true as const, value }),
+    (error: unknown) => ({ ok: false as const, error }),
+  );
   let detail;
   let options;
   try {
@@ -94,13 +100,12 @@ export default async function EditDraftPage({
       </>
     );
   if (!options) return recovery;
-  let mainImage;
-  try {
-    mainImage = await getArticleMainImage(detail.articleId);
-  } catch (error) {
-    unstable_rethrow(error);
+  const image = await imageRead;
+  if (!image.ok) {
+    unstable_rethrow(image.error);
     return recovery;
   }
+  const mainImage = image.value;
 
   return (
     <>

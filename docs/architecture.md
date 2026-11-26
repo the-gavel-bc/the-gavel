@@ -79,6 +79,7 @@ Browser
 
 - Public article and listing pages may use framework caching with explicit revalidation after content changes.
 - Dashboard and user-specific responses must not enter shared caches.
+- The browser's client router keeps a visited dynamic page for 30 seconds (`staleTimes.dynamic` in `next.config.ts`), so Back and repeat clicks need no server render. This is a per-browser cache, not a shared one. Server actions that call `revalidatePath` clear it, so members see their own changes at once; changes by other people can take up to 30 seconds to appear. Sign-out clears it too. Every real request and action still rechecks access. See the [performance plan](superpowers/plans/2026-11-26-performance-batch.md).
 - Search results must reflect only published content.
 - The MVP requires no custom job queue. Scheduled publishing and newsletter delivery are deferred.
 

@@ -30,6 +30,45 @@ async function confirm(page: Page, label: string) {
     .click();
 }
 
+test("author: own saves show at once on client revisits; sign-out drops cached pages", async ({
+  context,
+  page,
+}) => {
+  // next.config.ts reuses dynamic pages for 30 s on client navigation. A
+  // member's own saves must still show immediately, and signing out must not
+  // leave dashboard pages reachable with Back. The excerpt is used because a
+  // title change would also change the slug that later journeys rely on.
+  await setLocalSession(context, fixture.users.author);
+  const name = fixture.title(fixture.articles.draft);
+  await page.goto("/dashboard");
+  // Visit the editor once so a client copy of it exists, then come back.
+  await page.getByRole("link", { name }).click();
+  const excerpt = page.getByLabel("Excerpt (optional)");
+  await expect(excerpt).toBeVisible();
+  const original = await excerpt.inputValue();
+  await excerpt.fill("Revised excerpt for the cache check.");
+  await page.getByRole("button", { name: "Save draft" }).click();
+  await expect(
+    page.getByRole("status").filter({ hasText: "Draft saved." }),
+  ).toBeVisible();
+
+  await page.getByRole("link", { name: "Back to My articles" }).click();
+  await page.getByRole("link", { name }).click();
+  await expect(excerpt).toHaveValue("Revised excerpt for the cache check.");
+
+  await excerpt.fill(original);
+  await page.getByRole("button", { name: "Save draft" }).click();
+  await expect(
+    page.getByRole("status").filter({ hasText: "Draft saved." }),
+  ).toBeVisible();
+
+  await page.getByRole("button", { name: "Sign out" }).click();
+  await expect(page).toHaveURL(/\/sign-in/);
+  await page.goBack();
+  await expect(page).toHaveURL(/\/sign-in/);
+  await expect(excerpt).toHaveCount(0);
+});
+
 test("author: writes and submits own drafts, never publishes, corrects or administers", async ({
   context,
   page,
