@@ -1,6 +1,6 @@
 # Architecture
 
-Status: Source ownership refactor, dashboard editorial workflows, and local Supabase boundaries implemented on this branch; public article rendering and hosted provider verification remain planned.
+Status: Implemented and in production (2026-11-26): public reader, editorial dashboard, private media and hosted Supabase/Vercel/Google sign-in. Staging is not configured.
 
 ## System overview
 

@@ -1,6 +1,6 @@
 # Design system
 
-Status: The public reader matches the owner's desktop homepage screenshots as of Phase 5 Task 22 (2026-11-11). Mobile and non-homepage visual signoff, and human screen-reader review, remain pending.
+Status: Implemented for the public reader and dashboard. The desktop homepage matches the owner's screenshots (2026-11-11); dashboard navigation and icons were refreshed on 2026-11-26. Human screen-reader review remains pending.
 
 ## Direction
 

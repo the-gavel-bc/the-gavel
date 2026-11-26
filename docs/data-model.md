@@ -1,6 +1,6 @@
 # Data model
 
-Status: Foundation identity, content storage/read permissions and atomic private draft create/save implemented; editor/publishing remain planned.
+Status: Implemented. Identity, content, editorial workflow, media, taxonomy, homepage, site information and audit tables are in production; migrations are in `supabase/migrations`.
 
 ## Storage
 
@@ -178,7 +178,7 @@ The private table reserves previous public taxonomy paths. Each redirect tracks 
 
 Hard deletion of an Auth user anonymizes the retained profile, clears approver, uploader and history actor references, and cascades actor-owned receipts and limits. Articles keep their owner and all audit events and revision snapshots survive. See the [account erasure runbook](runbooks/auth-account-erasure.md).
 
-Local reset, pgTAP, lint, and type generation require a running Docker-compatible container runtime. The local project is not linked to a hosted Supabase project.
+Local reset, pgTAP, lint, and type generation require a running Docker-compatible container runtime. The repository is linked to the hosted production project; `pnpm supabase db push` applies pending migrations there, so run it deliberately.
 
 ## Phase 3 write support
 

@@ -1,6 +1,6 @@
 # Git and GitHub workflow
 
-Status: Foundation CI workflow implemented and hosted execution verified; human review evidence and branch-rule configuration remain separate requirements. See the [Phase 1 review](reviews/phase-1-foundation.md).
+Status: CI runs on every pull request and on `main`. Branch protection settings live in GitHub and are not recorded here. See the [Phase 1 review](reviews/phase-1-foundation.md).
 
 ## Repository and branches
 

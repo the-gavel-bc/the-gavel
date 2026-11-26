@@ -1,6 +1,6 @@
 # Testing and validation
 
-Status: Foundation and Phase 2 content/history database coverage implemented; broader MVP coverage remains planned.
+Status: Unit, component, database (pgTAP) and desktop/mobile browser (Playwright) suites cover the implemented product and run in CI.
 
 ## Commands
 

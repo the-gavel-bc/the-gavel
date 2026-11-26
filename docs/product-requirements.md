@@ -1,6 +1,6 @@
 # Product requirements
 
-Status: Approved design; application and membership-access foundation implemented. Publishing MVP remains planned.
+Status: Approved design. The publishing MVP is implemented and in production (2026-11-26); deferred items are listed below.
 
 ## Purpose and users
 

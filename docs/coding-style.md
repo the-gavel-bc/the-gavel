@@ -1,6 +1,6 @@
 # Coding style
 
-Status: Foundation conventions implemented; formatter and linter configuration are committed, with dependency versions recorded in package.json and the lockfile.
+Status: In use. Formatter and linter configuration are committed; dependency versions are in package.json and the lockfile.
 
 ## Language and type safety
 

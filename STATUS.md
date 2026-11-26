@@ -1,5 +1,6 @@
 # Current work
 
-- Phase: no feature branch in progress. Everything from the 2026-11-24 session is merged into `main` (#150 to #160): article page polish, About page image, article corrections, the demo article import (local run done; hosted run pending owner approval and a backup, see the [runbook](docs/runbooks/demo-article-import.md)), homepage and archive reading changes, and role tests.
-- Open branches with unmerged commits: `docs/combined-review-areas-3-4-5-10-11` and `docs/publication-date-plan` (older docs; review before deleting).
-- Known gaps: the full pgTAP and Playwright suites were not rerun after these merges; several older browser specs are known to be stale (see [testing](docs/testing.md)).
+- Phase: no feature branch in progress. Everything through PR #172 (2026-11-26) is merged into `main` and live. Stale branches were removed on GitHub and locally; only `main` remains on GitHub.
+- Production: Vercel project "the-gavel", hosted Supabase (us-west-2), Google sign-in configured, all migrations through `20261126020000` applied, the 37 demo articles imported. See [deployment](docs/deployment.md#production-setup).
+- Open owner actions: choose homepage picks (Dashboard → Homepage); confirm `CRON_SECRET` is set in Vercel so the scheduled cleanup jobs run; decide on a production domain.
+- Known gaps: in a local database that holds the imported demo articles, the site-information, taxonomy, homepage and some public reader browser specs fail (they also fail on `main`); a fresh `pnpm supabase db reset` before `pnpm test:e2e` avoids this. Human screen-reader review is still outstanding.
