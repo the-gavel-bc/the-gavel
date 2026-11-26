@@ -1,6 +1,6 @@
 # Performance batch: dashboard and reader responsiveness
 
-Status: planned 2026-11-26. Slice 1 built 2026-11-26; slice 2 measured and not needed; slice 3 not started.
+Status: planned 2026-11-26. Slice 1 built; slice 2 measured and not needed (keyword suggestions added instead); slice 3 built 2026-11-26.
 
 Source: two read-only reviews on 2026-11-26, one of the staff dashboard and one of the public reader. Their main claims were checked against the code. Items that were rejected, deferred or dropped (data caching for reader pages, full-page CDN caching, stale-while-revalidate on images, `getClaims`, the RLS rework, parallel related stories, sitemap caching) are recorded in [DEFERRED.md](../../code-reviews/DEFERRED.md#performance-review-decisions-2026-11-26).
 
@@ -163,6 +163,21 @@ C-22 in DEFERRED.md suggested variants stored at upload. The ADR supersedes that
   - Vitest: 198 files and 1,394 tests passing, plus typecheck, lint and format.
   - Playwright: `e2e/roles`, `e2e/access-boundary` and `draft-conflict-recovery`, 32 passing.
   - The full `e2e/drafts` run: 138 passed. The failures were only in the admin site information, taxonomy and homepage specs, which fail on the long-lived local database's leftover data, as before.
+
+### Slice 3 results (2026-11-26)
+
+- **Route:**
+  - `?w=` 480, 960 or 1600, resized after the original passes its authorization and integrity checks (`src/backend/public-media/resize-public-image.ts`).
+  - Unlisted widths are rejected before any read.
+- **Components:**
+  - `StoryImage` now requires a `sizes` value.
+  - The article header and body images use the article-column `sizes`.
+  - All values are in `src/shared/reader/public-image/public-image.ts`, measured at 375, 768, 1024 and 1440 px viewports.
+- **Local measurements** (2x phone, 375 px):
+  - 168 px thumbnails load the 480 variant, and 262 px cards load the 960 variant.
+  - An uncached archive lead loads the 960 variant. A lead already cached at full size is reused by Chrome, which is expected browser behavior.
+  - Eight homepage images total 1,351 KB as originals, 584 KB at 960 px and 226 KB at 480 px.
+- **ADR:** [0016](../../decisions/0016-resize-public-images-on-request.md).
 
 ## Order and rollout
 

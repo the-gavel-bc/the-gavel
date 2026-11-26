@@ -30,3 +30,4 @@ Copy [template.md](template.md) to `0001-descriptive-title.md`, increasing the n
 - [0013: Publication date as an optional Eastern calendar date](0013-publication-date.md) — Accepted
 - [0014: Decisions from the code reviews](0014-review-follow-up-decisions.md) — Accepted
 - [0015: Import demo articles through a service-only database function](0015-demo-article-import.md) — Accepted
+- [0016: Resize public images on request](0016-resize-public-images-on-request.md) — Accepted

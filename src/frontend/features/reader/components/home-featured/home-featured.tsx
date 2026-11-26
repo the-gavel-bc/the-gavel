@@ -1,3 +1,4 @@
+import { STORY_IMAGE_SIZES } from "@/shared/reader/public-image/public-image";
 import Link from "next/link";
 import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
 import { StoryImage } from "../story-image/story-image";
@@ -19,7 +20,11 @@ export function HomeFeatured({ articles }: { articles: PublicArticleCard[] }) {
                 href={`/articles/${encodeURIComponent(article.slug)}`}
                 aria-label={article.title}
               >
-                <StoryImage article={article} className={styles.thumb} />
+                <StoryImage
+                  sizes={STORY_IMAGE_SIZES.featured}
+                  article={article}
+                  className={styles.thumb}
+                />
                 <div className={styles.text}>
                   <PreviewMeta article={article} />
                   <h3>{article.title}</h3>

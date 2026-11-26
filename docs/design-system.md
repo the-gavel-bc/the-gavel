@@ -150,6 +150,7 @@ Homepage curation (2026-11-17): the desk page mirrors the public homepage with a
 ## Images: upload and display sizes
 
 - **Uploads:** the browser downscales photos to a 2400-pixel long edge and under 3.5 MB before sending, because Vercel rejects function request bodies over 4.5 MB. The server still validates every file, caps the stored long edge at 2400 pixels and re-encodes it as WebP. Profile photos are downscaled to 1200 pixels.
+- **Responsive files:** public images list 480, 960 and 1600 px variants plus the original in `srcset`, with a `sizes` value measured for each placement (`src/shared/reader/public-image/public-image.ts`). Update those values when a layout changes.
 - **Reader display:** body photos fill the text column at their natural aspect ratio. Tall images are capped at `min(75vh, 44rem)` and centred, so one portrait never fills the whole screen.
 - **Editor:** body images appear as a compact chip (a small thumbnail plus `[Image: alt text]` and the caption), not at full size. Readers and the preview show the full photo.
 - **Dashboard navigation:** the clicked menu link shows a small spinner while its page loads. A route-level `loading.tsx` is avoided, because without JavaScript a streamed loading fallback never resolves.

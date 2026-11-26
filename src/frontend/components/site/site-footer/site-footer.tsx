@@ -1,3 +1,4 @@
+import { STORY_IMAGE_SIZES } from "@/shared/reader/public-image/public-image";
 import { sectionHref } from "@/shared/reader/section-link/section-link";
 import { contactMailto } from "@/shared/reader/contact-link/contact-link";
 import Link from "next/link";
@@ -91,7 +92,11 @@ export function SiteFooter({
                     className={styles.story}
                     href={`/articles/${encodeURIComponent(article.slug)}`}
                   >
-                    <StoryImage article={article} className={styles.thumb} />
+                    <StoryImage
+                      sizes={STORY_IMAGE_SIZES.footer}
+                      article={article}
+                      className={styles.thumb}
+                    />
                     <span>{article.title}</span>
                   </Link>
                 </li>
