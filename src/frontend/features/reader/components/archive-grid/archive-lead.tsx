@@ -1,3 +1,4 @@
+import { STORY_IMAGE_SIZES } from "@/shared/reader/public-image/public-image";
 import Link from "next/link";
 import { sectionHref } from "@/shared/reader/section-link/section-link";
 import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
@@ -15,7 +16,12 @@ export function ArchiveLead({ article }: { article: PublicArticleCard }) {
         href={`/articles/${encodeURIComponent(article.slug)}`}
         aria-label={article.title}
       >
-        <StoryImage article={article} eager className={styles.image} />
+        <StoryImage
+          sizes={STORY_IMAGE_SIZES.archiveLead}
+          article={article}
+          eager
+          className={styles.image}
+        />
         <div className={styles.text}>
           <PreviewMeta article={article} />
           <h2 className={styles.title}>{article.title}</h2>

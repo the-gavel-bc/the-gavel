@@ -6,6 +6,10 @@ import {
   type ReaderArticle,
 } from "@/shared/reader/reader-article/reader-article";
 import { ReaderImage } from "@/frontend/components/reader-image/reader-image";
+import {
+  ARTICLE_IMAGE_SIZES,
+  publicImageSrcSet,
+} from "@/shared/reader/public-image/public-image";
 import styles from "./article-header.module.css";
 
 const formatDate = (value: string) =>
@@ -83,6 +87,11 @@ export function ArticleHeader({
           {/* Keep authorized media outside the image optimizer's derivative cache. */}
           <ReaderImage
             src={imageUrl(article.id, article.mainImage.id)}
+            srcSet={publicImageSrcSet(
+              imageUrl(article.id, article.mainImage.id),
+              article.mainImage.width,
+            )}
+            sizes={ARTICLE_IMAGE_SIZES}
             width={article.mainImage.width}
             height={article.mainImage.height}
             alt={article.mainImage.alt}

@@ -1,3 +1,4 @@
+import { STORY_IMAGE_SIZES } from "@/shared/reader/public-image/public-image";
 import Link from "next/link";
 import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
 import { StoryImage } from "../story-image/story-image";
@@ -24,7 +25,11 @@ export function HomeLatest({ articles }: { articles: PublicArticleCard[] }) {
               href={`/articles/${encodeURIComponent(article.slug)}`}
               aria-label={article.title}
             >
-              <StoryImage article={article} className={styles.thumb} />
+              <StoryImage
+                sizes={STORY_IMAGE_SIZES.latest}
+                article={article}
+                className={styles.thumb}
+              />
               <div className={styles.text}>
                 <h3>{article.title}</h3>
                 <time dateTime={article.publishedAt}>

@@ -311,7 +311,7 @@ Task 5 adds a narrow Storage GET policy for finalized assets currently reference
 
 ## Public media delivery route
 
-Task 6 uses only the anonymous publishable-key client for both the allowlisted metadata projection and Storage download. UUIDs determine a canonical key internally; callers cannot supply a URL or object key. Size, finalized SHA-256 and WebP envelope are checked before a cacheable success. Storage authorization rechecks publication when an archive races the initial projection. Successful responses may remain cached for five minutes under the approved policy; private previews and all failures remain no-store. Hosted cache behavior and maintenance migration of legacy images remain release gates.
+Task 6 uses only the anonymous publishable-key client for both the allowlisted metadata projection and Storage download. UUIDs determine a canonical key internally; callers cannot supply a URL or object key. Size, finalized SHA-256 and WebP envelope are checked before a cacheable success. Storage authorization rechecks publication when an archive races the initial projection. Successful responses may remain cached for five minutes under the approved policy; private previews and all failures remain no-store. Resized variants (`?w=` 480, 960 or 1600) are derived only after the original passes these checks, so they share its authorization and its five-minute bound ([ADR 0016](decisions/0016-resize-public-images-on-request.md)). Hosted cache behavior and maintenance migration of legacy images remain release gates.
 
 ## Public homepage authorization
 

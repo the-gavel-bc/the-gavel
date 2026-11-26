@@ -1,3 +1,4 @@
+import { STORY_IMAGE_SIZES } from "@/shared/reader/public-image/public-image";
 import Link from "next/link";
 import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
 import { StoryImage } from "../story-image/story-image";
@@ -18,7 +19,12 @@ export function HomeHero({ article }: { article: PublicArticleCard }) {
         href={`/articles/${encodeURIComponent(article.slug)}`}
         aria-label={article.title}
       >
-        <StoryImage article={article} eager className={styles.image} />
+        <StoryImage
+          sizes={STORY_IMAGE_SIZES.hero}
+          article={article}
+          eager
+          className={styles.image}
+        />
         <div className={styles.overlay}>
           <span className={styles.pill}>{article.section.name}</span>
           <h2 className={styles.title}>{article.title}</h2>
