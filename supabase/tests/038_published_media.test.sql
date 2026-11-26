@@ -13,8 +13,17 @@ select set_config('storage.operation','object.get_authenticated',true);
 select is((select count(*) from storage.objects where bucket_id='article-media'),1::bigint,'anonymous GET sees live no-store object');
 select set_config('storage.operation','object.list',true);
 select is((select count(*) from storage.objects where bucket_id='article-media'),0::bigint,'anonymous listing denied');
+-- Hosted Storage looks up object info before serving a download, so the
+-- read-only info operations must pass for the same published object
+-- (20261126020000). Listing stays denied above.
 select set_config('storage.operation','object.get_authenticated_info',true);
-select is((select count(*) from storage.objects where bucket_id='article-media'),0::bigint,'anonymous metadata enumeration denied');
+select is((select count(*) from storage.objects where bucket_id='article-media'),1::bigint,'anonymous info lookup sees the published object');
+select set_config('storage.operation','storage.object.info_authenticated',true);
+select is((select count(*) from storage.objects where bucket_id='article-media'),1::bigint,'anonymous info operation sees the published object');
+select set_config('storage.operation','object.head_authenticated_info',true);
+select is((select count(*) from storage.objects where bucket_id='article-media'),1::bigint,'anonymous HEAD info sees the published object');
+select set_config('storage.operation','storage.object.upload',true);
+select is((select count(*) from storage.objects where bucket_id='article-media'),0::bigint,'other operations stay denied');
 reset role;
 update storage.objects set metadata='{"cacheControl":"max-age=3600"}' where name='56000000-0000-0000-0000-000000000038/66000000-0000-0000-0000-000000000038.webp';
 set local role anon;
