@@ -107,3 +107,22 @@ See [RUNTIME-VERIFICATION.md](RUNTIME-VERIFICATION.md). Not proven: tag merge pa
 - Area 1 (authentication and access): the real defects were fixed (editor read scope, callback errors, lost claim race, wording). The remaining Low and test-only findings were deferred and are listed above; none of them is a security gap.
 - Area 2 (staff and roles): Batch 7 S2-01 through S2-11 are implemented locally on `fix/staff-role-hardening`; S2-12 is measurement only. Full Vitest, pgTAP, concurrency, DB lint, build, type, lint, format and generated-type checks passed. Final independent diff review remains; nothing is published. See AREA-2-STAFF-REPORT.md and the [Batch 7 plan](../superpowers/plans/2026-11-19-review-fixes.md#7-staff-and-roles).
 | CI | Hosted verification of the repaired browser suite (C-27) | A full isolated local run passed with 197 tests and three intentional skips for shared settings. GitHub Actions did not start its jobs because of the account billing or spending limit. | Rerun the hosted foundation job when GitHub Actions can start. |
+
+## Performance review decisions (2026-11-26)
+
+Two read-only reviews ran on 2026-11-26: the staff dashboard and the public reader. The approved items are planned in [2026-11-26-performance-batch.md](../superpowers/plans/2026-11-26-performance-batch.md). This table records what was not approved, with the owner's decision.
+
+| # | Item | Decision | Why | What would settle it |
+| --- | --- | --- | --- | --- |
+| 8 | Data cache for public reads (article, homepage, archives, author pages) | Deferred by the owner | Every write that changes public content must clear the cache. Corrections, guest-credit edits, own-profile name, bio and photo edits, and main-image changes on published articles do not clear any cache today, so a missed clear would show stale content for up to the expiry. | Recommended form: one broad tag cleared on every public write, a 60-second expiry, and a test that each public write clears it. Revisit if reader time to first byte stays slow after the batch. |
+| — | Full-page CDN caching (the usual approach of large news sites) | Deferred | The per-request CSP nonce makes every public HTML response unique, so whole pages cannot be cached at the CDN. Changing that is a security-header change and needs approval. | Switch public pages to a hash-based CSP, then cache pages at the CDN and purge on publish. |
+| 10 | Serve stale images while refreshing (`stale-while-revalidate` on public media) | Rejected by the owner | An archived article's image could stay visible for up to an hour. That breaks the approved five-minute takedown bound. | — |
+| 11 | `getClaims` instead of `getUser` in `getCurrentAccess` | Not approved | It saves about 10 ms, but a revoked or signed-out session stays valid until its JWT expires (up to an hour). | Owner approval of the revocation trade-off. |
+| 12 | Inline `articles` select RLS policy (no per-row security-definer call) and an `(owner_profile_id, updated_at desc, id desc)` index | Deferred | Authorization-path change. Negligible at the current catalog size. | `EXPLAIN (ANALYZE, BUFFERS)` as an author with hundreds of articles. Then owner approval and the pgTAP suite. |
+| — | Fetch section and latest related stories in parallel (`article-context.ts`) | Dropped | Vercel and Supabase now share a region, so it saves about 2 ms, and it would add a query on every article view. | Revisit if the regions ever differ. |
+| — | Stop clearing the public shell on draft saves | Not needed | Review finding was wrong: only `savePublishedArticleAction` clears it (`draft-actions.ts:102`). | — |
+| — | One-hour CDN cache for `/sitemap.xml` | Dropped | `no-store` is the documented sitemap contract (`docs/api-contracts.md`), and the route is crawler-only and low volume. | Revisit if sitemap load shows up in the search budget. |
+| — | Cold-start time on Vercel Hobby | Measure first | It is the most likely cause of slow first clicks, but it is a platform limit. | Compare a menu click's response time after a few idle minutes with an immediate second click (browser Network tab or Vercel logs). |
+| — | `ReaderImage` hydrates on every card; global search budget (80 searches, 40 suggestions per minute) | Low priority | Small cost; the search budget is a reliability concern only under real load. | Measure under real traffic. |
+
+C-22 (resized image variants) and the typeahead part of C-25 are now planned in the batch above.

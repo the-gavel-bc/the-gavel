@@ -4,7 +4,7 @@ import { invalidatePublicShell } from "@/backend/public-site/public-shell-cache/
 import { getCurrentAccess } from "@/backend/auth/access/access";
 import { createServerSupabaseClient } from "@/backend/infrastructure/supabase/server/server";
 import { acquireImageProcessing } from "@/backend/media/image-intake/processing-gate";
-import { processAboutImage } from "./about-image";
+import { processAboutImage } from "./about-image-processing";
 
 export type AboutImageResult =
   | { ok: true }
