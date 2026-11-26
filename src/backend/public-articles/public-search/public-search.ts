@@ -149,7 +149,7 @@ export async function suggestPublicArticles(
 ): Promise<PublicSearchSuggestions> {
   if (typeof input !== "string") return { kind: "invalid" };
   const query = normalizePublicSearchQuery(input);
-  if (query === null || query.length < 2) return { kind: "invalid" };
+  if (query === null || query.length < 3) return { kind: "invalid" };
   try {
     const { data, error } = await createPublicReaderClient()
       .rpc("suggest_public_articles", { p_query: query })

@@ -1,3 +1,4 @@
+import { STORY_IMAGE_SIZES } from "@/shared/reader/public-image/public-image";
 import { sectionHref } from "@/shared/reader/section-link/section-link";
 import Link from "next/link";
 import type { PublicArticleCard } from "@/shared/reader/article-card/article-card";
@@ -45,7 +46,11 @@ export function ArticleCard({
         href={`/articles/${encodeURIComponent(article.slug)}`}
         aria-label={article.title}
       >
-        <StoryImage article={article} className={styles.image} />
+        <StoryImage
+          sizes={STORY_IMAGE_SIZES.card}
+          article={article}
+          className={styles.image}
+        />
         <PreviewMeta article={article} className={styles.meta} />
         <Heading className={styles.title}>
           {highlight ? (

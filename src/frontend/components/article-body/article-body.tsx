@@ -1,4 +1,8 @@
 import { ReaderImage } from "@/frontend/components/reader-image/reader-image";
+import {
+  ARTICLE_IMAGE_SIZES,
+  publicImageSrcSet,
+} from "@/shared/reader/public-image/public-image";
 import type { ReactNode } from "react";
 import {
   isDraftUuid,
@@ -99,6 +103,8 @@ function blocks(
               // Media routes enforce access/cache lifetime; optimizer derivatives are intentionally avoided.
               <ReaderImage
                 src={image.src}
+                srcSet={publicImageSrcSet(image.src, image.width)}
+                sizes={ARTICLE_IMAGE_SIZES}
                 width={image.width}
                 height={image.height}
                 alt={block.attrs.alt}

@@ -7,7 +7,7 @@ type Suggestion = { title: string; slug: string; section: string };
 type Result =
   | { query: string; kind: "ok"; items: Suggestion[] }
   | { query: string; kind: "error" };
-const MIN_LENGTH = 2;
+const MIN_LENGTH = 3;
 const DEBOUNCE_MS = 300;
 
 // Debounced, abortable lookups; only the newest query's answer is shown.

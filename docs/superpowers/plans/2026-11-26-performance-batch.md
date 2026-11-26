@@ -1,6 +1,6 @@
 # Performance batch: dashboard and reader responsiveness
 
-Status: planned 2026-11-26. Slice 1 built 2026-11-26; slices 2 and 3 not started.
+Status: planned 2026-11-26. Slice 1 built; slice 2 measured and not needed (keyword suggestions added instead); slice 3 built 2026-11-26.
 
 Source: two read-only reviews on 2026-11-26, one of the staff dashboard and one of the public reader. Their main claims were checked against the code. Items that were rejected, deferred or dropped (data caching for reader pages, full-page CDN caching, stale-while-revalidate on images, `getClaims`, the RLS rework, parallel related stories, sitemap caching) are recorded in [DEFERRED.md](../../code-reviews/DEFERRED.md#performance-review-decisions-2026-11-26).
 
@@ -78,6 +78,24 @@ Each slice is one small pull request, reviewed before the next one starts.
   - [api-contracts.md](../../api-contracts.md): the suggestion contract is unchanged;
   - remove the ponytail note in a follow-up migration comment, not by editing the old migration.
 
+### Slice 2 results (2026-11-26): measured, index not built
+
+The 5,000 seeded published articles were added inside a transaction and rolled back afterwards. `EXPLAIN (ANALYZE)` of the suggestion query:
+
+| Query | Without index | With the trigram index |
+| --- | --- | --- |
+| Selective (`%4f3a%`, 1 match) | 5.2 ms, backward scan of `articles_recent_published_idx` | 6.2 ms; the planner kept the same scan and ignored the index |
+| Common (`%campus%`, 5,000 matches) | 4.7 ms, sequential scan plus top-6 sort | 6.8 ms, bitmap scan on the new index |
+
+- **Result:** at 5,000 articles, more than a century of output at a few hundred stories a year, the query takes about 5 ms. That is far from its 2 s statement timeout, and the index made it no faster.
+- **Write cost:** a GIN index would also add work to every article save.
+- **Decision:** the index is not built. Scans grow linearly, so recheck when the catalog passes about 50,000 published articles.
+- **50,000-row run:** attempted on the local Docker database, but the backend was killed for memory during the seed insert. The transaction rolled back and no data changed.
+- **Follow-up (owner request, 2026-11-26):** suggestions now match keywords instead of substrings. Every typed word must start a title word, and at least 3 characters are required (`20261126010000_keyword_search_suggestions.sql`).
+  - The existing full-text index stores whole words only, so it cannot match word starts. Matching therefore stays on titles.
+  - Timing at 5,000 seeded articles: a word that matches nothing scans every title in about 31 ms; common words stop after 6 matches in under 1 ms.
+  - The client still waits for a 300 ms pause and aborts stale lookups, and answers are cached for 30 s.
+
 ### Slice 3: images sized for the screen (#9)
 
 **Decision to record:** ADR 0016, "Resize public images on request". On-demand resizing is chosen over storing variants at upload:
@@ -145,6 +163,21 @@ C-22 in DEFERRED.md suggested variants stored at upload. The ADR supersedes that
   - Vitest: 198 files and 1,394 tests passing, plus typecheck, lint and format.
   - Playwright: `e2e/roles`, `e2e/access-boundary` and `draft-conflict-recovery`, 32 passing.
   - The full `e2e/drafts` run: 138 passed. The failures were only in the admin site information, taxonomy and homepage specs, which fail on the long-lived local database's leftover data, as before.
+
+### Slice 3 results (2026-11-26)
+
+- **Route:**
+  - `?w=` 480, 960 or 1600, resized after the original passes its authorization and integrity checks (`src/backend/public-media/resize-public-image.ts`).
+  - Unlisted widths are rejected before any read.
+- **Components:**
+  - `StoryImage` now requires a `sizes` value.
+  - The article header and body images use the article-column `sizes`.
+  - All values are in `src/shared/reader/public-image/public-image.ts`, measured at 375, 768, 1024 and 1440 px viewports.
+- **Local measurements** (2x phone, 375 px):
+  - 168 px thumbnails load the 480 variant, and 262 px cards load the 960 variant.
+  - An uncached archive lead loads the 960 variant. A lead already cached at full size is reused by Chrome, which is expected browser behavior.
+  - Eight homepage images total 1,351 KB as originals, 584 KB at 960 px and 226 KB at 480 px.
+- **ADR:** [0016](../../decisions/0016-resize-public-images-on-request.md).
 
 ## Order and rollout
 

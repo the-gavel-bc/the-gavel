@@ -198,3 +198,79 @@ test("published photo stays private until attached and replacement updates publi
     await publicContext.close();
   }
 });
+
+test("phones load a resized published photo; unpublished variants stay private", async ({
+  context,
+  page,
+  browser,
+}) => {
+  await setLocalSession(context, fixture.users.admin);
+  const articleId = fixture.id(20);
+  await page.goto(`/dashboard/articles/${articleId}`);
+  const reader = await browser.newContext({
+    baseURL: "http://127.0.0.1:3100",
+    viewport: { width: 375, height: 800 },
+    deviceScaleFactor: 2,
+  });
+  try {
+    const response = page.waitForResponse(
+      (result) =>
+        result.request().method() === "POST" &&
+        result.url().includes(`/api/articles/${articleId}/media/`),
+    );
+    await page.getByLabel("Image file", { exact: true }).setInputFiles({
+      name: "wide-photo.png",
+      mimeType: "image/png",
+      buffer: await sharp({
+        create: {
+          width: 2000,
+          height: 1000,
+          channels: 3,
+          background: "#228844",
+        },
+      })
+        .png()
+        .toBuffer(),
+    });
+    const assetId = (await response).url().split("/").at(-1);
+    await expect(
+      page.getByText("Image ready to attach.", { exact: true }),
+    ).toBeVisible();
+    const variant = `/api/public/articles/${articleId}/media/${assetId}?w=480`;
+    // Resizing never bypasses publication: an unattached upload stays private.
+    expect((await reader.request.get(variant)).status()).toBe(404);
+    await page.getByLabel("Alt text", { exact: true }).fill("Wide photo");
+    await page.getByLabel("Image credit", { exact: true }).fill("The Gavel");
+    await page
+      .getByRole("button", { name: "Attach image", exact: true })
+      .click();
+    await expect(
+      page.getByText("Image attached.", { exact: true }),
+    ).toBeVisible();
+
+    const ok = await reader.request.get(variant);
+    expect(ok.status()).toBe(200);
+    expect(ok.headers()["cache-control"]).toContain("max-age=300");
+    expect((await sharp(await ok.body()).metadata()).width).toBe(480);
+    expect(
+      (
+        await reader.request.get(
+          `/api/public/articles/${articleId}/media/${assetId}?w=123`,
+        )
+      ).status(),
+    ).toBe(404);
+
+    const tab = await reader.newPage();
+    await tab.goto(`/articles/${fixture.article(20).article.slug}`);
+    const image = tab.getByRole("img", { name: "Wide photo", exact: true });
+    await expect(image).toBeVisible();
+    // About 300 CSS px at 2x density: the 960 px variant, not the original.
+    await expect
+      .poll(() =>
+        image.evaluate((element) => (element as HTMLImageElement).currentSrc),
+      )
+      .toContain("?w=960");
+  } finally {
+    await reader.close();
+  }
+});

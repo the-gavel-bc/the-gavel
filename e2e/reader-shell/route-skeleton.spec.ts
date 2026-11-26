@@ -40,7 +40,7 @@ async function skeletonSeenWithin(page: Page, ms: number) {
 // suggestion panel always offers "See all results", even with no matches.
 async function searchFromNavigation(page: Page) {
   await page.getByRole("button", { name: "Search", exact: true }).click();
-  await page.locator("#reader-search").fill("zz");
+  await page.locator("#reader-search").fill("zzz");
   await page.getByRole("link", { name: "See all results" }).click();
 }
 
