@@ -21,6 +21,7 @@ test("owner formats saves and reopens a private body with a second versioned sav
   await body.fill("A synthetic body paragraph.");
   await body.selectText();
   await page.getByRole("button", { name: "Bold", exact: true }).click();
+  await page.getByRole("button", { name: "Insert link" }).click();
   await page.getByLabel("Link URL").fill("https://example.org/story");
   await page.getByRole("button", { name: "Apply link" }).click();
   await expect(body.locator("strong")).toContainText("synthetic body");

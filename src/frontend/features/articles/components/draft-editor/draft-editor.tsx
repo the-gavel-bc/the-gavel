@@ -17,7 +17,8 @@ import {
   BODY_IMAGE_FILE_ID,
   DraftBodyImageControl,
 } from "./draft-body-image-control";
-import { Button } from "@/frontend/components/ui/button/button";
+import { IconButton } from "@/frontend/components/ui/icon-button/icon-button";
+import { ImageIcon } from "@/frontend/components/ui/icons/icons";
 // Compare already-validated JSON independent of PostgreSQL's object key ordering.
 const key = (value: unknown) =>
   JSON.stringify(value, (_, item: unknown) =>
@@ -173,15 +174,15 @@ export function DraftEditor({
         <>
           <DraftToolbar editor={editor} disabled={disabled} onError={reject}>
             {articleId && allowImageUpload && (
-              <Button
+              <IconButton
+                label="Insert image"
+                icon={<ImageIcon />}
                 disabled={disabled || !editor}
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() =>
                   document.getElementById(BODY_IMAGE_FILE_ID)?.click()
                 }
-              >
-                Insert image
-              </Button>
+              />
             )}
           </DraftToolbar>
           {articleId && allowImageUpload && (

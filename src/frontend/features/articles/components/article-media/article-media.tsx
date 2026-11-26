@@ -63,17 +63,18 @@ export function ArticleMedia({
   const [pendingWrite, setPendingWrite] = useState<PendingWrite | null>(null);
   const [altText, setAltText] = useState(initialImage?.altText ?? "");
   const [credit, setCredit] = useState(initialImage?.credit ?? "");
-  const [caption, setCaption] = useState(initialImage?.caption ?? "");
+  // One description serves as both alt text and the caption under the photo.
+  const caption = altText;
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const locked = disabled || busy || conflict || Boolean(cleanupAssetId);
   const mutationLocked = locked || Boolean(pendingWrite);
+  // The caption follows the description, so only the typed fields count:
+  // an older photo whose stored caption differs is not an unsaved change.
   const metadataChanged = image
-    ? altText !== image.altText ||
-      credit !== image.credit ||
-      caption !== (image.caption ?? "")
-    : Boolean(altText || credit || caption);
+    ? altText !== image.altText || credit !== image.credit
+    : Boolean(altText || credit);
   const dirty = Boolean(
     file || assetId || cleanupAssetId || pendingWrite || metadataChanged,
   );
@@ -249,9 +250,6 @@ export function ArticleMedia({
       setCredit((current) =>
         current === input.credit ? (command.credit ?? "") : current,
       );
-      setCaption((current) =>
-        current === input.caption ? (command.caption ?? "") : current,
-      );
       setAssetId(null);
       setFile(null);
       if (fileInput.current) fileInput.current.value = "";
@@ -271,19 +269,14 @@ export function ArticleMedia({
     const alt = altText.trim();
     const by = credit.trim();
     if (!alt || !by) {
-      setError("Alt text and credit are required.");
-      return;
-    }
-    const description = caption.trim();
-    if (Array.from(description).length > 400) {
-      setError("Caption must be 400 characters or fewer.");
+      setError("A description and a credit are required.");
       return;
     }
     void commit({
       assetId: targetAssetId,
       altText: alt,
       credit: by,
-      caption: description || null,
+      caption: alt,
     });
   }
 
@@ -307,7 +300,6 @@ export function ArticleMedia({
       if (!image) {
         setAltText("");
         setCredit("");
-        setCaption("");
       }
       setStatus("Upload discarded.");
     } catch {
@@ -389,14 +381,19 @@ export function ArticleMedia({
             )}
           </div>
           <div className={styles.field}>
-            <label htmlFor="article-image-alt">Alt text</label>
+            <label htmlFor="article-image-alt">Alt text and caption</label>
             <input
               id="article-image-alt"
               value={altText}
               maxLength={240}
               disabled={locked}
+              aria-describedby="article-image-alt-hint"
               onChange={(event) => setAltText(event.target.value)}
             />
+            <p id="article-image-alt-hint" className={styles.hint}>
+              Describe the photo. Read aloud by screen readers and shown under
+              the photo.
+            </p>
           </div>
           <div className={styles.field}>
             <label htmlFor="article-image-credit">Image credit</label>
@@ -407,21 +404,6 @@ export function ArticleMedia({
               disabled={locked}
               onChange={(event) => setCredit(event.target.value)}
             />
-          </div>
-          <div className={styles.wide}>
-            <label htmlFor="article-image-caption">Caption</label>
-            <textarea
-              id="article-image-caption"
-              rows={2}
-              value={caption}
-              maxLength={400}
-              disabled={locked}
-              aria-describedby="article-image-caption-hint"
-              onChange={(event) => setCaption(event.target.value)}
-            />
-            <p id="article-image-caption-hint" className={styles.hint}>
-              Optional. Up to 400 characters, shown under the photo.
-            </p>
           </div>
         </div>
       </div>

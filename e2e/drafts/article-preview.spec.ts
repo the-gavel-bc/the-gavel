@@ -42,16 +42,16 @@ test("administrator previews a saved draft with real media and returns to the ed
   const file = { name: "preview.png", mimeType: "image/png", buffer: png };
 
   await page.getByLabel("Image file", { exact: true }).setInputFiles(file);
-  await page.getByLabel("Alt text", { exact: true }).fill("Preview main photo");
+  await page
+    .getByLabel("Alt text and caption", { exact: true })
+    .fill("Preview main photo");
   await page.getByLabel("Image credit").fill("Preview photographer");
-  await page.getByLabel("Caption", { exact: true }).fill("Main caption.");
   await page.getByRole("button", { name: "Attach image" }).click();
   await expect(page.getByText("Image attached.")).toBeVisible();
 
   await page.getByLabel("Body image file").setInputFiles(file);
   await expect(page.getByText("Image ready to insert.")).toBeVisible();
   await page.getByLabel("Body image alt text").fill("Preview body photo");
-  await page.getByLabel("Body image caption").fill("Body caption.");
   await page.getByRole("button", { name: "Insert body image" }).click();
   await page.getByRole("button", { name: "Save draft" }).click();
   await expect(preview).toBeVisible();
@@ -67,8 +67,13 @@ test("administrator previews a saved draft with real media and returns to the ed
   await expect(
     page.getByText("Publication date shown is an estimate."),
   ).toBeVisible();
-  await expect(page.getByText("Main caption.", { exact: false })).toBeVisible();
-  await expect(page.getByText("Body caption.")).toBeVisible();
+  // The description doubles as the visible caption.
+  await expect(
+    page.locator("figcaption").filter({ hasText: "Preview main photo" }),
+  ).toBeVisible();
+  await expect(
+    page.locator("figcaption").filter({ hasText: "Preview body photo" }),
+  ).toBeVisible();
   await expect(
     page.getByText("Saved body text for the preview."),
   ).toBeVisible();
@@ -210,7 +215,7 @@ test("preview becomes available after creating a draft with its first photo", as
     page.getByRole("button", { name: "Preview article" }),
   ).toBeDisabled();
   await page
-    .getByLabel("Alt text", { exact: true })
+    .getByLabel("Alt text and caption", { exact: true })
     .fill("First preview photo");
   await page.getByLabel("Image credit").fill("Preview photographer");
   await page.getByRole("button", { name: "Attach image" }).click();

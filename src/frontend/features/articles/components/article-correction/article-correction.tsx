@@ -65,8 +65,9 @@ export function ArticleCorrection({
     }
   }
 
-  function save(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  // Not a <form>: it sits inside the article form, above its save bar, and
+  // saves on its own.
+  function save() {
     if (pending || retry || !dirty) return;
     void run({
       articleId,
@@ -77,12 +78,7 @@ export function ArticleCorrection({
   }
 
   return (
-    <form
-      className={styles.panel}
-      onSubmit={save}
-      aria-labelledby="correction-title"
-      noValidate
-    >
+    <section className={styles.panel} aria-labelledby="correction-title">
       <h2 id="correction-title">Correction</h2>
       <label>
         <span className={styles.hint}>
@@ -100,7 +96,11 @@ export function ArticleCorrection({
         />
       </label>
       <div className={styles.actions}>
-        <Button type="submit" disabled={pending || Boolean(retry) || !dirty}>
+        <Button
+          type="button"
+          disabled={pending || Boolean(retry) || !dirty}
+          onClick={save}
+        >
           {saved === null
             ? "Add correction"
             : text.trim() === ""
@@ -121,6 +121,6 @@ export function ArticleCorrection({
       {pending && <p role="status">Saving correction…</p>}
       {result?.ok && <p role="status">Correction saved.</p>}
       {result && !result.ok && <p role="alert">{messages[result.code]}</p>}
-    </form>
+    </section>
   );
 }

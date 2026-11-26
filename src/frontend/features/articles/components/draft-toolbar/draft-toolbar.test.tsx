@@ -37,6 +37,12 @@ it("rejects unsafe URLs without adding a link", async () => {
     <DraftToolbar editor={editor} disabled={false} onError={error} />,
   );
   try {
+    expect(screen.queryByLabelText("Link URL")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Insert link" }));
+    expect(screen.getByRole("button", { name: "Insert link" })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
     await userEvent.type(
       screen.getByLabelText("Link URL"),
       "javascript:alert(1)",
@@ -68,7 +74,9 @@ it("corrects local URL errors without invalidating an unchanged empty body", asy
     <DraftToolbar editor={editor} disabled={false} onError={error} />,
   );
   try {
+    await userEvent.click(screen.getByRole("button", { name: "Insert link" }));
     const input = screen.getByLabelText("Link URL");
+    expect(input).toHaveFocus();
     await userEvent.type(input, "javascript:bad");
     await userEvent.click(screen.getByRole("button", { name: "Apply link" }));
     expect(screen.getByRole("alert")).toBeVisible();
@@ -76,9 +84,30 @@ it("corrects local URL errors without invalidating an unchanged empty body", asy
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     await userEvent.type(input, "https://example.com");
     await userEvent.click(screen.getByRole("button", { name: "Apply link" }));
-    expect(input).toHaveAttribute("aria-invalid", "false");
+    // A valid link closes the field.
+    expect(screen.queryByLabelText("Link URL")).not.toBeInTheDocument();
     expect(error).not.toHaveBeenCalled();
     expect(editor.getJSON()).toEqual(original);
+  } finally {
+    view.unmount();
+    editor.destroy();
+  }
+});
+
+it("closes the link field with Escape or Cancel", async () => {
+  const editor = new Editor({ extensions: createDraftExtensions() });
+  const view = render(
+    <DraftToolbar editor={editor} disabled={false} onError={vi.fn()} />,
+  );
+  try {
+    const toggle = screen.getByRole("button", { name: "Insert link" });
+    await userEvent.click(toggle);
+    await userEvent.keyboard("{Escape}");
+    expect(screen.queryByLabelText("Link URL")).not.toBeInTheDocument();
+    await userEvent.click(toggle);
+    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByLabelText("Link URL")).not.toBeInTheDocument();
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
   } finally {
     view.unmount();
     editor.destroy();

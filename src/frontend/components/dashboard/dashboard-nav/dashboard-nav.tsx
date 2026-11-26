@@ -22,6 +22,9 @@ const admin = [
 
 type Item = { href: string; label: string; exact?: boolean };
 
+/** Every top-level dashboard page and its navigation label. */
+export const dashboardPages: Item[] = [...workspace, review, ...admin];
+
 // Marks the clicked link while its page loads, so slow server renders still
 // get instant feedback. Without JavaScript, links are ordinary page loads.
 function PendingLabel({ label }: { label: string }) {

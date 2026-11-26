@@ -37,12 +37,9 @@ test("owner uploads, describes, attaches and unlinks a private main image", asyn
   });
   await expect(page.getByText("Image ready to attach.")).toBeVisible();
   await page
-    .getByLabel("Alt text", { exact: true })
+    .getByLabel("Alt text and caption", { exact: true })
     .fill("Red newsroom graphic");
   await page.getByLabel("Image credit").fill("The Gavel");
-  await page
-    .getByLabel("Caption", { exact: true })
-    .fill("A synthetic newsroom graphic.");
   await page.getByRole("button", { name: "Attach image" }).click();
   await expect(page.getByText("Image attached.")).toBeVisible();
   await expect(
@@ -56,14 +53,11 @@ test("owner uploads, describes, attaches and unlinks a private main image", asyn
   await expect(
     page.getByText("Attached image: Red newsroom graphic — The Gavel"),
   ).toBeVisible();
-  await expect(page.getByLabel("Caption", { exact: true })).toHaveValue(
-    "A synthetic newsroom graphic.",
-  );
-  await page.getByLabel("Caption", { exact: true }).fill("");
-  await page.getByRole("button", { name: "Update image details" }).click();
-  await expect(page.getByText("Image attached.")).toBeVisible();
-  await page.reload();
-  await expect(page.getByLabel("Caption", { exact: true })).toHaveValue("");
+  // One field holds both the alt text and the caption.
+  await expect(page.getByLabel("Caption", { exact: true })).toHaveCount(0);
+  await expect(
+    page.getByLabel("Alt text and caption", { exact: true }),
+  ).toHaveValue("Red newsroom graphic");
   await page.getByRole("button", { name: "Remove main image" }).click();
   await page
     .getByRole("alertdialog")

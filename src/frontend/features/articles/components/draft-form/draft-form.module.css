@@ -103,6 +103,32 @@
   }
   .saveText {
     font-size: 0.875rem;
+    grid-area: auto;
+    grid-column: 1 / -1;
+    order: -1;
+  }
+  /* All actions share a two-column grid: two rows instead of four. */
+  .saveBar {
+    grid-template-areas: none;
+    grid-template-columns: 1fr 1fr;
+  }
+  .saveLeft {
+    display: contents;
+  }
+  .saveLeft > *,
+  .saveLeft > * > button {
+    justify-self: stretch;
+    width: 100%;
+  }
+  .saveBar :is(button, a) {
+    font-size: 0.875rem;
+    justify-self: stretch;
+    padding-inline: var(--space-2);
+    white-space: nowrap;
+  }
+  .saveBar > button[type="submit"] {
+    grid-area: auto;
+    justify-self: stretch;
   }
   /* The visibility note is dropped here; the save status stays. */
   .saveText .visibilityNote {

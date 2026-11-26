@@ -60,9 +60,6 @@ export default async function MemberAuditPage({
   }
   return (
     <>
-      <p>
-        <Link href="/dashboard/admin/members">← Memberships</Link>
-      </p>
       <h1>
         {user
           ? `Activity for ${page.items[0]?.targetEmail || "this person"}`

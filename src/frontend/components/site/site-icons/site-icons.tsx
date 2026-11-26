@@ -1,7 +1,7 @@
 import type { SVGProps } from "react";
 
 // Decorative only: every use sits next to visible text or an accessible name.
-function Icon({ children, ...props }: SVGProps<SVGSVGElement>) {
+export function Icon({ children, ...props }: SVGProps<SVGSVGElement>) {
   return (
     <svg
       aria-hidden="true"

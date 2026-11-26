@@ -145,6 +145,7 @@
 .cardActions button,
 .pager button,
 .addRow button {
+  justify-content: center;
   background: var(--color-paper);
   border: 1px solid var(--dash-line, #c9cfdb);
   border-radius: 999px;
@@ -238,13 +239,17 @@
 }
 .addRow {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-1);
   padding: 0 var(--space-3) var(--space-3);
 }
+/* Labels stay readable: chips wrap onto a second line instead of clipping. */
 .addRow button {
-  flex: 1;
+  flex: 1 1 auto;
   font-size: 0.8125rem;
+  min-width: 0;
   padding: 0 var(--space-2);
+  white-space: nowrap;
 }
 .none {
   color: var(--color-muted);

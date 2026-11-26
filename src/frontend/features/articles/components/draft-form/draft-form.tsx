@@ -6,6 +6,7 @@ import {
   useState,
   useCallback,
   type FormEvent,
+  type ReactNode,
 } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
@@ -31,7 +32,6 @@ import { useDraftCategories } from "./use-draft-categories";
 import { DraftConflictPanel } from "../draft-conflict-panel/draft-conflict-panel";
 import { useDraftNavigationGuard } from "../../../../components/dashboard/draft-navigation-guard/draft-navigation-guard";
 import buttonStyles from "@/frontend/components/ui/button/button.module.css";
-import { GuardedDashboardLink } from "../../../../components/dashboard/guarded-dashboard-link/guarded-dashboard-link";
 import { ArticleMedia } from "../article-media/article-media";
 import type { MainImage } from "@/backend/media/media-queries/media-queries";
 import { DraftReadOnlyBody } from "../draft-editor/draft-read-only-body";
@@ -73,6 +73,7 @@ export function DraftForm({
   review,
   capabilities,
   canPreview = false,
+  correction,
 }: {
   initialDraft: DraftInput;
   options: DraftOptions;
@@ -83,6 +84,8 @@ export function DraftForm({
   review?: { requestedAt: string | null; note: string | null };
   capabilities?: ArticleCapabilities;
   canPreview?: boolean;
+  /** Shown after the fields, above the save bar; it saves on its own. */
+  correction?: ReactNode;
 }) {
   const command = useDraftCommand(initialDraft, article, status);
   const [editorFailure, setEditorFailure] = useState<DraftFailure | null>(null);
@@ -534,6 +537,7 @@ export function DraftForm({
           onChange={update}
         />
       </fieldset>
+      {correction}
       <div className={styles.saveBar} data-draft-save-bar="">
         <div className={styles.saveText}>
           <p role="status">
@@ -633,11 +637,6 @@ export function DraftForm({
                 : "Create draft"}
         </Button>
       </div>
-      <p>
-        <GuardedDashboardLink href="/dashboard">
-          Back to My articles
-        </GuardedDashboardLink>
-      </p>
       {confirmDialog}
     </form>
   );

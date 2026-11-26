@@ -420,6 +420,7 @@ it("toolbar correction does not clear an independent invalid native body", async
   });
   fireEvent(body, paste);
   expect(screen.getByRole("button", { name: "Create draft" })).toBeDisabled();
+  await userEvent.click(screen.getByRole("button", { name: "Insert link" }));
   const input = screen.getByLabelText("Link URL");
   await userEvent.type(input, "javascript:bad");
   await userEvent.click(screen.getByRole("button", { name: "Apply link" }));

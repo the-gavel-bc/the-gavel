@@ -4,7 +4,6 @@ import { requireActiveMembership } from "@/backend/auth/access/access";
 import { getAdminArticleDetail } from "@/backend/articles/admin-article-queries/admin-article-queries";
 import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
 import { AdminArticleMeta } from "@/frontend/features/articles/components/admin-articles/admin-article-list";
-import { GuardedDashboardLink } from "@/frontend/components/dashboard/guarded-dashboard-link/guarded-dashboard-link";
 import { ArticleDeletion } from "@/frontend/features/articles/components/article-deletion/article-deletion";
 import { ArticleLifecycleControls } from "@/frontend/features/articles/components/article-lifecycle-controls/article-lifecycle-controls";
 
@@ -68,11 +67,6 @@ export default async function AdminArticleDetailPage({
           </Link>
         </p>
       )}
-      <p>
-        <GuardedDashboardLink href="/dashboard/admin/articles">
-          Back to article management
-        </GuardedDashboardLink>
-      </p>
     </>
   );
 }

@@ -183,10 +183,13 @@ it("uploads a file, requires alt and credit, then attaches the finalized asset",
   expect(String(url)).toBe(`/api/articles/${article.id}/media/${assetId}`);
   await user.click(screen.getByRole("button", { name: "Attach image" }));
   expect(screen.getByRole("alert")).toHaveTextContent(
-    "Alt text and credit are required.",
+    "A description and a credit are required.",
   );
   expect(mocks.setImage).not.toHaveBeenCalled();
-  await user.type(screen.getByLabelText("Alt text"), "Newsroom graphic");
+  await user.type(
+    screen.getByLabelText("Alt text and caption"),
+    "Newsroom graphic",
+  );
   await user.type(screen.getByLabelText("Image credit"), "The Gavel");
   await user.click(screen.getByRole("button", { name: "Attach image" }));
   await waitFor(() => expect(onCommit).toHaveBeenCalledOnce());
@@ -197,7 +200,7 @@ it("uploads a file, requires alt and credit, then attaches the finalized asset",
       assetId,
       altText: "Newsroom graphic",
       credit: "The Gavel",
-      caption: null,
+      caption: "Newsroom graphic",
     }),
   );
 });
@@ -277,7 +280,7 @@ it("replays the full image command despite changed metadata, props and disabled 
   };
   const user = userEvent.setup();
   const { rerender } = render(<ArticleMedia {...props} />);
-  fireEvent.change(screen.getByLabelText("Alt text"), {
+  fireEvent.change(screen.getByLabelText("Alt text and caption"), {
     target: { value: "  Submitted alt  " },
   });
   await user.click(
@@ -295,9 +298,9 @@ it("replays the full image command despite changed metadata, props and disabled 
     assetId,
     altText: "Submitted alt",
     credit: "The Gavel",
-    caption: null,
+    caption: "Submitted alt",
   });
-  fireEvent.change(screen.getByLabelText("Alt text"), {
+  fireEvent.change(screen.getByLabelText("Alt text and caption"), {
     target: { value: "Newer alt" },
   });
   rerender(
@@ -311,7 +314,9 @@ it("replays the full image command despite changed metadata, props and disabled 
   await user.click(retry);
   await waitFor(() => expect(onCommit).toHaveBeenCalledOnce());
   expect(mocks.setImage).toHaveBeenNthCalledWith(2, command);
-  expect(screen.getByLabelText("Alt text")).toHaveValue("Newer alt");
+  expect(screen.getByLabelText("Alt text and caption")).toHaveValue(
+    "Newer alt",
+  );
   expect(screen.getByLabelText("Image credit")).toHaveValue("The Gavel");
   expect(
     screen.getByText("Attached image: Submitted alt — The Gavel"),
@@ -336,7 +341,7 @@ it("retains a pending attachment asset and blocks competing mutations until retr
     new File(["synthetic"], "pending.png", { type: "image/png" }),
   );
   await screen.findByText("Image ready to attach.");
-  fireEvent.change(screen.getByLabelText("Alt text"), {
+  fireEvent.change(screen.getByLabelText("Alt text and caption"), {
     target: { value: "  Submitted alt  " },
   });
   fireEvent.change(screen.getByLabelText("Image credit"), {
@@ -362,7 +367,9 @@ it("retains a pending attachment asset and blocks competing mutations until retr
   await user.click(screen.getByRole("button", { name: "Retry image change" }));
   await screen.findByText("Image attached.");
   expect(mocks.setImage).toHaveBeenNthCalledWith(2, command);
-  expect(screen.getByLabelText("Alt text")).toHaveValue("Submitted alt");
+  expect(screen.getByLabelText("Alt text and caption")).toHaveValue(
+    "Submitted alt",
+  );
   expect(screen.getByLabelText("Image credit")).toHaveValue("Newer credit");
   expect(screen.queryByRole("button", { name: "Discard upload" })).toBeNull();
   expect(mocks.request).toHaveBeenCalledOnce();
@@ -407,7 +414,7 @@ it("retries an unlink independently of newer image metadata and keeps those edit
   await user.click(screen.getByRole("button", { name: "Retry image change" }));
   await screen.findByText("Image removed.");
   expect(mocks.setImage).toHaveBeenNthCalledWith(2, command);
-  expect(screen.getByLabelText("Alt text")).toHaveValue("");
+  expect(screen.getByLabelText("Alt text and caption")).toHaveValue("");
   expect(screen.getByLabelText("Image credit")).toHaveValue("New credit");
   expect(screen.queryByText(/Attached image:/)).not.toBeInTheDocument();
   expect(onDirtyChange).toHaveBeenLastCalledWith(true);
@@ -600,7 +607,7 @@ it("uploads a file handed over at creation once, without a click", async () => {
   expect(mocks.request).toHaveBeenCalledWith(article.id, expect.any(String));
 });
 
-it("updates and clears an optional caption without replacing the image", async () => {
+it("saves the one description as both alt text and caption", async () => {
   const user = userEvent.setup();
   render(
     <ArticleMedia
@@ -615,55 +622,21 @@ it("updates and clears an optional caption without replacing the image", async (
       onCommit={vi.fn()}
     />,
   );
-  await user.type(screen.getByLabelText("Caption"), "  Student newsroom  ");
+  expect(screen.queryByLabelText("Caption")).not.toBeInTheDocument();
+  const field = screen.getByLabelText("Alt text and caption");
+  await user.clear(field);
+  await user.type(field, "  Student newsroom  ");
   await user.click(
     screen.getByRole("button", { name: "Update image details" }),
   );
   await screen.findByText("Image attached.");
   expect(mocks.setImage).toHaveBeenLastCalledWith(
-    expect.objectContaining({ assetId, caption: "Student newsroom" }),
+    expect.objectContaining({
+      assetId,
+      altText: "Student newsroom",
+      caption: "Student newsroom",
+    }),
   );
-  expect(screen.getByLabelText("Caption")).toHaveValue("Student newsroom");
-  await user.clear(screen.getByLabelText("Caption"));
-  await user.click(
-    screen.getByRole("button", { name: "Update image details" }),
-  );
-  await waitFor(() =>
-    expect(mocks.setImage).toHaveBeenLastCalledWith(
-      expect.objectContaining({ caption: null }),
-    ),
-  );
-});
-
-it("retries the original caption and retains newer caption input", async () => {
-  mocks.setImage.mockRejectedValueOnce(new Error("Lost response"));
-  const user = userEvent.setup();
-  render(
-    <ArticleMedia
-      article={article}
-      initialImage={{
-        assetId,
-        altText: "Newsroom",
-        credit: "The Gavel",
-        caption: null,
-      }}
-      disabled={false}
-      onCommit={vi.fn()}
-    />,
-  );
-  await user.type(screen.getByLabelText("Caption"), "Submitted caption");
-  await user.click(
-    screen.getByRole("button", { name: "Update image details" }),
-  );
-  await screen.findByRole("alert");
-  const command = mocks.setImage.mock.calls[0][0];
-  expect(command.caption).toBe("Submitted caption");
-  await user.clear(screen.getByLabelText("Caption"));
-  await user.type(screen.getByLabelText("Caption"), "Newer caption");
-  await user.click(screen.getByRole("button", { name: "Retry image change" }));
-  await screen.findByText("Image attached.");
-  expect(mocks.setImage).toHaveBeenNthCalledWith(2, command);
-  expect(screen.getByLabelText("Caption")).toHaveValue("Newer caption");
 });
 
 it("asks before removing a published article's photo, and marks it destructive", async () => {

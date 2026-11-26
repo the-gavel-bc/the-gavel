@@ -127,3 +127,25 @@ test("dashboard filters keep keyboard focus visible and touch targets usable", a
     expect(target?.width).toBeGreaterThanOrEqual(44);
   }
 });
+
+test("back arrow returns to the filtered list it came from", async ({
+  context,
+  page,
+}) => {
+  await setLocalSession(context, fixture.users.admin);
+  await page.goto("/dashboard/admin/articles");
+  await page.getByLabel("Search article titles").fill("admin own");
+  await page.getByRole("button", { name: "Apply filters" }).click();
+  await expect(page).toHaveURL(/search=admin\+own/);
+  await page
+    .getByRole("link", { name: `Edit draft: ${fixture.label} admin own` })
+    .click();
+  await expect(page.getByRole("heading", { name: "Edit draft" })).toBeVisible();
+  await page.getByRole("link", { name: "Back to Administration" }).click();
+  await expect(page).toHaveURL(/search=admin\+own/);
+  await expect(page.getByLabel("Search article titles")).toHaveValue(
+    "admin own",
+  );
+  // Top-level pages have no back arrow; the sidebar covers them.
+  await expect(page.getByRole("link", { name: /^Back to / })).toHaveCount(0);
+});
