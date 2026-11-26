@@ -28,12 +28,18 @@ export default async function AdminHomepagePage() {
       listHomepageStoriesAction({}),
     ]);
     if (!library.ok) throw new Error("Unable to load stories.");
-    const saved = curation.saved;
-    images = await getHomepageImageUrls(
-      [saved.lead, ...saved.featured, ...saved.readThis].flatMap((story) =>
-        story?.status === "published" ? [story.id] : [],
-      ),
-    );
+    const { saved, effective } = curation;
+    // Effective stories are live, so their images are readable too.
+    images = await getHomepageImageUrls([
+      ...new Set([
+        ...[saved.lead, ...saved.featured, ...saved.readThis].flatMap(
+          (story) => (story?.status === "published" ? [story.id] : []),
+        ),
+        ...[effective.lead, ...effective.featured, ...effective.readThis]
+          .filter((story) => story !== null)
+          .map((story) => story.id),
+      ]),
+    ]);
   } catch (error) {
     unstable_rethrow(error);
     return (
@@ -79,7 +85,9 @@ export default async function AdminHomepagePage() {
           featured: saved.featured.map(withImage),
           readThis: saved.readThis.map(withImage),
         }}
-        automatic={live.filter((story) => !savedIds.has(story.id))}
+        automatic={live
+          .filter((story) => !savedIds.has(story.id))
+          .map((story) => ({ ...story, imageUrl: images[story.id] ?? null }))}
         library={{ items: library.items, nextCursor: library.nextCursor }}
       />
     </>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { DragEvent } from "react";
 import {
   groupLabel,
+  type AutomaticStory,
   type Group,
   type Place,
   type Story,
@@ -161,17 +162,20 @@ export function EmptyTile({
   index,
   blocked,
   handlers,
+  automatic,
 }: {
   group: Group;
   index: number;
   blocked: boolean;
   handlers: DragHandlers;
+  automatic?: AutomaticStory;
 }) {
   const [over, setOver] = useState(false);
   return (
     <li
       className={styles.empty}
       data-over={over || undefined}
+      data-automatic={automatic ? true : undefined}
       data-lead={group === "lead" || undefined}
       onDragOver={(event) => {
         if (blocked) return;
@@ -185,7 +189,18 @@ export function EmptyTile({
         handlers.drop({ group, index });
       }}
     >
-      <span>{group === "lead" ? "Add a lead story" : "Add a story"}</span>
+      {automatic ? (
+        <>
+          <StoryImage story={{ ...automatic, status: "published" }} />
+          <div className={styles.cardBody}>
+            <span className={styles.autoBadge}>Automatic</span>
+            <p className={styles.cardTitle}>{automatic.title}</p>
+          </div>
+          <p className={styles.autoHint}>Drop a story to replace</p>
+        </>
+      ) : (
+        <span>{group === "lead" ? "Add a lead story" : "Add a story"}</span>
+      )}
     </li>
   );
 }

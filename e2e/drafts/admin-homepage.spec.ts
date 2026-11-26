@@ -21,11 +21,13 @@ test("administrator saves ordered published homepage selections", async ({
   );
   await setLocalSession(context, fixture.users.admin);
   await page.goto("/dashboard/admin/homepage");
-  const fillers = page.getByRole("region", {
-    name: "Automatic on the live homepage",
-  });
-  await expect(fillers).toBeVisible();
-  await expect(fillers.getByRole("button")).toHaveCount(0);
+  // Unpicked slots show the live automatic story as a read-only card.
+  const filler = page
+    .locator("li[data-automatic]")
+    .filter({ hasText: "Automatic" })
+    .first();
+  await expect(filler).toBeVisible();
+  await expect(filler.getByRole("button")).toHaveCount(0);
   const lead = `${fixture.label} own 20`;
   const featured = `${fixture.label} own 21`;
   const remove = page.getByRole("button", {
