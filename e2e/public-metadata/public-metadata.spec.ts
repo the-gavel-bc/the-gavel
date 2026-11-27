@@ -74,7 +74,7 @@ test("public canonical/social tags live in initial head and use stored identity"
     await page.goto(`/sections/${fixture.prefix}`);
     const older = page
       .getByRole("main")
-      .getByRole("link", { name: "Older articles" });
+      .getByRole("link", { name: "Load more articles" });
     await older.click();
     await expect(page.locator('head meta[name="robots"]')).toHaveAttribute(
       "content",
