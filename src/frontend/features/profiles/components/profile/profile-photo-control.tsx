@@ -8,6 +8,8 @@ import {
   type ProfilePhotoResult,
 } from "@/backend/profiles/profile-photo/profile-photo-actions";
 import { Button } from "@/frontend/components/ui/button/button";
+import { IconButton } from "@/frontend/components/ui/icon-button/icon-button";
+import { TrashIcon } from "@/frontend/components/ui/icons/icons";
 import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import styles from "./profile-photo-control.module.css";
 
@@ -124,14 +126,13 @@ export function ProfilePhotoControl({
             {photoUrl ? "Replace photo" : "Add photo"}
           </Button>
           {photoUrl && (
-            <Button
-              type="button"
+            <IconButton
               variant="danger"
               disabled={pending}
               onClick={() => void remove()}
-            >
-              Remove photo
-            </Button>
+              label="Remove photo"
+              icon={<TrashIcon />}
+            />
           )}
         </div>
         {pending && <p role="status">Saving photo…</p>}

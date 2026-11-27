@@ -4,6 +4,8 @@ import { shrinkImage } from "@/frontend/features/media/shrink-image/shrink-image
 import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/frontend/components/ui/button/button";
+import { IconButton } from "@/frontend/components/ui/icon-button/icon-button";
+import { TrashIcon } from "@/frontend/components/ui/icons/icons";
 import type { DraftArticle } from "@/frontend/features/articles/draft-save-state/draft-save-state";
 import type { DraftWriteResult } from "@/shared/articles/draft-contract/draft-contract";
 import {
@@ -465,9 +467,10 @@ export function ArticleMedia({
           </Button>
         )}
         {image && (
-          <Button
-            type="button"
+          <IconButton
             variant="danger"
+            label="Remove main image"
+            icon={<TrashIcon />}
             disabled={mutationLocked}
             onClick={async () => {
               if (
@@ -489,9 +492,7 @@ export function ArticleMedia({
                 caption: null,
               });
             }}
-          >
-            Remove main image
-          </Button>
+          />
         )}
       </div>
       {busy && <progress aria-label="Image operation in progress" />}

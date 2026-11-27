@@ -12,6 +12,7 @@
 .bar a {
   display: inline-flex;
   align-items: center;
+  gap: 0.375rem;
   min-height: 44px;
   margin-inline-start: auto;
 }

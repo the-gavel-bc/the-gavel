@@ -82,14 +82,16 @@ export function ProfileModeration({ userId }: { userId: string }) {
       <summary>Moderate public profile</summary>
       {settings ? (
         <fieldset disabled={busy}>
-          <legend>Profile visibility and public details</legend>
+          <legend className={styles.visuallyHidden}>
+            Profile visibility and public details
+          </legend>
           <label>
             <input
               type="checkbox"
               checked={hidden}
               disabled={Boolean(pending)}
               onChange={(event) => setHidden(event.target.checked)}
-            />{" "}
+            />
             Hide public author page
           </label>
           <label>
@@ -98,7 +100,7 @@ export function ProfileModeration({ userId }: { userId: string }) {
               checked={clearBiography}
               disabled={Boolean(pending)}
               onChange={(event) => setClearBiography(event.target.checked)}
-            />{" "}
+            />
             Clear biography
           </label>
           <label>
@@ -107,11 +109,11 @@ export function ProfileModeration({ userId }: { userId: string }) {
               checked={resetDisplayName}
               disabled={Boolean(pending)}
               onChange={(event) => setResetDisplayName(event.target.checked)}
-            />{" "}
+            />
             Reset display name to Gavel contributor
           </label>
           <Button onClick={() => void save()}>
-            {pending ? "Retry profile update" : "Save public profile settings"}
+            {pending ? "Retry profile update" : "Save profile settings"}
           </Button>
         </fieldset>
       ) : error ? (

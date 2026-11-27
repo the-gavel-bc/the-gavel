@@ -7,6 +7,8 @@ import { manageMembershipAction } from "@/backend/memberships/member-command/mem
 import { manageInvitationAction } from "@/backend/memberships/invitation-command/invitation-actions";
 import { newStaffDisplayNameSchema } from "@/shared/memberships/member-command/member-command";
 import { Button } from "@/frontend/components/ui/button/button";
+import { IconButton } from "@/frontend/components/ui/icon-button/icon-button";
+import { TrashIcon } from "@/frontend/components/ui/icons/icons";
 import {
   STAFF_ROLE_OPTIONS,
   staffRoleLabels,
@@ -247,15 +249,25 @@ export function MemberControls({
               Save role
             </Button>
           )}
-          <Button
-            type="button"
-            variant="danger"
-            onClick={() => void remove()}
-            disabled={blocked}
-            aria-label={`${member.state === "invited" ? "Remove" : "Deactivate"} ${member.email}`}
-          >
-            {member.state === "invited" ? "Remove" : "Deactivate"}
-          </Button>
+          {member.state === "invited" ? (
+            <IconButton
+              variant="danger"
+              onClick={() => void remove()}
+              disabled={blocked}
+              label={`Remove ${member.email}`}
+              icon={<TrashIcon />}
+            />
+          ) : (
+            <Button
+              type="button"
+              variant="danger"
+              onClick={() => void remove()}
+              disabled={blocked}
+              aria-label={`Deactivate ${member.email}`}
+            >
+              Deactivate
+            </Button>
+          )}
         </>
       )}
       {confirmDialog}
