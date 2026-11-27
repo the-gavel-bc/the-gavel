@@ -73,10 +73,15 @@ test("administrator sees published candidates; author cannot open curation", asy
   await expect(
     page.getByRole("heading", { name: "Homepage", exact: true }),
   ).toBeVisible();
+  // Other suites publish stories in parallel, so find this one by title
+  // instead of assuming it is on the first page.
+  const library = page.getByRole("region", { name: "Published stories" });
+  await library
+    .getByRole("searchbox", { name: "Search titles" })
+    .fill(`${fixture.label} own 20`);
+  await library.getByRole("button", { name: "Search", exact: true }).click();
   await expect(
-    page
-      .getByRole("region", { name: "Published stories" })
-      .getByText(`${fixture.label} own 20`, { exact: true }),
+    library.getByText(`${fixture.label} own 20`, { exact: true }),
   ).toBeVisible();
   if (info.project.name === "mobile") {
     const remove = page.getByRole("button", {

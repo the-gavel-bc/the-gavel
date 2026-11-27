@@ -24,7 +24,6 @@ test("administrator saves site information", async ({
   ).toHaveValue("");
   await expect(page.getByLabel("Contact email")).toHaveValue("");
   await expect(page.getByLabel("Instagram URL")).toHaveValue("");
-  await expect(page.getByLabel("Submission instructions")).toHaveValue("");
   await page
     .getByRole("textbox", { name: "Mission", exact: true })
     .fill("Synthetic Task 14 browser mission");

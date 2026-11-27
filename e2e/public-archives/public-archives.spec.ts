@@ -107,14 +107,19 @@ test("archives paginate natively and bind equal category slugs to the selected s
     (await older.getAttribute("href"))!,
     page.url(),
   ).searchParams.get("cursor")!;
+  // With JavaScript the next batch joins the same grid and the address
+  // becomes the shareable cursor page.
   await older.click();
-  await expect(main.getByRole("article")).toHaveCount(1);
+  await expect(main.getByRole("article")).toHaveCount(13);
   await expect(
     main.getByRole("link", { name: "Load more articles" }),
   ).toHaveCount(0);
   await expect(
     main.getByRole("link", { name: `${prefix} story 1`, exact: true }),
   ).toBeVisible();
+  await expect(page).toHaveURL(/cursor=/);
+  await page.reload();
+  await expect(main.getByRole("article")).toHaveCount(1);
   await main.getByRole("link", { name: "Newest articles" }).click();
   await expect(main.getByRole("article")).toHaveCount(12);
   await page.goto(

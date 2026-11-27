@@ -93,21 +93,26 @@ test("article topic links lead to multi-section archives with native isolated pa
         .getByRole("link", { name: `Topic ${section} ${project}`, exact: true })
         .first(),
     ).toHaveAttribute("href", `/sections/${prefix}-${section.toLowerCase()}`);
-  const older = main.getByRole("link", { name: "Older articles" });
+  const older = main.getByRole("link", { name: "Load more articles" });
   await older.focus();
   await expectVisibleFocus(older);
   const cursor = new URL(
     (await older.getAttribute("href"))!,
     page.url(),
   ).searchParams.get("cursor")!;
+  // With JavaScript the next batch joins the same grid; reloading the
+  // updated address shows that batch on its own page.
   await older.click();
-  await expect(main.getByRole("article")).toHaveCount(1);
+  await expect(main.getByRole("article")).toHaveCount(13);
   await expect(
     main.getByRole("link", { name: `${prefix} story 1`, exact: true }),
   ).toHaveCount(1);
-  await expect(main.getByRole("link", { name: "Older articles" })).toHaveCount(
-    0,
-  );
+  await expect(
+    main.getByRole("link", { name: "Load more articles" }),
+  ).toHaveCount(0);
+  await expect(page).toHaveURL(/cursor=/);
+  await page.reload();
+  await expect(main.getByRole("article")).toHaveCount(1);
   await page.goto(`/tags/${prefix}-other?cursor=${encodeURIComponent(cursor)}`);
   await expect(
     main.getByText("This article page is invalid or expired."),
@@ -171,7 +176,7 @@ test("tags hide private and stale references, return 404 for unused tags, and wo
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
     ).toBe(true);
-    await content.getByRole("link", { name: "Older articles" }).click();
+    await content.getByRole("link", { name: "Load more articles" }).click();
     await expect(content.getByRole("article")).toHaveCount(1);
     await content
       .getByRole("link", { name: `${prefix} story 1`, exact: true })
