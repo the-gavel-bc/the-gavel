@@ -8,6 +8,8 @@ import {
   type AboutImageResult,
 } from "@/backend/site-information/about-image/about-image-actions";
 import { Button } from "@/frontend/components/ui/button/button";
+import { IconButton } from "@/frontend/components/ui/icon-button/icon-button";
+import { TrashIcon } from "@/frontend/components/ui/icons/icons";
 import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import { ReaderImage } from "@/frontend/components/reader-image/reader-image";
 import styles from "./about-image-control.module.css";
@@ -139,14 +141,13 @@ export function AboutImageControl({
           {image ? "Replace image" : "Add image"}
         </Button>
         {image && (
-          <Button
-            type="button"
+          <IconButton
             variant="danger"
             disabled={pending}
             onClick={() => void remove()}
-          >
-            Remove image
-          </Button>
+            label="Remove image"
+            icon={<TrashIcon />}
+          />
         )}
       </div>
       {pending && <p role="status">Saving image…</p>}

@@ -4,6 +4,11 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/frontend/components/ui/button/button";
+import {
+  IconButton,
+  IconLink,
+} from "@/frontend/components/ui/icon-button/icon-button";
+import { PencilIcon, TrashIcon } from "@/frontend/components/ui/icons/icons";
 import { useConfirm } from "@/frontend/components/ui/confirm-dialog/use-confirm";
 import {
   archiveArticleAction,
@@ -136,14 +141,11 @@ export function ArticleRowActions({
   return (
     <div className={styles.actions}>
       {article.status !== "archived" && (!caps || caps.edit) && (
-        <Link
-          className={styles.edit}
+        <IconLink
           href={`/dashboard/articles/${article.id}`}
-          prefetch={false}
-          aria-label={`${article.status === "draft" ? "Edit draft" : "Edit article"}: ${article.title}`}
-        >
-          {article.status === "draft" ? "Edit draft" : "Edit article"}
-        </Link>
+          label={`${article.status === "draft" ? "Edit draft" : "Edit article"}: ${article.title}`}
+          icon={<PencilIcon />}
+        />
       )}
       {caps && !caps.edit && article.status !== "archived" && (
         <Link
@@ -177,15 +179,13 @@ export function ArticleRowActions({
           >
             Restore
           </Button>
-          <Button
-            type="button"
+          <IconButton
             variant="danger"
             disabled={pending || deleted}
             onClick={() => void remove()}
-            aria-label={`Delete article: ${article.title}`}
-          >
-            Delete
-          </Button>
+            label={`Delete article: ${article.title}`}
+            icon={<TrashIcon />}
+          />
         </>
       )}
       {pending && <span role="status">Working…</span>}

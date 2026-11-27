@@ -6,6 +6,7 @@
   font-weight: 700;
   line-height: 1;
   padding: 0.375rem 0.625rem;
+  white-space: nowrap;
 }
 .draft {
   background: var(--dash-status-warning-bg, #fff4e0);

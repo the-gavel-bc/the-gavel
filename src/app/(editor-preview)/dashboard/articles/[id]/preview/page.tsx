@@ -6,6 +6,7 @@ import { ReaderArticleFrame } from "@/frontend/features/reader/components/reader
 import { ReaderSurface } from "@/frontend/features/reader/components/reader-layout/reader-layout";
 import { isDraftUuid } from "@/shared/articles/draft-contract/draft-contract";
 import type { ArticleImageUrl } from "@/shared/reader/reader-article/reader-article";
+import { ArrowLeftIcon } from "@/frontend/components/ui/icons/icons";
 import styles from "./preview.module.css";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +30,12 @@ export default async function EditorialPreviewPage({
     ? await getEditorialArticlePreview(id)
     : ({ kind: "unavailable" } as const);
   if (result.kind === "notFound") notFound();
-  const back = <a href={`/dashboard/articles/${id}`}>Back to editor</a>;
+  const back = (
+    <a href={`/dashboard/articles/${id}`}>
+      <ArrowLeftIcon />
+      Back to editor
+    </a>
+  );
   if (result.kind !== "ok")
     return (
       <ReaderSurface>

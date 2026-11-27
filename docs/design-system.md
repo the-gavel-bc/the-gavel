@@ -116,7 +116,7 @@ Slice 2:
 Navigation and icons (2026-11-26), from the [dashboard navigation plan](superpowers/plans/2026-11-26-dashboard-navigation-icons.md):
 
 - **Back arrow:** nested pages show "← <page>" at the top left of the main area; it returns to the previous dashboard page with its filters, or to the parent list.
-- **Icons:** dashboard icons live in `src/frontend/components/ui/icons` (24px grid, 2px stroke, `currentColor`, decorative). Icon-only actions use `IconButton`, whose label is the accessible name and the hover/focus tooltip. Use icons only where meaning is unambiguous; Archive, Restore, Delete, Deactivate and similar consequential actions keep text.
+- **Icons:** dashboard icons live in `src/frontend/components/ui/icons` (24px grid, 2px stroke, `currentColor`, decorative). Icon-only actions use `IconButton`, whose label is the accessible name and the hover/focus tooltip. Navigating icon actions use `IconLink`, which has the same label, tooltip and styling. Edit is a pencil and delete or remove is a trash can (2026-11-27, owner request); every destructive icon still opens a confirmation that names the action. Use icons only where meaning is unambiguous: Archive, Restore, Deactivate, Reactivate, View and Replace keep text.
 
 ## Reader refresh (2026-11-13)
 
